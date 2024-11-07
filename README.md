@@ -1,70 +1,103 @@
-# Getting Started with Create React App
+# Service Link System
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+The **Service Link System** consists of both frontend and backend applications designed to streamline and manage job requests. Follow the instructions below to set up and run the frontend and backend of this system.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## How to Run the Frontend
 
-### `npm start`
+1. **Fork the Repository**
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+   Click the "Fork" button on GitHub to create your own copy of the repository.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+2. **Clone the Repository**
 
-### `npm test`
+   Open your terminal and run:
+   ```bash
+    git clone https://github.com/your-username/servicelink-frontend.git
+   ```
+3. **Open the Project in VS Code**
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+   Navigate to the project folder:
 
-### `npm run build`
+   ```bash
+    cd servicelink-frontend
+    code .
+   ```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+4. **Run the Frontend Application**
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+   In the terminal, run:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+   ```bash
+    npm i axios
+    npm i sass
+    npm mysql2
+    npm i react-router-dom
+    npm i cors
+    npm cookie-parser
+    npm i multer
 
-### `npm run eject`
+    ``Font Awesome Icons``
+    npm i --save @fontawesome/fontawesome-svg-core
+    npm i --save @fontawesome/free-solid-svg-icons
+    npm i --save @fontawesome/react-fontawesome
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+    npm run start
+   ```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+   This will start the frontend server, typically on ``http://localhost:3000.``
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+---
+ 
+## How to run the Backend
 
-## Learn More
+1. **Fork the Repository**
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+   Click the "Fork" button on GitHub to create your own copy of the repository.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+2. **Clone the Repository**
 
-### Code Splitting
+   Open your terminal and run:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+   ```bash
+    git clone https://github.com/your-username/servicelink-backend.git
+   ```
 
-### Analyzing the Bundle Size
+3. **Open the Project in VS Code**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+   Navigate to the project folder:
 
-### Making a Progressive Web App
+   ```bash
+    cd servicelink-backend
+    code .
+   ```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+4. **Run the Backend Application**
 
-### Advanced Configuration
+   In the terminal, navigate to the backend API directory:
+  
+   ```bash
+    cd service_link_api
+   ```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+   Install dependencies and start the backend server:
 
-### Deployment
+   ```bash
+    npm i express
+    npm i nodemon
+    npm i bcryptjs
+    npm i jsonwebtoken
+    npm i cookie-parser
+    npm i multer
+   ```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
 
-### `npm run build` fails to minify
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+
+
+
+
+

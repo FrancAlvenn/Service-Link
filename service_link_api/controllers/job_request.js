@@ -87,7 +87,7 @@ export const deleteJobRequest = (request,response) => {
     const value = request.params.request_id
 
     // Execute the query with the specified request_id
-    database.query(query, [value], (error, data) => {
+    database.query(query, [value], (error) => {
         //Error handler
         if (error) return response.status(500).json({ message: "There was a server error!", error });
 
@@ -97,7 +97,21 @@ export const deleteJobRequest = (request,response) => {
 }
 
 export const getJobRequestsByStatus = (request,response) => {
-    response.status(200).json("Get Job Request by Status")
+
+    //Get query based on the status
+    const query = `SELECT * FROM job_request WHERE status_id = ? `;
+
+    //Get value from params
+    const value = request.params.status
+
+    // Execute the query with the specified request_id
+    database.query(query, [value], (error, data) => {
+        //Error handler
+        if (error) return response.status(500).json({ message: "There was a server error!", error });
+
+        // Return the found job request
+        return response.status(200).json(data);
+    });
 }
 
 export const assignJobRequest = (request,response) => {

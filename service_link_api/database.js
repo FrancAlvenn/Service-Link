@@ -1,17 +1,21 @@
-import mysql from "mysql2";
+import { Sequelize } from "sequelize";
 
-export const database = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "password",
-    database: "service-link",
-    port: 3307
-})
+// Initialize Sequelize with database connection settings
+const sequelize = new Sequelize("service-link", "root", "password", {
+  host: "localhost",
+  dialect: "mysql",
+  port: 3307,
+  logging: false,
+});
 
-database.connect((err) => {
-    if (err) {
-      console.error("Error connecting to the database:", err);
-      return;
-    }
-    console.log("Connected to the MySQL database!");
-  });
+// Test the connection
+(async () => {
+  try {
+    await sequelize.authenticate();
+    console.log("Connected to the MySQL database via Sequelize!");
+  } catch (error) {
+    console.error("Unable to connect to the database:", error);
+  }
+})();
+
+export default sequelize;

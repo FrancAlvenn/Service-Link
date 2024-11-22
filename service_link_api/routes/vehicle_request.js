@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAllVehicleRequest, getAllVehicleRequestById, getAllVehicleRequestByStatus, createVehicleRequest, updateVehicleRequest } from '../controllers/vehicle_request.js';
+import { getAllVehicleRequest, getVehicleRequestById, getAllVehicleRequestByStatus, createVehicleRequest, updateVehicleRequest, archiveById, immediateHeadApproval, gsoDirectorApproval, operationsDirectorApproval, getVehicleRequestByTrip } from '../controllers/vehicle_request.js';
 
 const router = express.Router();
 
@@ -10,14 +10,27 @@ router.post('/', createVehicleRequest)
 router.get("/", getAllVehicleRequest);
 
 //Get Vehicle Request by Id
-router.get("/:reference_number", getAllVehicleRequestById)
+router.get("/:reference_number", getVehicleRequestById)
 
 //Update a Request by its ID
 router.put('/:reference_number', updateVehicleRequest)
 
+//Delete/Archive by Id
+router.delete("/:reference_number/archive/:archive", archiveById)
+
+//Patch Approve/reject by Immediate Head
+router.patch("/:reference_number/immediate_head_approval/:approval_flag", immediateHeadApproval)
+
+//Patch Approve/reject by GSO Director
+router.patch("/:reference_number/gso_director_approval/:approval_flag", gsoDirectorApproval)
+
+//Patch Approve/reject by Operations Head
+router.patch("/:reference_number/operations_director_approval/:approval_flag", operationsDirectorApproval)
+
 //Get all Vehicle Requests by Status
 router.get("/status/:status", getAllVehicleRequestByStatus)
 
-
+//Get all Vehicle Request by Date of Trip
+router.get("/date/:date_of_trip", getVehicleRequestByTrip)
 
 export default router;

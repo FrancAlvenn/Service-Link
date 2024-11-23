@@ -1,34 +1,36 @@
 import express from 'express';
-import { 
-   getAllVenueRequests, getVenueRequestById, updateVenueRequest, deleteVenueRequest, getVenueRequestByStatus, updateVenueRequestStatus,  getVenueRequestCountByStatus,
-  createVenueRequest
-} from '../controllers/venue_request.js';
+import { getAllVenueRequest, getVenueRequestById, getAllVenueRequestByStatus, createVenueRequest, updateVenueRequest, archiveById, immediateHeadApproval, gsoDirectorApproval, operationsDirectorApproval, getVenueRequestByTrip } from '../controllers/venue_request.js';
 
 const router = express.Router();
 
+//Create a new Request
+router.post('/', createVenueRequest)
 
-// Route to get all venues (GET)
-router.get("/", getAllVenueRequests);
+//Get all Venue Request
+router.get("/", getAllVenueRequest);
 
-// Route to create a new venue (POST)
-router.post("/create", createVenueRequest);
+//Get Venue Request by Id
+router.get("/:reference_number", getVenueRequestById)
 
-// Route to get a venue by ID (GET)
-router.get("/:id", getVenueRequestById);
+//Update a Request by its ID
+router.put('/:reference_number', updateVenueRequest)
 
-// Route to update a venue (PUT)
-router.put("/:id", updateVenueRequest);
+//Delete/Archive by Id
+router.delete("/:reference_number/archive/:archive", archiveById)
 
-// Route to delete a venue (DELETE)
-router.delete("/:id", deleteVenueRequest);
+//Patch Approve/reject by Immediate Head
+router.patch("/:reference_number/immediate_head_approval/:approval_flag", immediateHeadApproval)
 
-// Route to get venues by status (GET)
-router.get("/status/:status", getVenueRequestByStatus);
+//Patch Approve/reject by GSO Director
+router.patch("/:reference_number/gso_director_approval/:approval_flag", gsoDirectorApproval)
 
-// Route to update venue status (PATCH)
-router.patch("/:id/status", updateVenueRequestStatus);
+//Patch Approve/reject by Operations Head
+router.patch("/:reference_number/operations_director_approval/:approval_flag", operationsDirectorApproval)
 
-// Route to get the count of venues by status (GET)
-router.get("/status/count", getVenueRequestCountByStatus);
+//Get all Venue Requests by Status
+router.get("/status/:status", getAllVenueRequestByStatus)
+
+//Get all Venue Request by Date of Trip
+router.get("/date/:date_of_trip", getVenueRequestByTrip)
 
 export default router;

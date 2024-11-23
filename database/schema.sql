@@ -41,7 +41,7 @@
         id INT AUTO_INCREMENT PRIMARY KEY,
         reference_number VARCHAR(50) NOT NULL,
         venue_id INT NOT NULL,
-        requester_id INT NOT NULL,
+        requester_id VARCHAR(100) NOT NULL,
         department VARCHAR(100) DEFAULT NULL,
         organization VARCHAR(100) DEFAULT NULL,
         event_title VARCHAR(255) NOT NULL,

@@ -3,6 +3,9 @@ import { createNewDepartment, getAllDepartments, getDepartmentById, updateDepart
 import { createNewOrganization, getAllOrganizations, getOrganizationById, updateOrganization, archiveOrganizationById  } from '../controllers/settings_controllers/organization.js';
 import { createNewStatus, getAllStatus, getStatusById, updateStatus, archiveStatusById } from '../controllers/settings_controllers/status.js';
 import { createNewPriority, getAllPriority, getPriorityById, updatePriority, archivePriorityById } from '../controllers/settings_controllers/priority_level.js';
+import { createNewDesignation, getAllDesignation, getDesignationById, updateDesignation, archiveDesignationById } from '../controllers/settings_controllers/designation.js';
+
+
 
 const router = express.Router();
 
@@ -82,6 +85,24 @@ router.put('/priority/:id', updatePriority);
 //Delete a priority
 router.delete('/priority/:id/archive/:archive', archivePriorityById);
 
+
+
+//ROUTE FOR DESIGNATION
+
+//Create a new designation
+router.post('/designation', createNewDesignation);
+
+//Get all designation
+router.get('/designation', getAllDesignation);
+
+//Get designation by ID
+router.get('/designation/:id', getDesignationById);
+
+//Edit a designation
+router.put('/designation/:id', updateDesignation);
+
+//Delete a designation
+router.delete('/designation/:id/archive/:archive', archiveDesignationById);
 
 
 export default router;

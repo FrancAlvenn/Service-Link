@@ -231,6 +231,23 @@
     ('Critical', 'Critical priority; requires immediate action');
 
 
+    -- Table for Priority Levels
+    CREATE TABLE designation (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        designation VARCHAR(50) NOT NULL,
+        description TEXT,
+        archive BOOLEAN DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    );
+
+    -- Insert data into Priority Levels table
+    INSERT INTO designation (priority) VALUES
+    ('Student'),
+    ('Faculty'),
+    ('GSO Officer'),
+    ('Operations Officer')
+
     --Table for Tickets
     CREATE TABLE tickets (
     ticket_id INTEGER PRIMARY KEY AUTO_INCREMENT,

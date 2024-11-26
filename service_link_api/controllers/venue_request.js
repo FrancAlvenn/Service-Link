@@ -113,7 +113,7 @@ export async function updateVenueRequest(req, res) {
         },
         {
             where: {
-                reference_number : req.body.reference_number
+                reference_number : req.params.reference_number
             },
         });
 

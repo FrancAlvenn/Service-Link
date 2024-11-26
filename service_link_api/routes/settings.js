@@ -2,6 +2,7 @@ import express from 'express';
 import { createNewDepartment, getAllDepartments, getDepartmentById, updateDepartment, archiveDepartmentById } from '../controllers/settings_controllers/department.js';
 import { createNewOrganization, getAllOrganizations, getOrganizationById, updateOrganization, archiveOrganizationById  } from '../controllers/settings_controllers/organization.js';
 import { createNewStatus, getAllStatus, getStatusById, updateStatus, archiveStatusById } from '../controllers/settings_controllers/status.js';
+import { createNewPriority, getAllPriority, getPriorityById, updatePriority, archivePriorityById } from '../controllers/settings_controllers/priority_level.js';
 
 const router = express.Router();
 
@@ -62,6 +63,24 @@ router.put('/status/:id', updateStatus);
 
 //Delete a status
 router.delete('/status/:id/archive/:archive', archiveStatusById);
+
+
+//ROUTE FOR PRIORITY
+
+//Create a new priority
+router.post('/priority', createNewPriority);
+
+//Get all priority
+router.get('/priority', getAllPriority);
+
+//Get priority by ID
+router.get('/priority/:id', getPriorityById);
+
+//Edit a priority
+router.put('/priority/:id', updatePriority);
+
+//Delete a priority
+router.delete('/priority/:id/archive/:archive', archivePriorityById);
 
 
 

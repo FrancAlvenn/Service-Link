@@ -80,8 +80,8 @@
         designation VARCHAR(255),
         access_level VARCHAR(255),
         immediate_head VARCHAR(255),
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
 
     -- Table for Images
@@ -91,8 +91,8 @@
         file_name VARCHAR(255) NOT NULL,
         uploaded_by INT NOT NULL,
         uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
 
     -- Table for Assets
@@ -115,8 +115,8 @@
         type_specific_1 VARCHAR(255),
         type_specific_2 VARCHAR(255),
         type_specific_3 VARCHAR(255),
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
 
     -- Table for Comments on Requests
@@ -145,8 +145,8 @@
         status VARCHAR(50) NOT NULL,
         description TEXT,
         archive boolean DEFAULT 0,
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
 
     -- Insert data into Status table
@@ -166,8 +166,8 @@
         name VARCHAR(100) NOT NULL,
         description TEXT,
         archive boolean DEFAULT 0,
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
 
     -- Insert data into Departments table
@@ -189,8 +189,8 @@
         id INT PRIMARY KEY AUTO_INCREMENT,
         name VARCHAR(100) NOT NULL,
         archive boolean DEFAULT 0,
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
 
     -- Insert data into Organizations table
@@ -211,6 +211,38 @@
     ('Dr. Yangas Student Publications Vox Nostra'),
     ('Himig DYCIan');
 
+
+
+    -- Table for Priority Levels
+    CREATE TABLE priority_levels (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        priority VARCHAR(50) NOT NULL,
+        description TEXT,
+        archive BOOLEAN DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    );
+
+    -- Insert data into Priority Levels table
+    INSERT INTO priority_levels (priority, description) VALUES 
+    ('Low', 'Low urgency level; can be attended to at a convenient time'),
+    ('Medium', 'Medium urgency; should be attended to soon'),
+    ('High', 'High urgency; requires prompt attention'),
+    ('Critical', 'Critical priority; requires immediate action');
+
+
+    --Table for Tickets
+    CREATE TABLE tickets (
+    ticket_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    reference_number VARCHAR(50) NOT NULL,
+    status VARCHAR(50) DEFAULT 'Approved/InProgress',
+    assigned_to INTEGER,
+    priority_level VARCHAR(50) DEFAULT 'Medium',
+    remarks TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    archived BOOLEAN DEFAULT false,
+    );
 
 
 

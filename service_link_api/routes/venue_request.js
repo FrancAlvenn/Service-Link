@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAllVenueRequest, getVenueRequestById, getAllVenueRequestByStatus, createVenueRequest, updateVenueRequest, archiveById, immediateHeadApproval, gsoDirectorApproval, operationsDirectorApproval, getVenueRequestByTrip } from '../controllers/venue_request.js';
+import { getAllVenueRequest, getVenueRequestById, getAllVenueRequestByStatus, createVenueRequest, updateVenueRequest, archiveById, immediateHeadApproval, gsoDirectorApproval, operationsDirectorApproval } from '../controllers/venue_request.js';
 
 const router = express.Router();
 
@@ -30,7 +30,5 @@ router.patch("/:reference_number/operations_director_approval/:approval_flag", o
 //Get all Venue Requests by Status
 router.get("/status/:status", getAllVenueRequestByStatus)
 
-//Get all Venue Request by Date of Trip
-router.get("/date/:date_of_trip", getVenueRequestByTrip)
 
 export default router;

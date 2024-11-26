@@ -114,7 +114,9 @@
         warranty_expiry DATE,
         type_specific_1 VARCHAR(255),
         type_specific_2 VARCHAR(255),
-        type_specific_3 VARCHAR(255)
+        type_specific_3 VARCHAR(255),
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
 
     -- Table for Comments on Requests
@@ -141,7 +143,10 @@
     CREATE TABLE status (
         id INT PRIMARY KEY AUTO_INCREMENT,
         status VARCHAR(50) NOT NULL,
-        description TEXT
+        description TEXT,
+        archive boolean DEFAULT 0,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
 
     -- Insert data into Status table
@@ -159,7 +164,10 @@
     CREATE TABLE departments (
         id INT PRIMARY KEY AUTO_INCREMENT,
         name VARCHAR(100) NOT NULL,
-        description TEXT
+        description TEXT,
+        archive boolean DEFAULT 0,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
 
     -- Insert data into Departments table
@@ -179,7 +187,10 @@
     -- Table for Organizations
     CREATE TABLE organizations (
         id INT PRIMARY KEY AUTO_INCREMENT,
-        name VARCHAR(100) NOT NULL
+        name VARCHAR(100) NOT NULL,
+        archive boolean DEFAULT 0,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
 
     -- Insert data into Organizations table

@@ -44,7 +44,7 @@ const VehicleRequisition = sequelize.define("VehicleRequisition", {
     type: DataTypes.TEXT,
     allowNull: false,
   },
-  requestor: {
+  requester_id: {
     type: DataTypes.STRING(100),
     allowNull: false,
   },

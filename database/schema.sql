@@ -250,16 +250,31 @@
 
     --Table for Tickets
     CREATE TABLE tickets (
-    ticket_id INTEGER PRIMARY KEY AUTO_INCREMENT,
-    reference_number VARCHAR(50) NOT NULL,
-    status VARCHAR(50) DEFAULT 'Approved/InProgress',
-    assigned_to INTEGER,
-    priority_level VARCHAR(50) DEFAULT 'Medium',
-    remarks TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    archived BOOLEAN DEFAULT false,
+        ticket_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+        reference_number VARCHAR(50) NOT NULL,
+        status VARCHAR(50) DEFAULT 'Approved/InProgress',
+        assigned_to INTEGER,
+        priority_level VARCHAR(50) DEFAULT 'Medium',
+        remarks TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        archived BOOLEAN DEFAULT false
     );
+
+
+    -- Table for Logs
+    CREATE TABLE system_logs (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        reference_number VARCHAR(50) NOT NULL,
+        action VARCHAR(50) NOT NULL,
+        performed_by VARCHAR(50) NOT NULL,
+        target VARCHAR(50) NOT NULL,
+        details TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        archived BOOLEAN DEFAULT false
+    );
+
 
 
 

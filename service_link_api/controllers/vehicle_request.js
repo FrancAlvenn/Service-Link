@@ -1,6 +1,7 @@
 import sequelize from "../database.js";
 import VehicleRequisitionModel from "../models/VehicleRequisitionModel.js";
 import { Op } from 'sequelize';
+import { createLog } from "./system_logs.js";
 
 // Generate a unique reference number (e.g., DYCI-2024-0001)
 function generateReferenceNumber(lastRequestId) {
@@ -20,7 +21,7 @@ export async function createVehicleRequest(req, res){
         // Create the vehicle requisition entry in the database
         const newVehicleRequisition = await VehicleRequisitionModel.create({
             reference_number : referenceNumber,
-            vehicle_requested : "",
+            vehicle_requested : req.body.vehicle_requested,
             date_filled : req.body.date_filled,
             date_of_trip : req.body.date_of_trip,
             time_of_departure : req.body.time_of_departure,
@@ -28,7 +29,7 @@ export async function createVehicleRequest(req, res){
             number_of_passengers : req.body.number_of_passengers,
             destination : req.body.destination,
             purpose : req.body.purpose,
-            requestor : req.body.requestor,
+            requester_id : req.body.requester_id,
             designation : req.body.designation,
             status : req.body.status,
             vehicle_id : req.body.vehicle_id,
@@ -39,6 +40,14 @@ export async function createVehicleRequest(req, res){
         });
 
         res.status(201).json({message: `Request created successfully!`});
+
+        //Log the request
+        createLog({
+            action: 'create',
+            performed_by: req.body.requester_id,
+            target: referenceNumber,
+            details: `Vehicle Requisition ${referenceNumber} created successfully!`,
+        });
     }catch (error){
         res.status(500).json({ message: `Encountered an internal error ${error}` })
     }
@@ -96,7 +105,7 @@ export async function updateVehicleRequest(req, res) {
             number_of_passengers : req.body.number_of_passengers,
             destination : req.body.destination,
             purpose : req.body.purpose,
-            requestor : req.body.requestor,
+            requester_id : req.body.requester_id,
             designation : req.body.designation,
             status : req.body.status,
             vehicle_id : req.body.vehicle_id,
@@ -118,6 +127,14 @@ export async function updateVehicleRequest(req, res) {
 
         console.log(req.body.vehicle_requested)
         res.status(200).json({ message: `Request updated successfully!`})
+
+        //Log the request
+        createLog({
+            action: 'update',
+            performed_by: req.body.requester_id,
+            target: req.params.reference_number,
+            details: `Vehicle Requisition ${req.params.reference_number} updated successfully!`,
+        });
     }catch (error){
         res.status(500).json({ message: `Encountered an internal error ${error}`})
     }
@@ -141,6 +158,14 @@ export async function archiveById(req, res){
 
         console.log(req.body.vehicle_requested)
         res.status(200).json({ message: req.params.archive === '0' ? 'Request removed from archive!' : 'Request added to archive!'});
+
+        //Log the request
+        createLog({
+            action: 'archive',
+            performed_by: req.body.requester_id,
+            target: req.params.reference_number,
+            details: `Vehicle Requisition ${req.params.reference_number} archived successfully!`,
+        });
     }catch(error){
         res.status(500).json({ message: `Encountered an internal error ${error}`, error: error});
     }
@@ -165,6 +190,14 @@ export async function immediateHeadApproval(req, res){
 
         console.log(req.body.vehicle_requested)
         res.status(200).json({ message: `Request updated successfully!`})
+
+        //Log the request
+        createLog({
+            action: 'update',
+            performed_by: req.body.requester_id,
+            target: req.params.reference_number,
+            details: `Venue Requisition ${req.params.reference_number} ${req.params.approval_flag} by immediate head!`,
+        })
     }catch(error){
         res.status(500).json({ message: `Encountered an internal error ${error}`, error});
     }
@@ -189,6 +222,14 @@ export async function gsoDirectorApproval(req, res){
 
         console.log(req.body.vehicle_requested)
         res.status(200).json({ message: `Request updated successfully!`})
+
+        //Log the request
+        createLog({
+            action: 'update',
+            performed_by: req.body.requester_id,
+            target: req.params.reference_number,
+            details: `Venue Requisition ${req.params.reference_number} ${req.params.approval_flag} by GSO Director!`,
+        })
     }catch(error){
         res.status(500).json({ message: `Encountered an internal error ${error}`, error});
     }
@@ -213,6 +254,14 @@ export async function operationsDirectorApproval(req, res){
 
         console.log(req.body.vehicle_requested)
         res.status(200).json({ message: `Request updated successfully!`})
+
+        //Log the request
+        createLog({
+            action: 'update',
+            performed_by: req.body.requester_id,
+            target: req.params.reference_number,
+            details: `Venue Requisition ${req.params.reference_number} ${req.params.approval_flag} by operations head!`,
+        })
     }catch(error){
         res.status(500).json({ message: `Encountered an internal error ${error}`, error});
     }

@@ -1,6 +1,7 @@
 import sequelize from "../database.js";
 import VenueRequisitionModel from "../models/VenueRequisitionModel.js";
 import { Op } from 'sequelize';
+import { createLog } from "./system_logs.js";
 
 // Generate a unique reference number (e.g., DYCI-2024-0001)
 function generateReferenceNumber(lastRequestId) {
@@ -41,7 +42,15 @@ export async function createVenueRequest(req, res){
             archived: req.body.archived || false,
           });
 
-        res.status(201).json({message: `Request created successfully!`});
+          res.status(201).json({message: `Request created successfully!`});
+
+        //Log the request
+        createLog({
+            action: 'create',
+            performed_by: req.body.requester_id,
+            target: referenceNumber,
+            details: `Venue Requisition ${referenceNumber} created successfully!`,
+        });
     }catch (error){
         res.status(500).json({ message: `Encountered an internal error ${error}` })
     }
@@ -124,6 +133,14 @@ export async function updateVenueRequest(req, res) {
 
         console.log(req.body.venue_requested)
         res.status(200).json({ message: `Request updated successfully!`})
+
+        //Log the request
+        createLog({
+            action: 'update',
+            performed_by: req.body.requester_id,
+            target: req.params.reference_number,
+            details: `Venue Requisition ${req.params.reference_number} updated successfully!`,
+        });
     }catch (error){
         res.status(500).json({ message: `Encountered an internal error ${error}`})
     }
@@ -147,6 +164,14 @@ export async function archiveById(req, res){
 
         console.log(req.body.venue_requested)
         res.status(200).json({ message: req.params.archive === '0' ? 'Request removed from archive!' : 'Request added to archive!'});
+
+        //Log the request
+        createLog({
+            action: 'archive',
+            performed_by: req.body.requester_id,
+            target: req.params.reference_number,
+            details: `Venue Requisition ${req.params.reference_number} archived successfully!`,
+        });
     }catch(error){
         res.status(500).json({ message: `Encountered an internal error ${error}`, error: error});
     }
@@ -166,11 +191,18 @@ export async function immediateHeadApproval(req, res){
 
         // If no rows were updated, it means the reference number didn't match any requisition
         if (updatedRow === 0) {
-            return res.status(404).json({ message: `No requisition found with reference number ${req.body.reference_number}` });
+            return res.status(404).json({ message: `No requisition found with reference number ${req.params.reference_number}` });
         }
 
-        console.log(req.body.venue_requested)
-        res.status(200).json({ message: `Request updated successfully!`})
+        res.status(200).json({ message: `Request updated successfully!!`})
+
+        //Log the request
+        createLog({
+            action: 'update',
+            performed_by: req.body.requester_id,
+            target: req.params.reference_number,
+            details: `Venue Requisition ${req.params.reference_number} ${req.params.approval_flag} by immediate head!`,
+        })
     }catch(error){
         res.status(500).json({ message: `Encountered an internal error ${error}`, error});
     }
@@ -195,6 +227,14 @@ export async function gsoDirectorApproval(req, res){
 
         console.log(req.body.venue_requested)
         res.status(200).json({ message: `Request updated successfully!`})
+
+        //Log the request
+        createLog({
+            action: 'update',
+            performed_by: req.body.requester_id,
+            target: req.params.reference_number,
+            details: `Venue Requisition ${req.params.reference_number} ${req.params.approval_flag} by GSO Director!`,
+        })
     }catch(error){
         res.status(500).json({ message: `Encountered an internal error ${error}`, error});
     }
@@ -219,6 +259,14 @@ export async function operationsDirectorApproval(req, res){
 
         console.log(req.body.venue_requested)
         res.status(200).json({ message: `Request updated successfully!`})
+
+        //Log the request
+        createLog({
+            action: 'update',
+            performed_by: req.body.requester_id,
+            target: req.params.reference_number,
+            details: `Venue Requisition ${req.params.reference_number} ${req.params.approval_flag} by operations head!`,
+        })
     }catch(error){
         res.status(500).json({ message: `Encountered an internal error ${error}`, error});
     }

@@ -65,8 +65,8 @@ const User = sequelize.define('User', {
 }, {
     tableName: 'users',
     timestamps: true,  // Automatically adds `createdAt` and `updatedAt`
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    createdAt: 'created_at',
+    updatedAt: 'updated_at'
 });
 
 export default User;

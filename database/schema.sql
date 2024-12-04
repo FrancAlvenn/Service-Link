@@ -62,7 +62,36 @@
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
+ 
 
+    -- Table for Job Requests
+    CREATE TABLE job_requests (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        reference_number VARCHAR(50) NOT NULL,
+        date_required DATE NOT NULL,
+        purpose TEXT NOT NULL,
+        requester_id INT NOT NULL,
+        immediate_head_approval BOOLEAN DEFAULT false,
+        gso_director_approval BOOLEAN DEFAULT false,
+        operations_director_approval BOOLEAN DEFAULT false,
+        archived BOOLEAN DEFAULT false,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    );
+
+    -- Table for Job Request Details
+    CREATE TABLE job_request_details (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        job_request_id INT NOT NULL,
+        qty TEXT NULL,
+        particulars TEXT NOT NULL,
+        description TEXT NOT NULL,
+        remarks TEXT NULL,
+        archived BOOLEAN DEFAULT false,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (job_request_id) REFERENCES job_requests(reference_number) ON DELETE CASCADE
+    );
 
     -- Table for User Account
     CREATE TABLE users (

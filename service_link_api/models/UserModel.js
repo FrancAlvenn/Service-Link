@@ -61,6 +61,10 @@ const User = sequelize.define('User', {
     immediate_head: {
         type: DataTypes.STRING,
         allowNull: true
+    },
+    archived:{
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
     }
 }, {
     tableName: 'users',

@@ -5,6 +5,7 @@ import venueRequestRoutes from './routes/venue_request.js'
 import vehicleRequestRoutes from './routes/vehicle_request.js'
 import settingsRoutes from './routes/settings.js';
 import ticketRoutes from './routes/ticketing.js';
+import userRoutes from './routes/user_management.js';
 
 const app = express()
 
@@ -30,6 +31,9 @@ app.use("/service_link_api/settings", settingsRoutes)
 
 //Ticket Route
 app.use("/service_link_api/ticket", ticketRoutes)
+
+//User Management
+app.use("/service_link_api/users", userRoutes)
 
 
 app.listen(8080, () => {

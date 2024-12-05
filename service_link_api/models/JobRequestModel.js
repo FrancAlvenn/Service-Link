@@ -42,6 +42,11 @@ const JobRequest = sequelize.define(
         type: DataTypes.BOOLEAN,
         defaultValue: false,
     },
+    remarks: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        defaultValue: null
+    },
   },
   {
     sequelize,

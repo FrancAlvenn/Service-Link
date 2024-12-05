@@ -20,7 +20,6 @@ export async function createJobRequest(req, res){
         const lastRequest = await JobRequestModel.findOne({ order: [['id', 'DESC']] });
         const referenceNumber = generateReferenceNumber(lastRequest ? lastRequest.id : 0);
 
-        console.log(referenceNumber)
 
         const newJobRequest = await JobRequestModel.create({
           reference_number : referenceNumber,
@@ -31,6 +30,7 @@ export async function createJobRequest(req, res){
           gso_director_approval : req.body.gso_director_approval,
           operations_director_approval : req.body.operations_director_approval,
           archived : req.body.archived || false,
+          remarks : req.body.remarks || null,
         }, { transaction });
 
         const jobRequestDetailsData = req.body.jobRequestDetails.map(detail => ({
@@ -128,6 +128,7 @@ export async function updateJobRequest(req, res) {
             gso_director_approval: req.body.gso_director_approval,
             operations_director_approval: req.body.operations_director_approval,
             archived: req.body.archived,
+            remarks : req.body.remarks || null,
             },
             {
             where: {

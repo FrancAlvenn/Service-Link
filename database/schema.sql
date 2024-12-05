@@ -83,7 +83,7 @@
     -- Table for Job Request Details
     CREATE TABLE job_request_details (
         id INT PRIMARY KEY AUTO_INCREMENT,
-        job_request_id INT NOT NULL,
+        job_request_id VARCHAR(50) NOT NULL,
         qty TEXT NULL,
         particulars TEXT NOT NULL,
         description TEXT NOT NULL,
@@ -93,6 +93,39 @@
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (job_request_id) REFERENCES job_requests(reference_number) ON DELETE CASCADE
     );
+
+
+    CREATE TABLE purchasing_requests (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        reference_number VARCHAR(50) NOT NULL UNIQUE,
+        date_requested DATE NOT NULL,
+        date_required DATE NOT NULL,
+        requester_id VARCHAR(50) NOT NULL,
+        supply_category VARCHAR(255) NOT NULL,
+        purpose TEXT NOT NULL,
+        immediate_head_approval VARCHAR(255) DEFAULT 'Pending',
+        gso_director_approval VARCHAR(255) DEFAULT 'Pending',
+        operations_director_approval VARCHAR(255) DEFAULT 'Pending',
+        archived BOOLEAN DEFAULT FALSE,
+        remarks TEXT DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    );
+
+
+    CREATE TABLE purchasing_request_details (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        purchasing_request_id VARCHAR(50) NOT NULL,
+        quantity INT NOT NULL,
+        particulars TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (purchasing_request_id) REFERENCES purchasing_requests(reference_number) ON DELETE CASCADE
+    );
+
+
+
+
 
     -- Table for User Account
     CREATE TABLE users (

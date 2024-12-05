@@ -18,7 +18,7 @@ const JobRequestDetails = sequelize.define(
       },
       onDelete: "CASCADE", // Ensures cascade deletion
     },
-    qty: {
+    quantity: {
       type: DataTypes.TEXT,
       allowNull: true,
     },

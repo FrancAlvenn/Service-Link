@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAllJobRequest, getJobRequestById, getAllJobRequestByStatus, createJobRequest, updateJobRequest, archiveById, immediateHeadApproval, gsoDirectorApproval, operationsDirectorApproval, getJobRequestByTrip } from '../controllers/job_request.js';
+import { getAllJobRequest, getJobRequestById, getAllJobRequestByStatus, createJobRequest, updateJobRequest, archiveById, immediateHeadApproval, gsoDirectorApproval, operationsDirectorApproval } from '../controllers/job_request.js';
 
 const router = express.Router();
 

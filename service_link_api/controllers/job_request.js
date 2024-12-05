@@ -33,15 +33,15 @@ export async function createJobRequest(req, res){
           remarks : req.body.remarks || null,
         }, { transaction });
 
-        const jobRequestDetailsData = req.body.jobRequestDetails.map(detail => ({
+        const detailsData = req.body.details.map(detail => ({
           job_request_id: newJobRequest.reference_number,
-          qty: detail.qty || null,
+          quantity: detail.quantity || null,
           particulars: detail.particulars,
           description: detail.description,
           remarks: detail.remarks || null
         }));
 
-        await JobRequestDetails.bulkCreate(jobRequestDetailsData, { transaction });
+        await JobRequestDetails.bulkCreate(detailsData, { transaction });
 
         await transaction.commit();
 
@@ -132,13 +132,18 @@ export async function updateJobRequest(req, res) {
             },
             {
             where: {
-                reference_number: req.params.reference_number,
+                reference_number:
+                req.params.reference_number,
             },
             transaction,
             }
         );
 
-        if (updatedRows === 0) {return res.status(404).json({message: `No job request found with reference number ${req.params.reference_number}`,});}
+        if (updatedRows === 0) {
+            return res.status(404).json({
+                message: `No job request found with reference number ${req.params.reference_number}`,
+            });
+        }
 
         //Get the IDs of the current details in the database
         const existingDetails = await JobRequestDetails.findAll({
@@ -150,7 +155,7 @@ export async function updateJobRequest(req, res) {
         const existingDetailIds = existingDetails.map((detail) => detail.id);
 
         // Extract IDs from incoming data
-        const incomingDetailIds = req.body.jobRequestDetails
+        const incomingDetailIds = req.body.details
         .filter((detail) => detail.id) // Only include those with IDs
         .map((detail) => detail.id);
 
@@ -166,13 +171,13 @@ export async function updateJobRequest(req, res) {
         });
         }
 
-        // Update or Create details
-        for (const detail of req.body.jobRequestDetails) {
+        //If detail has id then update, else if its a new detail then create
+        for (const detail of req.body.details) {
         if (detail.id) {
             // Update existing detail
             await JobRequestDetails.update(
             {
-                qty: detail.qty || null,
+                quantity: detail.quantity || null,
                 particulars: detail.particulars,
                 description: detail.description,
                 remarks: detail.remarks || null,
@@ -187,7 +192,7 @@ export async function updateJobRequest(req, res) {
             await JobRequestDetails.create(
             {
                 job_request_id: req.params.reference_number,
-                qty: detail.qty || null,
+                quantity: detail.quantity || null,
                 particulars: detail.particulars,
                 description: detail.description,
                 remarks: detail.remarks || null,
@@ -371,28 +376,4 @@ export async function getAllJobRequestByStatus(req, res) {
     }
 }
 
-
-// Get Vehicle Request by Date of Trip using custom SQL
-export async function getJobRequestByTrip(req, res) {
-    try {
-        const { date_of_trip } = req.params;
-
-        const [requisitions, metadata] = await sequelize.query(
-            `SELECT * FROM vehicle_requisition WHERE DATE(date_of_trip) = :date_of_trip AND archived = false`,
-            {
-                replacements: { date_of_trip },
-                type: sequelize.QueryTypes.SELECT,
-            }
-        );
-
-        // Check if any records were found
-        if (!requisitions || requisitions.length === 0) {
-            res.status(404).json({ message: 'Request not found!' });
-        } else {
-            res.status(200).json({ requisitions });
-        }
-    } catch (error) {
-        res.status(500).json({ message: `Encountered an internal error ${error}`, error });
-    }
-}
 

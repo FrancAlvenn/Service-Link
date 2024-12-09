@@ -1,5 +1,5 @@
 import sequelize from "../database.js";
-import VenueRequisitionModel from "../models/VenueRequisitionModel.js";
+import VenueRequestModel from "../models/VenueRequestModel.js";
 import { Op } from 'sequelize';
 import { createLog } from "./system_logs.js";
 
@@ -15,11 +15,11 @@ export async function createVenueRequest(req, res){
     try{
 
         // Generate a unique reference number
-        const lastRequest = await VenueRequisitionModel.findOne({ order: [['id', 'DESC']] });
+        const lastRequest = await VenueRequestModel.findOne({ order: [['id', 'DESC']] });
         const referenceNumber = generateReferenceNumber(lastRequest ? lastRequest.id : 0);
 
         // Create the venue requisition entry in the database
-        const newVenueRequisition = await VenueRequisitionModel.create({
+        const newVenueRequisition = await VenueRequestModel.create({
             reference_number: referenceNumber,
             venue_id: req.body.venue_id,
             requester_id: req.body.requester_id,
@@ -33,7 +33,6 @@ export async function createVenueRequest(req, res){
             event_end_time: req.body.event_end_time,
             participants: req.body.participants,
             pax_estimation: req.body.pax_estimation || 0,
-            equipment_materials: req.body.equipment_materials || null,
             status: req.body.status || 'pending',
             remarks: req.body.remarks || null,
             immediate_head_approval: req.body.immediate_head_approval || 'pending',
@@ -59,7 +58,7 @@ export async function createVenueRequest(req, res){
 // Get All Venue Requests
 export async function getAllVenueRequest(req, res) {
     try {
-        const requisitions = await VenueRequisitionModel.findAll({
+        const requisitions = await VenueRequestModel.findAll({
             where: {
                 archived : {
                     [Op.eq]: false // Get all that is not archived
@@ -76,7 +75,7 @@ export async function getAllVenueRequest(req, res) {
 // Get Venue Request by ID
 export async function getVenueRequestById(req, res) {
     try{
-        const requisition = await VenueRequisitionModel.findOne({
+        const requisition = await VenueRequestModel.findOne({
             where: {
                 reference_number: req.params.reference_number
                 },
@@ -99,7 +98,7 @@ export async function getVenueRequestById(req, res) {
 // Update Venue Request
 export async function updateVenueRequest(req, res) {
     try{
-        const [updatedRows] = await VenueRequisitionModel.update({
+        const [updatedRows] = await VenueRequestModel.update({
             venue_id: req.body.venue_id,
             requester_id: req.body.requester_id,
             department: req.body.department || null,
@@ -112,7 +111,6 @@ export async function updateVenueRequest(req, res) {
             event_end_time: req.body.event_end_time,
             participants: req.body.participants,
             pax_estimation: req.body.pax_estimation || 0,
-            equipment_materials: req.body.equipment_materials || null,
             status: req.body.status || 'pending',
             remarks: req.body.remarks || null,
             immediate_head_approval: req.body.immediate_head_approval || 'pending',
@@ -149,7 +147,7 @@ export async function updateVenueRequest(req, res) {
 // Delete / Archive Request
 export async function archiveById(req, res){
     try{
-        const [updatedRows] = await VenueRequisitionModel.update({
+        const [updatedRows] = await VenueRequestModel.update({
             archived: req.params.archive
         },{
             where: {
@@ -181,7 +179,7 @@ export async function archiveById(req, res){
 // Approval of Immediate Head
 export async function immediateHeadApproval(req, res){
     try{
-        const [updatedRow] = await VenueRequisitionModel.update({
+        const [updatedRow] = await VenueRequestModel.update({
             immediate_head_approval: req.params.approval_flag
         },{
             where: {
@@ -212,7 +210,7 @@ export async function immediateHeadApproval(req, res){
 // Approval of GSO Director
 export async function gsoDirectorApproval(req, res){
     try{
-        const [updatedRow] = await VenueRequisitionModel.update({
+        const [updatedRow] = await VenueRequestModel.update({
             gso_director_approval: req.params.approval_flag
         },{
             where: {
@@ -244,7 +242,7 @@ export async function gsoDirectorApproval(req, res){
 // Approval of Operations Director
 export async function operationsDirectorApproval(req, res){
     try{
-        const [updatedRow] = await VenueRequisitionModel.update({
+        const [updatedRow] = await VenueRequestModel.update({
             operations_director_approval: req.params.approval_flag
         },{
             where: {
@@ -276,7 +274,7 @@ export async function operationsDirectorApproval(req, res){
 // Get Venue Request by Status
 export async function getAllVenueRequestByStatus(req, res) {
     try{
-        const requisitions = await VenueRequisitionModel.findAll({
+        const requisitions = await VenueRequestModel.findAll({
             where: {
                 status : req.params.status
             },

@@ -17,6 +17,9 @@ CREATE TABLE `assets` (
   `type_specific_1` varchar(255) DEFAULT NULL,
   `type_specific_2` varchar(255) DEFAULT NULL,
   `type_specific_3` varchar(255) DEFAULT NULL,
+  `archived` tinyint(1) DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`asset_id`),
   UNIQUE KEY `serial_number` (`serial_number`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -53,6 +56,7 @@ CREATE TABLE `images` (
   `uploaded_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `createdAt` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `archived` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`image_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -80,7 +84,9 @@ CREATE TABLE `job_requests` (
   `reference_number` varchar(50) NOT NULL,
   `date_required` date NOT NULL,
   `purpose` text NOT NULL,
+  `department` varchar(100),
   `requester_id` varchar(50) NOT NULL,
+  `status` varchar(100) DEFAULT 'Pending',
   `immediate_head_approval` varchar(255) DEFAULT 'pending',
   `gso_director_approval` varchar(255) DEFAULT 'pending',
   `operations_director_approval` varchar(255) DEFAULT 'pending',
@@ -124,9 +130,11 @@ CREATE TABLE `purchasing_requests` (
   `reference_number` varchar(50) NOT NULL,
   `date_requested` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_required` date NOT NULL,
+  `department` varchar(100),
   `requester_id` varchar(50) NOT NULL,
   `supply_category` varchar(255) NOT NULL,
   `purpose` text NOT NULL,
+  `status` varchar(100) DEFAULT 'Pending',
   `immediate_head_approval` varchar(255) DEFAULT 'Pending',
   `gso_director_approval` varchar(255) DEFAULT 'Pending',
   `operations_director_approval` varchar(255) DEFAULT 'Pending',
@@ -160,6 +168,9 @@ CREATE TABLE `requests_attachments` (
   `file_name` varchar(255) NOT NULL,
   `uploaded_by` int DEFAULT NULL,
   `uploaded_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `archived` tinyint(1) DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`attachment_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -170,7 +181,9 @@ CREATE TABLE `requests_comments` (
   `request_id` varchar(255) DEFAULT NULL,
   `user_id` int DEFAULT NULL,
   `comment_text` text,
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `archived` tinyint(1) DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`comment_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -273,7 +286,7 @@ CREATE TABLE `vehicle_requisition` (
 
 
 
-CREATE TABLE `venue_requisition` (
+CREATE TABLE `venue_requests` (
   `id` int NOT NULL AUTO_INCREMENT,
   `reference_number` varchar(50) NOT NULL,
   `venue_id` int NOT NULL,
@@ -288,7 +301,6 @@ CREATE TABLE `venue_requisition` (
   `event_end_time` time NOT NULL,
   `participants` varchar(255) NOT NULL,
   `pax_estimation` int DEFAULT '0',
-  `equipment_materials` text,
   `status` varchar(100) DEFAULT 'Pending',
   `remarks` text,
   `immediate_head_approval` varchar(255) DEFAULT 'Pending',
@@ -297,6 +309,19 @@ CREATE TABLE `venue_requisition` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `archived` tinyint(1) DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `reference_number` (`reference_number`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+
+CREATE TABLE `venue_request_details` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `venue_request_id` varchar(50) NOT NULL,
+  `quantity` int NOT NULL,
+  `particulars` text NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `venue_request_id` (`venue_request_id`),
+  CONSTRAINT `venue_request_details_ibfk_1` FOREIGN KEY (`venue_request_id`) REFERENCES `venue_requests` (`reference_number`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

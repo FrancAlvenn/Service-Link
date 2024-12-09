@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../database.js";
 
-const VehicleRequisition = sequelize.define("VehicleRequisition", {
+const VehicleRequest = sequelize.define("VehicleRequest", {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -81,10 +81,10 @@ const VehicleRequisition = sequelize.define("VehicleRequisition", {
     defaultValue: false,
   }
 }, {
-  tableName: "vehicle_requisition",
+  tableName: "vehicle_requests",
   timestamps: true,
   createdAt: "created_at",
   updatedAt: "updated_at",
 });
 
-export default VehicleRequisition;
+export default VehicleRequest;

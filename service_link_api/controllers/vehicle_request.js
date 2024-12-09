@@ -1,5 +1,5 @@
 import sequelize from "../database.js";
-import VehicleRequisitionModel from "../models/VehicleRequisitionModel.js";
+import VehicleRequestModel from "../models/VehicleRequestModel.js";
 import { Op } from 'sequelize';
 import { createLog } from "./system_logs.js";
 
@@ -15,11 +15,11 @@ export async function createVehicleRequest(req, res){
     try{
 
         // Generate a unique reference number
-        const lastRequest = await VehicleRequisitionModel.findOne({ order: [['id', 'DESC']] });
+        const lastRequest = await VehicleRequestModel.findOne({ order: [['id', 'DESC']] });
         const referenceNumber = generateReferenceNumber(lastRequest ? lastRequest.id : 0);
 
         // Create the vehicle requisition entry in the database
-        const newVehicleRequisition = await VehicleRequisitionModel.create({
+        const newVehicleRequisition = await VehicleRequestModel.create({
             reference_number : referenceNumber,
             vehicle_requested : req.body.vehicle_requested,
             date_filled : req.body.date_filled,
@@ -56,7 +56,7 @@ export async function createVehicleRequest(req, res){
 // Get All Vehicle Requests
 export async function getAllVehicleRequest(req, res) {
     try {
-        const requisitions = await VehicleRequisitionModel.findAll({
+        const requisitions = await VehicleRequestModel.findAll({
             where: {
                 archived : {
                     [Op.eq]: false // Get all that is not archived
@@ -73,7 +73,7 @@ export async function getAllVehicleRequest(req, res) {
 // Get Vehicle Request by ID
 export async function getVehicleRequestById(req, res) {
     try{
-        const requisition = await VehicleRequisitionModel.findOne({
+        const requisition = await VehicleRequestModel.findOne({
             where: {
                 reference_number: req.params.reference_number
                 },
@@ -96,7 +96,7 @@ export async function getVehicleRequestById(req, res) {
 // Update Vehicle Request
 export async function updateVehicleRequest(req, res) {
     try{
-        const [updatedRows] = await VehicleRequisitionModel.update({
+        const [updatedRows] = await VehicleRequestModel.update({
             vehicle_requested : req.body.vehicle_requested,
             date_filled : req.body.date_filled,
             date_of_trip : req.body.date_of_trip,
@@ -143,7 +143,7 @@ export async function updateVehicleRequest(req, res) {
 // Delete / Archive Request
 export async function archiveById(req, res){
     try{
-        const [updatedRows] = await VehicleRequisitionModel.update({
+        const [updatedRows] = await VehicleRequestModel.update({
             archived: req.params.archive
         },{
             where: {
@@ -175,7 +175,7 @@ export async function archiveById(req, res){
 // Approval of Immediate Head
 export async function immediateHeadApproval(req, res){
     try{
-        const [updatedRow] = await VehicleRequisitionModel.update({
+        const [updatedRow] = await VehicleRequestModel.update({
             immediate_head_approval: req.params.approval_flag
         },{
             where: {
@@ -207,7 +207,7 @@ export async function immediateHeadApproval(req, res){
 // Approval of GSO Director
 export async function gsoDirectorApproval(req, res){
     try{
-        const [updatedRow] = await VehicleRequisitionModel.update({
+        const [updatedRow] = await VehicleRequestModel.update({
             gso_director_approval: req.params.approval_flag
         },{
             where: {
@@ -239,7 +239,7 @@ export async function gsoDirectorApproval(req, res){
 // Approval of Operations Director
 export async function operationsDirectorApproval(req, res){
     try{
-        const [updatedRow] = await VehicleRequisitionModel.update({
+        const [updatedRow] = await VehicleRequestModel.update({
             operations_director_approval: req.params.approval_flag
         },{
             where: {
@@ -271,7 +271,7 @@ export async function operationsDirectorApproval(req, res){
 // Get Vehicle Request by Status
 export async function getAllVehicleRequestByStatus(req, res) {
     try{
-        const requisitions = await VehicleRequisitionModel.findAll({
+        const requisitions = await VehicleRequestModel.findAll({
             where: {
                 status : req.params.status
             },

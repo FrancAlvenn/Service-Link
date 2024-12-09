@@ -28,9 +28,17 @@ const PurchasingRequest = sequelize.define("PurchasingRequest", {
         type: DataTypes.STRING(255),
         allowNull: false,
     },
+    department: {
+        type: DataTypes.STRING(100),
+        allowNull: true,
+    },
     purpose: {
         type: DataTypes.TEXT,
         allowNull: false,
+    },
+    status: {
+        type: DataTypes.STRING(100),
+        defaultValue: "Pending",
     },
     immediate_head_approval: {
         type: DataTypes.STRING(255),

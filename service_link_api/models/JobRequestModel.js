@@ -18,9 +18,17 @@ const JobRequest = sequelize.define(
         type: DataTypes.DATE,
         allowNull: false,
     },
+    department: {
+        type : DataTypes.STRING(100),
+        allowNull: true,
+    },
     purpose: {
         type: DataTypes.TEXT,
         allowNull: false,
+    },
+    status: {
+        type: DataTypes.STRING(255),
+        defaultValue: 'pending',
     },
     requester_id: {
         type: DataTypes.STRING(255),

@@ -8,6 +8,9 @@ import ticketRoutes from './routes/ticketing.js';
 import userRoutes from './routes/user_management.js';
 import purchasingRequestRoutes from './routes/purchasing_request.js';
 
+import sequelize from './database.js'
+import { syncModels } from './models/syncModels.js';
+
 const app = express()
 
 
@@ -40,6 +43,9 @@ app.use("/service_link_api/ticket", ticketRoutes)
 app.use("/service_link_api/users", userRoutes)
 
 
-app.listen(8080, () => {
+const PORT = process.env.PORT || 8080
+
+app.listen(PORT, async () => {
     console.log("Connected");
+    await syncModels(sequelize); // Sync all models
 })

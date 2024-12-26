@@ -1,6 +1,6 @@
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import CustomToastNotification from "../components/CustomToastNotification"; // Import the WithActions component
+import CustomToastNotification from "../components/toast_notification/CustomToastNotification"; // Import the WithActions component
 
 class ToastNotification {
   static success(title, message, options = {}) {

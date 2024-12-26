@@ -4,7 +4,7 @@ import './assets/global_style.scss';
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Home from './pages/Home';
-import CustomToastContainer from './components/CustomToastContainer';
+import CustomToastContainer from './components/toast_notification/CustomToastContainer';
 
 
 const router = createBrowserRouter([

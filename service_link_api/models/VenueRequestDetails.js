@@ -27,6 +27,11 @@ const VenueRequestDetails = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: false,
     },
+    archived: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false,
+    }
   },
   {
     tableName: "venue_request_details",

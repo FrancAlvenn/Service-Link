@@ -1,47 +1,24 @@
 import * as React from 'react';
 import './App.css';
-import "./style.scss";
+import './assets/global_style.scss';
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import Login from './pages/public/Login';
-import Register from './pages/public/Register';
-import Main from './pages/admin/Main';
-import JR_Dashboard from './pages/admin/job_requests/JR_Dashboard';
+import Home from './pages/Home';
+import CustomToastContainer from './components/CustomToastContainer';
 
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Login />,
-  },
-  {
-    path: '/register',
-    element: <Register />
-  },
-  {
-    path: 'admin/login',
-    element: <Login />
-  },
-  {
-    path: 'admin/register',
-    element: <Register />
-  },
-  {
-    path: '/main',
-    element: <Main />,
-    children: [
-      {
-        path: '/main/job-request/dashboard',
-        element: <JR_Dashboard />,
-      },
-    ],
+    element: <Home></Home>,
   },
 ]);
 
 function App() {
   return (
-    <div className="App">
+    <div className="App p-5">
        <RouterProvider router={router} />
+       <CustomToastContainer/>
     </div>
   );
 }

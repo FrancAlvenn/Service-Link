@@ -23,6 +23,11 @@ const PurchasingRequestDetails = sequelize.define("PurchasingRequestDetails", {
     particulars: {
         type: DataTypes.TEXT,
         allowNull: false,
+    },
+    archived: {
+        type: DataTypes.BOOLEAN,
+        allowNull: true,
+        defaultValue: false,
     }
 }, {
     modelName: "PurchasingRequestDetails",

@@ -1,4 +1,5 @@
 import express from 'express'
+import cors from 'cors'
 import authRoutes from './routes/auth.js'
 import jobRequestRoutes from './routes/job_request.js'
 import venueRequestRoutes from './routes/venue_request.js'
@@ -11,7 +12,15 @@ import purchasingRequestRoutes from './routes/purchasing_request.js';
 import sequelize from './database.js'
 import { syncModels } from './models/syncModels.js';
 
-const app = express()
+const app = express();
+
+const corsOptions = {
+    origin: 'http://localhost:3000', //Frontend URL (React)
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions));
 
 
 app.use(express.json())

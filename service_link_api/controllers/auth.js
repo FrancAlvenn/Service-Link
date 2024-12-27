@@ -102,8 +102,8 @@ export const login = async (req, res) => {
         const user = await UserModel.findOne({
             where: {
                 [Op.or]: [
-                    { username: req.body.username },  // Check by username
-                    { email: req.body.username }      // Check by email (use the same input for both fields)
+                    { username: req.body.email },  // Check by username
+                    { email: req.body.email }      // Check by email (use the same input for both fields)
                 ]
             }
         });
@@ -111,7 +111,7 @@ export const login = async (req, res) => {
 
         // Verify password
         const isPasswordCorrect = bcrypt.compareSync(req.body.password, user.password);
-        if (!isPasswordCorrect) return res.status(400).json("Incorrect Username or Password!");
+        if (!isPasswordCorrect) return res.status(401).json("Incorrect Username or Password!");
 
         //Include Image Path
         const image = await ImageModel.findOne({ where: { image_id: user.profile_image_id } });

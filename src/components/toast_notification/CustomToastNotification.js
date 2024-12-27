@@ -1,12 +1,11 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
-import { Archive } from "react-feather"; // If you're using the Archive icon from react-feather
-import { ToastContainer, toast } from "react-toastify";
 
 function CustomToastNotification( {closeToast, title, content} ) {
   return (
     <div className="flex flex-col w-full">
       <h3 className="text-zinc-800 text-sm font-semibold flex items-center gap-1 ms-3">
-        <Archive className="size-4 text-grey-700" /> {title}
+        <FontAwesomeIcon icon={"fa-solid fa-box-archive"}/> {title}
       </h3>
 
       <div className="pl-5 mt-2">

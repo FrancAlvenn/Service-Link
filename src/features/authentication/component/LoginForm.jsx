@@ -9,6 +9,10 @@ import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import ToastNotification from '../../../utils/ToastNotification';
 
+import { gapi } from 'gapi-script';
+import GoogleLogin from 'react-google-login';
+
+import  GoogleAuthLogin  from './GoogleAuthentication';
 
 function LoginForm() {
 
@@ -68,7 +72,9 @@ function LoginForm() {
                 setFormStatus('idle');
             }
 
-            
+            if(res.status === 404){
+                ToastNotification.error('Oops!', 'Account not activated, Please contact GSO office for account activation.');
+            }
 
         }).catch((error) =>{
             console.log(error);
@@ -76,9 +82,15 @@ function LoginForm() {
             if (error.response && error.response.status === 401) {
                 // Handle Unauthorized status code (invalid login credentials)
                 ToastNotification.error('Oh no!', error.response.data);
-            } else {
+            }
+
+            if (error.response && error.response.status === 404) {
+                // Handle Unauthorized status code (invalid login credentials)
+                ToastNotification.error('Oh no!', error.response.data);
+            }else{
                 // Handle other errors (network, server errors, etc.)
                 ToastNotification.error('Oops!', 'Something went wrong. Please try again.');
+                console.error('Error logging in:', error);
             }
             setTimeout(() => {
                 setFormStatus('idle');
@@ -95,6 +107,22 @@ function LoginForm() {
     setDebounceState(true);
     }, [userInputDebounce]);
 
+
+    const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+
+    useEffect(() => {
+    function start() {
+        gapi.client.init({
+        clientId: clientId,
+        scope: "",
+        });
+    }
+    gapi.load("client:auth2", start);
+    }, []);
+
+    //get the access token from the user
+    //var accessToken = gapi.auth.getToken().access_token;
+
     return (
         <div className='flex flex-col min-h-[94vh]'>
         <AuthHeader/>
@@ -108,13 +136,7 @@ function LoginForm() {
 
 
                 <div className="mt-5">
-                    <div>
-                        <a href="#"
-                            className="w-full flex items-center justify-between px-5 py-2 border border-gray-300 rounded-md shadow-sm text-xs sm:text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                            <FontAwesomeIcon icon={"fa-brands fa-google"} className='size-4'/>
-                            <p className='w-full text-center'>Sign in with Google</p>
-                        </a>
-                    </div>
+                    <GoogleAuthLogin/>
                 </div>
 
                 <div className="mt-5">

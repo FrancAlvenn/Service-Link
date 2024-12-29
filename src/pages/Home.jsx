@@ -3,6 +3,7 @@ import { toast } from 'react-toastify';
 import ToastNotification from '../utils/ToastNotification';
 import './../assets/output.css';
 import { AuthContext } from '../features/authentication';
+import { useNavigate } from 'react-router-dom';
 
 function Home() {
   const { user } = useContext(AuthContext);
@@ -11,6 +12,8 @@ function Home() {
   if (!user) {
     return <div>Loading...</div>; // or redirect to login page
   }
+
+  const navigate = useNavigate();
 
   console.log(user);
   console.log(user?.username);
@@ -47,6 +50,8 @@ function Home() {
       >
         Show
       </button>
+
+      <button className='btn p-5 bg-gray-50' onClick={()=>{navigate('/')}}>Logout</button>
     </>
   );
 }

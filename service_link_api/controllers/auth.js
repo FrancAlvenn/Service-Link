@@ -70,6 +70,7 @@ export const register = async (req, res) => {
                 designation: req.body.designation,
                 access_level: req.body.access_level,
                 immediate_head: req.body.immediate_head,
+                status: 'active',
                 profile_image_id: null // Set profile image ID to null initially
             });
 
@@ -107,7 +108,10 @@ export const login = async (req, res) => {
                 ]
             }
         });
-        if (!user) return res.status(404).json("User not found!");
+        if (!user) return res.status(404).json("Account not activated, Please contact GSO office for account activation.");
+
+        // Check if the user is active
+        if (user.status !== 'active') return res.status(401).json("Account not activated, Please contact GSO office for account activation.");
 
         // Verify password
         const isPasswordCorrect = bcrypt.compareSync(req.body.password, user.password);
@@ -144,3 +148,91 @@ export const logout = (req, res) => {
         secure: true,
     }).status(200).json("User has been logged out!");
 };
+
+
+//Google Authentication
+export const googleAuth = async (req, res) => {
+    try {
+        //Check if the user already has a google_id in the database
+        const existingUser = await UserModel.findOne({
+            where: {
+                google_id: req.body.google_id
+            }
+        });
+
+        // Check if the user already has a google_id in the database
+        if(existingUser){
+            const token = jwt.sign({ id: existingUser.user_id }, "jwtkey");
+
+            //Include Image Path
+            const image = await ImageModel.findOne({ where: { image_id: existingUser.profile_image_id } });
+
+            // Create a response object with user data and image path
+            const response = {
+                ...existingUser,
+                profileImage: image ? image.file_path : null // Include image path or null if no image found
+            };
+
+            return res.cookie("access_token", token, { httpOnly: true })
+                .status(200)
+                .json({response});
+        }
+
+
+        // Check if the user exists by email but does not have a google_id
+        const userWithNoGoogleId = await UserModel.findOne({
+            where: {
+                email: req.body.email
+            }
+        });
+
+        if(userWithNoGoogleId){
+            await UserModel.update(
+                {
+                    google_id: req.body.google_id
+                },
+                {
+                    where: { email: req.body.email }
+                }
+            );
+
+            const token = jwt.sign({ id: userWithNoGoogleId.user_id }, "jwtkey");
+
+            //Include Image Path
+            const image = await ImageModel.findOne({ where: { image_id: userWithNoGoogleId.profile_image_id } });
+
+            // Create a response object with user data and image path
+            const response = {
+                ...userWithNoGoogleId,
+                profileImage: image ? image.file_path : null // Include image path or null if no image found
+            };
+
+            return res.cookie("access_token", token, { httpOnly: true })
+                .status(200)
+                .json({response});
+        }
+
+        //If user doesn't exist, create an account but with a pending status
+        const lastUser = await UserModel.findOne(
+            { order: [['user_id', 'DESC']]
+        });
+
+        const newUser = await UserModel.create({
+            reference_number: generateReferenceNumber(lastUser ? lastUser.user_id : 0),
+            first_name: req.body.first_name,
+            last_name: req.body.last_name,
+            email: req.body.email,
+            username: req.body.email,
+            google_id: req.body.google_id,
+            status: "pending",
+            archived: false,
+        });
+
+        return res.status(201);
+
+    } catch (error) {
+        console.error("Error during Google Authentication:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}
+

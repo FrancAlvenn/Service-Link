@@ -12,6 +12,10 @@ const User = sequelize.define('User', {
         type: DataTypes.STRING,
         allowNull: false
     },
+    google_id: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
     first_name: {
         type: DataTypes.STRING,
         allowNull: false
@@ -27,7 +31,7 @@ const User = sequelize.define('User', {
     },
     password: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
     },
     email: {
         type: DataTypes.STRING,
@@ -59,6 +63,10 @@ const User = sequelize.define('User', {
         allowNull: true
     },
     immediate_head: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    status: {
         type: DataTypes.STRING,
         allowNull: true
     },

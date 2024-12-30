@@ -10,7 +10,6 @@ import { useNavigate } from 'react-router-dom';
 import ToastNotification from '../../../utils/ToastNotification';
 
 import { gapi } from 'gapi-script';
-import GoogleLogin from 'react-google-login';
 
 import  GoogleAuthLogin  from './GoogleAuthentication';
 

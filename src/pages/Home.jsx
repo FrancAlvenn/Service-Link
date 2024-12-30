@@ -4,6 +4,8 @@ import ToastNotification from '../utils/ToastNotification';
 import './../assets/output.css';
 import { AuthContext } from '../features/authentication';
 import { useNavigate } from 'react-router-dom';
+import StatusDropdown from '../components/dropdowns/StatusDropdown';
+import Navbar from '../layouts/Navbar';
 
 function Home() {
   const { user } = useContext(AuthContext);
@@ -20,6 +22,7 @@ function Home() {
 
   return (
     <>
+      <Navbar/>
       <h1>{user?.username}</h1>
 
       <div className='text-3xl text-red-500'>Home</div>
@@ -52,6 +55,12 @@ function Home() {
       </button>
 
       <button className='btn p-5 bg-gray-50' onClick={()=>{navigate('/')}}>Logout</button>
+
+
+      <br />
+      <br />
+
+      <StatusDropdown/>
     </>
   );
 }

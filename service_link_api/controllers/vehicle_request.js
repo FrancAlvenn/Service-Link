@@ -46,6 +46,7 @@ export async function createVehicleRequest(req, res){
             action: 'create',
             performed_by: req.body.requester_id,
             target: referenceNumber,
+            type: 'Request Submitted',
             details: `Vehicle Requisition ${referenceNumber} created successfully!`,
         });
     }catch (error){
@@ -133,6 +134,7 @@ export async function updateVehicleRequest(req, res) {
             action: 'update',
             performed_by: req.body.requester_id,
             target: req.params.reference_number,
+            title: 'Request Updated',
             details: `Vehicle Requisition ${req.params.reference_number} updated successfully!`,
         });
     }catch (error){
@@ -164,6 +166,7 @@ export async function archiveById(req, res){
             action: 'archive',
             performed_by: req.body.requester_id,
             target: req.params.reference_number,
+            title: 'Request Archived',
             details: `Vehicle Requisition ${req.params.reference_number} archived successfully!`,
         });
     }catch(error){
@@ -196,6 +199,7 @@ export async function immediateHeadApproval(req, res){
             action: 'update',
             performed_by: req.body.requester_id,
             target: req.params.reference_number,
+            title: 'Request Approved by Immediate Head',
             details: `Venue Requisition ${req.params.reference_number} ${req.params.approval_flag} by immediate head!`,
         })
     }catch(error){
@@ -228,6 +232,7 @@ export async function gsoDirectorApproval(req, res){
             action: 'update',
             performed_by: req.body.requester_id,
             target: req.params.reference_number,
+            title: 'Request Approved by GSO Director',
             details: `Venue Requisition ${req.params.reference_number} ${req.params.approval_flag} by GSO Director!`,
         })
     }catch(error){
@@ -260,6 +265,7 @@ export async function operationsDirectorApproval(req, res){
             action: 'update',
             performed_by: req.body.requester_id,
             target: req.params.reference_number,
+            title: 'Request Approved by Operations Director',
             details: `Venue Requisition ${req.params.reference_number} ${req.params.approval_flag} by operations head!`,
         })
     }catch(error){

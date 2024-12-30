@@ -52,6 +52,7 @@ export async function createLog(logData) {
             action: logData.action,
             performed_by: logData.performed_by,
             target: logData.target,
+            title: logData.title || '', // Use an empty string if title is not provided
             details: logData.details
         });
 

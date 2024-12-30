@@ -31,7 +31,6 @@ function GoogleAuthLogin() {
                     navigate('/home');
                 } else if (response.status === 201) {
                     ToastNotification.info('Oops!', 'Account not activated. Please contact the GSO office for account activation.');
-                    navigate('/home');
                 } else {
                     ToastNotification.error('Oops!', 'Internal Server Error. Please try again.');
                 }

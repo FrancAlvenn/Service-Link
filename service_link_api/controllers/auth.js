@@ -160,6 +160,9 @@ export const googleAuth = async (req, res) => {
             }
         });
 
+        // Check if the user is active
+        if (existingUser && existingUser.status !== 'active') return res.status(201).json("Account not activated, Please contact GSO office for account activation.");
+
         // Check if the user already has a google_id in the database
         if(existingUser){
             const token = jwt.sign({ id: existingUser.user_id }, "jwtkey");

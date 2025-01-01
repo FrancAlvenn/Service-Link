@@ -231,7 +231,7 @@ export const googleAuth = async (req, res) => {
             archived: false,
         });
 
-        return res.status(201);
+        return res.status(201).json("Account not activated, Please contact GSO office for account activation.");
 
     } catch (error) {
         console.error("Error during Google Authentication:", error);

@@ -72,28 +72,30 @@ function LoginForm() {
             }
 
             if(res.status === 404){
-                ToastNotification.error('Oops!', 'Account not activated, Please contact GSO office for account activation.');
+                ToastNotification.info('Oops!', 'Account not activated, Please contact GSO office for account activation.');
             }
 
         }).catch((error) =>{
             console.log(error);
+            setTimeout(() => {
+                setFormStatus('idle');
+            }, 3000);
 
             if (error.response && error.response.status === 401) {
                 // Handle Unauthorized status code (invalid login credentials)
-                ToastNotification.error('Oh no!', error.response.data);
+                ToastNotification.info('Oops!', error.response.data);
+                return;
             }
 
             if (error.response && error.response.status === 404) {
                 // Handle Unauthorized status code (invalid login credentials)
                 ToastNotification.error('Oh no!', error.response.data);
+                return;
             }else{
                 // Handle other errors (network, server errors, etc.)
                 ToastNotification.error('Oops!', 'Something went wrong. Please try again.');
                 console.error('Error logging in:', error);
             }
-            setTimeout(() => {
-                setFormStatus('idle');
-            }, 3000);
         })
 
     }

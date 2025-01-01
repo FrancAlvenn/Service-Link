@@ -97,7 +97,6 @@ export const register = async (req, res) => {
 
 // Login function
 export const login = async (req, res) => {
-    console.log(req.body)
     try {
         // Check if the user exists by email or username
         const user = await UserModel.findOne({
@@ -114,6 +113,10 @@ export const login = async (req, res) => {
         if (user.status !== 'active') return res.status(401).json("Account not activated, Please contact GSO office for account activation.");
 
         // Verify password
+        // No user password is found meaning they initially used the google login
+        if (!user.password) return res.status(401).json("Incorrect Username or Password!");
+
+        // Has a password then check if the password is correct
         const isPasswordCorrect = bcrypt.compareSync(req.body.password, user.password);
         if (!isPasswordCorrect) return res.status(401).json("Incorrect Username or Password!");
 

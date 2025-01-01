@@ -4,7 +4,7 @@ import ToastNotification from '../utils/ToastNotification';
 import './../assets/output.css';
 import { AuthContext } from '../features/authentication';
 import { useNavigate } from 'react-router-dom';
-import StatusDropdown from '../components/dropdowns/StatusDropdown';
+// import StatusDropdown from '../components/dropdowns/StatusDropdown';
 import Navbar from '../layouts/Navbar';
 
 function Home() {
@@ -60,7 +60,7 @@ function Home() {
       <br />
       <br />
 
-      <StatusDropdown/>
+      {/* <StatusDropdown/> */}
     </>
   );
 }

@@ -15,6 +15,8 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import ProtectedRoute from './components/protected_route/ProtectedRoute';
 
+import { ThemeProvider } from "@material-tailwind/react";
+
 library.add(fas, fab, far); // Add all the icons needed
 
 const router = createBrowserRouter([
@@ -30,12 +32,14 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <AuthProvider>
-      <div className="App p-5">
-        <RouterProvider router={router} />
-        <CustomToastContainer />
-      </div>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <div className="App p-5">
+          <RouterProvider router={router} />
+          <CustomToastContainer />
+        </div>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

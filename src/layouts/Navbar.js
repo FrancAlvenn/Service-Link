@@ -1,7 +1,6 @@
-import React from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import logo from '../assets/dyci_logo.png';
 import { ArrowSquareOut, Bell, Gear, Question, UserCircle } from '@phosphor-icons/react';
-import { Menu, MenuButton, MenuItem, MenuItems, MenuHeading, Label } from '@headlessui/react';
 import NotificationModal from './component/NotificationModal';
 import HelpModal from './component/HelpModal';
 import SettingsModal from './component/SettingsModal';

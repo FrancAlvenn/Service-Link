@@ -28,6 +28,8 @@ export const AuthProvider = ({ children }) => {
   const clearAuthData = () => {
     setUser(null);
     setIsAuthenticated(false);
+    localStorage.removeItem("user");
+    localStorage.removeItem("isAuthenticated");
   };
 
   return (

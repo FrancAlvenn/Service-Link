@@ -34,7 +34,7 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <div className="App p-5">
+        <div className="App">
           <RouterProvider router={router} />
           <CustomToastContainer />
         </div>

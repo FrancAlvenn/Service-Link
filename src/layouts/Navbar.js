@@ -10,8 +10,8 @@ import ProfileModal from './component/ProfileModal';
 
 function Navbar() {
   return (
-    <nav>
-        <div className='flex justify-between items-center gap-3 px-5'>
+    <nav className="w-full bg-white shadow z-10">
+        <div className='flex justify-between items-center gap-3 px-5 py-1 border-b border-gray-200'>
             <div className='flex items-center gap-3'>
                 <img src={logo} alt="DYCI" className='w-10 h-10' />
                 <p>Service Link</p>

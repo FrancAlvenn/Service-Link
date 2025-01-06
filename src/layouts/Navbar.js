@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react'
 import logo from '../assets/dyci_logo.png';
 import { ArrowSquareOut, Bell, Gear, Question, UserCircle } from '@phosphor-icons/react';
-import NotificationModal from './component/NotificationModal';
-import HelpModal from './component/HelpModal';
-import SettingsModal from './component/SettingsModal';
-import ProfileModal from './component/ProfileModal';
+import NotificationModal from './component/navbar/NotificationModal';
+import HelpModal from './component/navbar/HelpModal';
+import SettingsModal from './component/navbar/SettingsModal';
+import ProfileModal from './component/navbar/ProfileModal';
 
 
 

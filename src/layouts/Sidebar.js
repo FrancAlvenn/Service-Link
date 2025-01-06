@@ -1,37 +1,72 @@
-import React from "react";
-import {
-  Card,
+import React, { useReducer } from "react";
+import { Card,
   Typography,
   List,
-  ListItem,
-  ListItemPrefix,
-  ListItemSuffix,
-  Chip,
-  Accordion,
-  AccordionHeader,
-  AccordionBody,
+  Menu,
+  MenuHandler,
+  MenuList,
+  MenuItem,
 } from "@material-tailwind/react";
 import {
-  PresentationChartBarIcon,
-  ShoppingBagIcon,
-  UserCircleIcon,
-  Cog6ToothIcon,
-  InboxIcon,
-  PowerIcon,
-} from "@heroicons/react/24/solid";
+  ClipboardText,
+  Ticket,
+  ArchiveBox,
+  UsersThree,
+  CaretDown,
+} from "@phosphor-icons/react";
+import { useNavigate } from "react-router-dom";
+import RequestsManagementControls from "./component/sidebar/RequestsManagementControls";
+import TicketManagementControls from "./component/sidebar/TicketManagementControls";
+import AssetManagementControls from "./component/sidebar/AssetManagementControls";
+import EmployeeManagementControls from "./component/sidebar/EmployeeManagementControls";
+import ControlRenderer from "./component/sidebar/ControlRenderer";
+
+const options = {
+  "Requests Management": <ClipboardText size={20} />, // Default icon
+  "Ticket Management": <Ticket size={20} />,
+  "Asset Management": <ArchiveBox size={20} />,
+  "Employee Management": <UsersThree size={20} />,
+};
+
+// Map menu options to their corresponding routes
+const routeMap = {
+  "Requests Management": "/workspace/requests-management",
+  "Ticket Management": "/workspace/ticket-management",
+  "Asset Management": "/workspace/asset-management",
+  "Employee Management": "/workspace/employee-management",
+};
+
+const initialState = {
+  openDropdown: false,
+  selectedControl: "Requests Management",
+};
 
 
+function reducer(state, action) {
+  switch (action.type) {
+    case "TOGGLE_DROPDOWN":
+      return { ...state, openDropdown: !state.openDropdown };
+    case "SELECT_CONTROL":
+      return {
+        ...state,
+        selectedControl: action.payload,
+        openDropdown: true,
+      };
+    default:
+      return state;
+  }
+}
 
-import { ChevronRightIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
-import { Stack, ClipboardText, ChalkboardSimple, ChatCircle, ChartBar} from "@phosphor-icons/react";
- 
 function Sidebar() {
-  const [open, setOpen] = React.useState(0);
- 
-  const handleOpen = (value) => {
-    setOpen(open === value ? 0 : value);
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  const navigate = useNavigate();
+
+  const handleSelection = (control) => {
+    dispatch({ type: "SELECT_CONTROL", payload: control });
+    navigate(routeMap[control]); // Navigate to the corresponding route
   };
- 
+
   return (
     <Card className="h-fill w-64 max-h-screen max-w-[20rem] shadow-xl shadow-blue-gray-900/5">
       <div className="mt-5 px-4">
@@ -40,134 +75,47 @@ function Sidebar() {
         </Typography>
       </div>
       <List>
-      <hr className="my-7 border-gray-400" />
-        <Accordion
-          open={open === 1}
-          icon={
-            <ChevronDownIcon
-              strokeWidth={2.5}
-              className={`mx-auto h-4 w-4 transition-transform ${open === 1 ? "rotate-180" : ""}`}
-            />
-          }
+        <hr className="my-7 border-gray-400" />
+
+        <Menu
+          className="w-full"
+          open={state.openDropdown}
+          handler={(isOpen) => dispatch({ type: "TOGGLE_DROPDOWN" })}
         >
-            <ListItem className="mt-1 p-0 border" selected={open === 1}>
-            <AccordionHeader onClick={() => handleOpen(1)} className="border-b-0 p-2">
-                <ListItemPrefix>
-                <span className="flex items-center p-2 bg-blue-500 rounded-lg ">
-                    <ClipboardText size={16} className="cursor-pointer text-white" />
-                </span>
-                </ListItemPrefix>
-                <Typography color="blue-gray" className="mr-auto font-semibold text-sm">
-                    Request Management
-                </Typography>
-            </AccordionHeader>
-            </ListItem>
+          <MenuHandler>
+            <button
+              onClick={() => dispatch({ type: "TOGGLE_DROPDOWN" })}
+              className="flex justify-between items-center gap-2 pl-4 pr-3 py-2 text-xs font-bold bg-blue-gray-50 border border-gray-400 rounded-lg"
+            >
+              <span className="flex gap-2 items-center">
+                {options[state.selectedControl]}
+                {state.selectedControl}
+              </span>
+              <CaretDown
+                size={12}
+                strokeWidth={2.5}
+                className={`h-4 w-4 transition-transform ${
+                  state.openDropdown ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+          </MenuHandler>
+          <MenuList className="border-none w-56 py-3 shadow-md">
+            <span className="py-3 text-xs font-bold">Workspace</span>
+            <hr className="my-3 h-px text-gray-400" />
+            {Object.keys(options).map((control) => (
+              <MenuItem
+                key={control}
+                className="px-3 py-3 text-left hover:bg-gray-200"
+                onClick={() =>handleSelection(control)}
+              >
+                {control}
+              </MenuItem>
+            ))}
+          </MenuList>
+        </Menu>
 
-          <AccordionBody className="py-1">
-            <List className="p-0">
-                <ListItem className="text-sm">
-                    <ListItemPrefix>    
-                        <ChevronRightIcon strokeWidth={3} className="h-3 w-5" />
-                    </ListItemPrefix>
-                    Analytics
-                </ListItem>
-                <ListItem className="text-sm">
-                    <ListItemPrefix>
-                        <ChevronRightIcon strokeWidth={3} className="h-3 w-5" />
-                    </ListItemPrefix>
-                    Reporting
-                </ListItem>
-                <ListItem className="text-sm">
-                    <ListItemPrefix>
-                        <ChevronRightIcon strokeWidth={3} className="h-3 w-5" />
-                    </ListItemPrefix>
-                    Projects
-                </ListItem>
-            </List>
-          </AccordionBody>
-        </Accordion>
-
-
-        <Accordion
-          open={open === 2}
-          icon={
-            <ChevronDownIcon
-              strokeWidth={2.5}
-              className={`mx-auto h-4 w-4 transition-transform ${open === 2 ? "rotate-180" : ""}`}
-            />
-          }
-        >
-          <ListItem className="p-0" selected={open === 2}>
-            <AccordionHeader onClick={() => handleOpen(2)} className="border-b-0 p-3">
-                <ListItemPrefix>
-                    <Stack size={20} />
-                </ListItemPrefix>
-                <Typography color="blue-gray" className="mr-auto font-normal text-sm">
-                    Queues
-                </Typography>
-            </AccordionHeader>
-          </ListItem>
-          <AccordionBody className="py-1">
-            <List className="p-0">
-                <ListItem className="text-sm">
-                    All Open
-                </ListItem>
-                <ListItem className="text-sm">
-                    In Progress
-                </ListItem>
-            </List>
-          </AccordionBody>
-        </Accordion>
-
-        <Accordion
-          open={open === 3}
-          icon={
-            <ChevronDownIcon
-              strokeWidth={2.5}
-              className={`mx-auto h-4 w-4 transition-transform ${open === 2 ? "rotate-180" : ""}`}
-            />
-          }
-        >
-          <ListItem className="p-0" selected={open === 2}>
-            <AccordionHeader onClick={() => handleOpen(3)} className="border-b-0 p-3">
-                <ListItemPrefix>
-                    <ChalkboardSimple size={20} />
-                </ListItemPrefix>
-                <Typography color="blue-gray" className="mr-auto font-normal text-sm">
-                    Views
-                </Typography>
-                <ListItemSuffix>
-                    <Chip value="14" size="sm" variant="ghost" color="blue-gray" className="rounded-full" />
-                </ListItemSuffix>
-            </AccordionHeader>
-          </ListItem>
-          <AccordionBody className="py-1">
-            <List className="p-0">
-                <ListItem className="text-sm">
-                    Kanban
-                </ListItem>
-                <ListItem className="text-sm">
-                    Calendar
-                </ListItem>
-            </List>
-          </AccordionBody>
-        </Accordion>
-
-
-        <ListItem className="text-sm">
-          <ListItemPrefix>
-            <ChatCircle size={20} />
-          </ListItemPrefix>
-          Raise a Request
-        </ListItem>
-
-        <ListItem className="text-sm">
-          <ListItemPrefix>
-            <ChartBar size={20} />
-          </ListItemPrefix>
-          Reporting Dashboard
-        </ListItem>
-
+        <ControlRenderer selectedControl={state.selectedControl}/>
       </List>
     </Card>
   );

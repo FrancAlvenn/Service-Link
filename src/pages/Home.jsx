@@ -36,7 +36,6 @@ function Home() {
 
   return (
     <>
-      <Layout>
         <div className='flex flex-col gap-3'>
             <h1>{user?.username}</h1>
             <div className='text-3xl text-red-500'>Home</div>
@@ -71,7 +70,6 @@ function Home() {
             <button className='btn p-5 bg-gray-50 pb-14' onClick={()=>{handleLogout()}}>Logout</button>
             <button className='btn p-5 bg-gray-50 pb-14' onClick={()=>{handleLogout()}}>Logout</button>
           </div>
-      </Layout>
     </>
   );
 }

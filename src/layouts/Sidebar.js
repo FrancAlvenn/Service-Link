@@ -68,7 +68,7 @@ function Sidebar() {
   };
 
   return (
-    <Card className="h-fill w-64 max-h-screen max-w-[20rem] shadow-xl shadow-blue-gray-900/5">
+    <Card className="h-fill p-4 w-72 max-h-screen max-w-[20rem] shadow-xl shadow-blue-gray-900/5">
       <div className="mt-5 px-4">
         <Typography variant="h5" color="blue-gray" className="text-lg">
           Requests Management

@@ -7,7 +7,7 @@ import { fas } from "@fortawesome/free-solid-svg-icons";
 import { fab } from "@fortawesome/free-brands-svg-icons";
 import { far } from "@fortawesome/free-regular-svg-icons";
 
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
 import CustomToastContainer from './components/toast_notification/CustomToastContainer';
 
 import { AuthProvider } from './features/authentication';
@@ -19,6 +19,8 @@ import { ThemeProvider } from "@material-tailwind/react";
 import Dashboard from './pages/Dashboard';
 import Layout from './layouts/Layout';
 import Workspace from './pages/Workspace';
+import RequestManagement from './pages/RequestManagement';
+import { Queue } from './features/request_management';
 
 library.add(fas, fab, far); // Add all the icons needed
 
@@ -41,7 +43,11 @@ const router = createBrowserRouter([
     children: [
       {
         path: 'requests-management',
-        element: <div>Requests Management</div>
+        element: <Navigate to="/workspace/requests-management/queue" />,
+      },
+      {
+        path: 'requests-management/queue',
+        element: <ProtectedRoute><Queue/></ProtectedRoute>
       },
       {
         path: 'ticket-management',

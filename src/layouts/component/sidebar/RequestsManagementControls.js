@@ -12,9 +12,10 @@ function RequestsManagementControls() {
     };
 
     return (
-        <>
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
             <Accordion
             open={open === 2}
+            className={`rounded-lg ${open === 2 ? "bg-gray-100" : ""}`}
             icon={
                 <CaretDown
                 strokeWidth={2.5}
@@ -46,6 +47,7 @@ function RequestsManagementControls() {
 
             <Accordion
             open={open === 3}
+            className={`rounded-lg ${open === 3 ? "bg-gray-100" : ""}`}
             icon={
                 <CaretDown
                 strokeWidth={2.5}
@@ -68,10 +70,10 @@ function RequestsManagementControls() {
             </ListItem>
             <AccordionBody className="py-1">
                 <List className="p-0">
-                    <ListItem className="text-sm">
+                    <ListItem className="text-xs">
                         Kanban
                     </ListItem>
-                    <ListItem className="text-sm">
+                    <ListItem className="text-xs">
                         Calendar
                     </ListItem>
                 </List>
@@ -92,7 +94,7 @@ function RequestsManagementControls() {
             </ListItemPrefix>
             Reporting Dashboard
             </ListItem>
-        </>
+        </div>
     )
 
 }

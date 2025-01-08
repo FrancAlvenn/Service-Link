@@ -3,7 +3,7 @@ import { Outlet } from 'react-router-dom'
 
 function Workspace() {
   return (
-    <div>
+    <div className='h-full'>
         <Outlet></Outlet>
     </div>
   )

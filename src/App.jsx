@@ -20,7 +20,7 @@ import Dashboard from './pages/Dashboard';
 import Layout from './layouts/Layout';
 import Workspace from './pages/Workspace';
 import RequestManagement from './pages/RequestManagement';
-import { Queue } from './features/request_management';
+import { InProgress, Queue } from './features/request_management';
 
 library.add(fas, fab, far); // Add all the icons needed
 
@@ -43,11 +43,19 @@ const router = createBrowserRouter([
     children: [
       {
         path: 'requests-management',
-        element: <Navigate to="/workspace/requests-management/queue" />,
+        element: <Navigate to="/workspace/requests-management/queues/all-open" />,
       },
       {
         path: 'requests-management/queue',
+        element: <Navigate to="/workspace/requests-management/queues/all-open" />,
+      },
+      {
+        path: 'requests-management/queues/all-open',
         element: <ProtectedRoute><Queue/></ProtectedRoute>
+      },
+      {
+        path: 'requests-management/queues/in-progress',
+        element: <ProtectedRoute><InProgress/></ProtectedRoute>
       },
       {
         path: 'ticket-management',

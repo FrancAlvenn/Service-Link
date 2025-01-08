@@ -2,17 +2,20 @@ import React from "react";
 import {Card, Typography,List, ListItem, ListItemPrefix, ListItemSuffix, Chip, Accordion, AccordionHeader, AccordionBody, Menu, MenuHandler, Button, MenuList, MenuItem} from "@material-tailwind/react";
 
 import { Stack, ClipboardText, ChalkboardSimple, ChatCircle, ChartBar, CaretDown} from "@phosphor-icons/react";
+import { useNavigate } from "react-router-dom";
 
 function RequestsManagementControls() {
 
     const [open, setOpen] = React.useState(0);
+
+    const navigate = useNavigate();
 
     const handleOpen = (value) => {
         setOpen(open === value ? 0 : value);
     };
 
     return (
-        <div className="flex-1 overflow-y-auto custom-scrollbar">
+        <div>
             <Accordion
             open={open === 2}
             className={`rounded-lg ${open === 2 ? "bg-gray-100" : ""}`}
@@ -35,10 +38,12 @@ function RequestsManagementControls() {
             </ListItem>
             <AccordionBody className="py-1">
                 <List className="p-0">
-                    <ListItem className="text-xs">
+                    <ListItem className="text-xs"
+                        onClick={() => navigate("/workspace/requests-management/queues/all-open")}>
                         All Open
                     </ListItem>
-                    <ListItem className="text-xs">
+                    <ListItem className="text-xs"
+                        onClick={() => navigate("/workspace/requests-management/queues/in-progress")}>
                         In Progress
                     </ListItem>
                 </List>

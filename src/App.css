@@ -1,6 +1,13 @@
 .custom-scrollbar {
-    overflow-y: auto; /* Enables vertical scrolling */
-    max-height: 100%; /* Restricts the height for scrolling */
-    scrollbar-width: none; /* For modern browsers */
-    scrollbar-color: #888 transparent; /* Scrollbar color */
-  }
+  overflow-y: auto; /* Enables vertical scrolling */
+  scrollbar-width: none; /* For modern browsers */
+  scrollbar-color: #888 transparent; /* Scrollbar color */
+}
+
+.App{
+  height: 100vh;
+}
+
+body{
+  background-color: lightblue;
+}

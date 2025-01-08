@@ -29,7 +29,7 @@ function ControlRenderer({ selectedControl }) {
 
     // Add styles before returning the component
     return (
-      <div className="control-container px-1 py-4">
+      <div className="mt-4 px-1  h-full custom-scrollbar">
         {controlComponent}
       </div>
     );

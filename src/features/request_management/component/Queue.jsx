@@ -1,172 +1,145 @@
-
-import { Card, CardHeader, Input, Typography, Button, CardBody, Chip, CardFooter, Tabs,TabsHeader, Tab, Avatar, IconButton, Tooltip, } from "@material-tailwind/react";
+import {
+  Card,
+  CardHeader,
+  Input,
+  Typography,
+  Button,
+  CardBody,
+  CardFooter,
+  Tabs,
+  TabsHeader,
+  Tab,
+} from "@material-tailwind/react";
 
 import { TABS, TABLE_HEAD, TABLE_ROWS } from "../data/data";
-import { CaretDown, MagnifyingGlass, Pencil, UserPlus } from "@phosphor-icons/react";
+import { MagnifyingGlass, MagnifyingGlassMinus, UserPlus } from "@phosphor-icons/react";
+import { useState } from "react";
 
-  export function Queue() {
-    return (
-      <Card className="h-full w-full mt-0 pt-0">
-        <CardHeader floated={false} shadow={false} className="rounded-none">
+export function Queue() {
+  const [selectedType, setSelectedType] = useState("JR"); // Default to 'Job Request'
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = (e) => {
+    setSearchQuery(e.target.value);
+  }
+
+  // Filter data based on the selected type
+  const filteredRows = TABLE_ROWS.filter((row) => {
+    // Check if referenceNumber starts with selectedType
+    const matchesType = row.referenceNumber.startsWith(selectedType);
+
+    // Check if the searchQuery is found anywhere in the row (case insensitive)
+    const matchesSearchQuery = Object.values(row)
+      .join(" ")
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+
+    // Return true if both conditions match
+    return matchesType && matchesSearchQuery;
+  });
+
+  return (
+    <div className="h-full bg-white rounded-lg w-full mt-0 px-3 flex flex-col justify-between">
+      <div className="flex flex-col gap-4 h-full">
+        <CardHeader floated={false} shadow={false} className="rounded-none min-h-fit">
           <div className="mb-1 flex items-center justify-between gap-5">
             <div>
-              <Typography color="blue-gray" className="text-lg font-bold">
-                Members list
+              <Typography color="black" className="text-lg font-bold">
+                All Open
               </Typography>
               <Typography color="gray" className="mt-1 font-normal text-sm">
-                See information about all members
+                See information about requests
               </Typography>
             </div>
             <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
-              <Button variant="outlined" size="sm">
-                view all
-              </Button>
-              <Button className="flex items-center gap-3" size="sm">
-                <UserPlus strokeWidth={2} className="h-4 w-4" /> Add member
+              <Button className="flex items-center gap-3 bg-blue-500" size="sm">
+                <UserPlus strokeWidth={2} className="h-4 w-4" /> Add request
               </Button>
             </div>
           </div>
-          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-            <Tabs value="all" className="w-full md:w-max text-sm">
+          <div className="flex items-center justify-between gap-4 md:flex-row">
+            <Tabs value={selectedType} className="w-full md:w-max text-sm">
               <TabsHeader>
                 {TABS.map(({ label, value }) => (
-                  <Tab key={value} value={value} className="text-sm">
+                  <p
+                    key={value}
+                    value={value}
+                    className={`text-xs w-fit p-2 rounded-lg ${selectedType === value ? "bg-blue-500 text-white" : ""} transition-all ease-in-out duration-300`}
+                    onClick={() => setSelectedType(value)}
+                  >
                     &nbsp;&nbsp;{label}&nbsp;&nbsp;
-                  </Tab>
+                  </p>
                 ))}
               </TabsHeader>
             </Tabs>
-            <div className="w-full md:w-72 relative">
-              <Input
-                placeholder="Search"
-                icon={<MagnifyingGlass size={20} />}
-                className="flex items-center py-0"
-              />
+            <div className="w-full max-w-sm min-w-[200px]">
+              <div className="relative">
+                <input
+                  className="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md pl-3 pr-28 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
+                  placeholder="Search"
+                  value={searchQuery}
+                  onChange={(e) => handleSearch(e)}
+                />
+                <span
+                  className="absolute top-1 right-1 flex items-center rounded py-1.5 px-3 border border-transparent text-center text-sm text-black transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                  type="button"
+                >
+                  <MagnifyingGlass size={16} />
+                </span>
+              </div>
             </div>
           </div>
         </CardHeader>
-        <CardBody className="overflow-scroll px-0">
-          <table className="mt-4 w-full min-w-max table-auto text-left">
-            <thead>
+
+        <CardBody className="custom-scrollbar h-full pt-0">
+          <table className="w-full min-w-max table-auto text-left">
+            <thead className="sticky top-0 mt-0 z-10">
               <tr>
-                {TABLE_HEAD.map((head, index) => (
+                {TABLE_HEAD.map((header, index) => (
                   <th
-                    key={head}
-                    className="cursor-pointer border-y border-blue-gray-100 bg-blue-gray-50/50 p-4 transition-colors hover:bg-blue-gray-50"
+                    key={index}
+                    className="cursor-pointer bg-white p-4 transition-colors hover:bg-blue-gray-50"
                   >
                     <Typography
                       variant="small"
                       color="blue-gray"
                       className="flex items-center justify-between gap-2 font-normal leading-none opacity-70"
                     >
-                      {head}{" "}
-                      {index !== TABLE_HEAD.length - 1 && (
-                        <CaretDown strokeWidth={2} className="h-4 w-4" />
-                      )}
+                      {header.label || header}
                     </Typography>
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {TABLE_ROWS.map(
-                ({ img, name, email, job, org, online, date }, index) => {
-                  const isLast = index === TABLE_ROWS.length - 1;
-                  const classes = isLast
-                    ? "p-4"
-                    : "p-4 border-b border-blue-gray-50";
-   
-                  return (
-                    <tr key={name}>
-                      <td className={classes}>
-                        <div className="flex items-center gap-3">
-                          <Avatar src={img} alt={name} size="sm" />
-                          <div className="flex flex-col">
-                            <Typography
-                              variant="small"
-                              color="blue-gray"
-                              className="font-normal"
-                            >
-                              {name}
-                            </Typography>
-                            <Typography
-                              variant="small"
-                              color="blue-gray"
-                              className="font-normal opacity-70"
-                            >
-                              {email}
-                            </Typography>
-                          </div>
-                        </div>
-                      </td>
-                      <td className={classes}>
-                        <div className="flex flex-col">
-                          <Typography
-                            variant="small"
-                            color="blue-gray"
-                            className="font-normal"
-                          >
-                            {job}
-                          </Typography>
-                          <Typography
-                            variant="small"
-                            color="blue-gray"
-                            className="font-normal opacity-70"
-                          >
-                            {org}
-                          </Typography>
-                        </div>
-                      </td>
-                      <td className={classes}>
-                        <div className="w-max">
-                          <Chip
-                            variant="ghost"
-                            size="sm"
-                            value={online ? "online" : "offline"}
-                            color={online ? "green" : "blue-gray"}
-                          />
-                        </div>
-                      </td>
-                      <td className={classes}>
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-normal"
+              {filteredRows.map((row, rowIndex) => {
+                const isLast = rowIndex === filteredRows.length - 1;
+                const classes = isLast ? "p-4" : "px-4 py-5 w-fit";
+                return (
+                  <tr key={rowIndex}>
+                    {TABLE_HEAD.map((header, colIndex) => (
+                      <td key={colIndex} className={classes}>
+                        <p
+                          className={`text-sm w-fit ${header.value === "summary" ? "text-blue-500" : ""} `}
+                          onClick={() => {
+                            if (header.value === "summary") {
+                              console.log(row[header.value]);
+                            }
+                          }}
                         >
-                          {date}
-                        </Typography>
+                          {row[header.value]}
+                        </p>
                       </td>
-                      <td className={classes}>
-                        <Tooltip content="Edit User">
-                          <IconButton variant="text">
-                            <Pencil size={20} />
-                          </IconButton>
-                        </Tooltip>
-                      </td>
-                    </tr>
-                  );
-                },
-              )}
+                    ))}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </CardBody>
+      </div>
+    </div>
+  );
+}
 
-
-        <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
-          <Typography variant="small" color="blue-gray" className="font-normal">
-            Page 1 of 10
-          </Typography>
-          <div className="flex gap-2">
-            <Button variant="outlined" size="sm">
-              Previous
-            </Button>
-            <Button variant="outlined" size="sm">
-              Next
-            </Button>
-          </div>
-        </CardFooter>
-      </Card>
-    );
-  }
-
-  export default Queue;
+export default Queue;

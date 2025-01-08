@@ -1,34 +1,16 @@
 import React, { useReducer } from "react";
-import { Card,
-  Typography,
-  List,
-  Menu,
-  MenuHandler,
-  MenuList,
-  MenuItem,
-} from "@material-tailwind/react";
-import {
-  ClipboardText,
-  Ticket,
-  ArchiveBox,
-  UsersThree,
-  CaretDown,
-} from "@phosphor-icons/react";
+import { Typography, Menu, MenuHandler, MenuList, MenuItem } from "@material-tailwind/react";
+import { ClipboardText, Ticket, ArchiveBox, UsersThree, CaretDown, ArrowsLeftRight, CaretLeft, CaretRight } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
-import RequestsManagementControls from "./component/sidebar/RequestsManagementControls";
-import TicketManagementControls from "./component/sidebar/TicketManagementControls";
-import AssetManagementControls from "./component/sidebar/AssetManagementControls";
-import EmployeeManagementControls from "./component/sidebar/EmployeeManagementControls";
 import ControlRenderer from "./component/sidebar/ControlRenderer";
 
 const options = {
-  "Requests Management": <ClipboardText size={20} />, // Default icon
+  "Requests Management": <ClipboardText size={20} />,
   "Ticket Management": <Ticket size={20} />,
   "Asset Management": <ArchiveBox size={20} />,
   "Employee Management": <UsersThree size={20} />,
 };
 
-// Map menu options to their corresponding routes
 const routeMap = {
   "Requests Management": "/workspace/requests-management",
   "Ticket Management": "/workspace/ticket-management",
@@ -39,19 +21,17 @@ const routeMap = {
 const initialState = {
   openDropdown: false,
   selectedControl: "Requests Management",
+  isMinimized: false,  // New state to control sidebar minimization
 };
-
 
 function reducer(state, action) {
   switch (action.type) {
     case "TOGGLE_DROPDOWN":
       return { ...state, openDropdown: !state.openDropdown };
     case "SELECT_CONTROL":
-      return {
-        ...state,
-        selectedControl: action.payload,
-        openDropdown: true,
-      };
+      return { ...state, selectedControl: action.payload, openDropdown: true };
+    case "TOGGLE_MINIMIZE":
+      return { ...state, isMinimized: !state.isMinimized };
     default:
       return state;
   }
@@ -59,24 +39,38 @@ function reducer(state, action) {
 
 function Sidebar() {
   const [state, dispatch] = useReducer(reducer, initialState);
-
   const navigate = useNavigate();
 
   const handleSelection = (control) => {
     dispatch({ type: "SELECT_CONTROL", payload: control });
-    navigate(routeMap[control]); // Navigate to the corresponding route
+    navigate(routeMap[control]);
   };
 
   return (
-    <Card className="h-fill p-4 w-72 max-h-screen max-w-[20rem] shadow-xl shadow-blue-gray-900/5">
-      <div className="mt-5 px-4">
-        <Typography variant="h5" color="blue-gray" className="text-lg">
-          Requests Management
-        </Typography>
+    <div
+      className={`bg-white flex flex-col h-full p-4 transition-all ${
+        state.isMinimized ? "w-12" : "w-72 justify-center"
+      } shadow-xl shadow-blue-gray-900/5 rounded-none rounded-tr-lg rounded-br-lg`}
+    >
+      <div className={`mt-0 flex items-center ${state.isMinimized ? "justify-center" : "justify-between"}`}>
+        {!state.isMinimized && (
+          <Typography color="blue-gray" className="text-lg font-bold">
+            Requests Management
+          </Typography>
+        )}
+        <button
+          className="text-xl"
+          onClick={() => dispatch({ type: "TOGGLE_MINIMIZE" })}
+        >
+          {state.isMinimized ? <CaretRight size={20} /> : <CaretLeft size={20} />}
+        </button>
       </div>
-      <List>
-        <hr className="my-7 border-gray-400" />
 
+      <hr className="my-5 border-gray-400" />
+
+      {/* Show dropdown and other menu items only if sidebar is not minimized */}
+      {!state.isMinimized && (
+        <>
         <Menu
           className="w-full"
           open={state.openDropdown}
@@ -107,7 +101,7 @@ function Sidebar() {
               <MenuItem
                 key={control}
                 className="px-3 py-3 text-left hover:bg-gray-200"
-                onClick={() =>handleSelection(control)}
+                onClick={() => handleSelection(control)}
               >
                 {control}
               </MenuItem>
@@ -115,9 +109,11 @@ function Sidebar() {
           </MenuList>
         </Menu>
 
-        <ControlRenderer selectedControl={state.selectedControl}/>
-      </List>
-    </Card>
+        <ControlRenderer selectedControl={state.selectedControl} />
+        </>
+      )}
+      
+    </div>
   );
 }
 

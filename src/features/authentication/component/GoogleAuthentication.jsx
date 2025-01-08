@@ -28,7 +28,7 @@ function GoogleAuthLogin() {
                 if (response.status === 200) {
                     ToastNotification.success('Welcome to Service Link!', 'You have been successfully logged in.');
                     setAuthData(response.data.response.dataValues);
-                    navigate('/home');
+                    navigate('/workspace/requests-management');
                 } else if (response.status === 201) {
                     ToastNotification.info('Oops!', 'Account not activated. Please contact the GSO office for account activation.');
                 } else {

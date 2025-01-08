@@ -67,7 +67,7 @@ function LoginForm() {
             if(res.status === 200){
                 setAuthData(res.data);
     
-                navigate('/home');
+                navigate('/workspace/requests-management');
                 setFormStatus('idle');
             }
 

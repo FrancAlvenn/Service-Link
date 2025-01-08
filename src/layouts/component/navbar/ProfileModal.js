@@ -1,7 +1,26 @@
 import { Button, Menu, MenuHandler, MenuList, MenuItem } from "@material-tailwind/react";
 import { UserCircle, User, ArrowSquareOut, SignOut } from "@phosphor-icons/react";
+import { useContext } from "react";
+import { AuthContext } from "../../../features/authentication";
+import { useNavigate } from "react-router-dom";
 
 function ProfileModal() {
+
+    const { clearAuthData } = useContext(AuthContext);
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        // Remove user data and token from local storage
+        localStorage.removeItem('user');
+        localStorage.removeItem('access_token');
+
+        // Remove user from AuthContext
+        clearAuthData();
+
+        // Redirect to login page
+        navigate('/');
+    };
+
     return (
         <Menu placement="bottom-start">
             <MenuHandler>
@@ -34,7 +53,10 @@ function ProfileModal() {
                 </div>
 
                 <div className="py-1">
-                    <MenuItem className="flex justify-between items-center px-4 py-2 text-xs text-gray-700 hover:bg-gray-200">
+                    <MenuItem
+                        className="flex justify-between items-center px-4 py-2 text-xs text-gray-700 hover:bg-gray-200"
+                        onClick={()=>{handleLogout()}}
+                    >
                         <div className="flex gap-2 items-center">
                             <p className="text-xs leading-6 text-red-500">Logout</p>
                         </div>

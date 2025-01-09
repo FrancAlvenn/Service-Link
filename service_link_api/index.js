@@ -12,16 +12,21 @@ import purchasingRequestRoutes from './routes/purchasing_request.js';
 import sequelize from './database.js'
 import { syncModels } from './models/syncModels.js';
 
+import { verifyToken } from './middleware/authMiddleware.js';
+import cookieParser from "cookie-parser";
+
 const app = express();
 
 const corsOptions = {
     origin: 'http://localhost:3000', //Frontend URL (React)
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
 };
 
 app.use(cors(corsOptions));
 
+app.use(cookieParser());
 
 app.use(express.json())
 
@@ -31,25 +36,25 @@ app.use(express.json())
 app.use("/service_link_api/auth", authRoutes);
 
 //Job_Request Route
-app.use("/service_link_api/job_request", jobRequestRoutes)
+app.use("/service_link_api/job_request", verifyToken, jobRequestRoutes)
 
 //Venue Request Route
-app.use("/service_link_api/venue_request", venueRequestRoutes)
+app.use("/service_link_api/venue_request", verifyToken, venueRequestRoutes)
 
 //Vehicle Request Route
-app.use("/service_link_api/vehicle_request", vehicleRequestRoutes)
+app.use("/service_link_api/vehicle_request", verifyToken, vehicleRequestRoutes)
 
 //Purchasing Request Route
-app.use("/service_link_api/purchasing_request", purchasingRequestRoutes)
+app.use("/service_link_api/purchasing_request", verifyToken, purchasingRequestRoutes)
 
 //Settings Route
-app.use("/service_link_api/settings", settingsRoutes)
+app.use("/service_link_api/settings", verifyToken, settingsRoutes)
 
 //Ticket Route
-app.use("/service_link_api/ticket", ticketRoutes)
+app.use("/service_link_api/ticket", verifyToken, ticketRoutes)
 
 //User Management
-app.use("/service_link_api/users", userRoutes)
+app.use("/service_link_api/users", verifyToken, userRoutes)
 
 
 const PORT = process.env.PORT || 8080

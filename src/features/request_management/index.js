@@ -1,6 +1,11 @@
 // export { RequestsProvider } from "./context/RequestsContext";
 
+export { RequestsProviderWrapper } from "./context/RequestProviderWrapper";
 
-export { default as Queue } from "./component/Queue";
+export { JobRequests } from "./component/JobRequests";
 
-export { default as InProgress } from "./component/InProgress";
+export { PurchasingRequests } from "./component/PurchasingRequests";
+
+export { VehicleRequests } from "./component/VehicleRequests";
+
+export { VenueRequests } from "./component/VenueRequests";

@@ -20,7 +20,8 @@ import Dashboard from './pages/Dashboard';
 import Layout from './layouts/Layout';
 import Workspace from './pages/Workspace';
 import RequestManagement from './pages/RequestManagement';
-import { InProgress, Queue } from './features/request_management';
+import { JobRequests, PurchasingRequests, RequestsProviderWrapper, VehicleRequests, VenueRequests } from './features/request_management/';
+
 
 library.add(fas, fab, far); // Add all the icons needed
 
@@ -43,19 +44,27 @@ const router = createBrowserRouter([
     children: [
       {
         path: 'requests-management',
-        element: <Navigate to="/workspace/requests-management/queues/all-open" />,
+        element: <Navigate to="/workspace/requests-management/queues/job-requests" />,
       },
       {
         path: 'requests-management/queue',
-        element: <Navigate to="/workspace/requests-management/queues/all-open" />,
+        element: <Navigate to="/workspace/requests-management/queues/job-requests" />,
       },
       {
-        path: 'requests-management/queues/all-open',
-        element: <ProtectedRoute><Queue/></ProtectedRoute>
+        path: 'requests-management/queues/job-requests',
+        element: <ProtectedRoute><JobRequests/></ProtectedRoute>
       },
       {
-        path: 'requests-management/queues/in-progress',
-        element: <ProtectedRoute><InProgress/></ProtectedRoute>
+        path: 'requests-management/queues/purchasing-requests',
+        element: <ProtectedRoute><PurchasingRequests/></ProtectedRoute>
+      },
+      {
+        path: 'requests-management/queues/vehicle-requests',
+        element: <ProtectedRoute><VehicleRequests/></ProtectedRoute>
+      },
+      {
+        path: 'requests-management/queues/venue-requests',
+        element: <ProtectedRoute><VenueRequests/></ProtectedRoute>
       },
       {
         path: 'ticket-management',
@@ -77,10 +86,12 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <div className="App">
-          <RouterProvider router={router} />
-          <CustomToastContainer />
-        </div>
+        <RequestsProviderWrapper>
+          <div className="App">
+            <RouterProvider router={router} />
+            <CustomToastContainer />
+          </div>
+        </RequestsProviderWrapper>
       </AuthProvider>
     </ThemeProvider>
   );

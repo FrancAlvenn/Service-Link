@@ -134,7 +134,7 @@ export const login = async (req, res) => {
         };
 
         // Set the cookie and respond
-        res.cookie("access_token", token, { httpOnly: true })
+        res.cookie("access_token", token, { httpOnly: true, sameSite: "none", secure: false })
            .status(200)
            .json(response); // Send user data without password
 
@@ -213,7 +213,7 @@ export const googleAuth = async (req, res) => {
                 profileImage: image ? image.file_path : null // Include image path or null if no image found
             };
 
-            return res.cookie("access_token", token, { httpOnly: true })
+            return res.cookie("access_token", token, { httpOnly: true, sameSite: "none", secure: false })
                 .status(200)
                 .json({response});
         }

@@ -11,12 +11,11 @@ import {
     Tab,
   } from "@material-tailwind/react";
   
-  import { TABS, TABLE_HEAD, TABLE_ROWS } from "../data/data";
+  import { TABS, TABLE_HEAD, VEHICLE_REQUEST,  } from "../data/data";
   import { MagnifyingGlass, MagnifyingGlassMinus, UserPlus } from "@phosphor-icons/react";
   import { useState } from "react";
   
-  export function InProgress() {
-    const [selectedType, setSelectedType] = useState("JR"); // Default to 'Job Request'
+  export function VehicleRequests() {
     const [searchQuery, setSearchQuery] = useState("");
   
     const handleSearch = (e) => {
@@ -24,10 +23,7 @@ import {
     }
   
     // Filter data based on the selected type
-    const filteredRows = TABLE_ROWS.filter((row) => {
-      // Check if referenceNumber starts with selectedType
-      const matchesType = row.referenceNumber.startsWith(selectedType);
-  
+    const filteredRows = VEHICLE_REQUEST.filter((row) => {
       // Check if the searchQuery is found anywhere in the row (case insensitive)
       const matchesSearchQuery = Object.values(row)
         .join(" ")
@@ -35,7 +31,7 @@ import {
         .includes(searchQuery.toLowerCase());
   
       // Return true if both conditions match
-      return matchesType && matchesSearchQuery;
+      return matchesSearchQuery;
     });
   
     return (
@@ -45,7 +41,7 @@ import {
             <div className="mb-1 flex items-center justify-between gap-5">
               <div>
                 <Typography color="black" className="text-lg font-bold">
-                  In Progress
+                  Vehicle Requests
                 </Typography>
                 <Typography color="gray" className="mt-1 font-normal text-sm">
                   See information about requests
@@ -58,7 +54,7 @@ import {
               </div>
             </div>
             <div className="flex items-center justify-between gap-4 md:flex-row">
-              <Tabs value={selectedType} className="w-full md:w-max text-sm">
+              {/* <Tabs value={selectedType} className="w-full md:w-max text-sm">
                 <TabsHeader>
                   {TABS.map(({ label, value }) => (
                     <p
@@ -71,7 +67,7 @@ import {
                     </p>
                   ))}
                 </TabsHeader>
-              </Tabs>
+              </Tabs> */}
               <div className="w-full max-w-sm min-w-[200px]">
                 <div className="relative">
                   <input
@@ -142,5 +138,5 @@ import {
     );
   }
   
-  export default InProgress;
+  export default VehicleRequests;
   

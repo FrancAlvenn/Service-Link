@@ -39,12 +39,20 @@ function RequestsManagementControls() {
             <AccordionBody className="py-1">
                 <List className="p-0">
                     <ListItem className="text-xs"
-                        onClick={() => navigate("/workspace/requests-management/queues/all-open")}>
-                        All Open
+                        onClick={() => navigate("/workspace/requests-management/queues/job-requests")}>
+                        Job Requests
                     </ListItem>
                     <ListItem className="text-xs"
-                        onClick={() => navigate("/workspace/requests-management/queues/in-progress")}>
-                        In Progress
+                        onClick={() => navigate("/workspace/requests-management/queues/purchasing-requests")}>
+                        Purchasing Requests
+                    </ListItem>
+                    <ListItem className="text-xs"
+                        onClick={() => navigate("/workspace/requests-management/queues/vehicle-requests")}>
+                        Vehicle Requests
+                    </ListItem>
+                    <ListItem className="text-xs"
+                        onClick={() => navigate("/workspace/requests-management/queues/venue-requests")}>
+                        Venue Requests
                     </ListItem>
                 </List>
             </AccordionBody>

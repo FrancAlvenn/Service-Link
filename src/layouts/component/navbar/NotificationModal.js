@@ -16,7 +16,7 @@ const notifications = [
 
 function NotificationModal() {
     return (
-        <Menu placement="bottom-start">
+        <Menu placement="bottom-start" dismissType="click">
             <MenuHandler>
                 <Button variant="text" className="flex items-center px-3 py-3 gap-x-3">
                     <Bell size={24} className="cursor-pointer" />

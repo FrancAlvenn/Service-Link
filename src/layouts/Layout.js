@@ -4,10 +4,10 @@ import Sidebar from "./Sidebar";
 
 function Layout({ children }) {
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full bg-blue-400">
             <Navbar/>
 
-            <div className="flex flex-1 mt-2 mb-0 h-[90%]">
+            <div className="flex flex-1 mt-2 mb-0 h-[90%] ">
                 <Sidebar/>
 
 

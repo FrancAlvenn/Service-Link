@@ -22,7 +22,7 @@ export async function createVenueRequest(req, res){
         const newVenueRequisition = await VenueRequestModel.create({
             reference_number: referenceNumber,
             venue_id: req.body.venue_id,
-            requester_id: req.body.requester_id,
+            requester: req.body.requester,
             department: req.body.department || null,
             organization: req.body.organization || null,
             event_title: req.body.event_title,
@@ -46,7 +46,7 @@ export async function createVenueRequest(req, res){
         //Log the request
         createLog({
             action: 'create',
-            performed_by: req.body.requester_id,
+            performed_by: req.body.requester,
             target: referenceNumber,
             title: 'Request Submitted',
             details: `Venue Requisition ${referenceNumber} created successfully!`,
@@ -101,7 +101,7 @@ export async function updateVenueRequest(req, res) {
     try{
         const [updatedRows] = await VenueRequestModel.update({
             venue_id: req.body.venue_id,
-            requester_id: req.body.requester_id,
+            requester: req.body.requester,
             department: req.body.department || null,
             organization: req.body.organization || null,
             event_title: req.body.event_title,
@@ -136,7 +136,7 @@ export async function updateVenueRequest(req, res) {
         //Log the request
         createLog({
             action: 'update',
-            performed_by: req.body.requester_id,
+            performed_by: req.body.requester,
             target: req.params.reference_number,
             title: 'Request Updated',
             details: `Venue Requisition ${req.params.reference_number} updated successfully!`,
@@ -168,7 +168,7 @@ export async function archiveById(req, res){
         //Log the request
         createLog({
             action: 'archive',
-            performed_by: req.body.requester_id,
+            performed_by: req.body.requester,
             target: req.params.reference_number,
             title: 'Request Archived',
             details: `Venue Requisition ${req.params.reference_number} archived successfully!`,
@@ -200,7 +200,7 @@ export async function immediateHeadApproval(req, res){
         //Log the request
         createLog({
             action: 'update',
-            performed_by: req.body.requester_id,
+            performed_by: req.body.requester,
             target: req.params.reference_number,
             title: 'Request Approved by Immediate Head',
             details: `Venue Requisition ${req.params.reference_number} ${req.params.approval_flag} by immediate head!`,
@@ -233,7 +233,7 @@ export async function gsoDirectorApproval(req, res){
         //Log the request
         createLog({
             action: 'update',
-            performed_by: req.body.requester_id,
+            performed_by: req.body.requester,
             target: req.params.reference_number,
             title: 'Request Approved by GSO Director',
             details: `Venue Requisition ${req.params.reference_number} ${req.params.approval_flag} by GSO Director!`,
@@ -266,7 +266,7 @@ export async function operationsDirectorApproval(req, res){
         //Log the request
         createLog({
             action: 'update',
-            performed_by: req.body.requester_id,
+            performed_by: req.body.requester,
             target: req.params.reference_number,
             title: 'Request Approved by Operations Director',
             details: `Venue Requisition ${req.params.reference_number} ${req.params.approval_flag} by operations head!`,

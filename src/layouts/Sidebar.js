@@ -48,7 +48,7 @@ function Sidebar() {
 
   return (
     <div
-      className={`bg-white flex flex-col h-full p-4 transition-all ${
+      className={`bg-white flex flex-col h-full p-4 transition-all   ${
         state.isMinimized ? "w-12" : "w-72 justify-center"
       } shadow-xl shadow-blue-gray-900/5 rounded-none rounded-tr-lg rounded-br-lg`}
     >

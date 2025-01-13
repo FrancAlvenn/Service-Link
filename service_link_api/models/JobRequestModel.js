@@ -30,7 +30,7 @@ const JobRequest = sequelize.define(
         type: DataTypes.STRING(255),
         defaultValue: 'pending',
     },
-    requester_id: {
+    requester: {
         type: DataTypes.STRING(255),
         allowNull: false,
     },

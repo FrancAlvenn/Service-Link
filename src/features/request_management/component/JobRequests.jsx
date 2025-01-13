@@ -5,11 +5,14 @@ import {
   Typography,
   Button,
   CardBody,
+  Chip,
 } from "@material-tailwind/react";
 
 import { MagnifyingGlass, UserPlus } from "@phosphor-icons/react";
 import { useContext, useState } from "react";
 import { JobRequestsContext } from "../context/JobRequestsContext";
+import { formatDate } from "../utils/dateFormatter";
+import { getApprovalColor, getArchivedColor } from "../utils/approvalColor";
 
 export function JobRequests() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -30,6 +33,8 @@ export function JobRequests() {
     return rowString.includes(searchQuery.toLowerCase());
   });
 
+  console.log(filteredRows);
+
   return (
     <div className="h-full bg-white rounded-lg w-full mt-0 px-3 flex flex-col justify-between">
       <div className="flex flex-col gap-4 h-full">
@@ -37,7 +42,7 @@ export function JobRequests() {
             <div className="mb-1 flex items-center justify-between gap-5">
               <div>
                 <Typography color="black" className="text-lg font-bold">
-                  Purchasing Requests
+                  Job Requests
                 </Typography>
                 <Typography color="gray" className="mt-1 font-normal text-sm">
                   See information about requests
@@ -85,7 +90,7 @@ export function JobRequests() {
 
         <CardBody className="custom-scrollbar h-full pt-0">
           <table className="w-full min-w-max table-auto text-left">
-            <thead className="sticky top-0 mt-0 z-10">
+            <thead className="sticky top-0 mt-0 z-10 border-b border-blue-gray-100">
               <tr>
                 {Object.keys(jobRequests[0] || {})
                   .filter((key) => key !== "details") // Exclude `details`
@@ -97,7 +102,7 @@ export function JobRequests() {
                       <Typography
                         variant="small"
                         color="blue-gray"
-                        className="flex items-center justify-between gap-2 font-normal leading-none opacity-70 capitalize"
+                        className="flex items-center justify-between gap-2 font-normal leading-none opacity-70 capitalize font-bold"
                       >
                         {key.replace(/_/g, " ")}
                       </Typography>
@@ -111,13 +116,155 @@ export function JobRequests() {
                 const classes = isLast ? "p-4" : "px-4 py-5 w-fit";
                 return (
                   <tr key={rowIndex}>
-                    {Object.entries(row)
-                      .filter(([key]) => key !== "details")
-                      .map(([key, value], colIndex) => (
-                        <td key={colIndex} className={classes}>
-                          <p className="text-sm">{value}</p>
-                        </td>
-                      ))}
+                    <td>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className={`flex items-center gap-2 ${classes}`}
+                      >
+                        {row.id}
+                      </Typography>
+                    </td>
+
+                    <td>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className={`flex items-center gap-2 ${classes}`}
+                      >
+                        {row.reference_number}
+                      </Typography>
+                    </td>
+
+                    <td>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className={`flex items-center gap-2 ${classes}`}
+                      >
+                        {formatDate(row.date_required)}
+                      </Typography>
+                    </td>
+
+                    <td>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className={`flex items-center gap-2 ${classes}`}
+                      >
+                        {row.department}
+                      </Typography>
+                    </td>
+
+                    <td>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className={`flex items-center gap-2 ${classes}`}
+                      >
+                        {row.purpose}
+                      </Typography>
+                    </td>
+
+                    <td>
+                      <Chip
+                            size="sm"
+                            variant="ghost"
+                            value={row.status}
+                            className="text-center"
+                            color={getApprovalColor(row.status)}
+                          />
+                    </td>
+
+                    <td>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className={`flex items-center gap-2 ${classes}`}
+                      >
+                        {row.requester}
+                      </Typography>
+                    </td>
+
+                    <td>
+                      <div className="flex justify-center">
+                        <Chip
+                            size="sm"
+                            variant="ghost"
+                            value={row.immediate_head_approval}
+                            className="text-center w-fit"
+                            color={getApprovalColor(row.immediate_head_approval)}
+                          />
+                      </div>
+                    </td>
+
+                    <td>
+                    <div className="flex justify-center">
+                        <Chip
+                            size="sm"
+                            variant="ghost"
+                            value={row.gso_director_approval}
+                            className="text-center w-fit"
+                            color={getApprovalColor(row.gso_director_approval)}
+                          />
+                      </div>
+                    </td>
+
+                    <td>
+                    <div className="flex justify-center">
+                        <Chip
+                            size="sm"
+                            variant="ghost"
+                            value={row.operations_director_approval}
+                            className="text-center w-fit"
+                            color={getApprovalColor(row.operations_director_approval)}
+                          />
+                      </div>
+                    </td>
+
+                    <td>
+                      <div className="flex justify-center">
+                        <Chip
+                            size="sm"
+                            variant="ghost"
+                            value={row.archived === true ? "Archived" : "Active"}
+                            className="text-center w-fit"
+                            color={row.archived === true ? "red" : "green"}
+                          />
+                      </div>
+                    </td>
+                    
+                    <td>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className={`flex items-center gap-2 ${classes}`}
+                      >
+                        {row.remarks}
+                      </Typography>
+                    </td>
+
+                    <td>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className={`flex items-center gap-2 ${classes}`}
+                      >
+                        {formatDate(row.created_at)}
+                      </Typography>
+                    </td>
+
+                    <td>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className={`flex items-center gap-2 ${classes}`}
+                      >
+                        {formatDate(row.updated_at)}
+                      </Typography>
+                    </td>
+
+
                   </tr>
                 );
               })}

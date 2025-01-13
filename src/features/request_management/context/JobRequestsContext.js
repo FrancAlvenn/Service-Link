@@ -8,21 +8,21 @@ export const JobRequestsProvider = ({ children }) => {
 
   // Fetch job requests from the database
   useEffect(() => {
-    const fetchJobRequests = async () => {
-      try {
-        const { data } = await axios({
-          method: "get",
-          url: "http://localhost:8080/service_link_api/job_request/",
-          withCredentials: true,
-        });
-        setJobRequests(data);
-      } catch (error) {
-        console.error("Error fetching job requests:", error);
-      }
-    };
-
     fetchJobRequests();
   }, []);
+
+  const fetchJobRequests = async () => {
+    try {
+      const { data } = await axios({
+        method: "get",
+        url: "http://localhost:8080/service_link_api/job_request/",
+        withCredentials: true,
+      });
+      setJobRequests(data);
+    } catch (error) {
+      console.error("Error fetching job requests:", error);
+    }
+  };
 
   // Update a job request
   const updateJobRequest = async (updatedRequest) => {

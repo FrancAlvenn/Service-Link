@@ -26,7 +26,7 @@ export async function createJobRequest(req, res){
           date_required : req.body.date_required,
           department: req.body.department,
           purpose : req.body.purpose,
-          requester_id : req.body.requester_id,
+          requester : req.body.requester,
           status : req.body.status,
           immediate_head_approval : req.body.immediate_head_approval,
           gso_director_approval : req.body.gso_director_approval,
@@ -50,7 +50,7 @@ export async function createJobRequest(req, res){
         createLog({
           action: 'Created new job request',
           target: referenceNumber,
-          performed_by: req.body.requester_id,
+          performed_by: req.body.requester,
           title: 'Request Submitted',
           details: `Job Request with reference number ${referenceNumber} created successfully!`
         });
@@ -126,7 +126,7 @@ export async function updateJobRequest(req, res) {
             {
             date_required: req.body.date_required,
             purpose: req.body.purpose,
-            requester_id: req.body.requester_id,
+            requester: req.body.requester,
             department: req.body.department,
             status: req.body.status,
             immediate_head_approval: req.body.immediate_head_approval,
@@ -213,7 +213,7 @@ export async function updateJobRequest(req, res) {
         // Log the update action
         createLog({
         action: 'update',
-        performed_by: req.body.requester_id,
+        performed_by: req.body.requester,
         target: req.params.reference_number,
         title: 'Request Updated',
         details: `Job Request ${req.params.reference_number} updated successfully!`,
@@ -254,7 +254,7 @@ export async function archiveById(req, res){
         //Log the request
         createLog({
             action: 'archive',
-            performed_by: req.body.requester_id,
+            performed_by: req.body.requester,
             target: req.params.reference_number,
             title: 'Request Archived',
             details: `Vehicle Requisition ${req.params.reference_number} archived successfully!`,
@@ -287,7 +287,7 @@ export async function immediateHeadApproval(req, res){
         //Log the request
         createLog({
             action: 'update',
-            performed_by: req.body.requester_id,
+            performed_by: req.body.requester,
             target: req.params.reference_number,
             title: 'Request Approved by Immediate Head',
             details: `Venue Requisition ${req.params.reference_number} ${req.params.approval_flag} by immediate head!`,
@@ -320,7 +320,7 @@ export async function gsoDirectorApproval(req, res){
         //Log the request
         createLog({
             action: 'update',
-            performed_by: req.body.requester_id,
+            performed_by: req.body.requester,
             target: req.params.reference_number,
             title: 'Request Approved by GSO Director',
             details: `Venue Requisition ${req.params.reference_number} ${req.params.approval_flag} by GSO Director!`,
@@ -353,7 +353,7 @@ export async function operationsDirectorApproval(req, res){
         //Log the request
         createLog({
             action: 'update',
-            performed_by: req.body.requester_id,
+            performed_by: req.body.requester,
             target: req.params.reference_number,
             title: 'Request Approved by Operations Director',
             details: `Venue Requisition ${req.params.reference_number} ${req.params.approval_flag} by operations head!`,

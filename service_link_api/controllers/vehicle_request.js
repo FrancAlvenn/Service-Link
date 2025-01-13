@@ -29,7 +29,7 @@ export async function createVehicleRequest(req, res){
             number_of_passengers : req.body.number_of_passengers,
             destination : req.body.destination,
             purpose : req.body.purpose,
-            requester_id : req.body.requester_id,
+            requester : req.body.requester,
             designation : req.body.designation,
             status : req.body.status,
             vehicle_id : req.body.vehicle_id,
@@ -44,7 +44,7 @@ export async function createVehicleRequest(req, res){
         //Log the request
         createLog({
             action: 'create',
-            performed_by: req.body.requester_id,
+            performed_by: req.body.requester,
             target: referenceNumber,
             type: 'Request Submitted',
             details: `Vehicle Requisition ${referenceNumber} created successfully!`,
@@ -106,7 +106,7 @@ export async function updateVehicleRequest(req, res) {
             number_of_passengers : req.body.number_of_passengers,
             destination : req.body.destination,
             purpose : req.body.purpose,
-            requester_id : req.body.requester_id,
+            requester : req.body.requester,
             designation : req.body.designation,
             status : req.body.status,
             vehicle_id : req.body.vehicle_id,
@@ -132,7 +132,7 @@ export async function updateVehicleRequest(req, res) {
         //Log the request
         createLog({
             action: 'update',
-            performed_by: req.body.requester_id,
+            performed_by: req.body.requester,
             target: req.params.reference_number,
             title: 'Request Updated',
             details: `Vehicle Requisition ${req.params.reference_number} updated successfully!`,
@@ -164,7 +164,7 @@ export async function archiveById(req, res){
         //Log the request
         createLog({
             action: 'archive',
-            performed_by: req.body.requester_id,
+            performed_by: req.body.requester,
             target: req.params.reference_number,
             title: 'Request Archived',
             details: `Vehicle Requisition ${req.params.reference_number} archived successfully!`,
@@ -197,7 +197,7 @@ export async function immediateHeadApproval(req, res){
         //Log the request
         createLog({
             action: 'update',
-            performed_by: req.body.requester_id,
+            performed_by: req.body.requester,
             target: req.params.reference_number,
             title: 'Request Approved by Immediate Head',
             details: `Venue Requisition ${req.params.reference_number} ${req.params.approval_flag} by immediate head!`,
@@ -230,7 +230,7 @@ export async function gsoDirectorApproval(req, res){
         //Log the request
         createLog({
             action: 'update',
-            performed_by: req.body.requester_id,
+            performed_by: req.body.requester,
             target: req.params.reference_number,
             title: 'Request Approved by GSO Director',
             details: `Venue Requisition ${req.params.reference_number} ${req.params.approval_flag} by GSO Director!`,
@@ -263,7 +263,7 @@ export async function operationsDirectorApproval(req, res){
         //Log the request
         createLog({
             action: 'update',
-            performed_by: req.body.requester_id,
+            performed_by: req.body.requester,
             target: req.params.reference_number,
             title: 'Request Approved by Operations Director',
             details: `Venue Requisition ${req.params.reference_number} ${req.params.approval_flag} by operations head!`,

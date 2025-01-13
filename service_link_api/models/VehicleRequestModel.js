@@ -40,11 +40,15 @@ const VehicleRequest = sequelize.define("VehicleRequest", {
     type: DataTypes.STRING(255),
     allowNull: false,
   },
+  department:{
+    type : DataTypes.STRING(100),
+    allowNull: true,
+  },
   purpose: {
     type: DataTypes.TEXT,
     allowNull: false,
   },
-  requester_id: {
+  requester: {
     type: DataTypes.STRING(100),
     allowNull: false,
   },

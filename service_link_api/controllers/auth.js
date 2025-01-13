@@ -230,7 +230,7 @@ export const googleAuth = async (req, res) => {
             email: req.body.email,
             username: req.body.email,
             google_id: req.body.google_id,
-            status: "pending",
+            status: "active", //change later to pending
             archived: false,
         });
 

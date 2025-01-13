@@ -20,7 +20,7 @@ const PurchasingRequest = sequelize.define("PurchasingRequest", {
         type: DataTypes.DATE,
         allowNull: false,
     },
-    requester_id: {
+    requester: {
         type: DataTypes.STRING(50),
         allowNull: false,
     },

@@ -14,6 +14,8 @@ import { JobRequestsContext } from "../context/JobRequestsContext";
 import { formatDate } from "../utils/dateFormatter";
 import { getApprovalColor, getArchivedColor } from "../utils/approvalColor";
 
+import StatusModal from "../../../utils/statusModal.js";
+
 export function JobRequests() {
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -102,7 +104,7 @@ export function JobRequests() {
                       <Typography
                         variant="small"
                         color="blue-gray"
-                        className="flex items-center justify-between gap-2 font-normal leading-none opacity-70 capitalize font-bold"
+                        className="flex items-center justify-between gap-2 leading-none opacity-70 capitalize font-semibold"
                       >
                         {key.replace(/_/g, " ")}
                       </Typography>
@@ -113,47 +115,56 @@ export function JobRequests() {
             <tbody>
               {filteredRows.map((row, rowIndex) => {
                 const isLast = rowIndex === filteredRows.length - 1;
-                const classes = isLast ? "p-4" : "px-4 py-5 w-fit";
+                const classes = isLast ? "p-4 font-normal" : "px-4 py-5 w-fit";
                 return (
                   <tr key={rowIndex}>
                     <td>
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className={`flex items-center gap-2 ${classes}`}
-                      >
-                        {row.id}
-                      </Typography>
+                      <div className="flex justify-center">
+                        <Chip
+                          size="sm"
+                          variant="ghost"
+                          color="red"
+                          className={`text-center font-semibold rounded-full w-4  h-4 flex items-center justify-center ${classes}`}
+                          value={row.id}
+                        />
+                      </div>
                     </td>
 
                     <td>
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className={`flex items-center gap-2 ${classes}`}
-                      >
-                        {row.reference_number}
-                      </Typography>
+                      <div className="flex justify-center">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className={`flex items-center gap-2  text-blue-500 cursor-pointer hover:underline ${classes} font-semibold`}
+                          onClick={() => console.log("navigate to details")}
+                        >
+                          {row.reference_number}
+                        </Typography>
+                      </div>
                     </td>
 
                     <td>
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className={`flex items-center gap-2 ${classes}`}
-                      >
-                        {formatDate(row.date_required)}
-                      </Typography>
+                      <div className="flex justify-center">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className={`flex items-center gap-2 ${classes}`}
+                        >
+                          {formatDate(row.date_required)}
+                        </Typography>
+                      </div>
                     </td>
 
                     <td>
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className={`flex items-center gap-2 ${classes}`}
-                      >
-                        {row.department}
-                      </Typography>
+                      <div className="flex justify-center">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className={`flex items-center gap-2 ${classes}`}
+                        >
+                          {row.department}
+                        </Typography>
+                      </div>
                     </td>
 
                     <td>
@@ -167,13 +178,14 @@ export function JobRequests() {
                     </td>
 
                     <td>
-                      <Chip
+                      <StatusModal input={row.status} referenceNumber={row.reference_number}/>
+                      {/* <Chip
                             size="sm"
                             variant="ghost"
                             value={row.status}
                             className="text-center"
                             color={getApprovalColor(row.status)}
-                          />
+                          /> */}
                     </td>
 
                     <td>

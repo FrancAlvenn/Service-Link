@@ -15,7 +15,7 @@ export const JobRequestsProvider = ({ children }) => {
     try {
       const { data } = await axios({
         method: "get",
-        url: "http://localhost:8080/service_link_api/job_request/",
+        url: "/job_request/",
         withCredentials: true,
       });
       setJobRequests(data);

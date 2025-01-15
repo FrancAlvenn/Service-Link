@@ -8,18 +8,20 @@ import {
   Chip,
 } from "@material-tailwind/react";
 
-import { MagnifyingGlass, UserPlus } from "@phosphor-icons/react";
+import { ArrowClockwise, MagnifyingGlass, UserPlus } from "@phosphor-icons/react";
 import { useContext, useState } from "react";
 import { JobRequestsContext } from "../context/JobRequestsContext";
 import { formatDate } from "../utils/dateFormatter";
 import { getApprovalColor, getArchivedColor } from "../utils/approvalColor";
 
 import StatusModal from "../../../utils/statusModal.js";
+import ApprovalStatusModal from "../../../utils/approverStatusModal.js";
+import ArchiveStatusModal from "../../../utils/archiveStatusModal.js";
 
 export function JobRequests() {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { jobRequests } = useContext(JobRequestsContext);
+  const { jobRequests, fetchJobRequests } = useContext(JobRequestsContext);
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
@@ -35,7 +37,7 @@ export function JobRequests() {
     return rowString.includes(searchQuery.toLowerCase());
   });
 
-  console.log(filteredRows);
+
 
   return (
     <div className="h-full bg-white rounded-lg w-full mt-0 px-3 flex flex-col justify-between">
@@ -51,8 +53,13 @@ export function JobRequests() {
                 </Typography>
               </div>
               <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
-                <Button className="flex items-center gap-3 bg-blue-500" size="sm">
-                  <UserPlus strokeWidth={2} className="h-4 w-4" /> Add request
+                <Button className="flex items-center gap-2 bg-blue-500" size="sm">
+                  <ArrowClockwise
+                    strokeWidth={2}
+                    className="h-4 w-4"
+                    onClick={() => {fetchJobRequests()}}
+                  />
+                  Refresh
                 </Button>
               </div>
             </div>
@@ -125,7 +132,7 @@ export function JobRequests() {
                           variant="ghost"
                           color="red"
                           className={`text-center font-semibold rounded-full w-4  h-4 flex items-center justify-center ${classes}`}
-                          value={row.id}
+                          value={row.id || ""}
                         />
                       </div>
                     </td>
@@ -138,7 +145,7 @@ export function JobRequests() {
                           className={`flex items-center gap-2  text-blue-500 cursor-pointer hover:underline ${classes} font-semibold`}
                           onClick={() => console.log("navigate to details")}
                         >
-                          {row.reference_number}
+                          {row.reference_number || ""}
                         </Typography>
                       </div>
                     </td>
@@ -150,7 +157,7 @@ export function JobRequests() {
                           color="blue-gray"
                           className={`flex items-center gap-2 ${classes}`}
                         >
-                          {formatDate(row.date_required)}
+                          {formatDate(row.date_required || "")}
                         </Typography>
                       </div>
                     </td>
@@ -162,7 +169,7 @@ export function JobRequests() {
                           color="blue-gray"
                           className={`flex items-center gap-2 ${classes}`}
                         >
-                          {row.department}
+                          {row.department || ""}
                         </Typography>
                       </div>
                     </td>
@@ -173,19 +180,16 @@ export function JobRequests() {
                         color="blue-gray"
                         className={`flex items-center gap-2 ${classes}`}
                       >
-                        {row.purpose}
+                        {row.purpose || ""}
                       </Typography>
                     </td>
 
                     <td>
-                      <StatusModal input={row.status} referenceNumber={row.reference_number}/>
-                      {/* <Chip
-                            size="sm"
-                            variant="ghost"
-                            value={row.status}
-                            className="text-center"
-                            color={getApprovalColor(row.status)}
-                          /> */}
+                      <StatusModal
+                        input={row.status}
+                        referenceNumber={row.reference_number}
+                        requestType={"job_request"}
+                      />
                     </td>
 
                     <td>
@@ -194,65 +198,60 @@ export function JobRequests() {
                         color="blue-gray"
                         className={`flex items-center gap-2 ${classes}`}
                       >
-                        {row.requester}
+                        {row.requester || ""}
                       </Typography>
                     </td>
 
                     <td>
                       <div className="flex justify-center">
-                        <Chip
-                            size="sm"
-                            variant="ghost"
-                            value={row.immediate_head_approval}
-                            className="text-center w-fit"
-                            color={getApprovalColor(row.immediate_head_approval)}
-                          />
-                      </div>
-                    </td>
-
-                    <td>
-                    <div className="flex justify-center">
-                        <Chip
-                            size="sm"
-                            variant="ghost"
-                            value={row.gso_director_approval}
-                            className="text-center w-fit"
-                            color={getApprovalColor(row.gso_director_approval)}
-                          />
-                      </div>
-                    </td>
-
-                    <td>
-                    <div className="flex justify-center">
-                        <Chip
-                            size="sm"
-                            variant="ghost"
-                            value={row.operations_director_approval}
-                            className="text-center w-fit"
-                            color={getApprovalColor(row.operations_director_approval)}
-                          />
+                        <ApprovalStatusModal
+                          input={row.immediate_head_approval}
+                          referenceNumber={row.reference_number}
+                          approvingPosition={"immediate_head_approval"}
+                          requestType={"job_request"}
+                        />
                       </div>
                     </td>
 
                     <td>
                       <div className="flex justify-center">
-                        <Chip
-                            size="sm"
-                            variant="ghost"
-                            value={row.archived === true ? "Archived" : "Active"}
-                            className="text-center w-fit"
-                            color={row.archived === true ? "red" : "green"}
-                          />
+                        <ApprovalStatusModal
+                          input={row.gso_director_approval}
+                          referenceNumber={row.reference_number}
+                          approvingPosition={"gso_director_approval"}
+                          requestType={"job_request"}
+                        />
                       </div>
                     </td>
-                    
+
+                    <td>
+                      <div className="flex justify-center">
+                        <ApprovalStatusModal
+                          input={row.operations_director_approval}
+                          referenceNumber={row.reference_number}
+                          approvingPosition={"operations_director_approval"}
+                          requestType={"job_request"}
+                        />
+                      </div>
+                    </td>
+
+                    <td>
+                      <div className="flex justify-center">
+                        <ArchiveStatusModal
+                          input={row.archived}
+                          referenceNumber={row.reference_number}
+                          requestType={"job_request"}
+                        />
+                      </div>
+                    </td>
+
                     <td>
                       <Typography
                         variant="small"
                         color="blue-gray"
                         className={`flex items-center gap-2 ${classes}`}
                       >
-                        {row.remarks}
+                        {row.remarks || ""}
                       </Typography>
                     </td>
 
@@ -262,7 +261,7 @@ export function JobRequests() {
                         color="blue-gray"
                         className={`flex items-center gap-2 ${classes}`}
                       >
-                        {formatDate(row.created_at)}
+                        {formatDate(row.created_at || "")}
                       </Typography>
                     </td>
 
@@ -272,7 +271,7 @@ export function JobRequests() {
                         color="blue-gray"
                         className={`flex items-center gap-2 ${classes}`}
                       >
-                        {formatDate(row.updated_at)}
+                        {formatDate(row.updated_at || "")}
                       </Typography>
                     </td>
 

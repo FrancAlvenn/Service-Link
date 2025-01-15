@@ -232,8 +232,8 @@ export async function updateJobRequest(req, res) {
 }
   
 
-// Update Job Request Status
-export async function updateJobRequestStatus(req, res) {
+// Update Request Status
+export async function updateRequestStatus(req, res) {
     try {
         const { status } = req.body; // Get the new status from the request body
 
@@ -261,7 +261,7 @@ export async function updateJobRequestStatus(req, res) {
 
         // Return success response
         res.status(200).json({
-            message: `Job request status updated to "${status}" successfully!`,
+            message: `Request status updated to "${status}" successfully!`,
         });
 
         // Log the status update action
@@ -269,8 +269,8 @@ export async function updateJobRequestStatus(req, res) {
             action: 'update status',
             performed_by: req.body.requester,
             target: req.params.reference_number,
-            title: 'Job Request Status Updated',
-            details: `Job Request ${req.params.reference_number} status updated to "${status}"`,
+            title: 'Request Status Updated',
+            details: `Request ${req.params.reference_number} status updated to "${status}"`,
         });
     } catch (error) {
         console.error(error);

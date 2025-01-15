@@ -26,6 +26,12 @@ function GoogleAuthLogin() {
                 });
 
                 if (response.status === 200) {
+
+                    // This is for user login later
+                    if (response.data.response.dataValues.reference_number.includes('DYCI')) {
+                        console.log("User Login")
+                    }
+
                     ToastNotification.success('Welcome to Service Link!', 'You have been successfully logged in.');
                     setAuthData(response.data.response.dataValues);
                     navigate('/workspace/requests-management');

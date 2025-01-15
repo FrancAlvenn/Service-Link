@@ -66,7 +66,11 @@ function LoginForm() {
         }).then((res) => {
             if(res.status === 200){
                 setAuthData(res.data);
-    
+
+                if(res.data.reference_number.includes('DYCI')){
+                    console.log("User Login")
+                }
+
                 navigate('/workspace/requests-management');
                 setFormStatus('idle');
             }

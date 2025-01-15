@@ -1,5 +1,5 @@
 import express from 'express';
-import { archivePurchasingRequest, createPurchasingRequest, getAllPurchasingRequests, getPurchasingRequestById, gsoDirectorApproval, immediateHeadApproval, operationsDirectorApproval, updatePurchasingRequest } from '../controllers/purchasing_request.js';
+import { archivePurchasingRequest, createPurchasingRequest, getAllPurchasingRequests, getPurchasingRequestById, gsoDirectorApproval, immediateHeadApproval, operationsDirectorApproval, updatePurchasingRequest, updateRequestStatus } from '../controllers/purchasing_request.js';
 
 const router = express.Router();
 
@@ -14,6 +14,9 @@ router.get("/:reference_number", getPurchasingRequestById);
 
 // Route for PUT
 router.put("/:reference_number", updatePurchasingRequest);
+
+//Update status of a Request
+router.patch('/:reference_number/status', updateRequestStatus)
 
 // Route for DELETE
 router.delete("/:reference_number/archive/:archive", archivePurchasingRequest);

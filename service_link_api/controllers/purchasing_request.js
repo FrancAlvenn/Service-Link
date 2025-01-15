@@ -214,6 +214,53 @@ export async function updatePurchasingRequest(req, res) {
     }
 }
 
+
+// Update Request Status
+export async function updateRequestStatus(req, res) {
+    try {
+        const { status } = req.body; // Get the new status from the request body
+
+        // Check if status is provided
+        if (!status) {
+            return res.status(400).json({ message: "Status is required." });
+        }
+
+        // Update the job request status
+        const [updatedRow] = await PurchasingRequestModel.update(
+            { status }, // Only update the status field
+            {
+                where: {
+                    reference_number: req.params.reference_number,
+                },
+            }
+        );
+
+        // If no rows were updated, it means the reference number didn't match any job request
+        if (updatedRow === 0) {
+            return res.status(404).json({
+                message: `No job request found with reference number ${req.params.reference_number}`,
+            });
+        }
+
+        // Return success response
+        res.status(200).json({
+            message: `Request status updated to "${status}" successfully!`,
+        });
+
+        // Log the status update action
+        createLog({
+            action: 'update status',
+            performed_by: req.body.requester,
+            target: req.params.reference_number,
+            title: 'Request Status Updated',
+            details: `Request ${req.params.reference_number} status updated to "${status}"`,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: `Error updating job request status`, error });
+    }
+}
+
 // Archive / Unarchive Purchasing Request
 export async function archivePurchasingRequest(req, res) {
     try {

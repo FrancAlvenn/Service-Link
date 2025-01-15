@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAllVenueRequest, getVenueRequestById, getAllVenueRequestByStatus, createVenueRequest, updateVenueRequest, archiveById, immediateHeadApproval, gsoDirectorApproval, operationsDirectorApproval } from '../controllers/venue_request.js';
+import { getAllVenueRequest, getVenueRequestById, getAllVenueRequestByStatus, createVenueRequest, updateVenueRequest, archiveById, immediateHeadApproval, gsoDirectorApproval, operationsDirectorApproval, updateRequestStatus } from '../controllers/venue_request.js';
 
 const router = express.Router();
 
@@ -14,6 +14,9 @@ router.get("/:reference_number", getVenueRequestById)
 
 //Update a Request by its ID
 router.put('/:reference_number', updateVenueRequest)
+
+//Update status of a Request
+router.patch('/:reference_number/status', updateRequestStatus)
 
 //Delete/Archive by Id
 router.delete("/:reference_number/archive/:archive", archiveById)

@@ -1,43 +1,48 @@
 import {
-    Card,
-    CardHeader,
-    Input,
-    Typography,
-    Button,
-    CardBody,
-    CardFooter,
-    Tabs,
-    TabsHeader,
-    Tab,
-  } from "@material-tailwind/react";
-  
-  import { TABS, TABLE_HEAD, VENUE_REQUEST,  } from "../data/data";
-  import { MagnifyingGlass, MagnifyingGlassMinus, UserPlus } from "@phosphor-icons/react";
-  import { useState } from "react";
-  
-  export function VenueRequests() {
-    const [searchQuery, setSearchQuery] = useState("");
-  
-    const handleSearch = (e) => {
-      setSearchQuery(e.target.value);
-    }
-  
-    // Filter data based on the selected type
-    const filteredRows = VENUE_REQUEST.filter((row) => {
-      // Check if the searchQuery is found anywhere in the row (case insensitive)
-      const matchesSearchQuery = Object.values(row)
-        .join(" ")
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase());
-  
-      // Return true if both conditions match
-      return matchesSearchQuery;
-    });
-  
-    return (
-      <div className="h-full bg-white rounded-lg w-full mt-0 px-3 flex flex-col justify-between">
-        <div className="flex flex-col gap-4 h-full">
-          <CardHeader floated={false} shadow={false} className="rounded-none min-h-fit">
+  Card,
+  CardHeader,
+  Input,
+  Typography,
+  Button,
+  CardBody,
+  Chip,
+} from "@material-tailwind/react";
+
+import { ArrowClockwise, MagnifyingGlass, UserPlus } from "@phosphor-icons/react";
+import { useContext, useState } from "react";
+import { VenueRequestsContext } from "../context/VenueRequestsContext.js";
+import { formatDate, formatTime } from "../utils/dateFormatter";
+import { getApprovalColor, getArchivedColor } from "../utils/approvalColor";
+
+import StatusModal from "../../../utils/statusModal.js";
+import ApprovalStatusModal from "../../../utils/approverStatusModal.js";
+import ArchiveStatusModal from "../../../utils/archiveStatusModal.js";
+
+export function VenueRequests() {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const { venueRequests, fetchVenueRequests } = useContext(VenueRequestsContext);
+
+  const handleSearch = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  // Filter data based on search query
+  const filteredRows = venueRequests.filter((row) => {
+    const rowString = Object.entries(row)
+      .filter(([key]) => key !== "details") // Exclude `details` field
+      .map(([_, value]) => value) // Extract values
+      .join(" ")
+      .toLowerCase();
+    return rowString.includes(searchQuery.toLowerCase());
+  });
+
+
+
+  return (
+    <div className="h-full bg-white rounded-lg w-full mt-0 px-3 flex flex-col justify-between">
+      <div className="flex flex-col gap-4 h-full">
+      <CardHeader floated={false} shadow={false} className="rounded-none min-h-fit">
             <div className="mb-1 flex items-center justify-between gap-5">
               <div>
                 <Typography color="black" className="text-lg font-bold">
@@ -48,12 +53,17 @@ import {
                 </Typography>
               </div>
               <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
-                <Button className="flex items-center gap-3 bg-blue-500" size="sm">
-                  <UserPlus strokeWidth={2} className="h-4 w-4" /> Add request
+                <Button className="flex items-center gap-2 bg-blue-500" size="sm">
+                  <ArrowClockwise
+                    strokeWidth={2}
+                    className="h-4 w-4"
+                    onClick={() => {fetchVenueRequests()}}
+                  />
+                  Refresh
                 </Button>
               </div>
             </div>
-            <div className="flex items-center justify-between gap-4 md:flex-row">
+            <div className="flex items-center justify-end gap-4 md:flex-row">
               {/* <Tabs value={selectedType} className="w-full md:w-max text-sm">
                 <TabsHeader>
                   {TABS.map(({ label, value }) => (
@@ -86,12 +96,14 @@ import {
               </div>
             </div>
           </CardHeader>
-  
-          <CardBody className="custom-scrollbar h-full pt-0">
-            <table className="w-full min-w-max table-auto text-left">
-              <thead className="sticky top-0 mt-0 z-10">
-                <tr>
-                  {TABLE_HEAD.map((header, index) => (
+
+        <CardBody className="custom-scrollbar h-full pt-0">
+          <table className="w-full min-w-max table-auto text-left">
+            <thead className="sticky top-0 mt-0 z-10 border-b border-blue-gray-100">
+              <tr>
+                {Object.keys(venueRequests[0] || {})
+                  .filter((key) => key !== "details") // Exclude `details`
+                  .map((key, index) => (
                     <th
                       key={index}
                       className="cursor-pointer bg-white p-4 transition-colors hover:bg-blue-gray-50"
@@ -99,44 +111,281 @@ import {
                       <Typography
                         variant="small"
                         color="blue-gray"
-                        className="flex items-center justify-between gap-2 font-normal leading-none opacity-70"
+                        className="flex items-center justify-between gap-2 leading-none opacity-70 capitalize font-semibold"
                       >
-                        {header.label || header}
+                        {key.replace(/_/g, " ")}
                       </Typography>
                     </th>
                   ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filteredRows.map((row, rowIndex) => {
-                  const isLast = rowIndex === filteredRows.length - 1;
-                  const classes = isLast ? "p-4" : "px-4 py-5 w-fit";
-                  return (
-                    <tr key={rowIndex}>
-                      {TABLE_HEAD.map((header, colIndex) => (
-                        <td key={colIndex} className={classes}>
-                          <p
-                            className={`text-sm w-fit ${header.value === "summary" ? "text-blue-500" : ""} `}
-                            onClick={() => {
-                              if (header.value === "summary") {
-                                console.log(row[header.value]);
-                              }
-                            }}
-                          >
-                            {row[header.value]}
-                          </p>
-                        </td>
-                      ))}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </CardBody>
-        </div>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredRows.map((row, rowIndex) => {
+                const isLast = rowIndex === filteredRows.length - 1;
+                const classes = isLast ? "p-4 font-normal" : "px-4 py-5 w-fit";
+                return (
+                  <tr key={rowIndex}>
+                    <td>
+                      <div className="flex justify-center">
+                        <Chip
+                          size="sm"
+                          variant="ghost"
+                          color="purple"
+                          className={`text-center font-semibold rounded-full w-4  h-4 flex items-center justify-center ${classes}`}
+                          value={row.id || ""}
+                        />
+                      </div>
+                    </td>
+
+                    <td>
+                      <div className="flex justify-center">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className={`flex items-center gap-2  text-blue-500 cursor-pointer hover:underline ${classes} font-semibold`}
+                          onClick={() => console.log("navigate to details")}
+                        >
+                          {row.reference_number || ""}
+                        </Typography>
+                      </div>
+                    </td>
+
+                    <td>
+                      <div className="flex justify-center">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className={`flex items-center gap-2 ${classes}`}
+                        >
+                          {row.venue_id || ""}
+                        </Typography>
+                      </div>
+                    </td>
+
+                    <td>
+                      <div className="flex justify-center">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className={`flex items-center gap-2 ${classes}`}
+                        >
+                          {row.requester || ""}
+                        </Typography>
+                      </div>
+                    </td>
+
+                    <td>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className={`flex items-center gap-2 ${classes}`}
+                      >
+                        {row.department || ""}
+                      </Typography>
+                    </td>
+
+                    <td>
+                      <div className="flex justify-center">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className={`flex items-center gap-2 ${classes}`}
+                        >
+                          {row.organization || ""}
+                        </Typography>
+                      </div>
+                    </td>
+
+                    
+                    <td>
+                      <div className="flex justify-center">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className={`flex items-center gap-2 ${classes}`}
+                        >
+                          {row.event_title || ""}
+                        </Typography>
+                      </div>
+                    </td>
+
+                    <td>
+                      <div className="flex justify-center">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className={`flex items-center gap-2 ${classes}`}
+                        >
+                          {row.purpose || ""}
+                        </Typography>
+                      </div>
+                    </td>
+
+                    <td>
+                      <div className="flex justify-center">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className={`flex items-center gap-2 ${classes}`}
+                        >
+                          {row.event_nature || ""}
+                        </Typography>
+                      </div>
+                    </td>
+
+                    <td>
+                      <div className="flex justify-center">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className={`flex items-center gap-2 ${classes}`}
+                        >
+                          {formatDate(row.event_dates || "")}
+                        </Typography>
+                      </div>
+                    </td>
+
+                    <td>
+                      <div className="flex justify-center">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className={`flex items-center gap-2 ${classes}`}
+                        >
+                          {row.event_start_time || ""}
+                        </Typography>
+                      </div>
+                    </td>
+
+                    <td>
+                      <div className="flex justify-center">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className={`flex items-center gap-2 ${classes}`}
+                        >
+                          {row.event_end_time || ""}
+                        </Typography>
+                      </div>
+                    </td>
+
+                    <td>
+                      <div className="flex justify-center">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className={`flex items-center gap-2 ${classes}`}
+                        >
+                          {row.participants || ""}
+                        </Typography>
+                      </div>
+                    </td>
+
+                    <td>
+                      <div className="flex justify-center">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className={`flex items-center gap-2 ${classes}`}
+                        >
+                          {row.pax_estimation || ""}
+                        </Typography>
+                      </div>
+                    </td>
+
+                    <td>
+                      <StatusModal
+                        input={row.status}
+                        referenceNumber={row.reference_number}
+                        requestType={"venue_request"}
+                      />
+                    </td>
+
+                    <td>
+                      <div className="flex justify-center">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className={`flex items-center gap-2 ${classes}`}
+                        >
+                          {row.remarks || ""}
+                        </Typography>
+                      </div>
+                    </td>
+
+                    <td>
+                      <div className="flex justify-center">
+                        <ApprovalStatusModal
+                          input={row.immediate_head_approval}
+                          referenceNumber={row.reference_number}
+                          approvingPosition={"immediate_head_approval"}
+                          requestType={"venue_request"}
+                        />
+                      </div>
+                    </td>
+
+                    <td>
+                      <div className="flex justify-center">
+                        <ApprovalStatusModal
+                          input={row.gso_director_approval}
+                          referenceNumber={row.reference_number}
+                          approvingPosition={"gso_director_approval"}
+                          requestType={"venue_request"}
+                        />
+                      </div>
+                    </td>
+
+                    <td>
+                      <div className="flex justify-center">
+                        <ApprovalStatusModal
+                          input={row.operations_director_approval}
+                          referenceNumber={row.reference_number}
+                          approvingPosition={"operations_director_approval"}
+                          requestType={"venue_request"}
+                        />
+                      </div>
+                    </td>
+
+                    <td>
+                      <div className="flex justify-center">
+                        <ArchiveStatusModal
+                          input={row.archived}
+                          referenceNumber={row.reference_number}
+                          requestType={"venue_request"}
+                        />
+                      </div>
+                    </td>
+
+                    <td>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className={`flex items-center gap-2 ${classes}`}
+                      >
+                        {formatDate(row.created_at || "")}
+                      </Typography>
+                    </td>
+
+                    <td>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className={`flex items-center gap-2 ${classes}`}
+                      >
+                        {formatDate(row.updated_at || "")}
+                      </Typography>
+                    </td>
+
+
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </CardBody>
       </div>
-    );
-  }
-  
-  export default VenueRequests;
-  
+    </div>
+  );
+}
+
+export default VenueRequests;

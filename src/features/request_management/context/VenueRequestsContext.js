@@ -1,24 +1,24 @@
 import { createContext, useEffect, useState } from "react";
 import axios from "axios";
 
-export const JobRequestsContext = createContext();
+export const VenueRequestsContext = createContext();
 
-export const JobRequestsProvider = ({ children }) => {
-  const [jobRequests, setJobRequests] = useState([]);
+export const VenueRequestsProvider = ({ children }) => {
+  const [venueRequests, setVenueRequests] = useState([]);
 
   // Fetch job requests from the database
   useEffect(() => {
-    fetchJobRequests();
+    fetchVenueRequests();
   }, []);
 
-  const fetchJobRequests = async () => {
+  const fetchVenueRequests = async () => {
     try {
       const { data } = await axios({
         method: "get",
-        url: "/job_request/",
+        url: "/venue_request/",
         withCredentials: true,
       });
-      setJobRequests(data);
+      setVenueRequests(data);
     } catch (error) {
       console.error("Error fetching job requests:", error);
     }
@@ -26,13 +26,13 @@ export const JobRequestsProvider = ({ children }) => {
 
 
   return (
-    <JobRequestsContext.Provider
+    <VenueRequestsContext.Provider
       value={{
-        jobRequests,
-        fetchJobRequests,
+        venueRequests,
+        setVenueRequests,
       }}
     >
       {children}
-    </JobRequestsContext.Provider>
+    </VenueRequestsContext.Provider>
   );
 };

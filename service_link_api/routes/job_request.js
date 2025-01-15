@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAllJobRequest, getJobRequestById, getAllJobRequestByStatus, createJobRequest, updateJobRequest, archiveById, immediateHeadApproval, gsoDirectorApproval, operationsDirectorApproval, updateJobRequestStatus } from '../controllers/job_request.js';
+import { getAllJobRequest, getJobRequestById, getAllJobRequestByStatus, createJobRequest, updateJobRequest, archiveById, immediateHeadApproval, gsoDirectorApproval, operationsDirectorApproval, updateRequestStatus } from '../controllers/job_request.js';
 
 const router = express.Router();
 
@@ -16,7 +16,7 @@ router.get("/:reference_number", getJobRequestById)
 router.put('/:reference_number', updateJobRequest)
 
 //Update status of a Request
-router.put('/:reference_number/status', updateJobRequestStatus)
+router.patch('/:reference_number/status', updateRequestStatus)
 
 //Delete/Archive by Id
 router.delete("/:reference_number/archive/:archive", archiveById)

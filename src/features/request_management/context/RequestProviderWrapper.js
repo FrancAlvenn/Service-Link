@@ -1,4 +1,7 @@
 import { JobRequestsProvider } from "./JobRequestsContext";
+import { PurchasingRequestsProvider } from "./PurchasingRequestsContext";
+import { VehicleRequestsProvider } from "./VehicleRequestsContext";
+import { VenueRequestsProvider } from "./VenueRequestsContext";
 // import { PurchasingRequestsProvider } from "./PurchasingRequestsContext";
 // import { VehicleRequestsProvider } from "./VehicleRequestsContext";
 // import { VenueRequestsProvider } from "./VenueRequestsContext";
@@ -6,7 +9,13 @@ import { JobRequestsProvider } from "./JobRequestsContext";
 export function RequestsProviderWrapper ({ children })  {
   return (
     <JobRequestsProvider>
-        {children}
+      <PurchasingRequestsProvider>
+        <VehicleRequestsProvider>
+          <VenueRequestsProvider>
+            {children}
+          </VenueRequestsProvider>
+        </VehicleRequestsProvider>
+      </PurchasingRequestsProvider>
     </JobRequestsProvider>
   );
 };

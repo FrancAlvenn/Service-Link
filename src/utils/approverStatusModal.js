@@ -1,53 +1,59 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { Menu, MenuHandler, MenuList, MenuItem, Typography, Chip } from "@material-tailwind/react";
 import { PlusCircle } from "@phosphor-icons/react";
+import { JobRequestsContext } from "../features/request_management/context/JobRequestsContext";
+import ToastNotification from "./ToastNotification";
+import AuthContext from "../features/authentication/context/AuthContext";
 
-function StatusModal({ input, referenceNumber }) {
-  const [statusOptions, setStatusOptions] = useState([]); // Initialize as an empty array
-  const [currentStatus, setCurrentStatus] = useState(input); // Set initial status from input
+function ApprovalStatusModal({ input, referenceNumber, requestType, approvingPosition }) {
 
-  // Fetch the available statuses from the backend
-  const getStatus = async () => {
-    try {
-      const response = await axios({
-        method: "get",
-        url: "/settings/status", // API endpoint for fetching available statuses
-        withCredentials: true,    // Keep credentials if necessary
-      });
+  const { user } = useContext(AuthContext);
 
-      // Ensure the response is correct and contains a status array
-      if (Array.isArray(response.data.status)) {
-        setStatusOptions(response.data.status);
-      } else {
-        console.error("Invalid response: 'status' is not an array");
+  const {fetchJobRequests} = useContext(JobRequestsContext);
+
+  const [statusOptions, setStatusOptions] = useState(
+    [
+      {
+        id: 1,
+        status: 'Approved',
+        color:'green'
+      },
+      {
+        id: 2,
+        status:'Rejected',
+        color:'red'
+      },
+      {
+        id: 3,
+        status:'Pending',
+        color:'gray'
       }
-    } catch (error) {
-      console.error("Error fetching status options:", error);
-    }
-  };
+    ]
+  );
+  const [currentStatus, setCurrentStatus] = useState(input); // Set initial status from input
 
   // Handle status selection change
   const handleStatusChange = async (status) => {
     setCurrentStatus(status);
-    // Optionally, send the updated status to the server here
+
     await axios({
-      method: "put",
-      url: `/job_request/${referenceNumber}/status`,
+      method: "patch",
+      url: `/${requestType}/${referenceNumber}/${approvingPosition}/${status}`,
       data: {
-        status: status,
+        requester: user.reference_number
       },
       withCredentials: true
     }).then((res) => {
       if (res.status === 200) {
-        console.log("Status updated successfully");
+        fetchJobRequests();
+        ToastNotification.success('Success!', res.data.message);
       }
-    })
+    }).catch((error) => {
+      ToastNotification.error('Error!', 'Failed to update status.');
+    });
   };
 
-  useEffect(() => {
-    getStatus();
-  }, []);
 
   return (
     <div className="flex flex-col gap-2">
@@ -105,4 +111,4 @@ function StatusModal({ input, referenceNumber }) {
   );
 }
 
-export default StatusModal;
+export default ApprovalStatusModal;

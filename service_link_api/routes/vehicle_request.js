@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAllVehicleRequest, getVehicleRequestById, getAllVehicleRequestByStatus, createVehicleRequest, updateVehicleRequest, archiveById, immediateHeadApproval, gsoDirectorApproval, operationsDirectorApproval, getVehicleRequestByTrip } from '../controllers/vehicle_request.js';
+import { getAllVehicleRequest, getVehicleRequestById, getAllVehicleRequestByStatus, createVehicleRequest, updateVehicleRequest, archiveById, immediateHeadApproval, gsoDirectorApproval, operationsDirectorApproval, getVehicleRequestByTrip, updateRequestStatus } from '../controllers/vehicle_request.js';
 
 const router = express.Router();
 
@@ -14,6 +14,9 @@ router.get("/:reference_number", getVehicleRequestById)
 
 //Update a Request by its ID
 router.put('/:reference_number', updateVehicleRequest)
+
+//Update status of a Request
+router.patch('/:reference_number/status', updateRequestStatus)
 
 //Delete/Archive by Id
 router.delete("/:reference_number/archive/:archive", archiveById)

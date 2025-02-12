@@ -3,6 +3,13 @@ import axios from "axios";
 
 export const VehicleRequestsContext = createContext();
 
+/**
+ * Provider that fetches vehicle requests from the API and makes them available
+ * through the context. The fetched vehicle requests are stored in the state
+ * and provided to the wrapped components.
+ * @param {{children: React.ReactNode}} props
+ * @returns {React.ReactElement}
+ */
 export const VehicleRequestsProvider = ({ children }) => {
   const [vehicleRequests, setVehicleRequests] = useState([]);
 

@@ -4,7 +4,7 @@ import Sidebar from "./Sidebar";
 
 function Layout({ children }) {
     return (
-        <div className="flex flex-col h-full bg-blue-400">
+        <div className="flex flex-col h-full bg-gray-200">
             <Navbar/>
 
             <div className="flex flex-1 mt-2 mb-0 h-[90%] ">

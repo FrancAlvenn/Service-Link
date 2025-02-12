@@ -26,6 +26,7 @@ function StatusModal({ input, referenceNumber, requestType }) {
       // Ensure the response is correct and contains a status array
       if (Array.isArray(response.data.status)) {
         setStatusOptions(response.data.status);
+        console.log(response.data.status);
       } else {
         console.error("Invalid response: 'status' is not an array");
       }

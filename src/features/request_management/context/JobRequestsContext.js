@@ -3,6 +3,19 @@ import axios from "axios";
 
 export const JobRequestsContext = createContext();
 
+/**
+ * The JobRequestsProvider component is a context provider that provides
+ * the following values to its children components:
+ *
+ *   - jobRequests: an array of job requests
+ *   - fetchJobRequests: a function that fetches job requests from the server
+ *
+ * The component fetches job requests from the server when mounted and
+ * makes them available to its children components.
+ *
+ * @param {{ children: React.ReactNode }} props
+ * @returns {React.ReactElement}
+ */
 export const JobRequestsProvider = ({ children }) => {
   const [jobRequests, setJobRequests] = useState([]);
 

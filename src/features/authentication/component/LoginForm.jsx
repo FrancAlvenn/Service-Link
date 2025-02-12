@@ -13,6 +13,13 @@ import { gapi } from 'gapi-script';
 
 import  GoogleAuthLogin  from './GoogleAuthentication';
 
+/**
+ * LoginForm component
+ *
+ * This component is used to render the login form.
+ *
+ * @returns {ReactElement} The login form component.
+ */
 function LoginForm() {
 
     const [value, setValue] = useState({email: '', password: ''});
@@ -34,6 +41,15 @@ function LoginForm() {
 
     const navigate = useNavigate();
 
+    /**
+     * Handles the change event of the form inputs.
+     *
+     * Sets the debounce state to false and the form as dirty.
+     * Updates the value state with the new input value.
+     * Validates the email input and sets the `isEmailValid` state and `emailError` state accordingly.
+     *
+     * @param {React.ChangeEvent<HTMLInputElement>} event - The change event of the form input.
+     */
     const handleOnChange = (event) => {
         setDebounceState(false);
         setIsFieldsDirty(true);
@@ -53,6 +69,21 @@ function LoginForm() {
         }
 
     };
+
+/**
+ * Handles the form submission for logging in.
+ *
+ * Prevents the default form submission behavior and sets the form status to 'loading'.
+ * Sends a POST request to the '/auth/login' endpoint with the current form values.
+ * If the login is successful (status 200), it updates the AuthContext with the user's data,
+ * navigates to the requests management page, and sets the form status to 'idle'.
+ * If the response status is 404, it displays an info toast notification regarding account activation.
+ * Handles various error responses, including unauthorized access (status 401)
+ * and other network/server errors, displaying appropriate toast notifications.
+ *
+ * @param {Event} e - The form submission event.
+ * @returns {void}
+ */
 
     const handleSubmit = async (e) =>{
         e.preventDefault();
@@ -115,6 +146,9 @@ function LoginForm() {
 
     const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
+    /**
+     * Initializes the Google API client with the client ID and an empty scope
+     */
     useEffect(() => {
     function start() {
         gapi.client.init({

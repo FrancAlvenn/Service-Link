@@ -54,7 +54,7 @@ function Sidebar() {
     >
       <div className={`mt-0 flex items-center ${state.isMinimized ? "justify-center" : "justify-between"}`}>
         {!state.isMinimized && (
-          <Typography color="blue-gray" className="text-lg font-bold">
+          <Typography color="blue-gray" className={`text-lg font-bold whitespace-nowrap`}>
             Requests Management
           </Typography>
         )}
@@ -81,26 +81,26 @@ function Sidebar() {
               onClick={() => dispatch({ type: "TOGGLE_DROPDOWN" })}
               className="flex justify-between items-center gap-2 pl-4 pr-3 py-2 text-xs font-bold bg-blue-gray-50 border border-gray-400 rounded-lg"
             >
-              <span className="flex gap-2 items-center">
+              <span className="flex gap-2 items-center whitespace-nowrap">
                 {options[state.selectedControl]}
                 {state.selectedControl}
               </span>
               <CaretDown
                 size={12}
                 strokeWidth={2.5}
-                className={`h-4 w-4 transition-transform ${
+                className={`h-4 w-4 transition-transform whitespace-nowrap ${
                   state.openDropdown ? "rotate-180" : ""
                 }`}
               />
             </button>
           </MenuHandler>
-          <MenuList className="border-none w-56 py-3 shadow-md">
+          <MenuList className="border-none w-56 py-3 shadow-md whitespace-nowrap">
             <span className="py-3 text-xs font-bold">Workspace</span>
             <hr className="my-3 h-px text-gray-400" />
             {Object.keys(options).map((control) => (
               <MenuItem
                 key={control}
-                className="px-3 py-3 text-left hover:bg-gray-200"
+                className="px-3 py-3 text-left hover:bg-gray-200 whitespace-nowrap"
                 onClick={() => handleSelection(control)}
               >
                 {control}

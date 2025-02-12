@@ -3,6 +3,18 @@ import {Card, Typography,List, ListItem, ListItemPrefix, ListItemSuffix, Chip, A
 
 import { Stack, ClipboardText, ChalkboardSimple, ChatCircle, ChartBar, CaretDown, UserPlus, Plus, PlusCircle, Chalkboard, ChalkboardTeacher} from "@phosphor-icons/react";
 
+/**
+ * AssetManagementControls is a React component that renders a list of controls for managing assets in the workspace.
+ *
+ * It renders a list of three items: a board, an "Add Asset" button, and a reporting dashboard. The "Add Asset" button
+ * is prefixed with a PlusCircle icon, and the reporting dashboard is prefixed with a ChartBar icon.
+ *
+ * The component uses the useState hook to manage the state of the list items, and the handleOpen function is used
+ * to toggle the visibility of the list items.
+ *
+ * @function
+ * @returns {ReactElement} A React element representing the AssetManagementControls component.
+ */
 function AssetManagementControls() {
 
     const [open, setOpen] = React.useState(0);

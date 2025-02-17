@@ -8,6 +8,12 @@ import { VehicleRequestsContext } from "../../features/request_management/contex
 import { PurchasingRequestsContext } from "../../features/request_management/context/PurchasingRequestsContext";
 import { JobRequestsContext } from "../../features/request_management/context/JobRequestsContext";
 
+/**
+ * A component that displays a sidebar with details of a request.
+ *
+ * @param {{ open: boolean, onClose: function, referenceNumber: string }} props
+ * @returns {JSX.Element}
+ */
 const SidebarView =  ({ open, onClose, referenceNumber }) => {
   const [isOpen, setIsOpen] = useState(open);
   const { jobRequests, fetchJobRequests } = useContext(JobRequestsContext);
@@ -77,6 +83,10 @@ const SidebarView =  ({ open, onClose, referenceNumber }) => {
     setIsOpen(open);
   }, [open]);
 
+  /**
+   * Handles closing the sidebar by setting the local state to false and
+   * calling the "onClose" prop if provided.
+   */
   const handleClose = () => {
     setIsOpen(false);
     if (onClose) onClose();
@@ -123,6 +133,14 @@ const SidebarView =  ({ open, onClose, referenceNumber }) => {
     });
   };
 
+  /**
+   * Handle save edit button click
+   * @param {number} index index of the particular detail to be edited
+   * @description
+   * Updates the details of the job request in the state and the database
+   * with the new value of the edited particular detail.
+   * Then, it fetches the new data from the database and resets the editing index.
+   */
   const handleSaveEdit = async (index) => {
     const updatedDetails = [...request.details];
     updatedDetails[index] = editedParticular;
@@ -152,6 +170,12 @@ const SidebarView =  ({ open, onClose, referenceNumber }) => {
     setEditingIndex(null);
   };
 
+  /**
+   * Handle add particular button click
+   * @description
+   * Adds a new blank particular detail to the request in the state.
+   * The new detail is added at the end of the details array.
+   */
   const handleAddParticular = () => {
     const newDetail = {
       particulars: "",

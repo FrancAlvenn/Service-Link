@@ -14,6 +14,10 @@ const JobRequest = sequelize.define(
         allowNull: false,
         unique: true,
     },
+    title: {
+        type: DataTypes.STRING(255),
+        allowNull: false,
+    },
     date_required: {
         type: DataTypes.DATE,
         allowNull: false,

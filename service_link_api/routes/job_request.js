@@ -1,10 +1,13 @@
 import express from 'express';
-import { getAllJobRequest, getJobRequestById, getAllJobRequestByStatus, createJobRequest, updateJobRequest, archiveById, immediateHeadApproval, gsoDirectorApproval, operationsDirectorApproval, updateRequestStatus } from '../controllers/job_request.js';
+import { getAllJobRequest, getJobRequestById, getAllJobRequestByStatus, createJobRequest, updateJobRequest, archiveById, immediateHeadApproval, gsoDirectorApproval, operationsDirectorApproval, updateRequestStatus, createNewDetail } from '../controllers/job_request.js';
 
 const router = express.Router();
 
 //Create a new Request
 router.post('/', createJobRequest)
+
+//Create a new detail
+router.post('/:reference_number/detail', createNewDetail)
 
 //Get all Job Request
 router.get("/", getAllJobRequest);

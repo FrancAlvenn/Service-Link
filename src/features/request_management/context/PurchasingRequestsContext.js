@@ -39,7 +39,7 @@ export const PurchasingRequestsProvider = ({ children }) => {
     <PurchasingRequestsContext.Provider
       value={{
         purchasingRequests,
-        setPurchasingRequests,
+        fetchPurchasingRequests,
       }}
     >
       {children}

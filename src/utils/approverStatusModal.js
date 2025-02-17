@@ -27,7 +27,7 @@ function ApprovalStatusModal({ input, referenceNumber, requestType, approvingPos
       {
         id: 3,
         status:'Pending',
-        color:'gray'
+        color:'amber'
       }
     ]
   );
@@ -64,7 +64,7 @@ function ApprovalStatusModal({ input, referenceNumber, requestType, approvingPos
             variant="ghost"
             value={currentStatus || "Select Status"}
             className="text-center w-fit cursor-pointer"
-            color={statusOptions.find(option => option.status === currentStatus)?.color || "gray"} // default to gray if no match
+            color={statusOptions.find(option => option.status.toLowerCase() == currentStatus.toLowerCase())?.color || "gray"} // default to gray if no match
           >
           </Chip>
         </MenuHandler>

@@ -157,6 +157,18 @@ export function VenueRequests() {
                           color="blue-gray"
                           className={`flex items-center gap-2 ${classes}`}
                         >
+                          {row.title || ""}
+                        </Typography>
+                      </div>
+                    </td>
+
+                    <td>
+                      <div className="flex justify-center">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className={`flex items-center gap-2 ${classes}`}
+                        >
                           {row.venue_id || ""}
                         </Typography>
                       </div>

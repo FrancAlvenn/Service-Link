@@ -29,9 +29,9 @@ function RequestsManagementControls() {
             <ListItem className="p-0" selected={open === 2}>
                 <AccordionHeader onClick={() => handleOpen(2)} className="border-b-0 p-3">
                     <ListItemPrefix>
-                        <Stack size={20} />
+                        <Stack size={20} color="black" />
                     </ListItemPrefix>
-                    <Typography color="blue-gray" className="mr-auto font-normal text-sm">
+                    <Typography color="black" className="mr-auto font-normal text-sm">
                         Queues
                     </Typography>
                 </AccordionHeader>
@@ -71,13 +71,13 @@ function RequestsManagementControls() {
             <ListItem className="p-0" selected={open === 2}>
                 <AccordionHeader onClick={() => handleOpen(3)} className="border-b-0 p-3">
                     <ListItemPrefix>
-                        <ChalkboardSimple size={20} />
+                        <ChalkboardSimple size={20} color="black" />
                     </ListItemPrefix>
-                    <Typography color="blue-gray" className="mr-auto font-normal text-sm">
+                    <Typography color="black" className="mr-auto font-normal text-sm">
                         Views
                     </Typography>
                     <ListItemSuffix>
-                        <Chip value="14" size="sm" variant="ghost" color="blue-gray" className="rounded-full" />
+                        <Chip value="14" size="sm" variant="ghost" color="black" className="rounded-full" />
                     </ListItemSuffix>
                 </AccordionHeader>
             </ListItem>
@@ -98,14 +98,18 @@ function RequestsManagementControls() {
             <ListItemPrefix>
                 <ChatCircle size={20} />
             </ListItemPrefix>
-            Raise a Request
+            <Typography  color="black" className="mr-auto font-normal text-sm">
+                Raise a Request
+            </Typography>
             </ListItem>
 
             <ListItem className="text-sm">
             <ListItemPrefix>
                 <ChartBar size={20} />
             </ListItemPrefix>
-            Reporting Dashboard
+            <Typography  color="black" className="mr-auto font-normal text-sm">
+                Reporting Dashboard
+            </Typography>
             </ListItem>
         </div>
     )

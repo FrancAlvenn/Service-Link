@@ -12,6 +12,10 @@ const VehicleRequest = sequelize.define("VehicleRequest", {
     allowNull: false,
     unique: true,
   },
+  title: {
+    type: DataTypes.STRING(255),
+    allowNull: false,
+  },
   vehicle_requested: {
     type: DataTypes.STRING(100),
     allowNull: true,

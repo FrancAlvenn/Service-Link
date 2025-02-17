@@ -22,6 +22,8 @@ import SidebarView from "../../../components/sidebar/SidebarView.jsx";
 export function JobRequests() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  const [selectedReferenceNumber, setSelectedReferenceNumber] = useState(null);
+
   const [searchQuery, setSearchQuery] = useState("");
 
   const { jobRequests, fetchJobRequests } = useContext(JobRequestsContext);
@@ -66,7 +68,7 @@ export function JobRequests() {
             </Button>
           </div>
         </div>
-        <div className="flex items-center justify-end gap-4 md:flex-row">
+        <div className="flex items-center justify-end px-3 gap-4 md:flex-row">
           {/* <Tabs value={selectedType} className="w-full md:w-max text-sm">
             <TabsHeader>
               {TABS.map(({ label, value }) => (
@@ -146,9 +148,21 @@ export function JobRequests() {
                         variant="small"
                         color="blue-gray"
                         className={`flex items-center gap-2  text-blue-500 cursor-pointer hover:underline ${classes} font-semibold`}
-                        onClick={() => setSidebarOpen(true)}
+                        onClick={() => {setSidebarOpen(true); setSelectedReferenceNumber(row.reference_number)}}
                       >
                         {row.reference_number || ""}
+                      </Typography>
+                    </div>
+                  </td>
+
+                  <td>
+                    <div className="flex justify-center">
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className={`flex items-center gap-2 ${classes}`}
+                      >
+                        {row.title || ""}
                       </Typography>
                     </div>
                   </td>
@@ -286,7 +300,7 @@ export function JobRequests() {
         </table>
       </CardBody>
       </div>
-      <SidebarView open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <SidebarView open={sidebarOpen} onClose={() => setSidebarOpen(false)} referenceNumber={selectedReferenceNumber} />
     </div>
   );
 }

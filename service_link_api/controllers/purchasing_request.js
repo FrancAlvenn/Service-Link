@@ -22,6 +22,7 @@ export async function createPurchasingRequest(req, res) {
 
         const newPurchasingRequest = await PurchasingRequestModel.create({
             reference_number: referenceNumber,
+            title : req.body.title,
             supply_category: req.body.supply_category,
             date_required: req.body.date_required,
             department: req.body.department,
@@ -48,7 +49,7 @@ export async function createPurchasingRequest(req, res) {
         await transaction.commit();
 
         createLog({
-            action: 'Created new purchasing request',
+            action: 'create',
             target: referenceNumber,
             performed_by: req.body.requester,
             title: 'Request Submitted',
@@ -117,6 +118,7 @@ export async function updatePurchasingRequest(req, res) {
 
         const [updatedRows] = await PurchasingRequestModel.update(
             {
+                title: req.body.title,
                 supply_category: req.body.supply_category,
                 date_required: req.body.date_required,
                 department: req.body.department,
@@ -249,7 +251,7 @@ export async function updateRequestStatus(req, res) {
 
         // Log the status update action
         createLog({
-            action: 'update status',
+            action: 'update',
             performed_by: req.body.requester,
             target: req.params.reference_number,
             title: 'Request Status Updated',

@@ -38,7 +38,7 @@ function StatusModal({ input, referenceNumber, requestType }) {
   // Handle status selection change
   const handleStatusChange = async (status) => {
     setCurrentStatus(status);
-    // Optionally, send the updated status to the server here
+    // Send the updated status to the server here
     await axios({
       method: "patch",
       url: `/${requestType}/${referenceNumber}/status`,
@@ -70,7 +70,7 @@ function StatusModal({ input, referenceNumber, requestType }) {
             variant="ghost"
             value={currentStatus || "Select Status"}
             className="text-center w-fit cursor-pointer"
-            color={statusOptions.find(option => option.status === currentStatus)?.color || "gray"} // default to gray if no match
+            color={statusOptions.find(option => option.status.toLowerCase() === currentStatus.toLowerCase())?.color || "gray"} // default to gray if no match
           >
           </Chip>
         </MenuHandler>

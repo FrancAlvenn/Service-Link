@@ -16,7 +16,7 @@ const notifications = [
 
 function NotificationModal() {
     return (
-        <Menu placement="bottom-start" dismissType="click">
+        <Menu placement="bottom-start" dismiss={{ itemPress: false }}>
             <MenuHandler>
                 <Button variant="text" className="flex items-center px-3 py-3 gap-x-3">
                     <Bell size={24} className="cursor-pointer" />
@@ -24,21 +24,21 @@ function NotificationModal() {
             </MenuHandler>
 
             <MenuList className="left z-10 mt-2 w-80 divide-y divide-gray-100 rounded-md bg-white shadow-lg shadow-topping ring-2 ring-black/5 border-none">
-                <div className="py-4 px-4 text-sm font-semibold">
+                <div className="py-4 px-4 text-sm font-semibold text-black">
                     Notification
                 </div>
                 <div className="py-1">
                     {notifications.map((notification) => (
                         <MenuItem key={notification.id} className="flex justify-between items-center px-4 py-2 text-xs hover:bg-gray-200">
                             <div className="flex flex-col items-start">
-                                <p className="text-xs font-semibold leading-6 text-gray-900">
+                                <p className="text-xs font-semibold leading-6 text-black">
                                     {notification.title}
                                 </p>
                                 <p className="mt-1 text-xs leading-3 text-gray-500">
                                     {notification.description}
                                 </p>
                             </div>
-                            <ArrowSquareOut size={18} />
+                            <ArrowSquareOut size={18} className="cursor-pointer text-black" />
                         </MenuItem>
                     ))}
                 </div>

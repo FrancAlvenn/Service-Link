@@ -38,7 +38,7 @@ export const VenueRequestsProvider = ({ children }) => {
     <VenueRequestsContext.Provider
       value={{
         venueRequests,
-        setVenueRequests,
+        fetchVenueRequests,
       }}
     >
       {children}

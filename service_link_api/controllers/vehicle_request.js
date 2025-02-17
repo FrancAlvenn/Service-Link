@@ -21,6 +21,7 @@ export async function createVehicleRequest(req, res){
         // Create the vehicle requisition entry in the database
         const newVehicleRequisition = await VehicleRequestModel.create({
             reference_number : referenceNumber,
+            title : req.body.title,
             vehicle_requested : req.body.vehicle_requested,
             date_filled : req.body.date_filled,
             date_of_trip : req.body.date_of_trip,
@@ -98,6 +99,7 @@ export async function getVehicleRequestById(req, res) {
 export async function updateVehicleRequest(req, res) {
     try{
         const [updatedRows] = await VehicleRequestModel.update({
+            title : req.body.title,
             vehicle_requested : req.body.vehicle_requested,
             date_filled : req.body.date_filled,
             date_of_trip : req.body.date_of_trip,
@@ -176,7 +178,7 @@ export async function updateRequestStatus(req, res) {
 
         // Log the status update action
         createLog({
-            action: 'update status',
+            action: 'update',
             performed_by: req.body.requester,
             target: req.params.reference_number,
             title: 'Request Status Updated',

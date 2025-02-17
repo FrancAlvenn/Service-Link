@@ -13,7 +13,7 @@ export const getApprovalColor = (approvalStatus) => {
       case "approved":
         return "green";
       case "pending":
-        return "gray";
+        return "amber";
       case "rejected":
         return "red";
       default:

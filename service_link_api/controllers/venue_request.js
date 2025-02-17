@@ -21,6 +21,7 @@ export async function createVenueRequest(req, res){
         // Create the venue requisition entry in the database
         const newVenueRequisition = await VenueRequestModel.create({
             reference_number: referenceNumber,
+            title : req.body.title,
             venue_id: req.body.venue_id,
             requester: req.body.requester,
             department: req.body.department || null,
@@ -100,6 +101,7 @@ export async function getVenueRequestById(req, res) {
 export async function updateVenueRequest(req, res) {
     try{
         const [updatedRows] = await VenueRequestModel.update({
+            title : req.body.title,
             venue_id: req.body.venue_id,
             requester: req.body.requester,
             department: req.body.department || null,
@@ -180,7 +182,7 @@ export async function updateRequestStatus(req, res) {
 
         // Log the status update action
         createLog({
-            action: 'update status',
+            action: 'update',
             performed_by: req.body.requester,
             target: req.params.reference_number,
             title: 'Request Status Updated',

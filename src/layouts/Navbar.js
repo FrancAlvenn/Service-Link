@@ -16,8 +16,7 @@ function Navbar() {
                 <img src={logo} alt="DYCI" className='w-10 h-10' />
                 <p>Service Link</p>
             </div>
-            <div className='flex items-center'>
-                
+            <div className='flex items-center text-black'>
                 <NotificationModal/>
                 <HelpModal/>
                 <SettingsModal/>

@@ -22,14 +22,14 @@ function ProfileModal() {
     };
 
     return (
-        <Menu placement="bottom-start">
+        <Menu placement="bottom-start" dismiss={{ itemPress: false }}>
             <MenuHandler>
                 <Button variant="text" className="flex items-center px-3 py-3 gap-x-3">
                     <UserCircle size={24} className="cursor-pointer" />
                 </Button>
             </MenuHandler>
 
-            <MenuList className="left z-10 mt-2 w-80 divide-y divide-gray-100 rounded-md bg-white shadow-lg shadow-topping ring-2 ring-black/5 border-none">
+            <MenuList className="left z-10 mt-2 w-80 divide-y divide-gray-100 rounded-md bg-white shadow-lg shadow-topping ring-2 ring-black/5 border-none text-black">
                 <div className="py-4 px-4 text-sm font-semibold">
                     Account
                 </div>

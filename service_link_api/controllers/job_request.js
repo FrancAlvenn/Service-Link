@@ -23,6 +23,7 @@ export async function createJobRequest(req, res){
 
         const newJobRequest = await JobRequestModel.create({
           reference_number : referenceNumber,
+          title : req.body.title,
           date_required : req.body.date_required,
           department: req.body.department,
           purpose : req.body.purpose,
@@ -48,7 +49,7 @@ export async function createJobRequest(req, res){
         await transaction.commit();
 
         createLog({
-          action: 'Created new job request',
+          action: 'create',
           target: referenceNumber,
           performed_by: req.body.requester,
           title: 'Request Submitted',
@@ -124,6 +125,7 @@ export async function updateJobRequest(req, res) {
 
         const [updatedRows] = await JobRequestModel.update(
             {
+            title: req.body.title,
             date_required: req.body.date_required,
             purpose: req.body.purpose,
             requester: req.body.requester,
@@ -230,7 +232,22 @@ export async function updateJobRequest(req, res) {
         res.status(500).json({ message: `Encountered an internal error: ${error.message}` });
     }
 }
-  
+
+//Create new detail
+export async function createNewDetail(req, res) {
+    try {
+        const newDetail = await JobRequestDetails.create({
+            job_request_id: req.params.reference_number,
+            quantity: req.body.quantity || null,
+            particulars: req.body.particulars,
+            description: req.body.description,
+            remarks: req.body.remarks || null,
+        });
+        res.status(201).json({ message: `Detail added successfully!` });
+    } catch (error) {
+        res.status(500).json({ message: `Encountered an internal error: ${error.message}` });
+    }
+}
 
 // Update Request Status
 export async function updateRequestStatus(req, res) {
@@ -304,7 +321,7 @@ export async function archiveById(req, res){
             performed_by: req.body.requester,
             target: req.params.reference_number,
             title: 'Request Archived',
-            details: `Vehicle Requisition ${req.params.reference_number} archived successfully!`,
+            details: `Job Requisition ${req.params.reference_number} archived successfully!`,
         });
     }catch(error){
         res.status(500).json({ message: `Encountered an internal error ${error}`, error: error});
@@ -337,7 +354,7 @@ export async function immediateHeadApproval(req, res){
             performed_by: req.body.requester,
             target: req.params.reference_number,
             title: 'Request Approved by Immediate Head',
-            details: `Venue Requisition ${req.params.reference_number} ${req.params.approval_flag} by immediate head!`,
+            details: `Job Requisition ${req.params.reference_number} ${req.params.approval_flag} by immediate head!`,
         })
     }catch(error){
         res.status(500).json({ message: `Encountered an internal error ${error}`, error});

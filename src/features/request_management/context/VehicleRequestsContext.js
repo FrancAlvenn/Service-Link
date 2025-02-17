@@ -36,7 +36,7 @@ export const VehicleRequestsProvider = ({ children }) => {
     <VehicleRequestsContext.Provider
       value={{
         vehicleRequests,
-        setVehicleRequests,
+        fetchVehicleRequests,
       }}
     >
       {children}

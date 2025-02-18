@@ -11,7 +11,7 @@ import {
 import { ArrowClockwise, MagnifyingGlass, UserPlus } from "@phosphor-icons/react";
 import { useContext, useState } from "react";
 import { VenueRequestsContext } from "../context/VenueRequestsContext.js";
-import { formatDate, formatTime } from "../utils/dateFormatter";
+import { formatDate, formatTime } from "../../../utils/dateFormatter.js";
 import { getApprovalColor, getArchivedColor } from "../utils/approvalColor";
 
 import StatusModal from "../../../utils/statusModal.js";

@@ -9,15 +9,16 @@ import {
 } from "@material-tailwind/react";
 
 import { ArrowClockwise, MagnifyingGlass, UserPlus } from "@phosphor-icons/react";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { JobRequestsContext } from "../context/JobRequestsContext";
-import { formatDate } from "../utils/dateFormatter";
+import { formatDate } from "../../../utils/dateFormatter.js";
 import { getApprovalColor, getArchivedColor } from "../utils/approvalColor";
 
 import StatusModal from "../../../utils/statusModal.js";
 import ApprovalStatusModal from "../../../utils/approverStatusModal.js";
 import ArchiveStatusModal from "../../../utils/archiveStatusModal.js";
 import SidebarView from "../../../components/sidebar/SidebarView.jsx";
+import { UserContext } from "../../../context/UserContext.js";
 
 export function JobRequests() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -27,6 +28,8 @@ export function JobRequests() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const { jobRequests, fetchJobRequests } = useContext(JobRequestsContext);
+
+  const { getUserByReferenceNumber } = useContext(UserContext);
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
@@ -215,7 +218,7 @@ export function JobRequests() {
                       color="blue-gray"
                       className={`flex items-center gap-2 ${classes}`}
                     >
-                      {row.requester || ""}
+                      {getUserByReferenceNumber(row.requester)}
                     </Typography>
                   </td>
 

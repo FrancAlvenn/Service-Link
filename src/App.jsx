@@ -21,6 +21,7 @@ import Layout from './layouts/Layout';
 import Workspace from './pages/Workspace';
 import RequestManagement from './pages/RequestManagement';
 import { JobRequests, PurchasingRequests, RequestsProviderWrapper, VehicleRequests, VenueRequests } from './features/request_management/';
+import { UserContext, UserProvider } from './context/UserContext';
 
 
 library.add(fas, fab, far); // Add all the icons needed
@@ -86,12 +87,14 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <RequestsProviderWrapper>
-          <div className="App">
-            <RouterProvider router={router} />
-            <CustomToastContainer />
-          </div>
-        </RequestsProviderWrapper>
+        <UserProvider>
+          <RequestsProviderWrapper>
+            <div className="App">
+              <RouterProvider router={router} />
+              <CustomToastContainer />
+            </div>
+          </RequestsProviderWrapper>
+        </UserProvider>
       </AuthProvider>
     </ThemeProvider>
   );

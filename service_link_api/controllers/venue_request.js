@@ -2,6 +2,7 @@ import sequelize from "../database.js";
 import VenueRequestModel from "../models/VenueRequestModel.js";
 import { Op } from 'sequelize';
 import { createLog } from "./system_logs.js";
+import VenueRequestDetails from "../models/VenueRequestDetails.js";
 
 // Generate a unique reference number (e.g., DYCI-2024-0001)
 function generateReferenceNumber(lastRequestId) {
@@ -42,6 +43,16 @@ export async function createVenueRequest(req, res){
             archived: req.body.archived || false,
           });
 
+          const detailsData = req.body.details.map(detail => ({
+            venue_request_id: newVenueRequisition.reference_number,
+            quantity: detail.quantity || null,
+            particulars: detail.particulars,
+            description: detail.description,
+            remarks: detail.remarks || null,
+          }));
+
+          await sequelize.models.VenueRequestDetail.bulkCreate(detailsData);
+
           res.status(201).json({message: `Request created successfully!`});
 
         //Log the request
@@ -57,15 +68,17 @@ export async function createVenueRequest(req, res){
     }
 }
 
-// Get All Venue Requests
+// Get All Venue Requests with Details
 export async function getAllVenueRequest(req, res) {
     try {
         const requisitions = await VenueRequestModel.findAll({
-            where: {
-                archived : {
-                    [Op.eq]: false // Get all that is not archived
+            where: { archived: false },
+            include: [
+                {
+                    model: VenueRequestDetails,
+                    as: 'details'
                 }
-            }
+            ],
         });
         res.status(200).json(requisitions);
     } catch (error) {
@@ -73,69 +86,62 @@ export async function getAllVenueRequest(req, res) {
     }
 }
 
-
-// Get Venue Request by ID
+// Get Venue Request by ID with Details
 export async function getVenueRequestById(req, res) {
-    try{
+    try {
         const requisition = await VenueRequestModel.findOne({
-            where: {
-                reference_number: req.params.reference_number
-                },
-                archived : {
-                    [Op.eq]: false // Get all that is not archived
+            where: { reference_number: req.params.reference_number, archived: false },
+            include: [
+                {
+                    model: VenueRequestDetails,
+                    as: 'details'
                 }
+            ],
         });
-        console.log(req.params.reference_number)
-        if (requisition === null) {
-            res.status(404).json({message : 'Request not found!'});
-        } else {
-            res.status(200).json({requisition});
-            console.log(requisition.title);
+
+        if (!requisition) {
+            return res.status(404).json({ message: 'Request not found!' });
         }
-    }catch (error) {
-        res.status(500).json({ message: `Error fetching venue requisitions`, error });
+
+        res.status(200).json(requisition);
+    } catch (error) {
+        res.status(500).json({ message: `Error fetching venue requisition`, error });
     }
 }
 
-// Update Venue Request
+// Update Venue Request with Details
 export async function updateVenueRequest(req, res) {
-    try{
-        const [updatedRows] = await VenueRequestModel.update({
-            title : req.body.title,
-            venue_id: req.body.venue_id,
-            requester: req.body.requester,
-            department: req.body.department || null,
-            organization: req.body.organization || null,
-            event_title: req.body.event_title,
-            purpose: req.body.purpose,
-            event_nature: req.body.event_nature || null,
-            event_dates: req.body.event_dates,
-            event_start_time: req.body.event_start_time,
-            event_end_time: req.body.event_end_time,
-            participants: req.body.participants,
-            pax_estimation: req.body.pax_estimation || 0,
-            status: req.body.status || 'pending',
-            remarks: req.body.remarks || null,
-            immediate_head_approval: req.body.immediate_head_approval || 'pending',
-            gso_director_approval: req.body.gso_director_approval || 'pending',
-            operations_director_approval: req.body.operations_director_approval || 'pending',
-            archived: req.body.archived || false,
-        },
-        {
-            where: {
-                reference_number : req.params.reference_number
-            },
+    try {
+        const { details, ...updateData } = req.body;
+
+        const [updatedRows] = await VenueRequestModel.update(updateData, {
+            where: { reference_number: req.params.reference_number },
         });
 
-         // If no rows were updated, it means the reference number didn't match any requisition
-         if (updatedRows === 0) {
-            return res.status(404).json({ message: `No requisition found with reference number ${req.body.reference_number}` });
+        if (updatedRows === 0) {
+            return res.status(404).json({ message: `No requisition found with reference number ${req.params.reference_number}` });
         }
 
-        console.log(req.body.venue_requested)
-        res.status(200).json({ message: `Request updated successfully!`})
+        if (details && Array.isArray(details)) {
+            // Delete old details
+            await VenueRequestDetails.destroy({
+                where: { venue_request_id: req.params.reference_number },
+            });
 
-        //Log the request
+            // Insert new details
+            const detailsData = details.map(detail => ({
+                venue_request_id: req.params.reference_number,
+                quantity: detail.quantity || null,
+                particulars: detail.particulars,
+                description: detail.description,
+                remarks: detail.remarks || null,
+            }));
+
+            await VenueRequestDetails.bulkCreate(detailsData);
+        }
+
+        res.status(200).json({ message: `Request updated successfully!` });
+
         createLog({
             action: 'update',
             performed_by: req.body.requester,
@@ -143,10 +149,11 @@ export async function updateVenueRequest(req, res) {
             title: 'Request Updated',
             details: `Venue Requisition ${req.params.reference_number} updated successfully!`,
         });
-    }catch (error){
-        res.status(500).json({ message: `Encountered an internal error ${error}`})
+    } catch (error) {
+        res.status(500).json({ message: `Encountered an internal error ${error}` });
     }
 }
+
 
 // Update Request Status
 export async function updateRequestStatus(req, res) {

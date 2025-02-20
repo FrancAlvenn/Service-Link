@@ -14,11 +14,13 @@ const VehicleRequest = sequelize.define("VehicleRequest", {
   },
   title: {
     type: DataTypes.STRING(255),
-    allowNull: false,
+    allowNull: true,
+        defaultValue: null
   },
   vehicle_requested: {
     type: DataTypes.STRING(100),
     allowNull: true,
+    defaultValue: null
   },
   date_filled: {
     type: DataTypes.DATE,
@@ -38,19 +40,23 @@ const VehicleRequest = sequelize.define("VehicleRequest", {
   },
   number_of_passengers: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true,
+    defaultValue: null
   },
   destination: {
     type: DataTypes.STRING(255),
-    allowNull: false,
+    allowNull: true,
+    defaultValue: null
   },
   department:{
     type : DataTypes.STRING(100),
     allowNull: true,
+    defaultValue: null
   },
   purpose: {
     type: DataTypes.TEXT,
-    allowNull: false,
+    allowNull: true,
+    defaultValue: null
   },
   requester: {
     type: DataTypes.STRING(100),
@@ -59,6 +65,7 @@ const VehicleRequest = sequelize.define("VehicleRequest", {
   designation: {
     type: DataTypes.STRING(100),
     allowNull: true,
+    defaultValue: null
   },
   status: {
     type: DataTypes.STRING(100),

@@ -16,7 +16,8 @@ const VenueRequest = sequelize.define(
     },
     title: {
       type: DataTypes.STRING(255),
-      allowNull: false,
+      allowNull: true,
+      defaultValue: null
     },
     venue_id: {
       type: DataTypes.INTEGER,
@@ -29,18 +30,22 @@ const VenueRequest = sequelize.define(
     department: {
       type: DataTypes.STRING(100),
       allowNull: true,
+      defaultValue: null
     },
     organization: {
       type: DataTypes.STRING(100),
       allowNull: true,
+      defaultValue: null
     },
     event_title: {
       type: DataTypes.STRING(255),
-      allowNull: false,
+      allowNull: true,
+      defaultValue: null
     },
     purpose: {
       type: DataTypes.TEXT,
-      allowNull: false,
+      allowNull: true,
+      defaultValue: null
     },
     event_nature: {
       type: DataTypes.STRING(255),
@@ -64,7 +69,8 @@ const VenueRequest = sequelize.define(
     },
     pax_estimation: {
       type: DataTypes.INTEGER,
-      defaultValue: 0,
+      allowNull: true,
+      defaultValue: 0
     },
     status: {
       type: DataTypes.STRING(100),

@@ -216,6 +216,21 @@ export async function updatePurchasingRequest(req, res) {
     }
 }
 
+//Create new detail
+export async function createNewDetail(req, res) {
+    try {
+        const newDetail = await PurchasingRequestDetails.create({
+            purchasing_request_id: req.params.reference_number,
+            quantity: req.body.quantity || null,
+            particulars: req.body.particulars,
+            description: req.body.description,
+            remarks: req.body.remarks || null,
+        });
+        res.status(201).json({ message: `Detail added successfully!` });
+    } catch (error) {
+        res.status(500).json({ message: `Encountered an internal error: ${error.message}` });
+    }
+}
 
 // Update Request Status
 export async function updateRequestStatus(req, res) {

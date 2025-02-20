@@ -5,16 +5,78 @@ import ToastNotification from "../../utils/ToastNotification";
 import { UserContext } from "../../context/UserContext";
 import { formatDate } from "../../utils/dateFormatter";
 
+const requestFieldConfig = {
+    job_request: [
+      { key: "reference_number", label: "Reference Number", type: "text", readOnly: true },
+      { key: "title", label: "Title", type: "text" },
+      { key: "requester", label: "Requester", type: "text", readOnly: true },
+      { key: "department", label: "Department", type: "text" },
+      { key: "date_required", label: "Date Required", type: "date" },
+      { key: "purpose", label: "Purpose", type: "text" },
+      { key: "created_at", label: "Created At", type: "date", readOnly: true },
+      { key: "updated_at", label: "Updated At", type: "date", readOnly: true },
+    ],
+  
+    purchasing_request: [
+      { key: "reference_number", label: "Reference Number", type: "text", readOnly: true },
+      { key: "title", label: "Title", type: "text" },
+      { key: "requester", label: "Requester", type: "text", readOnly: true },
+      { key: "supply_category", label: "Supply Category", type: "text" },
+      { key: "department", label: "Department", type: "text" },
+      { key: "date_required", label: "Date Required", type: "date" },
+      { key: "purpose", label: "Purpose", type: "text" },
+      { key: "created_at", label: "Created At", type: "date", readOnly: true },
+      { key: "updated_at", label: "Updated At", type: "date", readOnly: true },
+    ],
+  
+    venue_request: [
+      { key: "reference_number", label: "Reference Number", type: "text", readOnly: true },
+      { key: "title", label: "Title", type: "text" },
+      { key: "requester", label: "Requester", type: "text", readOnly: true },
+      { key: "department", label: "Department", type: "text" },
+      { key: "organization", label: "Organization", type: "text" },
+      { key: "event_title", label: "Event Title", type: "text" },
+      { key: "event_nature", label: "Event Nature", type: "text" },
+      { key: "event_dates", label: "Event Date", type: "date" },
+      { key: "event_start_time", label: "Start Time", type: "time" },
+      { key: "event_end_time", label: "End Time", type: "time" },
+      { key: "participants", label: "Participants", type: "text" },
+      { key: "pax_estimation", label: "Estimated Participants", type: "number" },
+      { key: "purpose", label: "Purpose", type: "text" },
+      { key: "created_at", label: "Created At", type: "date", readOnly: true },
+      { key: "updated_at", label: "Updated At", type: "date", readOnly: true },
+    ],
+  
+    vehicle_request: [
+      { key: "reference_number", label: "Reference Number", type: "text", readOnly: true },
+      { key: "title", label: "Title", type: "text" },
+      { key: "requester", label: "Requester", type: "text", readOnly: true },
+      { key: "department", label: "Department", type: "text" },
+      { key: "designation", label: "Designation", type: "text" },
+      { key: "vehicle_requested", label: "Vehicle Type", type: "text" },
+      { key: "date_of_trip", label: "Date of Trip", type: "date" },
+      { key: "time_of_departure", label: "Departure Time", type: "time" },
+      { key: "time_of_arrival", label: "Arrival Time", type: "time" },
+      { key: "number_of_passengers", label: "Number of Passengers", type: "number" },
+      { key: "destination", label: "Destination", type: "text" },
+      { key: "purpose", label: "Purpose", type: "text" },
+      { key: "created_at", label: "Created At", type: "date", readOnly: true },
+      { key: "updated_at", label: "Updated At", type: "date", readOnly: true },
+    ],
+  };
+  
 const DetailsTab = ({ selectedRequest, setSelectedRequest, requestType, fetchRequests }) => {
   const { getUserByReferenceNumber } = useContext(UserContext);
   const [editedRequest, setEditedRequest] = useState({ ...selectedRequest });
-  const [editingField, setEditingField] = useState(null); // Tracks which field is being edited
+  const [editingField, setEditingField] = useState(null);
 
   if (!selectedRequest) {
     return <p className="text-gray-500">Select a request to view details.</p>;
   }
 
-  // Handle input changes per field
+  // Fetch fields based on request type
+  const fields = requestFieldConfig[requestType] || [];
+
   const handleChange = (field, value) => {
     setEditedRequest((prev) => ({
       ...prev,
@@ -22,39 +84,48 @@ const DetailsTab = ({ selectedRequest, setSelectedRequest, requestType, fetchReq
     }));
   };
 
-  // Handle Update Request
   const handleUpdate = async (field) => {
     try {
-      await axios({
-        method: "PUT",
-        url: `/${requestType}/${editedRequest.reference_number}`,
-        data: {
-            ...selectedRequest,
-            [field]: editedRequest[field]
-        },
-      });
+        const isDateOrTimeField = [
+            "date_required", "created_at", "updated_at",
+            "event_dates", "date_of_trip", "time_of_departure", "time_of_arrival"
+        ].includes(field);
 
-      //ToastNotification.success("Success", `${field.charAt(0).toUpperCase() + field.slice(1)} updated successfully!`);
-      fetchRequests();
-      setSelectedRequest((prev) => ({ ...prev, [field]: editedRequest[field] }));
+        await axios({
+            method: "PUT",
+            url: `/${requestType}/${editedRequest.reference_number}`,
+            data: {
+                ...selectedRequest,
+                [field]: isDateOrTimeField
+                    ? editedRequest[field] || selectedRequest[field] // Fallback for dates/times
+                    : editedRequest[field] // Allow null values for others
+            },
+        });
+
+        fetchRequests();
+        setSelectedRequest((prev) => ({
+            ...prev,
+            [field]: isDateOrTimeField
+                ? editedRequest[field] || prev[field]
+                : editedRequest[field]
+        }));
     } catch (error) {
-      console.error("Update failed:", error);
-      ToastNotification.error("Error", `Failed to update ${field}.`);
+        console.error("Update failed:", error);
+        ToastNotification.error("Error", `Failed to update ${field}.`);
     }
-  };
+};
 
-  // Handles when a field loses focus (auto-save)
+
   const handleBlur = (field) => {
     handleUpdate(field);
     setEditingField(null);
   };
 
-  // Handles pressing "Enter" to save or "Escape" to cancel
   const handleKeyDown = (event, field) => {
     if (event.key === "Enter") {
-      event.target.blur(); // Trigger blur to save
+      event.target.blur();
     } else if (event.key === "Escape") {
-      setEditedRequest({ ...selectedRequest }); // Revert changes
+      setEditedRequest({ ...selectedRequest });
       setEditingField(null);
     }
   };
@@ -65,75 +136,51 @@ const DetailsTab = ({ selectedRequest, setSelectedRequest, requestType, fetchReq
         <p className="text-sm font-semibold text-gray-600">Details</p>
       </span>
 
-      {/* Reference Number (Read-Only) */}
-      <span className="flex gap-1">
-        <p className="font-semibold text-sm">Reference Number</p>
-        <p className="ml-auto text-sm">{selectedRequest.reference_number}</p>
-      </span>
-
-      {/* Requester */}
-      <span className="flex gap-1">
-        <p className="font-semibold text-sm">Requester</p>
-        {/* {editingField === "requester" ? (
-          <input
-            type="text"
-            className="text-sm p-1 ml-auto min-w-52 w-52 max-w-72 border border-gray-300 rounded-md"
-            value={editedRequest.requester}
-            onChange={(e) => handleChange("requester", e.target.value)}
-            onBlur={() => handleBlur("requester")}
-            onKeyDown={(e) => handleKeyDown(e, "requester")}
-            autoFocus
-          />
-        ) : ( */}
-          <p className="ml-auto text-sm" onClick={() => setEditingField("requester")}>
-            {getUserByReferenceNumber(selectedRequest.requester)}
-          </p>
-        {/* )} */}
-      </span>
-
-      {/* Department */}
-      <span className="flex gap-1">
-        <p className="font-semibold text-sm">Department</p>
-        {editingField === "department" ? (
-          <input
-            type="text"
-            className="text-sm p-1 ml-auto min-w-52 w-52 max-w-72 border border-gray-300 rounded-md"
-            value={editedRequest.department}
-            onChange={(e) => handleChange("department", e.target.value)}
-            onBlur={() => handleBlur("department")}
-            onKeyDown={(e) => handleKeyDown(e, "department")}
-            autoFocus
-          />
-        ) : (
-          <p className="ml-auto text-sm cursor-pointer" onClick={() => setEditingField("department")}>
-            {selectedRequest.department}
-          </p>
-        )}
-      </span>
-
-        {/* Date Required */}
-        <span className="flex gap-1 items-center">
-            <p className="font-semibold text-sm">Date Required</p>
-            {editingField === "date_required" ? (
-                <input
-                type="date"
+      {fields.map(({ key, label, type, readOnly, color }) => (
+        <span key={key} className="flex gap-1">
+          <p className="font-semibold text-sm">{label}</p>
+          {editingField === key ? (
+            type === "textarea" ? (
+              <textarea
                 className="text-sm p-1 ml-auto min-w-52 w-52 max-w-72 border border-gray-300 rounded-md"
-                value={editedRequest.date_required ? editedRequest.date_required : selectedRequest.date_required}
-                onChange={(e) => handleChange("date_required", e.target.value)}
-                onBlur={() => handleBlur("date_required")}
-                onKeyDown={(e) => handleKeyDown(e, "date_required")}
+                value={editedRequest[key]}
+                onChange={(e) => handleChange(key, e.target.value)}
+                onBlur={() => handleBlur(key)}
+                onKeyDown={(e) => handleKeyDown(e, key)}
                 autoFocus
-                />
+              />
             ) : (
-                <p 
-                className="ml-auto text-sm cursor-pointer"
-                onClick={() => setEditingField("date_required")}
-                >
-                {formatDate(selectedRequest.date_required)}
-                </p>
-            )}
-        </span>
+              <input
+                type={type}
+                className="text-sm p-1 ml-auto min-w-52 w-52 max-w-72 border border-gray-300 rounded-md"
+                value={editedRequest[key]}
+                onChange={(e) => handleChange(key, e.target.value)}
+                onBlur={() => handleBlur(key)}
+                onKeyDown={(e) => handleKeyDown(e, key)}
+                autoFocus
+              />
+            )
+          ) : (
+            <p
+            className={`ml-auto text-sm cursor-pointer ${key === "reference_number" ? "font-semibold" : ""} ${readOnly ? "text-gray-500" : ""}`}
+            onClick={() => !readOnly && setEditingField(key)}
+            >
+            {["date_required", "created_at", "updated_at", "event_dates", "date_of_trip"].includes(key)
+                ? formatDate(selectedRequest[key])
+                : key === "requester"
+                ? getUserByReferenceNumber(selectedRequest[key]) || (
+                    <span className="text-gray-400 italic">Click to edit</span>
+                )
+                : selectedRequest[key] || (
+                    <span className="text-gray-400 italic">Click to edit</span>
+                )
+            }
 
+            </p>
+
+          )}
+        </span>
+      ))}
     </div>
   );
 };

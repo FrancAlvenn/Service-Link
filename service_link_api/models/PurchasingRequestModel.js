@@ -14,7 +14,8 @@ const PurchasingRequest = sequelize.define("PurchasingRequest", {
     },
     title: {
         type: DataTypes.STRING(255),
-        allowNull: false,
+        allowNull: true,
+        defaultValue: null
     },
     date_required: {
         type: DataTypes.DATE,
@@ -26,7 +27,8 @@ const PurchasingRequest = sequelize.define("PurchasingRequest", {
     },
     supply_category: {
         type: DataTypes.STRING(255),
-        allowNull: false,
+        allowNull: true,
+        defaultValue: null
     },
     department: {
         type: DataTypes.STRING(100),
@@ -34,7 +36,8 @@ const PurchasingRequest = sequelize.define("PurchasingRequest", {
     },
     purpose: {
         type: DataTypes.TEXT,
-        allowNull: false,
+        allowNull: true,
+        defaultValue: null
     },
     status: {
         type: DataTypes.STRING(100),

@@ -16,7 +16,8 @@ const JobRequest = sequelize.define(
     },
     title: {
         type: DataTypes.STRING(255),
-        allowNull: false,
+        allowNull: true,
+        defaultValue: null
     },
     date_required: {
         type: DataTypes.DATE,
@@ -28,7 +29,8 @@ const JobRequest = sequelize.define(
     },
     purpose: {
         type: DataTypes.TEXT,
-        allowNull: false,
+        allowNull: true,
+        defaultValue: null
     },
     status: {
         type: DataTypes.STRING(255),

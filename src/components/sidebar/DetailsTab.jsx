@@ -1,16 +1,17 @@
 import { CaretDown, Pencil } from "@phosphor-icons/react";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import ToastNotification from "../../utils/ToastNotification";
 import { UserContext } from "../../context/UserContext";
 import { formatDate } from "../../utils/dateFormatter";
+import DepartmentModal from "../../utils/departmentModal";
 
 const requestFieldConfig = {
     job_request: [
       { key: "reference_number", label: "Reference Number", type: "text", readOnly: true },
       { key: "title", label: "Title", type: "text" },
       { key: "requester", label: "Requester", type: "text", readOnly: true },
-      { key: "department", label: "Department", type: "text" },
+      { key: "department", label: "Department", type: "text", readOnly: true },
       { key: "date_required", label: "Date Required", type: "date" },
       { key: "purpose", label: "Purpose", type: "text" },
       { key: "created_at", label: "Created At", type: "date", readOnly: true },
@@ -22,7 +23,7 @@ const requestFieldConfig = {
       { key: "title", label: "Title", type: "text" },
       { key: "requester", label: "Requester", type: "text", readOnly: true },
       { key: "supply_category", label: "Supply Category", type: "text" },
-      { key: "department", label: "Department", type: "text" },
+      { key: "department", label: "Department", type: "text", readOnly: true },
       { key: "date_required", label: "Date Required", type: "date" },
       { key: "purpose", label: "Purpose", type: "text" },
       { key: "created_at", label: "Created At", type: "date", readOnly: true },
@@ -33,7 +34,7 @@ const requestFieldConfig = {
       { key: "reference_number", label: "Reference Number", type: "text", readOnly: true },
       { key: "title", label: "Title", type: "text" },
       { key: "requester", label: "Requester", type: "text", readOnly: true },
-      { key: "department", label: "Department", type: "text" },
+      { key: "department", label: "Department", type: "text", readOnly: true },
       { key: "organization", label: "Organization", type: "text" },
       { key: "event_title", label: "Event Title", type: "text" },
       { key: "event_nature", label: "Event Nature", type: "text" },
@@ -51,7 +52,7 @@ const requestFieldConfig = {
       { key: "reference_number", label: "Reference Number", type: "text", readOnly: true },
       { key: "title", label: "Title", type: "text" },
       { key: "requester", label: "Requester", type: "text", readOnly: true },
-      { key: "department", label: "Department", type: "text" },
+      { key: "department", label: "Department", type: "text", readOnly: true },
       { key: "designation", label: "Designation", type: "text" },
       { key: "vehicle_requested", label: "Vehicle Type", type: "text" },
       { key: "date_of_trip", label: "Date of Trip", type: "date" },
@@ -165,16 +166,25 @@ const DetailsTab = ({ selectedRequest, setSelectedRequest, requestType, fetchReq
             className={`ml-auto text-sm cursor-pointer ${key === "reference_number" ? "font-semibold" : ""} ${readOnly ? "text-gray-500" : ""}`}
             onClick={() => !readOnly && setEditingField(key)}
             >
-            {["date_required", "created_at", "updated_at", "event_dates", "date_of_trip"].includes(key)
-                ? formatDate(selectedRequest[key])
-                : key === "requester"
-                ? getUserByReferenceNumber(selectedRequest[key]) || (
+            {["date_required", "created_at", "updated_at", "event_dates", "date_of_trip"].includes(key) ? (
+                formatDate(selectedRequest[key])
+            ) : key === "requester" ? (
+                getUserByReferenceNumber(selectedRequest[key]) || (
                     <span className="text-gray-400 italic">Click to edit</span>
                 )
-                : selectedRequest[key] || (
+            ) : key === "department" ? (
+                <DepartmentModal
+                    request={selectedRequest}
+                    input={selectedRequest[key]}
+                    referenceNumber={selectedRequest.reference_number}
+                    requestType={requestType}
+                />
+            ) : (
+                selectedRequest[key] || (
                     <span className="text-gray-400 italic">Click to edit</span>
                 )
-            }
+            )}
+
 
             </p>
 

@@ -9,12 +9,11 @@ import { PurchasingRequestsContext } from "../features/request_management/contex
 import { VehicleRequestsContext } from "../features/request_management/context/VehicleRequestsContext";
 import { VenueRequestsContext } from "../features/request_management/context/VenueRequestsContext";
 
-function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
-  const [statusOptions, setStatusOptions] = useState([]); 
-  const [currentStatus, setCurrentStatus] = useState(input); 
+function DepartmentModal({ request, input, referenceNumber, requestType, onDepartmentUpdate }) {
+  const [departmentOptions, setDepartmentOptions] = useState([]); 
+  const [currentDepartment, setCurrentDepartment] = useState(input); 
 
   const { user } = useContext(AuthContext);
-
   const { fetchJobRequests } = useContext(JobRequestsContext);
   const { fetchPurchasingRequests } = useContext(PurchasingRequestsContext);
   const { fetchVehicleRequests } = useContext(VehicleRequestsContext);
@@ -27,53 +26,57 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
     fetchVenueRequests();
   };
 
-  // Fetch status options from backend
+  // Fetch department options from backend
   useEffect(() => {
-    const getStatus = async () => {
+    const getDepartments = async () => {
       try {
-        const response = await axios.get("/settings/status", { withCredentials: true });
+        const response = await axios.get("/settings/department", { withCredentials: true });
 
-        if (Array.isArray(response.data.status)) {
-          setStatusOptions(response.data.status);
+        if (Array.isArray(response.data.departments)) {
+          setDepartmentOptions(response.data.departments);
         } else {
-          console.error("Invalid response: 'status' is not an array");
+          console.error("Invalid response: 'departments' is not an array");
         }
       } catch (error) {
-        console.error("Error fetching status options:", error);
+        console.error("Error fetching department options:", error);
       }
     };
 
-    getStatus();
+    getDepartments();
   }, []);
 
-  // Update status when `input` prop changes
+  // Update department when `input` prop changes
   useEffect(() => {
-    setCurrentStatus(input);
+    setCurrentDepartment(input);
   }, [input]);
 
-  // Handle status change
-  const handleStatusChange = async (status) => {
+  // Handle department change
+  const handleDepartmentChange = async (department) => {
     try {
-      setCurrentStatus(status);
+      setCurrentDepartment(department);
 
-      const response = await axios.patch(
-        `/${requestType}/${referenceNumber}/status`,
-        { requester: user.reference_number, status },
-        { withCredentials: true }
-      );
+      const response = await axios({
+        method: "put",
+        url: `/${requestType}/${referenceNumber}`,
+        data: {
+            ...request,
+            department: department,
+        },
+        withCredentials: true
+      })
 
       if (response.status === 200) {
         ToastNotification.success("Success!", response.data.message);
         fetchAllRequests();
 
         // Trigger parent update if provided
-        if (onStatusUpdate) {
-          onStatusUpdate(status);
+        if (onDepartmentUpdate) {
+          onDepartmentUpdate(department);
         }
       }
     } catch (error) {
-      ToastNotification.error("Error!", "Failed to update status.");
-      console.error("Status update failed:", error);
+      ToastNotification.error("Error!", "Failed to update department.");
+      console.error("Department update failed:", error);
     }
   };
 
@@ -84,29 +87,29 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
           <Chip
             size="sm"
             variant="ghost"
-            value={currentStatus || "Select Status"}
+            value={currentDepartment || "Select Department"}
             className="text-center w-fit cursor-pointer"
-            color={statusOptions.find(option => option.status === currentStatus)?.color || "gray"}
+            color={departmentOptions.find(option => option.name === currentDepartment)?.color || "gray"}
           />
         </MenuHandler>
         <MenuList className="mt-2 divide-y divide-gray-100 rounded-md bg-white shadow-lg shadow-topping ring-2 ring-black/5 border-none">
-          {statusOptions.length > 0 ? (
+          {departmentOptions.length > 0 ? (
             <div className="flex flex-col">
               <div className="grid grid-cols-2 gap-2">
-                {statusOptions.map((option) => (
+                {departmentOptions.map((option) => (
                   <MenuItem
                     key={option.id}
                     className="flex justify-between items-center px-4 py-2 text-xs"
-                    onClick={() => handleStatusChange(option.status)}
+                    onClick={() => handleDepartmentChange(option.name)}
                   >
                     <Chip
                       size="sm"
                       variant="ghost"
-                      value={option.status}
+                      value={option.name}
                       className="text-center w-fit cursor-pointer"
                       color={option.color}
                     >
-                      {option.status}
+                      {option.name}
                     </Chip>
                   </MenuItem>
                 ))}
@@ -117,13 +120,13 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
                   className="flex items-center gap-2 font-semibold text-sm text-gray-500 cursor-pointer"
                 >
                   <PlusCircle size={18} className="cursor-pointer" />
-                  Add new status
+                  Add new department
                 </Typography>
               </div>
             </div>
           ) : (
             <MenuItem className="flex items-center justify-center text-xs text-gray-500">
-              Loading status options...
+              Loading department options...
             </MenuItem>
           )}
         </MenuList>
@@ -132,4 +135,4 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
   );
 }
 
-export default StatusModal;
+export default DepartmentModal;

@@ -3,6 +3,7 @@ import StatusModal from "../../../utils/statusModal.js";
 import ApprovalStatusModal from "../../../utils/approverStatusModal.js";
 import ArchiveStatusModal from "../../../utils/archiveStatusModal.js";
 import { formatDate, formatTime } from "../../../utils/dateFormatter.js";
+import DepartmentModal from "../../../utils/departmentModal.js";
 
 const normalText = "text-center font-semibold rounded-full flex items-center justify-center";
 
@@ -68,7 +69,7 @@ export const getColumnConfig = (requestType, setSidebarOpen, setSelectedReferenc
             key: "department",
             label: "Department",
             header: <Typography variant="small" color="blue-gray" className={normalText}>Department</Typography>,
-            render: (row) => <Typography variant="small" color="blue-gray" className={normalText}>{row.department}</Typography>,
+            render: (row) => <DepartmentModal request={row} input={row.department} referenceNumber={row.reference_number} requestType={requestType} />,
           },
           {
             key: "purpose",
@@ -184,7 +185,7 @@ export const getColumnConfig = (requestType, setSidebarOpen, setSelectedReferenc
             key: "department",
             label: "Department",
             header: <Typography variant="small" color="blue-gray" className={normalText}>Department</Typography>,
-            render: (row) => <Typography variant="small" color="blue-gray" className={normalText}>{row.department}</Typography>,
+            render: (row) => <DepartmentModal request={row} input={row.department} referenceNumber={row.reference_number} requestType={requestType} />,
           },
           {
             key: "purpose",
@@ -312,7 +313,7 @@ export const getColumnConfig = (requestType, setSidebarOpen, setSelectedReferenc
             key: "department",
             label: "Department",
             header: <Typography variant="small" color="blue-gray" className={normalText}>Department</Typography>,
-            render: (row) => <Typography variant="small" color="blue-gray" className={normalText}>{row.department}</Typography>,
+            render: (row) => <DepartmentModal request={row} input={row.department} referenceNumber={row.reference_number} requestType={requestType} />,
           },
           {
             key: "organization",
@@ -506,7 +507,7 @@ export const getColumnConfig = (requestType, setSidebarOpen, setSelectedReferenc
             key: "department",
             label: "Department",
             header: <Typography variant="small" color="blue-gray" className={normalText}>Department</Typography>,
-            render: (row) => <Typography variant="small" color="blue-gray" className={normalText}>{row.department}</Typography>,
+            render: (row) => <DepartmentModal request={row} input={row.department} referenceNumber={row.reference_number} requestType={requestType} />,
           },
           {
             key: "purpose",

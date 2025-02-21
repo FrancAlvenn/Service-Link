@@ -10,6 +10,8 @@ import { JobRequestsContext } from "../../features/request_management/context/Jo
 import DetailsTab from "./DetailsTab";
 import ParticularsTab from "./ParticularsTab";
 import { UserContext } from "../../context/UserContext";
+import StatusModal from "../../utils/statusModal";
+import ApprovalStatusModal from "../../utils/approverStatusModal";
 
 const SidebarView = ({ open, onClose, referenceNumber }) => {
   const [isOpen, setIsOpen] = useState(open);
@@ -94,7 +96,16 @@ const SidebarView = ({ open, onClose, referenceNumber }) => {
       return;
     }
     try {
-      await axios.put(`/${requestType}/${request.reference_number}`, { ...request, title: editedTitle }, { withCredentials: true });
+      await axios({
+        method: "put",
+        url: `/${requestType}/${request.reference_number}`,
+        data: {
+          ...request,
+          title: editedTitle,
+          requester: user.reference_number
+        },
+        withCredentials: true
+      });
       fetchAllRequests();
     } catch (error) {
       console.error("Update failed:", error);
@@ -120,7 +131,16 @@ const SidebarView = ({ open, onClose, referenceNumber }) => {
       return;
     }
     try {
-      await axios.put(`/${requestType}/${request.reference_number}`, { ...request, purpose: editedPurpose }, { withCredentials: true });
+      await axios({
+        method: "put",
+        url: `/${requestType}/${request.reference_number}`,
+        data: {
+          ...request,
+          purpose: editedPurpose,
+          requester: user.reference_number
+        },
+        withCredentials: true
+      });
       fetchAllRequests();
     } catch (error) {
       console.error("Update failed:", error);
@@ -161,6 +181,45 @@ const SidebarView = ({ open, onClose, referenceNumber }) => {
                 <p onClick={handleEditTitle} className="w-full cursor-pointer">{request.title}</p>
               )}
             </h2>
+
+            <div className="flex items-center gap-3 mb-5">
+              <div title="Request Status">
+                <StatusModal
+                  input={request.status}
+                  referenceNumber={request.reference_number}
+                  requestType={requestType}
+                  title="Status"
+                />
+              </div>
+
+              <div title="Immediate Head Approval">
+                <ApprovalStatusModal
+                  input={request.immediate_head_approval}
+                  referenceNumber={request.reference_number}
+                  approvingPosition="immediate_head_approval"
+                  requestType={requestType}
+                />
+              </div>
+
+              <div title="Operations Director Approval">
+                <ApprovalStatusModal
+                  input={request.operations_director_approval}
+                  referenceNumber={request.reference_number}
+                  approvingPosition="operations_director_approval"
+                  requestType={requestType}
+                />
+              </div>
+
+              <div title="GSO Director Approval">
+                <ApprovalStatusModal
+                  input={request.gso_director_approval}
+                  referenceNumber={request.reference_number}
+                  approvingPosition="gso_director_approval"
+                  requestType={requestType}
+                />
+              </div>
+            </div>
+
 
             {/* Editable Purpose */}
             <div className="flex flex-col p-3 gap-2 border-gray-400 border rounded-md">

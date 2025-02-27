@@ -20,8 +20,9 @@ import Dashboard from './pages/Dashboard';
 import Layout from './layouts/Layout';
 import Workspace from './pages/Workspace';
 import RequestManagement from './pages/RequestManagement';
-import { JobRequests, PurchasingRequests, RequestsProviderWrapper, VehicleRequests, VenueRequests } from './features/request_management/';
+import { JobRequests, KanbanBoard, PurchasingRequests, RequestsProviderWrapper, VehicleRequests, VenueRequests } from './features/request_management/';
 import { UserContext, UserProvider } from './context/UserContext';
+
 
 
 library.add(fas, fab, far); // Add all the icons needed
@@ -68,6 +69,10 @@ const router = createBrowserRouter([
         element: <ProtectedRoute><VenueRequests/></ProtectedRoute>
       },
       {
+        path: 'requests-management/views/kanban-board',
+        element: <ProtectedRoute><KanbanBoard/></ProtectedRoute>
+      },
+      {
         path: 'ticket-management',
         element: <div>Ticket Management</div>
       },
@@ -89,7 +94,7 @@ function App() {
       <AuthProvider>
         <UserProvider>
           <RequestsProviderWrapper>
-            <div className="App">
+            <div className="App font-sans">
               <RouterProvider router={router} />
               <CustomToastContainer />
             </div>

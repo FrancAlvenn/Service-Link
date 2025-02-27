@@ -97,6 +97,7 @@ function LoginForm() {
         }).then((res) => {
             if(res.status === 200){
                 setAuthData(res.data);
+                localStorage.setItem('userPreference', JSON.stringify(res.data.userPreference));
 
                 if(res.data.reference_number.includes('DYCI')){
                     console.log("User Login")

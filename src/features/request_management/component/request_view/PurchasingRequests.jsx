@@ -10,16 +10,16 @@ import {
 
 import { ArrowClockwise, MagnifyingGlass } from "@phosphor-icons/react";
 import { useContext, useState } from "react";
-import { PurchasingRequestsContext } from "../context/PurchasingRequestsContext";
-import { formatDate } from "../../../utils/dateFormatter.js";
-import { getApprovalColor, getArchivedColor } from "../utils/approvalColor";
+import { PurchasingRequestsContext } from "../../context/PurchasingRequestsContext.js";
+import { formatDate } from "../../../../utils/dateFormatter.js";
+import { getApprovalColor, getArchivedColor } from "../../utils/approvalColor.js";
 
-import StatusModal from "../../../utils/statusModal.js";
-import ApprovalStatusModal from "../../../utils/approverStatusModal.js";
-import ArchiveStatusModal from "../../../utils/archiveStatusModal.js";
-import SidebarView from "../../../components/sidebar/SidebarView.jsx";
-import { UserContext } from "../../../context/UserContext.js";
-import { getColumnConfig } from "../utils/columnConfig.js";
+import StatusModal from "../../../../utils/statusModal.js";
+import ApprovalStatusModal from "../../../../utils/approverStatusModal.js";
+import ArchiveStatusModal from "../../../../utils/archiveStatusModal.js";
+import SidebarView from "../../../../components/sidebar/SidebarView.jsx";
+import { UserContext } from "../../../../context/UserContext.js";
+import { getColumnConfig } from "../../utils/columnConfig.js";
 
 export function PurchasingRequests() {
   const [sidebarOpen, setSidebarOpen] = useState(false);

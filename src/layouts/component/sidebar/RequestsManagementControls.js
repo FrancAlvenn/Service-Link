@@ -83,8 +83,8 @@ function RequestsManagementControls() {
             </ListItem>
             <AccordionBody className="py-1">
                 <List className="p-0">
-                    <ListItem className="text-xs">
-                        Kanban
+                    <ListItem className="text-xs" onClick={() => navigate("/workspace/requests-management/views/kanban-board")}>
+                        Kanban Board
                     </ListItem>
                     <ListItem className="text-xs">
                         Calendar

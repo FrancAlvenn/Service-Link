@@ -4,6 +4,7 @@ import { createNewOrganization, getAllOrganizations, getOrganizationById, update
 import { createNewStatus, getAllStatus, getStatusById, updateStatus, archiveStatusById } from '../controllers/settings_controllers/status.js';
 import { createNewPriority, getAllPriority, getPriorityById, updatePriority, archivePriorityById } from '../controllers/settings_controllers/priority_level.js';
 import { createNewDesignation, getAllDesignation, getDesignationById, updateDesignation, archiveDesignationById } from '../controllers/settings_controllers/designation.js';
+import { createUserPreference, deleteUserPreference, getUserPreference, updateUserPreference } from '../controllers/settings_controllers/user_preference.js';
 
 
 
@@ -103,6 +104,21 @@ router.put('/designation/:id', updateDesignation);
 
 //Delete a designation
 router.delete('/designation/:id/archive/:archive', archiveDesignationById);
+
+
+//ROUTE FOR USER PREFERENCES
+
+//Create a new user preference
+router.post('/user_preference', createUserPreference);
+
+//Get user preference by user_id
+router.get('/user_preference/:user_id', getUserPreference);
+
+//Update user preference by user_id
+router.put('/user_preference/:user_id', updateUserPreference);
+
+//Delete user preference by user_id
+router.delete('/user_preference/:user_id', deleteUserPreference);
 
 
 export default router;

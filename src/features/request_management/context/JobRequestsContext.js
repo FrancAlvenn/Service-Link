@@ -43,6 +43,7 @@ export const JobRequestsProvider = ({ children }) => {
       value={{
         jobRequests,
         fetchJobRequests,
+        setJobRequests,
       }}
     >
       {children}

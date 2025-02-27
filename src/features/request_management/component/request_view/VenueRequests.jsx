@@ -10,23 +10,23 @@ import {
 
 import { ArrowClockwise, MagnifyingGlass } from "@phosphor-icons/react";
 import { useContext, useState } from "react";
-import { VehicleRequestsContext } from "../context/VehicleRequestsContext";
-import { formatDate } from "../../../utils/dateFormatter.js";
-import { getApprovalColor, getArchivedColor } from "../utils/approvalColor";
+import { VenueRequestsContext } from "../../context/VenueRequestsContext.js";
+import { formatDate } from "../../../../utils/dateFormatter.js";
+import { getApprovalColor, getArchivedColor } from "../../utils/approvalColor.js";
 
-import StatusModal from "../../../utils/statusModal.js";
-import ApprovalStatusModal from "../../../utils/approverStatusModal.js";
-import ArchiveStatusModal from "../../../utils/archiveStatusModal.js";
-import SidebarView from "../../../components/sidebar/SidebarView.jsx";
-import { UserContext } from "../../../context/UserContext.js";
-import { getColumnConfig } from "../utils/columnConfig.js";
+import StatusModal from "../../../../utils/statusModal.js";
+import ApprovalStatusModal from "../../../../utils/approverStatusModal.js";
+import ArchiveStatusModal from "../../../../utils/archiveStatusModal.js";
+import SidebarView from "../../../../components/sidebar/SidebarView.jsx";
+import { UserContext } from "../../../../context/UserContext.js";
+import { getColumnConfig } from "../../utils/columnConfig.js";
 
-export function VehicleRequests() {
+export function VenueRequests() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedReferenceNumber, setSelectedReferenceNumber] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { vehicleRequests, fetchVehicleRequests } = useContext(VehicleRequestsContext);
+  const { venueRequests, fetchVenueRequests } = useContext(VenueRequestsContext);
   const { getUserByReferenceNumber } = useContext(UserContext);
 
   const handleSearch = (e) => {
@@ -34,7 +34,7 @@ export function VehicleRequests() {
   };
 
   // Filter data based on search query
-  const filteredRows = vehicleRequests.filter((row) => {
+  const filteredRows = venueRequests.filter((row) => {
     const rowString = Object.entries(row)
       .filter(([key]) => key !== "details")
       .map(([_, value]) => value)
@@ -43,7 +43,7 @@ export function VehicleRequests() {
     return rowString.includes(searchQuery.toLowerCase());
   });
 
-  const requestType = "vehicle_request"; // Can be set dynamically based on the page or user input
+  const requestType = "venue_request"; // Can be set dynamically based on the page or user input
 
   const columns = getColumnConfig(requestType, setSidebarOpen, setSelectedReferenceNumber, getUserByReferenceNumber);
 
@@ -53,10 +53,10 @@ export function VehicleRequests() {
         <CardHeader floated={false} shadow={false} className="rounded-none min-h-fit pb-6">
           <div className="mb-1 flex items-center justify-between gap-5">
             <div>
-              <Typography color="black" className="text-lg font-bold">Vehicle Requests</Typography>
+              <Typography color="black" className="text-lg font-bold">Venue Requests</Typography>
               <Typography color="gray" className="mt-1 font-normal text-sm">See information about requests</Typography>
             </div>
-            <Button className="flex items-center gap-2 bg-blue-500" size="sm" onClick={fetchVehicleRequests}>
+            <Button className="flex items-center gap-2 bg-blue-500" size="sm" onClick={fetchVenueRequests}>
               <ArrowClockwise strokeWidth={2} className="h-4 w-4" />
               Refresh
             </Button>
@@ -109,4 +109,4 @@ export function VehicleRequests() {
   );
 }
 
-export default VehicleRequests;
+export default VenueRequests;

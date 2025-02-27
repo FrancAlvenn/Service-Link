@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken';
 import multer from 'multer';
 import Image from "../models/ImageModel.js";
 import { Op } from 'sequelize';
+import UserPreference from '../models/SettingsModels/UserPreferenceModel.js';
 
 // Set up storage for uploaded files
 const storage = multer.diskStorage({
@@ -84,6 +85,10 @@ export const register = async (req, res) => {
 
                 // Update the user's profile_image_id
                 await newUser.update({ profile_image_id: newImage.image_id });
+
+                 //Create the user_preference
+                await UserPreference.create({ user_id: newUser.id });
+
                 return res.status(200).json("User has been created with profile image!");
             } else {
                 return res.status(200).json("User has been created without a profile image!");
@@ -133,10 +138,13 @@ export const login = async (req, res) => {
             profileImage: image ? image.file_path : null // Include image path or null if no image found
         };
 
+        //Get the user_preference
+        const userPreference = await UserPreference.findOne({ where: { user_id: user.reference_number } });
+
         // Set the cookie and respond
         res.cookie("access_token", token, { httpOnly: true, sameSite: "none", secure: false })
            .status(200)
-           .json(response); // Send user data without password
+           .json(response, userPreference); // Send user data without password
 
     } catch (error) {
         console.error("Error during login:", error);
@@ -179,9 +187,13 @@ export const googleAuth = async (req, res) => {
                 profileImage: image ? image.file_path : null // Include image path or null if no image found
             };
 
+            //Get the user preference
+            const userPreference = await UserPreference.findOne({ where: { user_id: existingUser.reference_number } });
+
+
             return res.cookie("access_token", token, { httpOnly: true })
                 .status(200)
-                .json({response});
+                .json({response, userPreference});
         }
 
 
@@ -223,8 +235,10 @@ export const googleAuth = async (req, res) => {
             { order: [['user_id', 'DESC']]
         });
 
+        const referenceNumber = generateReferenceNumber(lastUser ? lastUser.user_id : 0);
+
         const newUser = await UserModel.create({
-            reference_number: generateReferenceNumber(lastUser ? lastUser.user_id : 0),
+            reference_number: referenceNumber,
             first_name: req.body.first_name,
             last_name: req.body.last_name,
             email: req.body.email,
@@ -233,6 +247,12 @@ export const googleAuth = async (req, res) => {
             status: "active", //change later to pending
             archived: false,
         });
+
+        //Create the user_preference and it doesn't already exists
+        const userPreference = await UserPreference.findOne({ where: { user_id: referenceNumber } });
+        if(!userPreference){
+            await UserPreference.create({ user_id: referenceNumber });
+        }
 
         return res.status(201).json("Account not activated, Please contact GSO office for account activation.");
 

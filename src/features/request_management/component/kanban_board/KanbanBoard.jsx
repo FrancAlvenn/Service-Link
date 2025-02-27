@@ -107,7 +107,7 @@ export function KanbanBoard() {
                         <span className='text-xs font-semibold whitespace-nowrap text-gray-700'>GROUP BY</span>
                             <Menu>
                                 <MenuHandler>
-                                    <button className="border border-slate-300 text-sm py-2 px-5 w-full max-w-[250px] rounded-md shadow-sm focus:outline-none focus:border-slate-500 hover:border-slate-400">
+                                    <button className="font-semibold border border-slate-300 text-sm py-2 px-5 w-full max-w-[250px] rounded-md shadow-sm focus:outline-none focus:border-slate-500 hover:border-slate-400">
                                         {requestType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                                     </button>
                                 </MenuHandler>
@@ -130,7 +130,7 @@ export function KanbanBoard() {
                                     ? requests.filter(task => task.status === column.name)
                                     : [];
                                 return (
-                                    <Column key={column.name} title={column.name} tasks={tasksForColumn} id={column.name} />
+                                    <Column key={column.name} title={column.name} tasks={tasksForColumn} id={column.name} requestType={requestType} setRequests={setRequests} />
                                 );
                             })}
                         </div>

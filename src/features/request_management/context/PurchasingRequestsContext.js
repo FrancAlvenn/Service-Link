@@ -40,6 +40,7 @@ export const PurchasingRequestsProvider = ({ children }) => {
       value={{
         purchasingRequests,
         fetchPurchasingRequests,
+        setPurchasingRequests
       }}
     >
       {children}

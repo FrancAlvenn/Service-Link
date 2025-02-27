@@ -37,6 +37,7 @@ export const VehicleRequestsProvider = ({ children }) => {
       value={{
         vehicleRequests,
         fetchVehicleRequests,
+        setVehicleRequests
       }}
     >
       {children}

@@ -3,7 +3,8 @@ import { Droppable } from 'react-beautiful-dnd'
 import Task from './Task';
 
 
-export default function Column({title, tasks, id}) {
+export default function Column({title, tasks, id, requestType, setRequests}) {
+  
   return (
     <div className='flex flex-col bg-gray-100 rounded-md  w-full min-w-[250px] h-[70vh] max-h-[80vh] overflow-y-scroll  custom-scrollbar'>
       <div
@@ -16,7 +17,7 @@ export default function Column({title, tasks, id}) {
           <div ref={provided.innerRef} {...provided.droppableProps} className="flex-grow min-h-[100px] rounded-sm">
             {tasks.map((task, index) => (
               <div key={task.id} className="mb-2">
-                <Task key={task.id} task={task} index={index} />
+                <Task key={task.id} task={task} index={index} requestType={requestType} setRequests={setRequests} />
               </div>
             ))}
             {provided.placeholder}

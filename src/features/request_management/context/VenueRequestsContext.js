@@ -39,6 +39,7 @@ export const VenueRequestsProvider = ({ children }) => {
       value={{
         venueRequests,
         fetchVenueRequests,
+        setVenueRequests
       }}
     >
       {children}

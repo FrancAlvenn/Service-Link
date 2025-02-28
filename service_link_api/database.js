@@ -12,9 +12,9 @@ const sequelize = new Sequelize("service-link", "root", "password", {
 (async () => {
   try {
     await sequelize.authenticate();
-    console.log("Connected to the MySQL database via Sequelize!");
+    console.log("✅ Connected to the MySQL database via Sequelize!");
   } catch (error) {
-    console.error("Unable to connect to the database:", error);
+    console.error("❌ Unable to connect to the database:", error);
   }
 })();
 

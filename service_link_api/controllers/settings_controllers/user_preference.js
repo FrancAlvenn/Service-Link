@@ -36,11 +36,17 @@ export const getUserPreference = async (req, res) => {
 export const updateUserPreference = async (req, res) => {
     try {
         const { user_id } = req.params;
-        const { kanban_config, theme, notifications_enabled, language } = req.body;
-        const [updated] = await UserPreference.update(
-            { kanban_config, theme, notifications_enabled, language },
-            { where: { user_id } }
-        );
+        const updateData = req.body;
+
+        // Dynamically build the update object from the request body
+        for (const [key, value] of Object.entries(req.body)) {
+            if (value !== undefined) {
+                updateData[key] = value;
+            }
+        }
+
+        const [updated] = await UserPreference.update(updateData, { where: { user_id } });
+
         if (updated) {
             const updatedPreference = await UserPreference.findOne({ where: { user_id } });
             res.status(200).json(updatedPreference);

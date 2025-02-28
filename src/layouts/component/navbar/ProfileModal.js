@@ -13,6 +13,7 @@ function ProfileModal() {
         // Remove user data and token from local storage
         localStorage.removeItem('user');
         localStorage.removeItem('access_token');
+        localStorage.removeItem("userPreference");
 
         // Remove user from AuthContext
         clearAuthData();

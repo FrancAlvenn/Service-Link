@@ -1,14 +1,16 @@
 import { Menu, MenuHandler, MenuItem, MenuList, Typography } from '@material-tailwind/react';
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import StatusModal from '../../../../utils/statusModal';
 import { DotsThree } from '@phosphor-icons/react';
 import axios from 'axios';
 import { AuthContext } from "../../../authentication";
 import ToastNotification from '../../../../utils/ToastNotification';
+import SidebarView from '../../../../components/sidebar/SidebarView';
 
 export default function Task({ task, index, requestType, setRequests }) {
   const { user } = useContext(AuthContext);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   async function handleArchiveRequest(task) {
     try {
@@ -29,6 +31,7 @@ export default function Task({ task, index, requestType, setRequests }) {
   }
 
   return (
+    <>
     <Draggable draggableId={task.reference_number.toString()} key={task.reference_number} index={index}>
       {(provided, snapshot) => (
         <div
@@ -38,8 +41,14 @@ export default function Task({ task, index, requestType, setRequests }) {
           {...provided.dragHandleProps}
         >
           <div className='flex justify-between items-center p-2'>
-            <Typography color="black" className="text-sm font-semibold">{task.title}</Typography>
-            
+            <Typography
+            color="black"
+            className="text-sm font-semibold cursor-pointer"
+            onClick={() => setSidebarOpen(true)}
+            >
+              {task.title}
+            </Typography>
+
             <Menu placement="bottom-end">
               <MenuHandler>
                 <DotsThree size={24} className="cursor-pointer hover:bg-gray-200 rounded-full"/>
@@ -51,16 +60,30 @@ export default function Task({ task, index, requestType, setRequests }) {
           </div>
 
           <div className='flex justify-between items-center px-2'>
-            <StatusModal input={task.status} referenceNumber={task.reference_number} requestType={requestType}/>
+            {snapshot.isDragging ? (
+              <div className="animate-spin h-5 w-5 border-b-2 border-gray-900 rounded-full"></div>
+            ) : (
+              <div className='' style={{ animationDelay: `${index * 5}s` }}>
+                <StatusModal input={task.status} referenceNumber={task.reference_number} requestType={requestType}/>
+              </div>
+            )}
           </div>
 
           <div className='flex justify-between items-center p-2 '>
-            <Typography color="black" className="text-xs">{task.reference_number}</Typography>
+            <Typography
+             color="black"
+             className="text-xs cursor-pointer"
+             onClick={() => setSidebarOpen(true)}
+             >
+              {task.reference_number}
+            </Typography>
           </div>
 
           {provided.placeholder}
         </div>
       )}
     </Draggable>
+    <SidebarView open={sidebarOpen} onClose={() => setSidebarOpen(false)} referenceNumber={task.reference_number} />
+    </>
   )
 }

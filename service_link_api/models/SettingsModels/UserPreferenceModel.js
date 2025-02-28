@@ -12,9 +12,9 @@ const UserPreference = sequelize.define('UserPreference', {
         allowNull: true,
         defaultValue: {
             columns: [
-                { id: 1, name: "Pending", color: "blue" },
-                { id: 2, name: "In Progress", color: "yellow"},
-                { id: 3, name: "Completed", color: "green" }
+                { id: 1, name: "Pending"},
+                { id: 2, name: "In Progress"},
+                { id: 3, name: "Completed"}
             ]
         }
     },

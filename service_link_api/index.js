@@ -60,6 +60,6 @@ app.use("/service_link_api/users", verifyToken, userRoutes)
 const PORT = process.env.PORT || 8080
 
 app.listen(PORT, async () => {
-    console.log("Connected");
+    console.log("✅ Connected");
     await syncModels(sequelize); // Sync all models
 })

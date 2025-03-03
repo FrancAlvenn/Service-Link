@@ -189,7 +189,18 @@ export function KanbanBoard() {
                     <DragDropContext onDragEnd={handleOnDragEnd}>
                         <div className="flex justify-between items-center flex-row gap-3">
                             {columns.map((column) => (
-                                <Column key={column.name} title={column.name} tasks={filteredTasks(requests.filter(task => task.status === column.name))} id={column.name} requestType={requestType} setRequests={setRequests} />
+                                <Column
+                                key={column.name}
+                                title={column.name}
+                                tasks={filteredTasks(requests.filter(task => task.status === column.name))}
+                                id={column.name}
+                                columnID={column.id}
+                                requestType={requestType}
+                                setRequests={setRequests}
+                                user={user}
+                                columns={columns}
+                                setColumns={setColumns}
+                                fetchData={fetchData} />
                             ))}
                         </div>
                     </DragDropContext>

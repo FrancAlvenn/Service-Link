@@ -80,7 +80,11 @@ export async function getAllVenueRequest(req, res) {
                 }
             ],
         });
-        res.status(200).json(requisitions);
+        if (!requisitions || requisitions.length === 0) {
+            res.status(200).json({ message: 'No venue requests found!' });
+        } else {
+            res.status(200).json(requisitions);
+        }
     } catch (error) {
         res.status(500).json({ message: `Error fetching venue requisitions`, error });
     }

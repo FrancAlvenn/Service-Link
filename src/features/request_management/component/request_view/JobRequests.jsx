@@ -95,7 +95,7 @@ export function JobRequests() {
           </table>
         </CardBody>
       </div>
-      <SidebarView open={sidebarOpen} onClose={() => setSidebarOpen(false)} referenceNumber={selectedReferenceNumber} />
+      <SidebarView open={sidebarOpen} onClose={() => setSidebarOpen(false)} referenceNumber={selectedReferenceNumber} requests={jobRequests} />
     </div>
   );
 }

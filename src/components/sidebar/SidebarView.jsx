@@ -13,7 +13,7 @@ import { UserContext } from "../../context/UserContext";
 import StatusModal from "../../utils/statusModal";
 import ApprovalStatusModal from "../../utils/approverStatusModal";
 
-const SidebarView = ({ open, onClose, referenceNumber }) => {
+const SidebarView = ({ open, onClose, referenceNumber, requests }) => {
   const [isOpen, setIsOpen] = useState(open);
   const { jobRequests, fetchJobRequests } = useContext(JobRequestsContext);
   const { purchasingRequests, fetchPurchasingRequests } = useContext(PurchasingRequestsContext);
@@ -60,7 +60,7 @@ const SidebarView = ({ open, onClose, referenceNumber }) => {
       }
 
       setRequestType(typeName);
-      setRequest(requests.find((req) => req.reference_number === referenceNumber));
+      setRequest({ ...requests.find((req) => req.reference_number === referenceNumber) });
     }
   }, [jobRequests, purchasingRequests, vehicleRequests, venueRequests, referenceNumber, isOpen]);
 
@@ -78,6 +78,11 @@ const SidebarView = ({ open, onClose, referenceNumber }) => {
   }, [open]);
 
   const handleClose = () => {
+    setRequest(null);
+    setRequestType(null);
+    setEditedPurpose("");
+    setEditedTitle("");
+
     setIsOpen(false);
     if (onClose) onClose();
   };
@@ -86,8 +91,8 @@ const SidebarView = ({ open, onClose, referenceNumber }) => {
 
   // Handle title editing
   const handleEditTitle = () => {
-    setIsEditingTitle(true);
     setEditedTitle(request.title);
+    setIsEditingTitle(true);
   };
 
   const handleSaveTitle = async () => {
@@ -107,6 +112,8 @@ const SidebarView = ({ open, onClose, referenceNumber }) => {
         withCredentials: true
       });
       fetchAllRequests();
+      setIsEditingTitle(false);
+      setEditedTitle("");
     } catch (error) {
       console.error("Update failed:", error);
       ToastNotification.error("Error", "Failed to update title.");
@@ -121,9 +128,10 @@ const SidebarView = ({ open, onClose, referenceNumber }) => {
   };
 
   const handleEditPurpose = () => {
-    setIsEditingPurpose(true);
     setEditedPurpose(request.purpose);
+    setIsEditingPurpose(true);
   };
+
 
   const handleSavePurpose = async () => {
     if (!editedPurpose.trim() || editedPurpose === request.purpose) {
@@ -142,6 +150,8 @@ const SidebarView = ({ open, onClose, referenceNumber }) => {
         withCredentials: true
       });
       fetchAllRequests();
+      setEditedPurpose("");
+      setIsEditingPurpose(false);
     } catch (error) {
       console.error("Update failed:", error);
       ToastNotification.error("Error", "Failed to update purpose.");

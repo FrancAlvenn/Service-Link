@@ -83,7 +83,7 @@ export async function getAllPurchasingRequests(req, res) {
         });
 
         if (!requests || requests.length === 0) {
-            res.status(404).json({ message: 'No purchasing requests found!' });
+            res.status(200).json({ message: 'No purchasing requests found!' });
         } else {
             res.status(200).json(requests);
         }

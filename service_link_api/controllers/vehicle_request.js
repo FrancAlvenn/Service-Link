@@ -65,7 +65,11 @@ export async function getAllVehicleRequest(req, res) {
                 }
             }
         });
-        res.status(200).json(requisitions);
+        if (!requisitions || requisitions.length === 0) {
+            res.status(200).json({ message: 'No vehicle requests found!' });
+        } else {
+            res.status(200).json(requisitions);
+        }
     } catch (error) {
         res.status(500).json({ message: `Error fetching vehicle requisitions`, error });
     }

@@ -61,6 +61,11 @@ const JobRequest = sequelize.define(
         allowNull: true,
         defaultValue: null
     },
+    authorized_access: {
+        type: DataTypes.JSON,
+        allowNull: true,
+        defaultValue: null
+    }
   },
   {
     sequelize,

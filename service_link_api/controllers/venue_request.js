@@ -41,6 +41,7 @@ export async function createVenueRequest(req, res){
             gso_director_approval: req.body.gso_director_approval || 'pending',
             operations_director_approval: req.body.operations_director_approval || 'pending',
             archived: req.body.archived || false,
+            authorized_users: req.body.requester || null,
           });
 
           const detailsData = req.body.details.map(detail => ({

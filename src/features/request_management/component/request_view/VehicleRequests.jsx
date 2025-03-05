@@ -34,7 +34,7 @@ export function VehicleRequests() {
   };
 
   // Filter data based on search query
-  const filteredRows = vehicleRequests.filter((row) => {
+  const filteredRows = (Array.isArray(vehicleRequests) ? vehicleRequests : []).filter((row) => {
     const rowString = Object.entries(row)
       .filter(([key]) => key !== "details")
       .map(([_, value]) => value)

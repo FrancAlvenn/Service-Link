@@ -34,7 +34,7 @@ export function VenueRequests() {
   };
 
   // Filter data based on search query
-  const filteredRows = venueRequests.filter((row) => {
+  const filteredRows = (Array.isArray(venueRequests) ? venueRequests : []).filter((row) => {
     const rowString = Object.entries(row)
       .filter(([key]) => key !== "details")
       .map(([_, value]) => value)

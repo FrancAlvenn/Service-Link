@@ -25,7 +25,7 @@ export function JobRequests() {
   };
 
   // Filter data based on search query
-  const filteredRows = jobRequests.filter((row) => {
+  const filteredRows = (Array.isArray(jobRequests) ? jobRequests : []).filter((row) => {
     const rowString = Object.entries(row)
       .filter(([key]) => key !== "details")
       .map(([_, value]) => value)

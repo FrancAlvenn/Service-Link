@@ -62,6 +62,11 @@ const PurchasingRequest = sequelize.define("PurchasingRequest", {
     remarks: {
         type: DataTypes.TEXT,
         defaultValue: null,
+    },
+    authorized_access: {
+        type: DataTypes.JSON,
+        allowNull: true,
+        defaultValue: null
     }
 }, {
     modelName: "PurchasingRequest",

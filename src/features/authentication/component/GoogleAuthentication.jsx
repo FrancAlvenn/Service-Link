@@ -90,17 +90,13 @@ function GoogleAuthLogin() {
                 <GoogleLogin
                     onSuccess={onSuccess}
                     onError={onError}
-                    // useOneTap  // not added cause it doenst work need further research on this one tap login
-                    render={(renderProps) => (
-                        <button
-                            className="w-full flex items-center justify-between px-5 py-2 border border-gray-300 rounded-md shadow-sm text-xs sm:text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-                            onClick={renderProps.onClick}
-                            disabled={renderProps.disabled}
-                        >
-                            <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google Logo" width="20" />
-                            <p className="w-full text-center">Sign in with Google</p>
-                        </button>
-                    )}
+                    prompt= 'select_account'
+                    auto_select={false}
+                    login_hint='dyci.edu.ph'
+                    width={"350"}
+                    // type='standard'
+                    // useOneTap  // not added cause it doesn't work need further research on this one tap login
+                    ux_mode='popup'
                 />
             </div>
         </GoogleOAuthProvider>

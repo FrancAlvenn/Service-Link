@@ -96,6 +96,11 @@ const VenueRequest = sequelize.define(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+    authorized_access: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      defaultValue: null
+    }
   },
   {
     tableName: "venue_requests",

@@ -34,7 +34,7 @@ export function PurchasingRequests() {
   };
 
   // Filter data based on search query
-  const filteredRows = purchasingRequests.filter((row) => {
+  const filteredRows = (Array.isArray(purchasingRequests) ? purchasingRequests : []).filter((row) => {
     const rowString = Object.entries(row)
       .filter(([key]) => key !== "details")
       .map(([_, value]) => value)

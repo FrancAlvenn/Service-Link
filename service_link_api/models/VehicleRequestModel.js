@@ -94,6 +94,11 @@ const VehicleRequest = sequelize.define("VehicleRequest", {
   archived: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
+  },
+  authorized_access: {
+    type: DataTypes.JSON,
+    allowNull: true,
+    defaultValue: null
   }
 }, {
   tableName: "vehicle_requests",

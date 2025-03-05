@@ -167,7 +167,7 @@ function LoginForm() {
         <div className='flex flex-col min-h-[94vh]'>
         <AuthHeader/>
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md flex-grow">
-            <div className="bg-white py-8 px-2  sm:rounded-lg sm:px-10" >
+            <div className="w-full max-w-[430px] bg-white py-8 px-2  sm:rounded-lg sm:px-10" >
 
                 <div>
                     <h1 className='text-3xl font-medium text-center mb-4'>Welcome to Service Link</h1>

@@ -34,6 +34,7 @@ export async function createPurchasingRequest(req, res) {
             operations_director_approval: req.body.operations_director_approval,
             archived: req.body.archived || false,
             remarks: req.body.remarks || null,
+            authorized_users: req.body.requester || null,
         }, { transaction });
 
         const detailsData = req.body.details.map(detail => ({
@@ -116,86 +117,36 @@ export async function updatePurchasingRequest(req, res) {
     try {
         transaction = await sequelize.transaction();
 
-        const [updatedRows] = await PurchasingRequestModel.update(
-            {
-                title: req.body.title,
-                supply_category: req.body.supply_category,
-                date_required: req.body.date_required,
-                department: req.body.department,
-                purpose: req.body.purpose,
-                requester: req.body.requester,
-                status: req.body.status,
-                immediate_head_approval: req.body.immediate_head_approval,
-                gso_director_approval: req.body.gso_director_approval,
-                operations_director_approval: req.body.operations_director_approval,
-                archived: req.body.archived,
-                remarks: req.body.remarks || null,
-            },
-            {
-                where: {
-                    reference_number:
-                    req.params.reference_number
-                },
-                transaction,
-            }
-        );
+        const { details, ...updateData } = req.body;
 
-        if (updatedRows === 0) {
-            return res.status(404).json({
-                message: `No purchasing request found with reference number ${req.params.reference_number}`,
-            });
-        }
-
-        const existingDetails = await PurchasingRequestDetails.findAll({
-            where: { purchasing_request_id: req.params.reference_number },
-            attributes: ['id'],
+        // Update only provided fields dynamically
+        const [updatedRows] = await PurchasingRequestModel.update(updateData, {
+            where: { reference_number: req.params.reference_number },
             transaction,
         });
 
-        const existingDetailIds = existingDetails.map((detail) => detail.id);
-
-        const incomingDetailIds = req.body.details
-            .filter((detail) => detail.id)
-            .map((detail) => detail.id);
-
-        const detailsToDelete = existingDetailIds.filter(
-            (id) => !incomingDetailIds.includes(id)
-        );
-
-        if (detailsToDelete.length > 0) {
-            await PurchasingRequestDetails.destroy({
-                where: { id: detailsToDelete },
-                transaction,
-            });
+        if (updatedRows === 0) {
+            await transaction.rollback();
+            return res.status(404).json({ message: `No purchasing request found with reference number ${req.params.reference_number}` });
         }
 
-        //If detail has id then update, else if its a new detail then create
-        for (const detail of req.body.details) {
-            if (detail.id) {
-                await PurchasingRequestDetails.update(
-                    {
-                        quantity: detail.quantity || null,
-                        particulars: detail.particulars,
-                        description: detail.description,
-                        remarks: detail.remarks || null,
-                    },
-                    {
-                        where: { id: detail.id },
-                        transaction,
-                    }
-                );
-            } else {
-                await PurchasingRequestDetails.create(
-                    {
-                        purchasing_request_id: req.params.reference_number,
-                        quantity: detail.quantity || null,
-                        particulars: detail.particulars,
-                        description: detail.description,
-                        remarks: detail.remarks || null,
-                    },
-                    { transaction }
-                );
-            }
+        if (details && Array.isArray(details)) {
+            // Delete old details
+            await PurchasingRequestDetails.destroy({
+                where: { purchasing_request_id: req.params.reference_number },
+                transaction,
+            });
+
+            // Insert new details
+            const detailsData = details.map(detail => ({
+                purchasing_request_id: req.params.reference_number,
+                quantity: detail.quantity || null,
+                particulars: detail.particulars,
+                description: detail.description,
+                remarks: detail.remarks || null,
+            }));
+
+            await PurchasingRequestDetails.bulkCreate(detailsData, { transaction });
         }
 
         await transaction.commit();
@@ -209,12 +160,14 @@ export async function updatePurchasingRequest(req, res) {
         });
 
         res.status(200).json({ message: `Purchasing request updated successfully!` });
+
     } catch (error) {
         if (transaction) await transaction.rollback();
         console.error(error);
         res.status(500).json({ message: `Error updating purchasing request`, error });
     }
 }
+
 
 //Create new detail
 export async function createNewDetail(req, res) {

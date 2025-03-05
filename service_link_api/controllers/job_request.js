@@ -34,6 +34,7 @@ export async function createJobRequest(req, res){
           operations_director_approval : req.body.operations_director_approval,
           archived : req.body.archived || false,
           remarks : req.body.remarks || null,
+          authorized_access : [req.body.requester],
         }, { transaction });
 
         const detailsData = req.body.details.map(detail => ({
@@ -123,28 +124,13 @@ export async function updateJobRequest(req, res) {
     try {
         transaction = await sequelize.transaction();
 
-        const [updatedRows] = await JobRequestModel.update(
-            {
-            title: req.body.title,
-            date_required: req.body.date_required,
-            purpose: req.body.purpose,
-            requester: req.body.requester,
-            department: req.body.department,
-            status: req.body.status,
-            immediate_head_approval: req.body.immediate_head_approval,
-            gso_director_approval: req.body.gso_director_approval,
-            operations_director_approval: req.body.operations_director_approval,
-            archived: req.body.archived,
-            remarks : req.body.remarks || null,
-            },
-            {
-            where: {
-                reference_number:
-                req.params.reference_number,
-            },
+        const { details, ...updateData } = req.body;
+
+        // Update job request dynamically
+        const [updatedRows] = await JobRequestModel.update(updateData, {
+            where: { reference_number: req.params.reference_number },
             transaction,
-            }
-        );
+        });
 
         if (updatedRows === 0) {
             return res.status(404).json({
@@ -152,86 +138,43 @@ export async function updateJobRequest(req, res) {
             });
         }
 
-        //Get the IDs of the current details in the database
-        const existingDetails = await JobRequestDetails.findAll({
-        where: { job_request_id: req.params.reference_number },
-        attributes: ['id'],
-        transaction,
-        });
-
-        const existingDetailIds = existingDetails.map((detail) => detail.id);
-
-        // Extract IDs from incoming data
-        const incomingDetailIds = req.body.details
-        .filter((detail) => detail.id) // Only include those with IDs
-        .map((detail) => detail.id);
-
-        // Delete details that are no longer in the request body
-        const detailsToDelete = existingDetailIds.filter(
-        (id) => !incomingDetailIds.includes(id)
-        );
-
-        if (detailsToDelete.length > 0) {
-        await JobRequestDetails.destroy({
-            where: { id: detailsToDelete },
-            transaction,
-        });
-        }
-
-        //If detail has id then update, else if its a new detail then create
-        for (const detail of req.body.details) {
-        if (detail.id) {
-            // Update existing detail
-            await JobRequestDetails.update(
-            {
-                quantity: detail.quantity || null,
-                particulars: detail.particulars,
-                description: detail.description,
-                remarks: detail.remarks || null,
-            },
-            {
-                where: { id: detail.id },
+        if (details && Array.isArray(details)) {
+            // Delete old details
+            await JobRequestDetails.destroy({
+                where: { job_request_id: req.params.reference_number },
                 transaction,
-            }
-            );
-        } else {
-            // Create new detail
-            await JobRequestDetails.create(
-            {
+            });
+
+            // Insert new details
+            const detailsData = details.map(detail => ({
                 job_request_id: req.params.reference_number,
                 quantity: detail.quantity || null,
                 particulars: detail.particulars,
                 description: detail.description,
                 remarks: detail.remarks || null,
-            },
-            { transaction }
-            );
+            }));
+
+            await JobRequestDetails.bulkCreate(detailsData, { transaction });
         }
-        }
-    
-        // Commit transaction
+
         await transaction.commit();
 
-        // Log the update action
         createLog({
-        action: 'update',
-        performed_by: req.body.requester,
-        target: req.params.reference_number,
-        title: 'Request Updated',
-        details: `Job Request ${req.params.reference_number} updated successfully!`,
+            action: 'update',
+            performed_by: req.body.requester,
+            target: req.params.reference_number,
+            title: 'Request Updated',
+            details: `Job Request ${req.params.reference_number} updated successfully!`,
         });
 
-        //Success Message
         res.status(200).json({ message: `Job request updated successfully!` });
-
     } catch (error) {
-        // Rollback the transaction in case of error
         if (transaction) await transaction.rollback();
-
         console.error(error);
         res.status(500).json({ message: `Encountered an internal error: ${error.message}` });
     }
 }
+
 
 //Create new detail
 export async function createNewDetail(req, res) {

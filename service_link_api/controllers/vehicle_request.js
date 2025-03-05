@@ -37,7 +37,8 @@ export async function createVehicleRequest(req, res){
             remarks : req.body.remarks,
             immediate_head_approval : req.body.immediate_head_approval,
             gso_director_approval : req.body.gso_director_approval,
-            operations_director_approval : req.body.operations_director_approval
+            operations_director_approval : req.body.operations_director_approval,
+            authorized_access : [req.body.requester],
         });
 
         res.status(201).json({message: `Request created successfully!`});
@@ -101,52 +102,44 @@ export async function getVehicleRequestById(req, res) {
 
 // Update Vehicle Request
 export async function updateVehicleRequest(req, res) {
-    try{
-        const [updatedRows] = await VehicleRequestModel.update({
-            title : req.body.title,
-            vehicle_requested : req.body.vehicle_requested,
-            date_filled : req.body.date_filled,
-            date_of_trip : req.body.date_of_trip,
-            time_of_departure : req.body.time_of_departure,
-            time_of_arrival : req.body.time_of_arrival,
-            number_of_passengers : req.body.number_of_passengers,
-            destination : req.body.destination,
-            purpose : req.body.purpose,
-            requester : req.body.requester,
-            designation : req.body.designation,
-            status : req.body.status,
-            vehicle_id : req.body.vehicle_id,
-            remarks : req.body.remarks,
-            immediate_head_approval : req.body.immediate_head_approval,
-            gso_director_approval : req.body.gso_director_approval,
-            operations_director_approval : req.body.operations_director_approval
-        },
-        {
-            where: {
-                reference_number : req.params.reference_number
-            },
+    let transaction;
+    try {
+        transaction = await sequelize.transaction();
+
+        const { reference_number } = req.params;
+        const updateData = { ...req.body }; // Only update provided fields
+
+        const [updatedRows] = await VehicleRequestModel.update(updateData, {
+            where: { reference_number },
+            transaction,
         });
 
-         // If no rows were updated, it means the reference number didn't match any requisition
-         if (updatedRows === 0) {
-            return res.status(404).json({ message: `No requisition found with reference number ${req.body.reference_number}` });
+        // If no rows were updated, return 404
+        if (updatedRows === 0) {
+            await transaction.rollback();
+            return res.status(404).json({ message: `No requisition found with reference number ${reference_number}` });
         }
 
-        console.log(req.body.vehicle_requested)
-        res.status(200).json({ message: `Request updated successfully!`})
+        await transaction.commit();
 
-        //Log the request
+        // Log the update
         createLog({
             action: 'update',
             performed_by: req.body.requester,
-            target: req.params.reference_number,
+            target: reference_number,
             title: 'Request Updated',
-            details: `Vehicle Requisition ${req.params.reference_number} updated successfully!`,
+            details: `Vehicle Requisition ${reference_number} updated successfully!`,
         });
-    }catch (error){
-        res.status(500).json({ message: `Encountered an internal error ${error}`})
+
+        res.status(200).json({ message: `Request updated successfully!` });
+
+    } catch (error) {
+        if (transaction) await transaction.rollback();
+        console.error(error);
+        res.status(500).json({ message: `Encountered an internal error`, error });
     }
 }
+
 
 // Update Request Status
 export async function updateRequestStatus(req, res) {

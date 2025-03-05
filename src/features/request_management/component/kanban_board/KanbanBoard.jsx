@@ -9,6 +9,7 @@ import { VehicleRequestsContext } from '../../context/VehicleRequestsContext';
 import { PurchasingRequestsContext } from '../../context/PurchasingRequestsContext';
 import axios from 'axios';
 import { AuthContext } from '../../../authentication';
+import ToastNotification from '../../../../utils/ToastNotification';
 
 export function KanbanBoard() {
     const [columns, setColumns] = useState([]);
@@ -98,13 +99,18 @@ export function KanbanBoard() {
 
     const filteredTasks = (tasks) => {
         return tasks.filter(task =>
-            task.title.toLowerCase().includes(searchQuery) || 
+            task.title.toLowerCase().includes(searchQuery) ||
             task.reference_number.toLowerCase().includes(searchQuery)
         );
     };
 
     const addColumn = async (status) => {
         if (!status) return;
+
+        if(columns.some(column => column.name === status)){
+            ToastNotification.info('Notice!', 'Column already exists');
+            return;
+        };
 
         const newColumn = { id: columns.length + 1, name: status};
         const updatedColumns = [...columns, newColumn];
@@ -192,7 +198,7 @@ export function KanbanBoard() {
                                 <Column
                                 key={column.name}
                                 title={column.name}
-                                tasks={filteredTasks(requests.filter(task => task.status === column.name))}
+                                tasks={filteredTasks((Array.isArray(requests) ? requests : []).filter(task => task.status === column.name))}
                                 id={column.name}
                                 columnID={column.id}
                                 requestType={requestType}

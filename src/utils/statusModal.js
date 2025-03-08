@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import axios from "axios";
-import { Menu, MenuHandler, MenuList, MenuItem, Typography, Chip } from "@material-tailwind/react";
+import { Menu, MenuHandler, MenuList, MenuItem, Typography, Chip, Dialog, DialogHeader, DialogBody, DialogFooter, Input, Button } from "@material-tailwind/react";
 import { PlusCircle } from "@phosphor-icons/react";
 import AuthContext from "../features/authentication/context/AuthContext";
 import ToastNotification from "./ToastNotification";
@@ -11,7 +11,10 @@ import { VenueRequestsContext } from "../features/request_management/context/Ven
 
 function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
   const [statusOptions, setStatusOptions] = useState([]); 
-  const [currentStatus, setCurrentStatus] = useState(input); 
+  const [currentStatus, setCurrentStatus] = useState(input);
+  const [selectedStatus, setSelectedStatus] = useState(null); // Status clicked
+  const [actionTaken, setActionTaken] = useState(""); // Action input
+  const [openModal, setOpenModal] = useState(false); // Controls popup visibility
 
   const { user } = useContext(AuthContext);
 
@@ -51,31 +54,66 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
     setCurrentStatus(input);
   }, [input]);
 
-  // Handle status change
-  const handleStatusChange = async (status) => {
-    try {
-      setCurrentStatus(status);
-
-      const response = await axios.patch(
-        `/${requestType}/${referenceNumber}/status`,
-        { requester: user.reference_number, status },
-        { withCredentials: true }
-      );
-
-      if (response.status === 200) {
-        ToastNotification.success("Success!", response.data.message);
-        fetchAllRequests();
-
-        // Trigger parent update if provided
-        if (onStatusUpdate) {
-          onStatusUpdate(status);
-        }
-      }
-    } catch (error) {
-      ToastNotification.error("Error!", "Failed to update status.");
-      console.error("Status update failed:", error);
-    }
+  // Handle status selection
+  const handleStatusClick = (status) => {
+    setSelectedStatus(status);
+    setActionTaken(""); // Reset input field
+    setOpenModal(true); // Show popup
   };
+
+  // Confirm status change
+  const confirmStatusChange = async () => {
+    if (!actionTaken.trim()) {
+        ToastNotification.error("Error!", "Please provide an action taken.");
+        return;
+    }
+
+    try {
+        setCurrentStatus(selectedStatus);
+        setOpenModal(false); // Close popup
+
+        // Update the request status
+        const response = await axios({
+          method: "patch",
+          url: `/${requestType}/${referenceNumber}/status`,
+          data: {
+            requester: user.reference_number,
+            status: selectedStatus,
+            action: actionTaken
+          },
+          withCredentials: true
+        })
+
+        if (response.status === 200) {
+            ToastNotification.success("Success!", response.data.message);
+            fetchAllRequests();
+
+            if (onStatusUpdate) {
+                onStatusUpdate(selectedStatus);
+            }
+
+            // Log the request activity
+            await axios({
+              method: "post",
+              url: "/request_activity",
+              data: {
+                reference_number: referenceNumber,
+                visibility: "external",
+                type: "status_change",
+                action: `Status updated to <i>${selectedStatus}</i>`,
+                details: actionTaken,
+                performed_by: user.reference_number,
+              },
+              withCredentials: true
+            })
+            // ToastNotification.success("Success!", "Activity logged successfully.");
+        }
+    } catch (error) {
+        ToastNotification.error("Error!", "Failed to update status or log activity.");
+        console.error("Status update or activity log failed:", error);
+    }
+};
+
 
   return (
     <div className="flex flex-col gap-2">
@@ -89,28 +127,27 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
             color={statusOptions.find(option => option.status === currentStatus)?.color || "gray"}
           />
         </MenuHandler>
-        <MenuList className="mt-2 divide-y divide-gray-100 rounded-md bg-white shadow-lg shadow-topping ring-2 ring-black/5 border-none">
+        <MenuList className="mt-2 divide-y divide-gray-100 rounded-md bg-white shadow-lg shadow-topping ring-2 ring-black/5 border-none w-fit">
           {statusOptions.length > 0 ? (
             <div className="flex flex-col">
               <div className="grid grid-cols-2 gap-2">
                 {statusOptions.map((option) => (
                   <MenuItem
                     key={option.id}
-                    className="flex justify-between items-center px-4 py-2 text-xs"
-                    onClick={() => handleStatusChange(option.status)}
+                    className="flex justify-between items-center px-4 py-2 text-xs cursor-pointer"
+                    onClick={() => handleStatusClick(option.status)}
                   >
                     <Chip
                       size="sm"
                       variant="ghost"
                       value={option.status}
-                      className="text-center w-fit cursor-pointer"
+                      className="text-center w-fit"
                       color={option.color}
-                    >
-                      {option.status}
-                    </Chip>
+                    />
                   </MenuItem>
                 ))}
               </div>
+
               <div className="flex items-center mt-2 py-2 justify-center text-xs rounded-lg bg-gray-100">
                 <Typography
                   color="blue-gray"
@@ -128,6 +165,32 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
           )}
         </MenuList>
       </Menu>
+
+      {/* Status Confirmation Modal */}
+      <Dialog open={openModal} handler={setOpenModal} size="sm">
+        <DialogHeader>Confirm Status Change</DialogHeader>
+        <DialogBody>
+          <div className="flex flex-col gap-4">
+            <Typography variant="small">
+              You selected <strong>{selectedStatus}</strong>. Please enter the action taken before proceeding.
+            </Typography>
+            <Input
+              type="text"
+              placeholder="Action Taken"
+              value={actionTaken}
+              onChange={(e) => setActionTaken(e.target.value)}
+            />
+          </div>
+        </DialogBody>
+        <DialogFooter>
+          <Button color="gray" onClick={() => setOpenModal(false)} className="mr-2 bg-gray-500 cursor-pointer">
+            Cancel
+          </Button>
+          <Button onClick={confirmStatusChange} disabled={!actionTaken.trim()} className="bg-blue-500 cursor-pointer">
+            Confirm
+          </Button>
+        </DialogFooter>
+      </Dialog>
     </div>
   );
 }

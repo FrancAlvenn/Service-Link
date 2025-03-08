@@ -12,6 +12,9 @@ import ParticularsTab from "./ParticularsTab";
 import { UserContext } from "../../context/UserContext";
 import StatusModal from "../../utils/statusModal";
 import ApprovalStatusModal from "../../utils/approverStatusModal";
+import { Button } from "@material-tailwind/react";
+import RequestAccess from "./RequestAccess";
+import ActivityTab from "./ActivityTab";
 
 const SidebarView = ({ open, onClose, referenceNumber, requests }) => {
   const [isOpen, setIsOpen] = useState(open);
@@ -30,6 +33,7 @@ const SidebarView = ({ open, onClose, referenceNumber, requests }) => {
   const [isEditingPurpose, setIsEditingPurpose] = useState(false);
   const [editedTitle, setEditedTitle] = useState("");
   const [editedPurpose, setEditedPurpose] = useState("");
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
   // Fetch relevant request based on reference number
   useEffect(() => {
@@ -61,8 +65,20 @@ const SidebarView = ({ open, onClose, referenceNumber, requests }) => {
 
       setRequestType(typeName);
       setRequest({ ...requests.find((req) => req.reference_number === referenceNumber) });
+
+      const foundRequest = requests.find((req) => req.reference_number === referenceNumber);
+      setRequestType(typeName);
+      setRequest(foundRequest);
+
+      // Check if user is authorized
+      if (foundRequest?.authorized_access) {
+        setIsAuthorized(foundRequest.authorized_access.includes(user.reference_number));
+      } else {
+        setIsAuthorized(false);
+      }
+
     }
-  }, [jobRequests, purchasingRequests, vehicleRequests, venueRequests, referenceNumber, isOpen]);
+  }, [jobRequests, purchasingRequests, vehicleRequests, venueRequests, referenceNumber, isOpen, user]);
 
   // Fetch all requests
   const fetchAllRequests = () => {
@@ -160,6 +176,8 @@ const SidebarView = ({ open, onClose, referenceNumber, requests }) => {
     }
   };
 
+  const [openRequestAccess, setOpenRequestAccess] = useState(false);
+
   return (
     <>
       {/* Overlay */}
@@ -177,7 +195,8 @@ const SidebarView = ({ open, onClose, referenceNumber, requests }) => {
           <div className="flex flex-col overflow-y-auto h-full">
             {/* Editable Title */}
             <h2 className="text-xl font-bold mb-4">
-              {isEditingTitle ? (
+            {isAuthorized ? (
+              isEditingTitle ? (
                 <input
                   type="text"
                   className="border w-full border-gray-300 rounded-md p-2"
@@ -189,44 +208,51 @@ const SidebarView = ({ open, onClose, referenceNumber, requests }) => {
                 />
               ) : (
                 <p onClick={handleEditTitle} className="w-full cursor-pointer">{request.title}</p>
-              )}
+              )
+            ): (
+              <p className="w-full cursor-pointer">{request.title}</p>
+            )}
             </h2>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3 mb-5">
+                <div title="Request Status">
+                  <StatusModal
+                    input={request.status}
+                    referenceNumber={request.reference_number}
+                    requestType={requestType}
+                    title="Status"
+                  />
+                </div>
 
-            <div className="flex items-center gap-3 mb-5">
-              <div title="Request Status">
-                <StatusModal
-                  input={request.status}
-                  referenceNumber={request.reference_number}
-                  requestType={requestType}
-                  title="Status"
-                />
+                <div title="Immediate Head Approval">
+                  <ApprovalStatusModal
+                    input={request.immediate_head_approval}
+                    referenceNumber={request.reference_number}
+                    approvingPosition="immediate_head_approval"
+                    requestType={requestType}
+                  />
+                </div>
+
+                <div title="Operations Director Approval">
+                  <ApprovalStatusModal
+                    input={request.operations_director_approval}
+                    referenceNumber={request.reference_number}
+                    approvingPosition="operations_director_approval"
+                    requestType={requestType}
+                  />
+                </div>
+
+                <div title="GSO Director Approval">
+                  <ApprovalStatusModal
+                    input={request.gso_director_approval}
+                    referenceNumber={request.reference_number}
+                    approvingPosition="gso_director_approval"
+                    requestType={requestType}
+                  />
+                </div>
               </div>
-
-              <div title="Immediate Head Approval">
-                <ApprovalStatusModal
-                  input={request.immediate_head_approval}
-                  referenceNumber={request.reference_number}
-                  approvingPosition="immediate_head_approval"
-                  requestType={requestType}
-                />
-              </div>
-
-              <div title="Operations Director Approval">
-                <ApprovalStatusModal
-                  input={request.operations_director_approval}
-                  referenceNumber={request.reference_number}
-                  approvingPosition="operations_director_approval"
-                  requestType={requestType}
-                />
-              </div>
-
-              <div title="GSO Director Approval">
-                <ApprovalStatusModal
-                  input={request.gso_director_approval}
-                  referenceNumber={request.reference_number}
-                  approvingPosition="gso_director_approval"
-                  requestType={requestType}
-                />
+              <div className="flex items-center mb-5">
+                <RequestAccess selectedRequest={request} />
               </div>
             </div>
 
@@ -241,16 +267,20 @@ const SidebarView = ({ open, onClose, referenceNumber, requests }) => {
               </span>
               <span className="flex flex-col gap-3">
                 <p className="text-sm font-semibold text-gray-600">Purpose</p>
-                {isEditingPurpose ? (
-                  <textarea
-                    className="text-sm p-2 border w-full border-gray-300 rounded-md"
-                    value={editedPurpose}
-                    onChange={(e) => setEditedPurpose(e.target.value)}
-                    onBlur={handleSavePurpose}
-                    autoFocus
-                  />
-                ) : (
-                  <p onClick={handleEditPurpose} className="text-sm cursor-pointer">{request.purpose}</p>
+                {isAuthorized ? (
+                  isEditingPurpose ? (
+                    <textarea
+                      className="text-sm p-2 border w-full border-gray-300 rounded-md"
+                      value={editedPurpose}
+                      onChange={(e) => setEditedPurpose(e.target.value)}
+                      onBlur={handleSavePurpose}
+                      autoFocus
+                    />
+                  ) : (
+                    <p onClick={handleEditPurpose} className="text-sm cursor-pointer">{request.purpose}</p>
+                  )
+                ): (
+                  <p className="text-sm cursor-pointer">{request.purpose}</p>
                 )}
               </span>
             </div>
@@ -281,7 +311,10 @@ const SidebarView = ({ open, onClose, referenceNumber, requests }) => {
               requestType={requestType}
               fetchRequests={fetchAllRequests}
               user={user}
+              isAuthorized={isAuthorized}
             />
+
+            <ActivityTab referenceNumber={referenceNumber} />
           </div>
         ) : (
           <div className="flex justify-center items-center h-full text-xl text-gray-600">No request found.</div>

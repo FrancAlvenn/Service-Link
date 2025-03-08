@@ -17,6 +17,16 @@ function ApprovalStatusModal({ input, referenceNumber, requestType, approvingPos
     { id: 3, status: "Pending", color: "amber" }
   ];
 
+  // Define a mapping of approval roles to readable titles
+  const approvalTitles = {
+    immediate_head_approval: "Immediate Head",
+    gso_director_approval: "GSO Director",
+    operations_director_approval: "Operations Director"
+  };
+
+  // Get the readable title or default to "Unknown"
+  const approvalTitle = approvalTitles[approvingPosition] || "Unknown";
+
   const [currentStatus, setCurrentStatus] = useState(input);
 
   // Sync status when `input` prop changes
@@ -44,6 +54,23 @@ function ApprovalStatusModal({ input, referenceNumber, requestType, approvingPos
           onStatusUpdate(status);
         }
       }
+
+      // Log the request activity
+      await axios({
+        method: "post",
+        url: "/request_activity",
+        data: {
+          reference_number: referenceNumber,
+          visibility: "external",
+          type: "approval",
+          action: `${approvalTitle} approval updated to <i>${status}</i>`,
+          details: "Status updated",
+          performed_by: user.reference_number,
+        },
+        withCredentials: true
+      })
+
+
     } catch (error) {
       ToastNotification.error("Error!", "Failed to update status.");
       console.error("Status update failed:", error);

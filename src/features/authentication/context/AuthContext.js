@@ -24,15 +24,18 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState( JSON.parse(localStorage.getItem("user")) || null);
   const [isAuthenticated, setIsAuthenticated] = useState(localStorage.getItem("isAuthenticated") === "true");
+  const [userPreference, setUserPreference] = useState(localStorage.getItem("userPreference") || null);
 
     // On initial load, check if authentication data is available in localStorage
     useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user'));
     const storedAuthStatus = localStorage.getItem('isAuthenticated') === 'true';
+    const storedUserPreference = localStorage.getItem('userPreference');
 
     if (storedAuthStatus) {
         setUser(storedUser);
         setIsAuthenticated(true);
+        setUserPreference(storedUserPreference);
     }
     }, []);
 
@@ -57,12 +60,14 @@ export const AuthProvider = ({ children }) => {
   const clearAuthData = () => {
     setUser(null);
     setIsAuthenticated(false);
+    setUserPreference(null);
     localStorage.removeItem("user");
     localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("userPreference");
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, setAuthData, clearAuthData }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, userPreference, setUserPreference, setAuthData, clearAuthData }}>
       {children}
     </AuthContext.Provider>
   );

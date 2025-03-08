@@ -1,8 +1,9 @@
-import React, { useReducer } from "react";
+import React, { useContext, useReducer, useEffect } from "react";
 import { Typography, Menu, MenuHandler, MenuList, MenuItem } from "@material-tailwind/react";
-import { ClipboardText, Ticket, ArchiveBox, UsersThree, CaretDown, ArrowsLeftRight, CaretLeft, CaretRight } from "@phosphor-icons/react";
+import { ClipboardText, Ticket, ArchiveBox, UsersThree, CaretDown, CaretLeft, CaretRight } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import ControlRenderer from "./component/sidebar/ControlRenderer";
+import { AuthContext } from "../features/authentication";
 
 const options = {
   "Requests Management": <ClipboardText size={20} />,
@@ -18,12 +19,6 @@ const routeMap = {
   "Employee Management": "/workspace/employee-management",
 };
 
-const initialState = {
-  openDropdown: false,
-  selectedControl: "Requests Management",
-  isMinimized: false,  // New state to control sidebar minimization
-};
-
 function reducer(state, action) {
   switch (action.type) {
     case "TOGGLE_DROPDOWN":
@@ -31,15 +26,29 @@ function reducer(state, action) {
     case "SELECT_CONTROL":
       return { ...state, selectedControl: action.payload, openDropdown: true };
     case "TOGGLE_MINIMIZE":
-      return { ...state, isMinimized: !state.isMinimized };
+      const newState = { ...state, isMinimized: !state.isMinimized };
+      localStorage.setItem("sidebarMinimized", JSON.stringify(newState.isMinimized)); // Persist state
+      return newState;
     default:
       return state;
   }
 }
 
 function Sidebar() {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const { userPreference } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  // Get sidebar state from localStorage (or fallback to userPreference)
+  const initialSidebarState = JSON.parse(localStorage.getItem("sidebarMinimized"));
+  const isMinimized = initialSidebarState ?? (userPreference?.sidebar_view === false);
+
+  const initialState = {
+    openDropdown: false,
+    selectedControl: "Requests Management",
+    isMinimized, // Load from localStorage
+  };
+
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   const handleSelection = (control) => {
     dispatch({ type: "SELECT_CONTROL", payload: control });
@@ -48,71 +57,62 @@ function Sidebar() {
 
   return (
     <div
-      className={`bg-white flex flex-col h-full p-4 transition-all   ${
+      className={`bg-white flex flex-col h-full p-4 transition-all ${
         state.isMinimized ? "w-12" : "w-72 justify-center"
       } shadow-xl shadow-black-900/5 rounded-none rounded-tr-lg rounded-br-lg`}
     >
       <div className={`mt-0 flex items-center ${state.isMinimized ? "justify-center" : "justify-between"}`}>
         {!state.isMinimized && (
-          <Typography color="black" className={`text-lg font-bold whitespace-nowrap font-body`}>
+          <Typography color="black" className="text-lg font-bold whitespace-nowrap font-body">
             Requests Management
           </Typography>
         )}
-        <button
-          className="text-xl"
-          onClick={() => dispatch({ type: "TOGGLE_MINIMIZE" })}
-        >
+        <button className="text-xl" onClick={() => dispatch({ type: "TOGGLE_MINIMIZE" })}>
           {state.isMinimized ? <CaretRight size={20} /> : <CaretLeft size={20} />}
         </button>
       </div>
 
       <hr className="my-5 border-gray-400" />
 
-      {/* Show dropdown and other menu items only if sidebar is not minimized */}
       {!state.isMinimized && (
         <>
-        <Menu
-          className="w-full"
-          open={state.openDropdown}
-          handler={(isOpen) => dispatch({ type: "TOGGLE_DROPDOWN" })}
-        >
-          <MenuHandler>
-            <button
-              onClick={() => dispatch({ type: "TOGGLE_DROPDOWN" })}
-              className="flex justify-between items-center gap-2 pl-4 pr-3 py-2 text-xs font-bold bg-black-50 border border-gray-400 rounded-lg"
-            >
-              <span className="flex gap-2 items-center whitespace-nowrap">
-                {options[state.selectedControl]}
-                {state.selectedControl}
-              </span>
-              <CaretDown
-                size={12}
-                strokeWidth={2.5}
-                className={`h-4 w-4 transition-transform whitespace-nowrap ${
-                  state.openDropdown ? "rotate-180" : ""
-                }`}
-              />
-            </button>
-          </MenuHandler>
-          <MenuList className="mt-2 border-none w-60 py-3 shadow-md whitespace-nowrap">
-            <span className="py-3 text-xs font-bold text-black ">Workspace</span>
-            <hr className="my-3 h-px text-gray-400" />
-            {Object.keys(options).map((control) => (
-              <MenuItem
-                key={control}
-                className="px-3 py-3 text-left text-black text-xs hover:bg-gray-200 whitespace-nowrap"
-                onClick={() => handleSelection(control)}
+          <Menu className="w-full" open={state.openDropdown} handler={() => dispatch({ type: "TOGGLE_DROPDOWN" })}>
+            <MenuHandler>
+              <button
+                onClick={() => dispatch({ type: "TOGGLE_DROPDOWN" })}
+                className="flex justify-between items-center gap-2 pl-4 pr-3 py-2 text-xs font-bold bg-black-50 border border-gray-400 rounded-lg"
               >
-                {control}
-              </MenuItem>
-            ))}
-          </MenuList>
-        </Menu>
+                <span className="flex gap-2 items-center whitespace-nowrap">
+                  {options[state.selectedControl]}
+                  {state.selectedControl}
+                </span>
+                <CaretDown
+                  size={12}
+                  strokeWidth={2.5}
+                  className={`h-4 w-4 transition-transform whitespace-nowrap ${
+                    state.openDropdown ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+            </MenuHandler>
+            <MenuList className="mt-2 border-none w-60 py-3 shadow-md whitespace-nowrap">
+              <span className="py-3 text-xs font-bold text-black ">Workspace</span>
+              <hr className="my-3 h-px text-gray-400" />
+              {Object.keys(options).map((control) => (
+                <MenuItem
+                  key={control}
+                  className="px-3 py-3 text-left text-black text-xs hover:bg-gray-200 whitespace-nowrap"
+                  onClick={() => handleSelection(control)}
+                >
+                  {control}
+                </MenuItem>
+              ))}
+            </MenuList>
+          </Menu>
 
-        <ControlRenderer selectedControl={state.selectedControl} />
+          <ControlRenderer selectedControl={state.selectedControl} />
         </>
       )}
-      
     </div>
   );
 }

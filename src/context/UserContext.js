@@ -63,6 +63,15 @@ export const UserProvider = ({ children }) => {
     return user ? `${user.first_name} ${user.last_name}` : referenceNumber;
   };
 
+
+  //Get user email by reference number
+  const getUserEmailByReferenceNumber = (referenceNumber) => {
+    if (!allUserInfo) return referenceNumber; // If no user info available, return the email
+
+    const user = allUserInfo.find((user) => user.reference_number === referenceNumber);
+    return user ? user.email : referenceNumber;
+  };
+
   return (
     <UserContext.Provider
       value={{
@@ -70,6 +79,7 @@ export const UserProvider = ({ children }) => {
         fetchUsers,
         fetchUserInfo,
         getUserByReferenceNumber,
+        getUserEmailByReferenceNumber,
       }}
     >
       {children}

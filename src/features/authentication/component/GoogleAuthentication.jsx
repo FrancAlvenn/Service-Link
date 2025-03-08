@@ -92,7 +92,7 @@ function GoogleAuthLogin() {
                     onError={onError}
                     prompt= 'select_account'
                     auto_select={false}
-                    login_hint='dyci.edu.ph'
+                    // login_hint='dyci.edu.ph'
                     width={"350"}
                     // type='standard'
                     // useOneTap  // not added cause it doesn't work need further research on this one tap login

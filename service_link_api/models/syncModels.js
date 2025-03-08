@@ -11,6 +11,7 @@ import SystemLogsModel from "./SystemLogs.js";
 import Ticket from "./TicketModel.js";
 import UserModel from "./UserModel.js";
 import VehicleRequestModel from "./VehicleRequestModel.js";
+import RequestActivity from "./RequestActivity.js";
 
 
 const models = [
@@ -27,6 +28,7 @@ const models = [
     PurchasingRequestDetails,
     VenueRequests,
     VenueRequestDetail,
+    RequestActivity,
     SystemLogsModel,
     Ticket,
     UserModel,

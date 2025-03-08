@@ -8,6 +8,7 @@ import settingsRoutes from './routes/settings.js';
 import ticketRoutes from './routes/ticketing.js';
 import userRoutes from './routes/user_management.js';
 import purchasingRequestRoutes from './routes/purchasing_request.js';
+import requestActivityRoutes from './routes/request_activity.js';
 
 import sequelize from './database.js'
 import { syncModels } from './models/syncModels.js';
@@ -55,6 +56,9 @@ app.use("/service_link_api/ticket", verifyToken, ticketRoutes)
 
 //User Management
 app.use("/service_link_api/users", verifyToken, userRoutes)
+
+//Request Activity
+app.use("/service_link_api/request_activity", verifyToken, requestActivityRoutes)
 
 
 const PORT = process.env.PORT || 8080

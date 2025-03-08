@@ -164,7 +164,7 @@ function LoginForm() {
     //var accessToken = gapi.auth.getToken().access_token;
 
     return (
-        <div className='flex flex-col min-h-[94vh]'>
+        <div className='flex flex-col min-h-[90vh]'>
         <AuthHeader/>
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md flex-grow">
             <div className="w-full max-w-[430px] bg-white py-8 px-2  sm:rounded-lg sm:px-10" >

@@ -171,7 +171,7 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
         <DialogHeader>Confirm Status Change</DialogHeader>
         <DialogBody>
           <div className="flex flex-col gap-4">
-            <Typography variant="small">
+            <Typography variant="small" className="font-sans">
               You selected <strong>{selectedStatus}</strong>. Please enter the action taken before proceeding.
             </Typography>
             <Input

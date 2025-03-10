@@ -5,6 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useEffect } from 'react';
+import { JobRequestsContext } from '../../request_management/context/JobRequestsContext';
+import { PurchasingRequestsContext } from '../../request_management/context/PurchasingRequestsContext';
+import { VehicleRequestsContext } from '../../request_management/context/VehicleRequestsContext';
+import { VenueRequestsContext } from '../../request_management/context/VenueRequestsContext';
 
 const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
@@ -22,6 +26,19 @@ const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 function GoogleAuthLogin() {
     const { setAuthData } = useContext(AuthContext);
     const navigate = useNavigate();
+
+    const { fetchJobRequests } = useContext(JobRequestsContext);
+    const { fetchPurchasingRequests } = useContext(PurchasingRequestsContext);
+    const { fetchVehicleRequests } = useContext(VehicleRequestsContext);
+    const { fetchVenueRequests } = useContext(VenueRequestsContext);
+
+
+    const fetchAllRequests = () => {
+        fetchJobRequests();
+        fetchPurchasingRequests();
+        fetchVehicleRequests();
+        fetchVenueRequests();
+    };
 
     /**
      * This function is called when the user successfully logs in with Google OAuth.
@@ -62,6 +79,10 @@ function GoogleAuthLogin() {
                     ToastNotification.success('Welcome to Service Link!', 'You have been successfully logged in.');
                     setAuthData(response.data.response.dataValues);
                     localStorage.setItem('userPreference', JSON.stringify(response.data.userPreference));
+
+                    //fetch all request data
+                    fetchAllRequests();
+
                     navigate('/workspace/requests-management');
                 } else if (response.status === 201) {
                     ToastNotification.info('Oops!', 'Account not activated. Please contact the GSO office for account activation.');

@@ -22,6 +22,7 @@ import Workspace from './pages/Workspace';
 import RequestManagement from './pages/RequestManagement';
 import { JobRequests, KanbanBoard, PurchasingRequests, RequestsProviderWrapper, VehicleRequests, VenueRequests } from './features/request_management/';
 import { UserContext, UserProvider } from './context/UserContext';
+import RaiseRequest from './features/request_management/component/raise_request/RaiseRequest';
 
 
 
@@ -71,6 +72,10 @@ const router = createBrowserRouter([
       {
         path: 'requests-management/views/kanban-board',
         element: <ProtectedRoute><KanbanBoard/></ProtectedRoute>
+      },
+      {
+        path: 'requests-management/raise-request',
+        element: <ProtectedRoute><RaiseRequest/></ProtectedRoute>
       },
       {
         path: 'ticket-management',

@@ -32,12 +32,12 @@ export async function createVehicleRequest(req, res){
             purpose : req.body.purpose,
             requester : req.body.requester,
             designation : req.body.designation,
-            status : req.body.status,
+            status : "Pending",
             vehicle_id : req.body.vehicle_id,
             remarks : req.body.remarks,
-            immediate_head_approval : req.body.immediate_head_approval,
-            gso_director_approval : req.body.gso_director_approval,
-            operations_director_approval : req.body.operations_director_approval,
+            immediate_head_approval : "Pending",
+            gso_director_approval : "Pending",
+            operations_director_approval : "Pending",
             authorized_access : [req.body.requester],
         });
 

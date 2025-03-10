@@ -166,10 +166,10 @@ const ActivityTab = ({ referenceNumber }) => {
 
            {/* Activity Feed */}
             <div className="mt-4 flex flex-col gap-2 pt-2">
-                <div className="flex flex-col gap-2 p-2">
+                <div className="flex flex-col gap-3 p-2">
                     {activities?.length > 0 ? (
                         activities
-                            .filter(activity => 
+                            .filter(activity =>
                                 (activity.visibility !== "internal" || activity.created_by === user.reference_number) &&
                                 (selectedTab === "all" || activity.request_type === selectedTab)
                             )

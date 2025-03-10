@@ -12,6 +12,10 @@ import ToastNotification from '../../../utils/ToastNotification';
 import { gapi } from 'gapi-script';
 
 import  GoogleAuthLogin  from './GoogleAuthentication';
+import { JobRequestsContext } from '../../request_management/context/JobRequestsContext';
+import { PurchasingRequestsContext } from '../../request_management/context/PurchasingRequestsContext';
+import { VehicleRequestsContext } from '../../request_management/context/VehicleRequestsContext';
+import { VenueRequestsContext } from '../../request_management/context/VenueRequestsContext';
 
 /**
  * LoginForm component
@@ -21,6 +25,19 @@ import  GoogleAuthLogin  from './GoogleAuthentication';
  * @returns {ReactElement} The login form component.
  */
 function LoginForm() {
+
+    const { fetchJobRequests } = useContext(JobRequestsContext);
+    const { fetchPurchasingRequests } = useContext(PurchasingRequestsContext);
+    const { fetchVehicleRequests } = useContext(VehicleRequestsContext);
+    const { fetchVenueRequests } = useContext(VenueRequestsContext);
+
+
+    const fetchAllRequests = () => {
+        fetchJobRequests();
+        fetchPurchasingRequests();
+        fetchVehicleRequests();
+        fetchVenueRequests();
+    };
 
     const [value, setValue] = useState({email: '', password: ''});
 
@@ -102,6 +119,9 @@ function LoginForm() {
                 if(res.data.reference_number.includes('DYCI')){
                     console.log("User Login")
                 }
+
+                //fetch all request data
+                fetchAllRequests();
 
                 navigate('/workspace/requests-management');
                 setFormStatus('idle');

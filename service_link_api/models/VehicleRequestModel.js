@@ -62,11 +62,6 @@ const VehicleRequest = sequelize.define("VehicleRequest", {
     type: DataTypes.STRING(100),
     allowNull: false,
   },
-  designation: {
-    type: DataTypes.STRING(100),
-    allowNull: true,
-    defaultValue: null
-  },
   status: {
     type: DataTypes.STRING(100),
     defaultValue: "Pending",

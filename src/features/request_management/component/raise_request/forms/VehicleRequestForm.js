@@ -5,10 +5,14 @@ import axios from "axios";
 import { UserContext } from "../../../../../context/UserContext";
 import ToastNotification from "../../../../../utils/ToastNotification";
 import ReactQuill from "react-quill";
+import { VehicleRequestsContext } from "../../../context/VehicleRequestsContext";
 
 const VehicleRequestForm = () => {
     const { user } = useContext(AuthContext);
+
     const { getUserByReferenceNumber } = useContext(UserContext);
+
+    const { fetchVehicleRequests } = useContext(VehicleRequestsContext)
 
     const [request, setRequest] = useState({
         requester: user.reference_number,
@@ -24,11 +28,17 @@ const VehicleRequestForm = () => {
         designation: "",
         purpose: "",
         remarks: "",
-        vehicle_id: "",
     });
 
     const [departmentOptions, setDepartmentOptions] = useState([]);
-    const [vehicleOptions, setVehicleOptions] = useState([]);
+
+    const [vehicleOptions, setVehicleOptions] = useState(
+        [
+            { id: 1, name: "Van" },
+            { id: 2, name: "Car"},
+            { id: 3, name: "Bus"}
+        ]
+    );
 
     const handleChange = (e) => {
         setRequest({ ...request, [e.target.name]: e.target.value });
@@ -46,10 +56,8 @@ const VehicleRequestForm = () => {
                     setDepartmentOptions(departmentResponse.data.departments);
                 }
 
-                const vehicleResponse = await axios.get("/settings/vehicles", { withCredentials: true });
-                if (Array.isArray(vehicleResponse.data.vehicles)) {
-                    setVehicleOptions(vehicleResponse.data.vehicles);
-                }
+                // Add here the fetch for Vehicles
+
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
@@ -63,8 +71,9 @@ const VehicleRequestForm = () => {
 
             const response = await axios.post("/vehicle_request", requestData, { withCredentials: true });
 
-            if (response.status === 200) {
+            if (response.status === 201) {
                 ToastNotification.success("Success!", response.data.message);
+                fetchVehicleRequests();
                 setRequest({
                     requester: user.reference_number,
                     title: "",
@@ -79,7 +88,6 @@ const VehicleRequestForm = () => {
                     designation: "",
                     purpose: "",
                     remarks: "",
-                    vehicle_id: "",
                 });
             }
         } catch (error) {
@@ -88,7 +96,7 @@ const VehicleRequestForm = () => {
     };
 
     return (
-        <form className="py-2 text-sm space-y-4">
+        <div className="py-2 text-sm space-y-4">
             {/* Requester & Department */}
             <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -122,24 +130,13 @@ const VehicleRequestForm = () => {
             </div>
 
             {/* Title & Designation */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
                 <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">Title</label>
                     <input
                         type="text"
                         name="title"
                         value={request.title || ""}
-                        onChange={handleChange}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Designation</label>
-                    <input
-                        type="text"
-                        name="designation"
-                        value={request.designation || ""}
                         onChange={handleChange}
                         className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                     />
@@ -151,14 +148,14 @@ const VehicleRequestForm = () => {
                 <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">Vehicle Requested</label>
                     <select
-                        name="vehicle_id"
-                        value={request.vehicle_id || ""}
+                        name="vehicle_requested"
+                        value={request.vehicle_requested || ""}
                         onChange={handleChange}
                         className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                     >
                         <option value="">Select Vehicle</option>
                         {vehicleOptions?.map((vehicle) => (
-                            <option key={vehicle.id} value={vehicle.id}>
+                            <option key={vehicle.id} value={vehicle.name}>
                                 {vehicle.name}
                             </option>
                         ))}
@@ -228,17 +225,18 @@ const VehicleRequestForm = () => {
             {/* Purpose */}
             <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Purpose</label>
-                <ReactQuill
-                    theme="snow"
+                <textarea
+                    name="purpose"
                     value={request.purpose}
-                    onChange={handleQuillChange}
-                    className="bg-white rounded-md"
+                    onChange={(e) => handleQuillChange("purpose", e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white"
+                    required
                 />
             </div>
 
             {/* Submit Button */}
             <Button color="blue" type="submit" onClick={submitVehicleRequest}>Submit Request</Button>
-        </form>
+        </div>
     );
 };
 

@@ -7,10 +7,14 @@ import { AuthContext } from "../../../../authentication";
 import axios from "axios";
 import { UserContext } from "../../../../../context/UserContext";
 import ToastNotification from "../../../../../utils/ToastNotification";
+import { PurchasingRequestsContext } from "../../../context/PurchasingRequestsContext";
 
-const PurchasingRequestForm = () => {
+const PurchasingRequestForm = ({setSelectedRequest}) => {
     const { user } = useContext(AuthContext);
+
     const { getUserByReferenceNumber } = useContext(UserContext);
+
+    const { fetchPurchasingRequests } = useContext(PurchasingRequestsContext);
 
     const [request, setRequest] = useState({
         requester: user.reference_number,
@@ -31,7 +35,17 @@ const PurchasingRequestForm = () => {
     });
 
     const [departmentOptions, setDepartmentOptions] = useState([]);
-    const [supplyCategories, setSupplyCategories] = useState([]);
+    const [supplyCategories, setSupplyCategories] = useState(
+        [
+            {id: 1, name: "Office Supplies"},
+            {id: 2, name: "Cleaning Supplies"},
+            {id: 3, name: "Classroom Supplies"},
+            {id: 4, name: "Furniture and Fixtures"},
+            {id: 5, name: "IT and Computer Supplies"},
+            {id: 6, name: "Electrical and Maintenance Supply"},
+            {id: 7, name: "Miscellaneous"}
+        ]
+    );
 
     const handleChange = (e) => {
         setRequest({ ...request, [e.target.name]: e.target.value });
@@ -75,10 +89,6 @@ const PurchasingRequestForm = () => {
                     setDepartmentOptions(departmentResponse.data.departments);
                 }
 
-                const categoryResponse = await axios.get("/settings/supply_categories", { withCredentials: true });
-                if (Array.isArray(categoryResponse.data.categories)) {
-                    setSupplyCategories(categoryResponse.data.categories);
-                }
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
@@ -93,8 +103,10 @@ const PurchasingRequestForm = () => {
 
             const response = await axios.post("/purchasing_request", requestData, { withCredentials: true });
 
-            if (response.status === 200) {
+            if (response.status === 201) {
                 ToastNotification.success("Success!", response.data.message);
+                fetchPurchasingRequests();
+                setSelectedRequest("")
                 setRequest({
                     requester: user.reference_number,
                     department: "",
@@ -112,7 +124,7 @@ const PurchasingRequestForm = () => {
     };
 
     return (
-        <form className="py-2 text-sm space-y-4 overflow-y-auto">
+        <div className="py-2 text-sm space-y-4 overflow-y-auto">
             {/* Requester & Department */}
             <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -178,6 +190,7 @@ const PurchasingRequestForm = () => {
                     value={request.supply_category || ""}
                     onChange={handleChange}
                     className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                    required
                 >
                     <option value="">Select Category</option>
                     {supplyCategories?.map((category) => (
@@ -191,11 +204,12 @@ const PurchasingRequestForm = () => {
             {/* Purpose */}
             <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Purpose</label>
-                <ReactQuill
-                    theme="snow"
+                <textarea
+                    name="purpose"
                     value={request.purpose}
-                    onChange={(value) => handleQuillChange("purpose", value)}
-                    className="bg-white"
+                    onChange={(e) => handleQuillChange("purpose", e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white"
+                    required
                 />
             </div>
 
@@ -226,18 +240,48 @@ const PurchasingRequestForm = () => {
                                     <Typography className="font-semibold">x{detail.quantity}</Typography>
                                 </>
                             )}
-                            <X className="cursor-pointer hover:text-red-500" onClick={() => handleDetailRemove(index)} />
+
+                            <span className="flex gap-3 ml-auto">
+                                {editingIndex === index ? (
+                                    <>
+                                        <button className="hover:text-green-500" onClick={() => handleSaveEdit(index)}>
+                                            <FloppyDisk size={18} />
+                                        </button>
+                                        <button className="hover:text-red-500" onClick={() => setEditingIndex(null)}>
+                                            <Prohibit size={18} />
+                                        </button>
+                                    </>
+                                ) : (
+                                    <button className="hover:text-blue-500" onClick={() => handleEditClick(index)}>
+                                        <PencilSimpleLine size={18} />
+                                    </button>
+                                )}
+                                <X className="cursor-pointer hover:text-red-500" onClick={() => handleDetailRemove(index)} />
+                            </span>
                         </div>
+
+                        {editingIndex === index ? (
+                            <ReactQuill
+                                theme="snow"
+                                value={editedParticular.description}
+                                onChange={(value) => setEditedParticular({ ...editedParticular, description: value })}
+                                className="mt-1 bg-white"
+                            />
+                        ) : (
+                            <Typography className="text-xs">{detail.description}</Typography>
+                        )}
                     </div>
                 ))}
+
+                {/* Add Particular Button */}
                 <button className="flex items-center gap-1 p-3 border rounded-md hover:text-green-500" onClick={handleAddParticular}>
                     <Plus size={18} />
                     <Typography className="text-xs">Add Particular</Typography>
                 </button>
             </div>
 
-            <Button color="blue" type="submit" onClick={submitPurchasingRequest}>Submit Request</Button>
-        </form>
+            <Button color="blue" onClick={submitPurchasingRequest}>Submit Request</Button>
+        </div>
     );
 };
 

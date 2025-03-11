@@ -31,7 +31,6 @@ export async function createVehicleRequest(req, res){
             destination : req.body.destination,
             purpose : req.body.purpose,
             requester : req.body.requester,
-            designation : req.body.designation,
             status : "Pending",
             vehicle_id : req.body.vehicle_id,
             remarks : req.body.remarks,

@@ -7,11 +7,14 @@ import { AuthContext } from "../../../../authentication";
 import axios from "axios";
 import { UserContext } from "../../../../../context/UserContext";
 import ToastNotification from "../../../../../utils/ToastNotification";
+import { JobRequestsContext } from "../../../context/JobRequestsContext";
 
-const JobRequestForm = () => {
+const JobRequestForm = ({setSelectedRequest}) => {
     const { user } = useContext(AuthContext);
 
-    const { getUserByReferenceNumber } = useContext(UserContext);;
+    const { getUserByReferenceNumber } = useContext(UserContext);
+
+    const { fetchJobRequests } = useContext(JobRequestsContext)
 
     const [request, setRequest] = useState({
         requester: user.reference_number,
@@ -58,7 +61,8 @@ const JobRequestForm = () => {
         setRequest({ ...request, details: updatedDetails });
     };
 
-    const handleAddParticular = () => {
+    const handleAddParticular = (e) => {
+        e.preventDefault();
         setRequest({
             ...request,
             details: [...request.details, { particulars: "", quantity: 0, description: "" }],
@@ -103,8 +107,10 @@ const JobRequestForm = () => {
                 withCredentials: true,
             })
     
-            if (response.status === 200) {
+            if (response.status === 201) {
                 ToastNotification.success("Success!", response.data.message);
+                fetchJobRequests();
+                setSelectedRequest("");
                 setRequest({
                     requester: "",
                     department: "",
@@ -115,7 +121,7 @@ const JobRequestForm = () => {
                     details: [],
                 });
             } else {
-                console.error("Invalid response: status code is not 200");
+                console.error("Invalid response");
             }
         } catch (error) {
             console.error("Error submitting job request:", error);
@@ -124,7 +130,7 @@ const JobRequestForm = () => {
     
 
     return (
-        <form className="py-2 text-sm space-y-4 overflow-y-auto">
+        <div className="py-2 text-sm space-y-4 overflow-y-auto">
             {/* Requester & Department */}
             <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -183,14 +189,14 @@ const JobRequestForm = () => {
                 />
             </div>
 
-            {/* Purpose (ReactQuill) */}
+            {/* Purpose */}
             <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Purpose</label>
-                <ReactQuill
-                    theme="snow"
+                <textarea
+                    name="purpose"
                     value={request.purpose}
-                    onChange={(value) => handleQuillChange("purpose", value)}
-                    className="bg-white"
+                    onChange={(e) => handleQuillChange("purpose", e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white"
                     required
                 />
             </div>
@@ -263,8 +269,8 @@ const JobRequestForm = () => {
             </div>
 
             {/* Submit Button */}
-            <Button color="blue" type="submit" onClick={()=> submitJobRequest()}>Submit Job Request</Button>
-        </form>
+            <Button color="blue" onClick={()=> submitJobRequest()}>Submit Job Request</Button>
+        </div>
     );
 };
 

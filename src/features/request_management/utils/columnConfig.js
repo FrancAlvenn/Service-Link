@@ -75,7 +75,7 @@ export const getColumnConfig = (requestType, setSidebarOpen, setSelectedReferenc
             key: "purpose",
             label: "Purpose",
             header: <Typography variant="small" color="blue-gray" className={normalText}>Purpose</Typography>,
-            render: (row) => <Typography variant="small" color="blue-gray" className={normalText}>{row.purpose}</Typography>,
+            render: (row) => <Typography variant="small" color="blue-gray" className={normalText} dangerouslySetInnerHTML={{ __html: row.purpose }}></Typography>,
           },
           {
             key: "requester",
@@ -191,7 +191,7 @@ export const getColumnConfig = (requestType, setSidebarOpen, setSelectedReferenc
             key: "purpose",
             label: "Purpose",
             header: <Typography variant="small" color="blue-gray" className={normalText}>Purpose</Typography>,
-            render: (row) => <Typography variant="small" color="blue-gray" className={normalText}>{row.purpose}</Typography>,
+            render: (row) => <Typography variant="small" color="blue-gray" className={normalText} dangerouslySetInnerHTML={{ __html: row.purpose }}></Typography>,
           },
           {
             key: "requester",
@@ -331,7 +331,7 @@ export const getColumnConfig = (requestType, setSidebarOpen, setSelectedReferenc
             key: "purpose",
             label: "Purpose",
             header: <Typography variant="small" color="blue-gray" className={normalText}>Purpose</Typography>,
-            render: (row) => <Typography variant="small" color="blue-gray" className={normalText}>{row.purpose}</Typography>,
+            render: (row) => <Typography variant="small" color="blue-gray" className={normalText} dangerouslySetInnerHTML={{ __html: row.purpose }}></Typography>,
           },
           {
             key: "event_nature",
@@ -513,7 +513,7 @@ export const getColumnConfig = (requestType, setSidebarOpen, setSelectedReferenc
             key: "purpose",
             label: "Purpose",
             header: <Typography variant="small" color="blue-gray" className={normalText}>Purpose</Typography>,
-            render: (row) => <Typography variant="small" color="blue-gray" className={normalText}>{row.purpose}</Typography>,
+            render: (row) => <Typography variant="small" color="blue-gray" className={normalText} dangerouslySetInnerHTML={{ __html: row.purpose }}></Typography>,
           },
           {
             key: "requester",

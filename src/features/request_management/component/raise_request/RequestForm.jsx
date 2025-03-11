@@ -70,13 +70,13 @@ const RequestForm = ({ selectedRequest, setSelectedRequest }) => {
         {(() => {
             switch (selectedRequest) {
                 case "job_request":
-                    return <JobRequestForm />;
+                    return <JobRequestForm setSelectedRequest={setSelectedRequest} />;
                 case "purchasing_request":
-                    return <PurchasingRequestForm />;
+                    return <PurchasingRequestForm setSelectedRequest={setSelectedRequest} />;
                 case "venue_request":
-                    return <VenueRequestForm />;
+                    return <VenueRequestForm setSelectedRequest={setSelectedRequest} />;
                 case "vehicle_request":
-                    return <VehicleRequestForm />;
+                    return <VehicleRequestForm setSelectedRequest={setSelectedRequest}/>;
                 default:
                     return null;
             }

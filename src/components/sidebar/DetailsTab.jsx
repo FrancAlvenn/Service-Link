@@ -53,7 +53,6 @@ const requestFieldConfig = {
       { key: "title", label: "Title", type: "text" },
       { key: "requester", label: "Requester", type: "text", readOnly: true },
       { key: "department", label: "Department", type: "text", readOnly: true },
-      { key: "designation", label: "Designation", type: "text" },
       { key: "vehicle_requested", label: "Vehicle Type", type: "text" },
       { key: "date_of_trip", label: "Date of Trip", type: "date" },
       { key: "time_of_departure", label: "Departure Time", type: "time" },

@@ -10,7 +10,7 @@ import axios from "axios";
  * @param {{ request: object, setRequest: function, requestType: string, referenceNumber: string, fetchRequests: function, user: object }} props
  * @returns {JSX.Element}
  */
-const ParticularsTab = ({ request, setRequest, requestType, referenceNumber, fetchRequests, user }) => {
+const ParticularsTab = ({ request, setRequest, requestType, referenceNumber, fetchRequests, user, isAuthorized }) => {
   const [editingIndex, setEditingIndex] = useState(null);
   const [editedParticular, setEditedParticular] = useState({
     particulars: "",
@@ -90,7 +90,7 @@ const ParticularsTab = ({ request, setRequest, requestType, referenceNumber, fet
         {request.details.map((detail, index) => (
           <div key={index} className="flex flex-col gap-1 p-3 border-gray-400 border rounded-md">
             <span className="flex gap-4 items-center">
-              {editingIndex === index ? (
+              {isAuthorized && editingIndex === index ? (
                 <input
                   type="text"
                   className="text-sm p-1 min-w-20 w-full max-w-32 border border-gray-300 rounded-md"
@@ -101,7 +101,7 @@ const ParticularsTab = ({ request, setRequest, requestType, referenceNumber, fet
                 <p className="text-sm font-semibold">{detail.particulars}</p>
               )}
 
-              {editingIndex === index ? (
+              {isAuthorized && editingIndex === index ? (
                 <input
                   type="number"
                   className="text-sm p-1 w-20 border border-gray-300 rounded-md"
@@ -113,7 +113,7 @@ const ParticularsTab = ({ request, setRequest, requestType, referenceNumber, fet
               )}
 
               <span className="flex gap-3 ml-auto">
-                {editingIndex === index ? (
+                {isAuthorized && editingIndex === index ? (
                   <span className="flex gap-3">
                     <button className="hover:scale-[1.2] hover:text-green-500" title="Save" onClick={() => handleSaveEdit(index)}>
                       <FloppyDisk size={18} />
@@ -124,14 +124,14 @@ const ParticularsTab = ({ request, setRequest, requestType, referenceNumber, fet
                   </span>
                 ) : (
                   <button className="hover:scale-[1.2] hover:text-blue-500" title="Edit" onClick={() => handleEditClick(index)}>
-                    <PencilSimpleLine size={18} />
+                    {isAuthorized && <PencilSimpleLine size={18} />}
                   </button>
                 )}
-                <X size={18} className="cursor-pointer hover:scale-[1.2] hover:text-red-500" title="Delete" onClick={() => handleDetailRemove(index)} />
+                {isAuthorized && <X size={18} className="cursor-pointer hover:scale-[1.2] hover:text-red-500" title="Delete" onClick={() => handleDetailRemove(index)} />}
               </span>
             </span>
 
-            {editingIndex === index ? (
+            {isAuthorized && editingIndex === index ? (
               <textarea
                 className="w-full p-1 mt-1 text-sm border border-gray-300 rounded-md"
                 value={editedParticular.description}
@@ -144,10 +144,10 @@ const ParticularsTab = ({ request, setRequest, requestType, referenceNumber, fet
         ))}
       </div>
 
-      <div className="flex gap-1 p-3 border-gray-400 border rounded-md hover:text-green-500" onClick={handleAddParticular}>
+      {isAuthorized && <div className="flex gap-1 p-3 border-gray-400 border rounded-md hover:text-green-500" onClick={handleAddParticular}>
         <button className="text-sm text-center"> Add Particular</button>
         <Plus size={18} className="ml-auto cursor-pointer hover:scale-[1.2] hover:text-green-500" title="Add Particular" />
-      </div>
+      </div>}
     </div>
   );
 };

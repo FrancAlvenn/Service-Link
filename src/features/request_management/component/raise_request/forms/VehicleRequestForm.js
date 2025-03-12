@@ -4,7 +4,6 @@ import { AuthContext } from "../../../../authentication";
 import axios from "axios";
 import { UserContext } from "../../../../../context/UserContext";
 import ToastNotification from "../../../../../utils/ToastNotification";
-import ReactQuill from "react-quill";
 import { VehicleRequestsContext } from "../../../context/VehicleRequestsContext";
 
 const VehicleRequestForm = () => {

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useContext, useEffect, useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
@@ -329,12 +330,16 @@ const VenueRequestForm = () => {
                         </div>
 
                         {editingIndex === index ? (
-                            <ReactQuill
-                                theme="snow"
-                                value={editedParticular.description}
-                                onChange={(value) => setEditedParticular({ ...editedParticular, description: value })}
-                                className="mt-1 bg-white"
-                            />
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
+                                <textarea
+                                    name="description"
+                                    value={editedParticular.description}
+                                    onChange={(e) => setEditedParticular({ ...editedParticular, description: e.target.value })}
+                                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white mt-1"
+                                    required
+                                />
+                            </div>
                         ) : (
                             <Typography className="text-xs">{detail.description}</Typography>
                         )}

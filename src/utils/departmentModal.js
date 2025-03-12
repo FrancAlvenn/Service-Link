@@ -10,14 +10,16 @@ import { VehicleRequestsContext } from "../features/request_management/context/V
 import { VenueRequestsContext } from "../features/request_management/context/VenueRequestsContext";
 
 function DepartmentModal({ request, input, referenceNumber, requestType, onDepartmentUpdate }) {
-  const [departmentOptions, setDepartmentOptions] = useState([]); 
-  const [currentDepartment, setCurrentDepartment] = useState(input); 
+  const [departmentOptions, setDepartmentOptions] = useState([]);
+  const [currentDepartment, setCurrentDepartment] = useState(input);
 
   const { user } = useContext(AuthContext);
   const { fetchJobRequests } = useContext(JobRequestsContext);
   const { fetchPurchasingRequests } = useContext(PurchasingRequestsContext);
   const { fetchVehicleRequests } = useContext(VehicleRequestsContext);
   const { fetchVenueRequests } = useContext(VenueRequestsContext);
+
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
   const fetchAllRequests = () => {
     fetchJobRequests();
@@ -41,6 +43,13 @@ function DepartmentModal({ request, input, referenceNumber, requestType, onDepar
         console.error("Error fetching department options:", error);
       }
     };
+
+      // Check if user is authorized
+      if (request?.authorized_access) {
+        setIsAuthorized(request.authorized_access.includes(user.reference_number));
+      } else {
+        setIsAuthorized(false);
+      }
 
     getDepartments();
   }, []);
@@ -88,11 +97,11 @@ function DepartmentModal({ request, input, referenceNumber, requestType, onDepar
             size="sm"
             variant="ghost"
             value={currentDepartment || "Select Department"}
-            className="text-center w-fit cursor-pointer"
+            className={`text-center w-fit cursor-pointer ${isAuthorized ? "cursor-pointer" : "cursor-not-allowed"}`}
             color={departmentOptions.find(option => option.name === currentDepartment)?.color || "gray"}
           />
         </MenuHandler>
-        <MenuList className="mt-2 divide-y divide-gray-100 rounded-md bg-white shadow-lg shadow-topping ring-2 ring-black/5 border-none">
+        {isAuthorized && <MenuList className="mt-2 divide-y divide-gray-100 rounded-md bg-white shadow-lg shadow-topping ring-2 ring-black/5 border-none">
           {departmentOptions.length > 0 ? (
             <div className="flex flex-col">
               <div className="grid grid-cols-2 gap-2">
@@ -129,7 +138,7 @@ function DepartmentModal({ request, input, referenceNumber, requestType, onDepar
               Loading department options...
             </MenuItem>
           )}
-        </MenuList>
+        </MenuList>}
       </Menu>
     </div>
   );

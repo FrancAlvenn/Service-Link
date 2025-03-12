@@ -296,6 +296,7 @@ const SidebarView = ({ open, onClose, referenceNumber, requests }) => {
                   referenceNumber={referenceNumber}
                   fetchRequests={fetchAllRequests}
                   user={user}
+                  isAuthorized={isAuthorized}
                 />
               )}
 

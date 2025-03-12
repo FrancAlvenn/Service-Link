@@ -6,11 +6,12 @@ import {
 } from "@material-tailwind/react";
 
 import { ArrowClockwise, MagnifyingGlass } from "@phosphor-icons/react";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { JobRequestsContext } from "../../context/JobRequestsContext.js";
 import SidebarView from "../../../../components/sidebar/SidebarView.jsx";
 import { UserContext } from "../../../../context/UserContext.js";
 import { getColumnConfig } from "../../utils/columnConfig.js";
+import { AuthContext } from "../../../authentication/index.js";
 
 export function JobRequests() {
   const [sidebarOpen, setSidebarOpen] = useState(false);

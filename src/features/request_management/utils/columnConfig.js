@@ -507,7 +507,7 @@ export const getColumnConfig = (requestType, setSidebarOpen, setSelectedReferenc
             key: "department",
             label: "Department",
             header: <Typography variant="small" color="blue-gray" className={normalText}>Department</Typography>,
-            render: (row) => <DepartmentModal request={row} input={row.department} referenceNumber={row.reference_number} requestType={requestType} />,
+            render: (row) => <DepartmentModal request={row} input={row.department} referenceNumber={row.reference_number} requestType={requestType}  />,
           },
           {
             key: "purpose",

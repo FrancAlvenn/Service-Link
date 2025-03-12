@@ -224,8 +224,8 @@ const JobRequestForm = ({setSelectedRequest}) => {
                                 </>
                             ) : (
                                 <>
-                                    <Typography className="font-semibold">{detail.particulars}</Typography>
-                                    <Typography className="font-semibold">x{detail.quantity}</Typography>
+                                    <Typography className="text-sm font-semibold">{detail.particulars}</Typography>
+                                    <Typography className="text-sm font-semibold">x{detail.quantity}</Typography>
                                 </>
                             )}
 
@@ -244,17 +244,21 @@ const JobRequestForm = ({setSelectedRequest}) => {
                                         <PencilSimpleLine size={18} />
                                     </button>
                                 )}
-                                <X className="cursor-pointer hover:text-red-500" onClick={() => handleDetailRemove(index)} />
+                                <X size={18} className="cursor-pointer hover:text-red-500" onClick={() => handleDetailRemove(index)} />
                             </span>
                         </div>
 
                         {editingIndex === index ? (
-                            <ReactQuill
-                                theme="snow"
-                                value={editedParticular.description}
-                                onChange={(value) => setEditedParticular({ ...editedParticular, description: value })}
-                                className="mt-1 bg-white"
-                            />
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
+                                <textarea
+                                    name="description"
+                                    value={editedParticular.description}
+                                    onChange={(e) => setEditedParticular({ ...editedParticular, description: e.target.value })}
+                                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white mt-1"
+                                    required
+                                />
+                            </div>
                         ) : (
                             <Typography className="text-xs">{detail.description}</Typography>
                         )}

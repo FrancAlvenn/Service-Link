@@ -40,6 +40,29 @@ const VehicleRequestForm = () => {
     );
 
     const handleChange = (e) => {
+
+        // Validate Date: Ensure date_required is not in the past
+        if (e.target.name === "date_of_trip") {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Normalize to start of day for accuracy
+            const selectedDate = new Date(e.target.value);
+
+            if (selectedDate < today) {
+                ToastNotification.error("Invalid Date", "Date cannot be in the past.");
+                return; // Exit without updating state
+            }
+        }
+
+        // Validate Time: Ensure event_start_time is not later than event_end_time
+        if (e.target.name === "time_of_departure" || e.target.name === "time_of_arrival") {
+            const { time_of_departure, time_of_arrival } = { ...request, [e.target.name]: e.target.value };
+
+            if (time_of_departure && time_of_arrival && time_of_departure >= time_of_arrival) {
+                ToastNotification.error("Invalid Time", "Departure time must be earlier than arrival time.");
+                return; // Exit without updating state
+            }
+        }
+
         setRequest({ ...request, [e.target.name]: e.target.value });
     };
 

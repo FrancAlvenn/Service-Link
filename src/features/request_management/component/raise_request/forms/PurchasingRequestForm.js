@@ -48,6 +48,19 @@ const PurchasingRequestForm = ({setSelectedRequest}) => {
     );
 
     const handleChange = (e) => {
+
+        // Validate Date: Ensure date_required is not in the past
+        if (e.target.name === "date_required") {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Normalize to start of day for accuracy
+            const selectedDate = new Date(e.target.value);
+
+            if (selectedDate < today) {
+                ToastNotification.error("Invalid Date", "Date cannot be in the past.");
+                return; // Exit without updating state
+            }
+        }
+
         setRequest({ ...request, [e.target.name]: e.target.value });
     };
 

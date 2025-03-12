@@ -53,6 +53,41 @@ const VenueRequestForm = () => {
     );
 
     const handleChange = (e) => {
+
+        // Validate Date: Ensure date_required is not in the past
+        if (e.target.name === "event_dates") {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Normalize to start of day for accuracy
+            const selectedDate = new Date(e.target.value);
+
+            if (selectedDate < today) {
+                ToastNotification.error("Invalid Date", "Date cannot be in the past.");
+                return; // Exit without updating state
+            }
+        }
+
+        // Validate Time: Ensure event_start_time is not later than event_end_time and has at least 1-hour difference
+        if (e.target.name === "event_start_time" || e.target.name === "event_end_time") {
+            const { event_start_time, event_end_time } = { ...request, [e.target.name]: e.target.value };
+
+            if (event_start_time && event_end_time) {
+                const start = new Date(`1970-01-01T${event_start_time}`);
+                const end = new Date(`1970-01-01T${event_end_time}`);
+                const diffInMinutes = (end - start) / (1000 * 60);
+
+                if (start >= end) {
+                    ToastNotification.error("Invalid Time", "Start time must be earlier than end time.");
+                    return; // Exit without updating state
+                }
+
+                if (diffInMinutes < 60) {
+                    ToastNotification.error("Invalid Time", "Event duration must be at least 1 hour.");
+                    return; // Exit without updating state
+                }
+            }
+        }
+
+
         setRequest({ ...request, [e.target.name]: e.target.value });
     };
 

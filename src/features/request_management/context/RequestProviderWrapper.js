@@ -1,3 +1,4 @@
+import { AssetProvider } from "../../asset_management/context/AssetContext";
 import { JobRequestsProvider } from "./JobRequestsContext";
 import { PurchasingRequestsProvider } from "./PurchasingRequestsContext";
 import { VehicleRequestsProvider } from "./VehicleRequestsContext";
@@ -17,6 +18,7 @@ import { VenueRequestsProvider } from "./VenueRequestsContext";
  */
 export function RequestsProviderWrapper ({ children })  {
   return (
+    <AssetProvider>
     <JobRequestsProvider>
       <PurchasingRequestsProvider>
         <VehicleRequestsProvider>
@@ -26,6 +28,7 @@ export function RequestsProviderWrapper ({ children })  {
         </VehicleRequestsProvider>
       </PurchasingRequestsProvider>
     </JobRequestsProvider>
+    </AssetProvider>
   );
 };
 

@@ -15,8 +15,8 @@ const options = {
 const routeMap = {
   "Requests Management": "/workspace/requests-management",
   "Ticket Management": "/workspace/ticket-management",
-  "Asset Management": "/workspace/asset-management",
-  "Employee Management": "/workspace/employee-management",
+  "Asset Management": "/workspace/asset-management/board",
+  "Employee Management": "/workspace/employee-management/board",
 };
 
 function reducer(state, action) {
@@ -24,6 +24,7 @@ function reducer(state, action) {
     case "TOGGLE_DROPDOWN":
       return { ...state, openDropdown: !state.openDropdown };
     case "SELECT_CONTROL":
+      localStorage.setItem("selectedControl", JSON.stringify(action.payload));
       return { ...state, selectedControl: action.payload, openDropdown: true };
     case "TOGGLE_MINIMIZE":
       const newState = { ...state, isMinimized: !state.isMinimized };
@@ -40,11 +41,12 @@ function Sidebar() {
 
   // Get sidebar state from localStorage (or fallback to userPreference)
   const initialSidebarState = JSON.parse(localStorage.getItem("sidebarMinimized"));
+  const initialControl = JSON.parse(localStorage.getItem("selectedControl"));
   const isMinimized = initialSidebarState ?? (userPreference?.sidebar_view === false);
 
   const initialState = {
     openDropdown: false,
-    selectedControl: "Requests Management",
+    selectedControl: initialControl ?? "Requests Management",
     isMinimized, // Load from localStorage
   };
 

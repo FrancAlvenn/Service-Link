@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import {Card, Typography,List, ListItem, ListItemPrefix, ListItemSuffix, Chip, Accordion, AccordionHeader, AccordionBody, Menu, MenuHandler, Button, MenuList, MenuItem} from "@material-tailwind/react";
 
 import { Stack, ClipboardText, ChalkboardSimple, ChatCircle, ChartBar, CaretDown, UserPlus, Plus, PlusCircle, Chalkboard, ChalkboardTeacher} from "@phosphor-icons/react";
+import { useNavigate } from "react-router-dom";
 
 /**
  * AssetManagementControls is a React component that renders a list of controls for managing assets in the workspace.
@@ -17,7 +18,9 @@ import { Stack, ClipboardText, ChalkboardSimple, ChatCircle, ChartBar, CaretDown
  */
 function AssetManagementControls() {
 
-    const [open, setOpen] = React.useState(0);
+    const [open, setOpen] = useState(0);
+
+    const navigate = useNavigate();
 
     const handleOpen = (value) => {
         setOpen(open === value ? 0 : value);
@@ -25,14 +28,14 @@ function AssetManagementControls() {
 
     return (
         <>
-            <ListItem className="text-sm">
+            <ListItem className="text-sm" onClick={() => navigate("/workspace/asset-management/board")}>
                 <ListItemPrefix>
                     <ChalkboardTeacher size={20} />
                 </ListItemPrefix>
                 Board
             </ListItem>
 
-            <ListItem className="text-sm">
+            <ListItem className="text-sm" onClick={() => navigate("/workspace/asset-management/create-asset")}>
                 <ListItemPrefix>
                     <PlusCircle size={20} />
                 </ListItemPrefix>

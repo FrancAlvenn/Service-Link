@@ -34,11 +34,11 @@ function ControlRenderer({ selectedControl }) {
       controlComponent = <TicketManagementControls />;
     }
 
-    if (location.pathname.includes("asset-management") || selectedControl === "Asset Management") {
+    if (location.pathname.includes("asset-management/board") || selectedControl === "Asset Management") {
       controlComponent = <AssetManagementControls />;
     }
 
-    if (location.pathname.includes("employee-management") || selectedControl === "Employee Management") {
+    if (location.pathname.includes("employee-management/board") || selectedControl === "Employee Management") {
       controlComponent = <EmployeeManagementControls />;
     }
 

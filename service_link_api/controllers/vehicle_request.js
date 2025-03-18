@@ -22,6 +22,7 @@ export async function createVehicleRequest(req, res){
         const newVehicleRequisition = await VehicleRequestModel.create({
             reference_number : referenceNumber,
             title : req.body.title,
+            department : req.body.department,
             vehicle_requested : req.body.vehicle_requested,
             date_filled : req.body.date_filled,
             date_of_trip : req.body.date_of_trip,

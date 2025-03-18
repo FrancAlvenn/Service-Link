@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../database.js";
 
-const Asset = sequelize.define("Asset", {
+const AssetModel = sequelize.define("AssetModel", {
   asset_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -79,7 +79,7 @@ const Asset = sequelize.define("Asset", {
   },
 }, {
   tableName: 'assets',
-  timestamps: false, // Set to true if you have created_at/updated_at fields
+  timestamps: true, // Set to true if you have created_at/updated_at fields
 });
 
-export default Asset;
+export default AssetModel;

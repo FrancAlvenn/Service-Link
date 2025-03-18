@@ -6,7 +6,7 @@ import { UserContext } from "../../../../../context/UserContext";
 import ToastNotification from "../../../../../utils/ToastNotification";
 import { VehicleRequestsContext } from "../../../context/VehicleRequestsContext";
 
-const VehicleRequestForm = () => {
+const VehicleRequestForm = ({setSelectedRequest}) => {
     const { user } = useContext(AuthContext);
 
     const { getUserByReferenceNumber } = useContext(UserContext);
@@ -39,6 +39,8 @@ const VehicleRequestForm = () => {
         ]
     );
 
+    const [ errorMessage, setErrorMessage ] = useState("");
+
     const handleChange = (e) => {
 
         // Validate Date: Ensure date_required is not in the past
@@ -48,7 +50,8 @@ const VehicleRequestForm = () => {
             const selectedDate = new Date(e.target.value);
 
             if (selectedDate < today) {
-                ToastNotification.error("Invalid Date", "Date cannot be in the past.");
+                setErrorMessage("Invalid Date");
+                // ToastNotification.error("Invalid Date", "Date cannot be in the past.");
                 return; // Exit without updating state
             }
         }
@@ -58,16 +61,14 @@ const VehicleRequestForm = () => {
             const { time_of_departure, time_of_arrival } = { ...request, [e.target.name]: e.target.value };
 
             if (time_of_departure && time_of_arrival && time_of_departure >= time_of_arrival) {
-                ToastNotification.error("Invalid Time", "Departure time must be earlier than arrival time.");
+                setErrorMessage("Invalid Time. Departure time must be earlier than arrival time.");
+                // ToastNotification.error("Invalid Time", "Departure time must be earlier than arrival time.");
                 return; // Exit without updating state
             }
         }
 
+        setErrorMessage("");
         setRequest({ ...request, [e.target.name]: e.target.value });
-    };
-
-    const handleQuillChange = (value) => {
-        setRequest({ ...request, purpose: value });
     };
 
     useEffect(() => {
@@ -96,6 +97,7 @@ const VehicleRequestForm = () => {
             if (response.status === 201) {
                 ToastNotification.success("Success!", response.data.message);
                 fetchVehicleRequests();
+                setSelectedRequest("");
                 setRequest({
                     requester: user.reference_number,
                     title: "",
@@ -208,6 +210,7 @@ const VehicleRequestForm = () => {
                         className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                         required
                     />
+                    {errorMessage === "Invalid Date" && <p className="text-xs text-red-500">{errorMessage}</p>}
                 </div>
                 <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">Time of Departure</label>
@@ -219,6 +222,7 @@ const VehicleRequestForm = () => {
                         className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                         required
                     />
+                    {errorMessage === "Invalid Time. Departure time must be earlier than arrival time." && <p className="text-xs text-red-500">{errorMessage}</p>}
                 </div>
                 <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">Time of Arrival</label>
@@ -250,14 +254,43 @@ const VehicleRequestForm = () => {
                 <textarea
                     name="purpose"
                     value={request.purpose}
-                    onChange={(e) => handleQuillChange("purpose", e.target.value)}
+                    onChange={handleChange}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white"
+                    required
+                />
+            </div>
+
+            {/* Remarks */}
+            <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1 pt-1">Remarks</label>
+                <textarea
+                    name="remarks"
+                    value={request.remarks}
+                    onChange={handleChange}
                     className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white"
                     required
                 />
             </div>
 
             {/* Submit Button */}
-            <Button color="blue" type="submit" onClick={submitVehicleRequest}>Submit Request</Button>
+            <Button
+                color="blue"
+                type="submit"
+                onClick={submitVehicleRequest}
+                disabled={
+                    !request.title ||
+                    !request.department ||
+                    !request.vehicle_requested ||
+                    !request.destination ||
+                    !request.date_of_trip ||
+                    !request.time_of_departure ||
+                    !request.time_of_arrival ||
+                    !request.number_of_passengers ||
+                    !request.purpose
+                }
+            >
+                Submit Request
+            </Button>
         </div>
     );
 };

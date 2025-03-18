@@ -23,6 +23,12 @@ import RequestManagement from './pages/RequestManagement';
 import { JobRequests, KanbanBoard, PurchasingRequests, RequestsProviderWrapper, VehicleRequests, VenueRequests } from './features/request_management/';
 import { UserContext, UserProvider } from './context/UserContext';
 import RaiseRequest from './features/request_management/component/raise_request/RaiseRequest';
+import AssetTable from './features/asset_management/component/AssetTable';
+import { AssetProvider } from './features/asset_management/context/AssetContext';
+import AssetForm from './features/asset_management/component/AssetForm';
+import EmployeeTable from './features/employee_management/component/EmployeeTable';
+import EmployeeForm from './features/employee_management/component/EmployeeForm';
+import { EmployeeProvider } from './features/employee_management/context/EmployeeContext';
 
 
 
@@ -82,12 +88,20 @@ const router = createBrowserRouter([
         element: <div>Ticket Management</div>
       },
       {
-        path: 'asset-management',
-        element: <div>Asset Management</div>
+        path: 'asset-management/board',
+        element: <ProtectedRoute><AssetTable/></ProtectedRoute>
       },
       {
-        path: 'employee-management',
-        element: <div>Employee Management</div>
+        path: 'asset-management/create-asset',
+        element: <ProtectedRoute><AssetForm/></ProtectedRoute>
+      },
+      {
+        path: 'employee-management/board',
+        element: <ProtectedRoute><EmployeeTable/></ProtectedRoute>
+      },
+      {
+        path: 'employee-management/add-employee',
+        element: <ProtectedRoute><EmployeeForm/></ProtectedRoute>
       },
     ]
   }
@@ -98,12 +112,16 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <UserProvider>
-          <RequestsProviderWrapper>
-            <div className="App font-sans">
-              <RouterProvider router={router} />
-              <CustomToastContainer />
-            </div>
-          </RequestsProviderWrapper>
+          <AssetProvider>
+            <EmployeeProvider>
+            <RequestsProviderWrapper>
+              <div className="App font-sans">
+                <RouterProvider router={router} />
+                <CustomToastContainer />
+              </div>
+            </RequestsProviderWrapper>
+            </EmployeeProvider>
+          </AssetProvider>
         </UserProvider>
       </AuthProvider>
     </ThemeProvider>

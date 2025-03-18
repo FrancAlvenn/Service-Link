@@ -9,6 +9,8 @@ import ticketRoutes from './routes/ticketing.js';
 import userRoutes from './routes/user_management.js';
 import purchasingRequestRoutes from './routes/purchasing_request.js';
 import requestActivityRoutes from './routes/request_activity.js';
+import assetRoutes from './routes/assets.js';
+import employeeRoutes from './routes/employee.js';
 
 import sequelize from './database.js'
 import { syncModels } from './models/syncModels.js';
@@ -59,6 +61,12 @@ app.use("/service_link_api/users", verifyToken, userRoutes)
 
 //Request Activity
 app.use("/service_link_api/request_activity", verifyToken, requestActivityRoutes)
+
+//Asset Management
+app.use("/service_link_api/assets", verifyToken, assetRoutes)
+
+//Employee Management
+app.use("/service_link_api/employees", verifyToken, employeeRoutes)
 
 
 const PORT = process.env.PORT || 8080

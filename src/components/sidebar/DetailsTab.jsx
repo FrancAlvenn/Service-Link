@@ -13,7 +13,8 @@ const requestFieldConfig = {
       { key: "requester", label: "Requester", type: "text", readOnly: true },
       { key: "department", label: "Department", type: "text", readOnly: true },
       { key: "date_required", label: "Date Required", type: "date" },
-      { key: "purpose", label: "Purpose", type: "text" },
+      { key: "purpose", label: "Purpose", type: "textarea" },
+      { key: "remarks", label: "Remarks", type: "textarea" },
       { key: "created_at", label: "Created At", type: "date", readOnly: true },
       { key: "updated_at", label: "Updated At", type: "date", readOnly: true },
     ],
@@ -25,7 +26,8 @@ const requestFieldConfig = {
       { key: "supply_category", label: "Supply Category", type: "text" },
       { key: "department", label: "Department", type: "text", readOnly: true },
       { key: "date_required", label: "Date Required", type: "date" },
-      { key: "purpose", label: "Purpose", type: "text" },
+      { key: "purpose", label: "Purpose", type: "textarea" },
+      { key: "remarks", label: "Remarks", type: "textarea" },
       { key: "created_at", label: "Created At", type: "date", readOnly: true },
       { key: "updated_at", label: "Updated At", type: "date", readOnly: true },
     ],
@@ -43,7 +45,8 @@ const requestFieldConfig = {
       { key: "event_end_time", label: "End Time", type: "time" },
       { key: "participants", label: "Participants", type: "text" },
       { key: "pax_estimation", label: "Estimated Participants", type: "number" },
-      { key: "purpose", label: "Purpose", type: "text" },
+      { key: "purpose", label: "Purpose", type: "textarea" },
+      { key: "remarks", label: "Remarks", type: "textarea" },
       { key: "created_at", label: "Created At", type: "date", readOnly: true },
       { key: "updated_at", label: "Updated At", type: "date", readOnly: true },
     ],
@@ -59,7 +62,8 @@ const requestFieldConfig = {
       { key: "time_of_arrival", label: "Arrival Time", type: "time" },
       { key: "number_of_passengers", label: "Number of Passengers", type: "number" },
       { key: "destination", label: "Destination", type: "text" },
-      { key: "purpose", label: "Purpose", type: "text" },
+      { key: "purpose", label: "Purpose", type: "textarea" },
+      { key: "remarks", label: "Remarks", type: "textarea" },
       { key: "created_at", label: "Created At", type: "date", readOnly: true },
       { key: "updated_at", label: "Updated At", type: "date", readOnly: true },
     ],
@@ -161,7 +165,7 @@ const requestFieldConfig = {
                 )
               ) : (
                 <p
-                  className={`ml-auto text-sm cursor-pointer ${key === "reference_number" ? "font-semibold" : ""} ${readOnly ? "text-gray-500" : ""}`}
+                  className={`ml-auto text-sm cursor-pointer w-[50%] text-right  ${key === "reference_number" ? "font-semibold" : ""} ${readOnly ? "text-gray-500" : ""}`}
                   onClick={() => !readOnly && setEditingField(key)}
                 >
                   {["date_required", "created_at", "updated_at", "event_dates", "date_of_trip"].includes(key)
@@ -169,7 +173,7 @@ const requestFieldConfig = {
                     : key === "requester"
                     ? getUserByReferenceNumber(selectedRequest[key]) || <span className="text-gray-400 italic">Click to edit</span>
                     : key === "department"
-                    ? <DepartmentModal request={selectedRequest} input={selectedRequest[key]} referenceNumber={selectedRequest.reference_number} requestType={requestType} />
+                    ? <span className="flex items-end justify-end"><DepartmentModal request={selectedRequest} input={selectedRequest[key]} referenceNumber={selectedRequest.reference_number} requestType={requestType} /></span>
                     : selectedRequest[key] || <span className="text-gray-400 italic">Click to edit</span>
                   }
                 </p>

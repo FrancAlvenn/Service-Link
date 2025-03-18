@@ -1,6 +1,5 @@
 /* eslint-disable no-unused-vars */
 import React, { useContext, useEffect, useState } from "react";
-import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { Button, Typography } from "@material-tailwind/react";
 import { Plus, FloppyDisk, PencilSimpleLine, Prohibit, X } from "@phosphor-icons/react";
@@ -10,7 +9,7 @@ import { UserContext } from "../../../../../context/UserContext";
 import ToastNotification from "../../../../../utils/ToastNotification";
 import { VenueRequestsContext } from "../../../context/VenueRequestsContext";
 
-const VenueRequestForm = () => {
+const VenueRequestForm = ({setSelectedRequest}) => {
     const { user } = useContext(AuthContext);
 
     const { getUserByReferenceNumber } = useContext(UserContext);
@@ -52,6 +51,8 @@ const VenueRequestForm = () => {
         ]
     );
 
+    const [errorMessage, setErrorMessage] = useState("");
+
     const handleChange = (e) => {
 
         // Validate Date: Ensure date_required is not in the past
@@ -61,7 +62,8 @@ const VenueRequestForm = () => {
             const selectedDate = new Date(e.target.value);
 
             if (selectedDate < today) {
-                ToastNotification.error("Invalid Date", "Date cannot be in the past.");
+                setErrorMessage("Invalid Date");
+                // ToastNotification.error("Invalid Date", "Date cannot be in the past.");
                 return; // Exit without updating state
             }
         }
@@ -76,18 +78,20 @@ const VenueRequestForm = () => {
                 const diffInMinutes = (end - start) / (1000 * 60);
 
                 if (start >= end) {
-                    ToastNotification.error("Invalid Time", "Start time must be earlier than end time.");
+                    setErrorMessage("Invalid Time. Start time must be earlier than end time.");
+                    // ToastNotification.error("Invalid Time", "Start time must be earlier than end time.");
                     return; // Exit without updating state
                 }
 
                 if (diffInMinutes < 60) {
-                    ToastNotification.error("Invalid Time", "Event duration must be at least 1 hour.");
+                    setErrorMessage("Invalid Time. Event duration must be at least 1 hour.");
+                    // ToastNotification.error("Invalid Time", "Event duration must be at least 1 hour.");
                     return; // Exit without updating state
                 }
             }
         }
 
-
+        setErrorMessage("");
         setRequest({ ...request, [e.target.name]: e.target.value });
     };
 
@@ -145,6 +149,7 @@ const VenueRequestForm = () => {
             if (response.status === 201) {
                 ToastNotification.success("Success!", response.data.message);
                 fetchVenueRequests();
+                setSelectedRequest("");
                 setRequest({
                     requester: user.reference_number,
                     department: "",
@@ -243,6 +248,18 @@ const VenueRequestForm = () => {
                 />
             </div>
 
+            <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Nature of Event</label>
+                <input
+                    type="text"
+                    name="event_nature"
+                    value={request.event_nature || ""}
+                    onChange={handleChange}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                    required
+                />
+            </div>
+
             {/* Event Details */}
             <div className="grid grid-cols-3 gap-4">
                 <div>
@@ -255,6 +272,7 @@ const VenueRequestForm = () => {
                         className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                         required
                     />
+                    {errorMessage === "Invalid Date" && <p className="text-red-500 font-semibold text-xs pl-2 pt-1">{errorMessage}</p>}
                 </div>
                 <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">Start Time</label>
@@ -266,6 +284,7 @@ const VenueRequestForm = () => {
                         className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                         required
                     />
+                    {errorMessage === "Invalid Time. Start time must be earlier than end time." && <p className="text-red-500 font-semibold text-xs pl-2 pt-1">{errorMessage}</p>}
                 </div>
                 <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">End Time</label>
@@ -277,6 +296,7 @@ const VenueRequestForm = () => {
                         className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                         required
                     />
+                    {errorMessage === "Invalid Time. Event duration must be at least 1 hour." && <p className="text-red-500 font-semibold text-xs pl-2 pt-1">{errorMessage}</p>}
                 </div>
             </div>
 
@@ -388,8 +408,39 @@ const VenueRequestForm = () => {
                 </button>
             </div>
 
+             {/* Remarks */}
+             <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1 pt-1">Remarks</label>
+                <textarea
+                    name="remarks"
+                    value={request.remarks}
+                    onChange={handleChange}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white"
+                    required
+                />
+            </div>
+
             {/* Submit Button */}
-            <Button color="blue" type="submit" onClick={submitVenueRequest}>Submit Request</Button>
+            <Button
+                color="blue"
+                type="submit"
+                onClick={submitVenueRequest}
+                disabled={
+                    !request.department ||
+                    !request.venue_id ||
+                    !request.organization ||
+                    !request.event_nature ||
+                    !request.event_title ||
+                    !request.event_dates ||
+                    !request.event_start_time ||
+                    !request.event_end_time ||
+                    !request.participants ||
+                    !request.pax_estimation ||
+                    !request.purpose
+                }
+            >
+                Submit Request
+            </Button>
         </div>
     );
 };

@@ -16,6 +16,8 @@ const JobRequestForm = ({setSelectedRequest}) => {
 
     const { fetchJobRequests } = useContext(JobRequestsContext)
 
+    const [errorMessage, setErrorMessage] = useState("");
+
     const [request, setRequest] = useState({
         requester: user.reference_number,
         department: "",
@@ -44,11 +46,13 @@ const JobRequestForm = ({setSelectedRequest}) => {
             const selectedDate = new Date(e.target.value);
 
             if (selectedDate < today) {
-                ToastNotification.error("Invalid Date", "Date cannot be in the past.");
+                setErrorMessage("Invalid Date");
+                // ToastNotification.error("Invalid Date", "Date cannot be in the past.");
                 return; // Exit without updating state
             }
         }
 
+        setErrorMessage("");
         setRequest({ ...request, [e.target.name]: e.target.value });
     };
 
@@ -200,6 +204,7 @@ const JobRequestForm = ({setSelectedRequest}) => {
                     className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                     required
                 />
+                {errorMessage && <p className="text-red-500 font-semibold text-xs pl-2 pt-1">{errorMessage}</p>}
             </div>
 
             {/* Purpose */}
@@ -285,8 +290,33 @@ const JobRequestForm = ({setSelectedRequest}) => {
                 </button>
             </div>
 
+            {/* Remarks */}
+            <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1 pt-1">Remarks</label>
+                <textarea
+                    name="remarks"
+                    value={request.remarks}
+                    onChange={handleChange}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white"
+                    required
+                />
+            </div>
+
             {/* Submit Button */}
-            <Button color="blue" onClick={()=> submitJobRequest()}>Submit Job Request</Button>
+            <Button
+                color="blue"
+                onClick={()=> submitJobRequest()}
+                disabled={
+                    !request.department ||
+                    !request.title ||
+                    !request.date_required ||
+                    !request.purpose
+                    // request.details.length === 0 ||
+                    // request.details.some(detail => !detail.particulars || !detail.quantity || !detail.description)
+                }
+            >
+                Submit Job Request
+            </Button>
         </div>
     );
 };

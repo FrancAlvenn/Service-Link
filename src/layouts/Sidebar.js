@@ -14,7 +14,7 @@ const options = {
 
 const routeMap = {
   "Requests Management": "/workspace/requests-management",
-  "Ticket Management": "/workspace/ticket-management",
+  "Ticket Management": "/workspace/ticket-management/board",
   "Asset Management": "/workspace/asset-management/board",
   "Employee Management": "/workspace/employee-management/board",
 };

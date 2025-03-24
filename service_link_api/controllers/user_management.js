@@ -107,7 +107,7 @@ export async function createUser(req, res) {
                 organization: req.body.organization,
                 department: req.body.department,
                 designation: req.body.designation,
-                access_level: req.body.access_level,
+                access_level: req.body.access_level || 'user', //change this later to 'user' -- 'admin' will be used for development
                 immediate_head: req.body.immediate_head,
                 profile_image_id: null // Set profile image ID to null initially
             });

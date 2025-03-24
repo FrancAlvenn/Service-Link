@@ -120,10 +120,25 @@ function LoginForm() {
                     console.log("User Login")
                 }
 
-                //fetch all request data
-                fetchAllRequests();
+                if (res.data.access_level === 'user'){
+                    ToastNotification.success('Welcome to Service Link!', 'You have been successfully logged in.');
+                    setAuthData(res.data);
+                    localStorage.setItem('userPreference', JSON.stringify(res.data.userPreference));
 
-                navigate('/workspace/requests-management');
+                    //fetch all request data
+                    fetchAllRequests();
+
+                    navigate('/portal/dashboard');
+                }else if (res.data.access_level === 'admin'){
+                    ToastNotification.success('Welcome to Service Link!', 'You have been successfully logged in.');
+                    setAuthData(res.data);
+                    localStorage.setItem('userPreference', JSON.stringify(res.data.userPreference));
+
+                    //fetch all request data
+                    fetchAllRequests();
+
+                    navigate('/workspace/requests-management');
+                }
                 setFormStatus('idle');
             }
 

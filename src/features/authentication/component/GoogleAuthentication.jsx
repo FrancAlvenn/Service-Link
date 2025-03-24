@@ -76,14 +76,25 @@ function GoogleAuthLogin() {
                         console.log("User Login")
                     }
 
-                    ToastNotification.success('Welcome to Service Link!', 'You have been successfully logged in.');
-                    setAuthData(response.data.response.dataValues);
-                    localStorage.setItem('userPreference', JSON.stringify(response.data.userPreference));
+                    if (response.data.response.dataValues.access_level === 'user'){
+                        ToastNotification.success('Welcome to Service Link!', 'You have been successfully logged in.');
+                        setAuthData(response.data.response.dataValues);
+                        localStorage.setItem('userPreference', JSON.stringify(response.data.userPreference));
 
-                    //fetch all request data
-                    fetchAllRequests();
+                        //fetch all request data
+                        fetchAllRequests();
 
-                    navigate('/workspace/requests-management');
+                        navigate('/portal/dashboard');
+                    }else if (response.data.response.dataValues.access_level === 'admin'){
+                        ToastNotification.success('Welcome to Service Link!', 'You have been successfully logged in.');
+                        setAuthData(response.data.response.dataValues);
+                        localStorage.setItem('userPreference', JSON.stringify(response.data.userPreference));
+
+                        //fetch all request data
+                        fetchAllRequests();
+
+                        navigate('/workspace/requests-management');
+                    }
                 } else if (response.status === 201) {
                     ToastNotification.info('Oops!', 'Account not activated. Please contact the GSO office for account activation.');
                 } else {

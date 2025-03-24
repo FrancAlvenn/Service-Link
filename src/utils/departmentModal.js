@@ -104,7 +104,7 @@ function DepartmentModal({ request, input, referenceNumber, requestType, onDepar
         {isAuthorized && <MenuList className="mt-2 divide-y divide-gray-100 rounded-md bg-white shadow-lg shadow-topping ring-2 ring-black/5 border-none">
           {departmentOptions.length > 0 ? (
             <div className="flex flex-col">
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[300px] overflow-y-auto">
                 {departmentOptions.map((option) => (
                   <MenuItem
                     key={option.id}

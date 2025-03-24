@@ -1,16 +1,25 @@
 import React, { useContext } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../../features/authentication';
 
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated } = useContext(AuthContext);
+const ProtectedRoute = ({ children, requiredAccess }) => {
+  const { user, isAuthenticated } = useContext(AuthContext);
+  const location = useLocation();
 
   if (!isAuthenticated) {
-    // If not authenticated, redirect to login page
-    return <Navigate to="/" />; // change to the url of the redirected page (either login or home)
+    // Redirect to login if not authenticated
+    return <Navigate to="/" state={{ from: location }} />;
   }
 
-  return children; // If authenticated, render the children (protected component)
+  // Ensure user has the required access level (e.g., 'admin' or 'user')
+  if (user.access_level !== requiredAccess) {
+    // Redirect to appropriate page if access level is not authorized
+    return user.access_level === 'user'
+      ? <Navigate to="/portal" />
+      : <Navigate to="/" />;
+  }
+
+  return children;
 };
 
 export default ProtectedRoute;

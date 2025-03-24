@@ -1,5 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import axios from "axios";
+import ToastNotification from "../../../utils/ToastNotification";
 
 export const EmployeeContext = createContext();
 
@@ -63,6 +64,7 @@ export const EmployeeProvider = ({ children }) => {
     try {
       await axios.delete(`/employees/${employeeId}`, { withCredentials: true });
       setEmployees((prev) => prev.filter((emp) => emp.reference_number !== employeeId));
+      ToastNotification.success("Success", "Employee archived successfully.");
     } catch (error) {
       console.error("Error deleting employee:", error);
     }

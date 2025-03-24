@@ -29,6 +29,12 @@ import AssetForm from './features/asset_management/component/AssetForm';
 import EmployeeTable from './features/employee_management/component/EmployeeTable';
 import EmployeeForm from './features/employee_management/component/EmployeeForm';
 import { EmployeeProvider } from './features/employee_management/context/EmployeeContext';
+import { TicketProvider } from './features/ticket_management/context/TicketContext';
+import TicketTable from './features/ticket_management/component/TicketTable';
+import TicketForm from './features/ticket_management/component/TicketForm';
+import Portal from './portal/pages/Portal';
+import PortalDashboard from './portal/component/dashboard/PortalDashboard';
+import RequestDetailsPage from './portal/component/request_view/RequestDetailsPage';
 
 
 
@@ -41,15 +47,15 @@ const router = createBrowserRouter([
   },
   {
     path: '/home',
-    element: <ProtectedRoute><Layout><Home/></Layout></ProtectedRoute>
+    element: <ProtectedRoute requiredAccess={'admin'}><Layout><Home/></Layout></ProtectedRoute>
   },
   {
     path: '/dashboard',
-    element: <ProtectedRoute><Layout><Dashboard/></Layout></ProtectedRoute>
+    element: <ProtectedRoute requiredAccess={'admin'}><Layout><Dashboard/></Layout></ProtectedRoute>
   },
   {
     path: '/workspace',
-    element: <ProtectedRoute><Layout><Workspace/></Layout></ProtectedRoute>,
+    element: <ProtectedRoute requiredAccess={'admin'}><Layout><Workspace/></Layout></ProtectedRoute>,
     children: [
       {
         path: 'requests-management',
@@ -61,48 +67,66 @@ const router = createBrowserRouter([
       },
       {
         path: 'requests-management/queues/job-requests',
-        element: <ProtectedRoute><JobRequests/></ProtectedRoute>
+        element: <ProtectedRoute requiredAccess={'admin'}><JobRequests/></ProtectedRoute>
       },
       {
         path: 'requests-management/queues/purchasing-requests',
-        element: <ProtectedRoute><PurchasingRequests/></ProtectedRoute>
+        element: <ProtectedRoute requiredAccess={'admin'}><PurchasingRequests/></ProtectedRoute>
       },
       {
         path: 'requests-management/queues/vehicle-requests',
-        element: <ProtectedRoute><VehicleRequests/></ProtectedRoute>
+        element: <ProtectedRoute requiredAccess={'admin'}><VehicleRequests/></ProtectedRoute>
       },
       {
         path: 'requests-management/queues/venue-requests',
-        element: <ProtectedRoute><VenueRequests/></ProtectedRoute>
+        element: <ProtectedRoute requiredAccess={'admin'}><VenueRequests/></ProtectedRoute>
       },
       {
         path: 'requests-management/views/kanban-board',
-        element: <ProtectedRoute><KanbanBoard/></ProtectedRoute>
+        element: <ProtectedRoute requiredAccess={'admin'}><KanbanBoard/></ProtectedRoute>
       },
       {
         path: 'requests-management/raise-request',
-        element: <ProtectedRoute><RaiseRequest/></ProtectedRoute>
+        element: <ProtectedRoute requiredAccess={'admin'}><RaiseRequest/></ProtectedRoute>
       },
       {
-        path: 'ticket-management',
-        element: <div>Ticket Management</div>
+        path: 'ticket-management/board',
+        element: <ProtectedRoute requiredAccess={'admin'}><TicketTable/></ProtectedRoute>
+      },
+      {
+        path: 'ticket-management/create-ticket',
+        element: <ProtectedRoute requiredAccess={'admin'}><TicketForm/></ProtectedRoute>
       },
       {
         path: 'asset-management/board',
-        element: <ProtectedRoute><AssetTable/></ProtectedRoute>
+        element: <ProtectedRoute requiredAccess={'admin'}><AssetTable/></ProtectedRoute>
       },
       {
         path: 'asset-management/create-asset',
-        element: <ProtectedRoute><AssetForm/></ProtectedRoute>
+        element: <ProtectedRoute requiredAccess={'admin'}><AssetForm/></ProtectedRoute>
       },
       {
         path: 'employee-management/board',
-        element: <ProtectedRoute><EmployeeTable/></ProtectedRoute>
+        element: <ProtectedRoute requiredAccess={'admin'}><EmployeeTable/></ProtectedRoute>
       },
       {
         path: 'employee-management/add-employee',
-        element: <ProtectedRoute><EmployeeForm/></ProtectedRoute>
+        element: <ProtectedRoute requiredAccess={'admin'}><EmployeeForm/></ProtectedRoute>
       },
+    ]
+  },
+  {
+    path: '/portal',
+    element: <ProtectedRoute requiredAccess={'user'}><Portal/></ProtectedRoute>,
+    children: [
+      {
+        path: "dashboard",
+        element: <ProtectedRoute requiredAccess={'user'}><PortalDashboard/></ProtectedRoute>,
+      },
+      {
+        path: "request/:id",
+        element: <ProtectedRoute requiredAccess={'user'}><RequestDetailsPage/></ProtectedRoute>,
+      }
     ]
   }
 ]);
@@ -112,16 +136,18 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <UserProvider>
-          <AssetProvider>
-            <EmployeeProvider>
-            <RequestsProviderWrapper>
-              <div className="App font-sans">
-                <RouterProvider router={router} />
-                <CustomToastContainer />
-              </div>
-            </RequestsProviderWrapper>
-            </EmployeeProvider>
-          </AssetProvider>
+          <TicketProvider>
+            <AssetProvider>
+              <EmployeeProvider>
+              <RequestsProviderWrapper>
+                <div className="App font-sans">
+                  <RouterProvider router={router} />
+                  <CustomToastContainer />
+                </div>
+              </RequestsProviderWrapper>
+              </EmployeeProvider>
+            </AssetProvider>
+          </TicketProvider>
         </UserProvider>
       </AuthProvider>
     </ThemeProvider>

@@ -13,7 +13,7 @@ const Ticket = sequelize.define('Ticket', {
     unique: true,
   },
   reference_number: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.STRING(50),
     allowNull: false,
   },
   status: {

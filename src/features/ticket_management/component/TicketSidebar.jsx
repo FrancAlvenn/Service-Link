@@ -1,49 +1,45 @@
 import { UserCircle } from "@phosphor-icons/react";
 import axios from "axios";
 import { useContext, useEffect, useState } from "react";
-import { Button } from "@material-tailwind/react";
+import { Button, Input } from "@material-tailwind/react";
 import { AuthContext } from "../../authentication";
 import { UserContext } from "../../../context/UserContext";
 import ToastNotification from "../../../utils/ToastNotification";
 import { formatDate } from "../../../utils/dateFormatter";
 
-const EmployeeSidebar = ({ open, onClose, referenceNumber, employees, fetchEmployees, deleteEmployee }) => {
+const TicketSidebar = ({ open, onClose, ticketId, tickets, fetchTickets, deleteTicket }) => {
   const [isOpen, setIsOpen] = useState(open);
   const { user } = useContext(AuthContext);
   const { getUserByReferenceNumber } = useContext(UserContext);
 
-  const [employee, setEmployee] = useState(null);
+  const [ticket, setTicket] = useState(null);
   const [editedFields, setEditedFields] = useState({});
   const [editingField, setEditingField] = useState(null);
 
-  const employeeFieldConfig = [
-    { key: "reference_number", label: "Reference Number", type: "text", readOnly: true },
-    { key: "first_name", label: "First Name", type: "text" },
-    { key: "last_name", label: "Last Name", type: "text" },
-    { key: "email", label: "Email", type: "text" },
-    { key: "position", label: "Position", type: "text" },
-    { key: "department", label: "Department", type: "text" },
-    { key: "expertise", label: "Expertise", type: "text" },
-    { key: "contact_number", label: "Contact Number", type: "text" },
-    { key: "hire_date", label: "Date Hired", type: "date" },
-    { key: "status", label: "Employment Status", type: "text" },
+  const ticketFieldConfig = [
+    { key: "ticket_id", label: "Ticket ID", type: "text", readOnly: true },
+    { key: "title", label: "Title", type: "text" },
+    { key: "description", label: "Description", type: "textarea" },
+    { key: "status", label: "Status", type: "text" },
+    { key: "priority", label: "Priority", type: "text" },
+    { key: "assigned_to", label: "Assigned To", type: "text" },
     { key: "createdAt", label: "Created At", type: "date", readOnly: true },
     { key: "updatedAt", label: "Updated At", type: "date", readOnly: true },
   ];
 
   useEffect(() => {
-    if (isOpen && referenceNumber) {
-      const foundEmployee = employees.find((emp) => emp.reference_number === referenceNumber);
-      setEmployee(foundEmployee);
+    if (isOpen && ticketId) {
+      const foundTicket = tickets.find((ticket) => ticket.ticket_id === ticketId);
+      setTicket(foundTicket);
     }
-  }, [employees, referenceNumber, isOpen]);
+  }, [tickets, ticketId, isOpen]);
 
   useEffect(() => {
     setIsOpen(open);
   }, [open]);
 
   const handleClose = () => {
-    setEmployee(null);
+    setTicket(null);
     setEditedFields({});
     setIsOpen(false);
     if (onClose) onClose();
@@ -58,16 +54,16 @@ const EmployeeSidebar = ({ open, onClose, referenceNumber, employees, fetchEmplo
   const handleSave = async (field) => {
     try {
       await axios.put(
-        `/employees/${employee.reference_number}`,
+        `/tickets/${ticket.ticket_id}`,
         {
-          ...employee,
+          ...ticket,
           [field]: editedFields[field],
           requester: user.reference_number,
         },
         { withCredentials: true }
       );
-      fetchEmployees();
-      // ToastNotification.success("Success", `${field} updated successfully.`);
+      fetchTickets();
+      ToastNotification.success("Success", `${field} updated successfully.`);
     } catch (error) {
       console.error("Update failed:", error);
       ToastNotification.error("Error", `Failed to update ${field}.`);
@@ -83,12 +79,12 @@ const EmployeeSidebar = ({ open, onClose, referenceNumber, employees, fetchEmplo
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`/employees/${employee.reference_number}`, { withCredentials: true });
-      fetchEmployees();
-      ToastNotification.success("Success", "Employee deleted successfully.");
+      await axios.delete(`/tickets/${ticket.ticket_id}`, { withCredentials: true });
+      fetchTickets();
+      ToastNotification.success("Success", "Ticket deleted successfully.");
     } catch (error) {
       console.error("Delete failed:", error);
-      ToastNotification.error("Error", "Failed to delete employee.");
+      ToastNotification.error("Error", `Failed to delete ticket.`);
     } finally {
       handleClose();
     }
@@ -122,32 +118,32 @@ const EmployeeSidebar = ({ open, onClose, referenceNumber, employees, fetchEmplo
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        {employee ? (
+        {ticket ? (
           <div className="flex flex-col overflow-y-auto h-full">
-            {/* Employee Name (Editable) */}
+            {/* Ticket Title (Editable) */}
             <h2 className="text-xl font-bold mb-4">
-              {editingField === "first_name" ? (
+              {editingField === "title" ? (
                 <input
                   type="text"
                   className="border w-full border-gray-300 rounded-md p-2 text-xl font-bold"
-                  value={editedFields.first_name ?? employee.first_name}
-                  onChange={(e) => handleFieldChange("first_name", e.target.value)}
-                  onBlur={() => handleSave("first_name")}
-                  onKeyDown={(e) => handleKeyDown(e, "first_name")}
+                  value={editedFields.title ?? ticket.title}
+                  onChange={(e) => handleFieldChange("title", e.target.value)}
+                  onBlur={() => handleSave("title")}
+                  onKeyDown={(e) => handleKeyDown(e, "title")}
                   autoFocus
                 />
               ) : (
-                <p onClick={() => setEditingField("first_name")} className="cursor-pointer">
-                  {employee.first_name || "Click to edit"}
+                <p onClick={() => setEditingField("title")} className="cursor-pointer">
+                  {ticket.title || "Click to edit"}
                 </p>
               )}
             </h2>
 
-            {/* Employee Details */}
+            {/* Ticket Details */}
             <div className="flex flex-col p-3 gap-2 border-gray-400 border rounded-md">
-              {employeeFieldConfig.map((field) => {
-                if (field.key === "first_name") return null;
-                const value = employee[field.key];
+              {ticketFieldConfig.map((field) => {
+                if (field.key === "title") return null;
+                const value = ticket[field.key];
 
                 return (
                   <div key={field.key} className="mb-3 flex justify-between items-center">
@@ -178,16 +174,18 @@ const EmployeeSidebar = ({ open, onClose, referenceNumber, employees, fetchEmplo
               })}
             </div>
 
-            <Button color="red" onClick={() => deleteEmployee(employee.reference_number)} className="w-full min-h-[40px] max-w-[160px] mt-3">
-              Delete Employee
+            <Button color="red" onClick={() => deleteTicket(ticket.ticket_id)} className="w-full min-h-[40px] max-w-[160px] mt-3">
+              Delete Ticket
             </Button>
           </div>
         ) : (
-          <div className="flex justify-center items-center h-full text-xl text-gray-600">No employee found.</div>
+          <div className="flex justify-center items-center h-full text-xl text-gray-600">
+            No ticket found.
+          </div>
         )}
       </div>
     </>
   );
 };
 
-export default EmployeeSidebar;
+export default TicketSidebar;

@@ -69,7 +69,7 @@ export const register = async (req, res) => {
                 organization: req.body.organization,
                 department: req.body.department,
                 designation: req.body.designation,
-                access_level: req.body.access_level,
+                access_level: req.body.access_level || 'user', //change this later to 'user' -- 'admin' will be used for development
                 immediate_head: req.body.immediate_head,
                 status: 'active',
                 profile_image_id: null // Set profile image ID to null initially
@@ -244,6 +244,7 @@ export const googleAuth = async (req, res) => {
             email: req.body.email,
             username: req.body.email,
             google_id: req.body.google_id,
+            access_level: 'user', //change this later to 'admin' -- 'admin' will be used for development
             status: "active", //change later to pending
             archived: false,
         });

@@ -6,12 +6,12 @@ const router = express.Router();
 // Employee CRUD Routes
 router.get("/", getAllEmployees);
 
-router.get("/:id", getEmployeeById);
+router.get("/:reference_number", getEmployeeById);
 
 router.post("/", createEmployee);
 
-router.put("/:id", updateEmployee);
+router.put("/:reference_number", updateEmployee);
 
-router.delete("/:id", deleteEmployee);
+router.delete("/:reference_number", deleteEmployee);
 
 export default router;

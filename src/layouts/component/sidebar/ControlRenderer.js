@@ -30,7 +30,7 @@ function ControlRenderer({ selectedControl }) {
       controlComponent = <RequestsManagementControls />;
     }
 
-    if (location.pathname.includes("ticket-management") || selectedControl === "Ticket Management") {
+    if (location.pathname.includes("ticket-management/board") || selectedControl === "Ticket Management") {
       controlComponent = <TicketManagementControls />;
     }
 

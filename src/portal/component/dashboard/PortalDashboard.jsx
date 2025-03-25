@@ -9,6 +9,9 @@ import axios from 'axios';
 import { ReadCvLogo, ShoppingCart, CalendarCheck, Car } from "@phosphor-icons/react";
 import RequestDetailsPage from '../request_view/RequestDetailsPage';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useOutletContext } from 'react-router-dom';
+
+import service_request from '../../../assets/service_request.png';
 
 function PortalDashboard() {
   const { jobRequests } = useContext(JobRequestsContext);
@@ -20,6 +23,8 @@ function PortalDashboard() {
   const [statusOptions, setStatusOptions] = useState([]);
   const [selectedType, setSelectedType] = useState('All');
   const [selectedRequest, setSelectedRequest] = useState(null);
+
+  const { searchQuery } = useOutletContext();
 
   // Icon mapping for request types
   const typeIcons = {
@@ -70,8 +75,19 @@ function PortalDashboard() {
   // Close RequestDetailsPage
   const closeRequestDetails = () => setSelectedRequest(null);
 
+  // Apply search filter
+  const searchedRequests = filteredRequests.filter((request) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      request.title?.toLowerCase().includes(query) ||
+      request.purpose?.toLowerCase().includes(query) ||
+      request.reference_number?.toLowerCase().includes(query)
+    );
+  });
+
+
   return (
-    <div className="h-full bg-white rounded-lg w-full mt-0 px-3 py-4 flex flex-col gap-6">
+    <div className="h-full bg-white rounded-lg w-full mt-0 px-3 py-4 flex flex-col gap-6 pb-24">
       <Typography variant="h5" className="text-gray-800">My Requests</Typography>
 
       {/* Filter Buttons */}
@@ -98,10 +114,14 @@ function PortalDashboard() {
 
       {/* Scrollable Container */}
       <div className="flex flex-wrap gap-4 overflow-y-auto">
-        {filteredRequests.length === 0 ? (
-          <Typography variant="h6" className="text-gray-500">No requests found.</Typography>
+        {searchedRequests.length === 0 ? (
+          <div className="text-gray-500 text-sm py-3 text-center flex flex-col gap-3 items-center justify-center w-full">
+            <img src={service_request} alt="No act" className="w-full h-auto max-w-xs sm:max-w-sm md:max-w-sm lg:max-w-sm xl:max-w-sm" />
+
+            <Typography variant="h6" className="text-gray-500">Nothing to see yet. Start a request and be the first to fill this space!</Typography>
+          </div>
         ) : (
-          filteredRequests.map((request) => (
+          searchedRequests.map((request) => (
             <div
               key={request.reference_number}
               className="flex flex-col bg-gray-100 p-3 rounded-lg shadow-md w-full max-w-[full] cursor-pointer"
@@ -111,9 +131,14 @@ function PortalDashboard() {
                 <div className="flex items-center gap-2 w-full mb-1">
                   {typeIcons[request.type]}
                   <div className='flex flex-col w-full'>
-                    <Typography variant="small" className="font-semibold mb-1">
-                      {request.title || "Request Title"}
-                    </Typography>
+                    <div className='flex justify-between w-full items-center gap-2'>
+                      <Typography variant="small" className="font-semibold mb-1">
+                        {request.title || "Request Title"}
+                      </Typography>
+                      <Typography variant="small" className="text-gray-500 text-xs ml-auto hidden sm:block">
+                        Requested on: {new Date(request.created_at).toLocaleDateString()}
+                      </Typography>
+                    </div>
                     <div className='flex justify-between w-full items-center gap-2'>
                       <Chip
                         size="sm"
@@ -122,7 +147,7 @@ function PortalDashboard() {
                         className="text-center w-fit cursor-pointer"
                         color={statusOptions.find(option => option.status === request.status)?.color || "gray"}
                       />
-                      <Typography variant="small" className="text-gray-500 text-xs ml-auto">
+                      <Typography variant="small" className="text-gray-500 text-xs ml-auto block sm:hidden">
                         Requested on: {new Date(request.created_at).toLocaleDateString()}
                       </Typography>
                     </div>
@@ -144,20 +169,34 @@ function PortalDashboard() {
 
       <AnimatePresence>
         {selectedRequest && (
-          <motion.div
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="fixed top-0 right-0  w-full h-full bg-white shadow-lg z-50"
-          >
-            <RequestDetailsPage
-              referenceNumber={selectedRequest.reference_number}
-              onClose={closeRequestDetails}
+          <>
+            {/* Gray Background Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.1 }} // Faster transition for instant appearance
+              className="fixed inset-0 bg-black z-40"
+              onClick={closeRequestDetails}
             />
-          </motion.div>
+
+            {/* Sliding Request Panel */}
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="fixed top-0 right-0 w-full max-w-[750px] h-full bg-white shadow-lg z-50"
+            >
+              <RequestDetailsPage
+                referenceNumber={selectedRequest.reference_number}
+                onClose={closeRequestDetails}
+              />
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
+
     </div>
   );
 }

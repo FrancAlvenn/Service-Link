@@ -35,6 +35,7 @@ import TicketForm from './features/ticket_management/component/TicketForm';
 import Portal from './portal/pages/Portal';
 import PortalDashboard from './portal/component/dashboard/PortalDashboard';
 import RequestDetailsPage from './portal/component/request_view/RequestDetailsPage';
+import Notifications from './portal/pages/Notifications';
 
 
 
@@ -126,9 +127,14 @@ const router = createBrowserRouter([
       {
         path: "request/:id",
         element: <ProtectedRoute requiredAccess={'user'}><RequestDetailsPage/></ProtectedRoute>,
+      },
+      {
+        path: 'notifications',
+        element: <ProtectedRoute requiredAccess={'user'}><Notifications/></ProtectedRoute>,
       }
     ]
-  }
+  },
+  
 ]);
 
 function App() {

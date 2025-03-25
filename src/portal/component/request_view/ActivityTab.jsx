@@ -63,7 +63,7 @@ const ActivityTab = ({ referenceNumber }) => {
             reference_number: referenceNumber,
             type: "comment",
             visibility: visibility,
-            action: visibility === "Reply to Support",
+            action: "Reply to Support",
             details: content,
             performed_by: user.reference_number,
         };

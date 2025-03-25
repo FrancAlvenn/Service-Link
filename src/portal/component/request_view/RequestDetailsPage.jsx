@@ -114,7 +114,7 @@ function RequestDetailsPage({ referenceNumber, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-white z-50 p-6 overflow-y-auto">
+    <div className="fixed top-0 right-0 w-full max-w-[750px] h-full bg-white z-100 p-6 overflow-y-auto">
       <div className="flex flex-col justify-between items-start mb-6">
         <div className="p-1 rounded-md bg-red-500 mb-3">
           <X color="white" onClick={onClose} className="cursor-pointer" />
@@ -125,7 +125,7 @@ function RequestDetailsPage({ referenceNumber, onClose }) {
           isEditingTitle ? (
             <input
               type="text"
-              className="border w-full border-gray-300 rounded-md p-2"
+              className="border w-full border-gray-300 rounded-md p-2 font-bold text-xl"
               value={editedTitle}
               onChange={(e) => setEditedTitle(e.target.value)}
               onKeyDown={handleTitleKeyDown}
@@ -133,23 +133,24 @@ function RequestDetailsPage({ referenceNumber, onClose }) {
               autoFocus
             />
           ) : (
-            <Typography className="text-gray-800 font-bold text-xl cursor-pointer" onClick={handleEditTitle}>
+            <Typography variant="h5" className="text-gray-800 font-bold text-xl cursor-pointer" onClick={handleEditTitle}>
               {request.title || 'Request Details'}
             </Typography>
           )
         ) : (
-          <Typography variant="h5" className="text-gray-800">{request.title || 'Request Details'}</Typography>
+          <Typography variant="h5" className="text-gray-800 font-bold text-xl">{request.title || 'Request Details'}</Typography>
         )}
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex gap-4 mb-6 items-center justify-start bg-blue-gray-200 rounded w-full">
+      <div className="flex gap-4 mb-6 items-center justify-between bg-gray-100 shadow-sm  rounded-lg w-full max-w-full">
         {['Main', 'Details', 'Activity'].map(tab => (
           <Button
             key={tab}
             size="sm"
-            variant={activeTab === tab ? 'filled' : 'outlined'}
-            color="blue"
+            className='w-full'
+            variant={activeTab === tab ? 'filled' : 'text'}
+            color={activeTab === tab ? 'blue' : 'black'}
             onClick={() => setActiveTab(tab)}
           >
             {tab}
@@ -158,7 +159,13 @@ function RequestDetailsPage({ referenceNumber, onClose }) {
       </div>
 
       {/* Render Active Tab */}
-      {activeTab === 'Main' && <MainTab request={request} setRequest={setRequest} />}
+      {activeTab === 'Main' && <MainTab
+        request={request}
+        setRequest={setRequest}
+        requestType={requestType}
+        fetchRequests={fetchAllRequests}
+        onClose={onClose}
+      />}
       {activeTab === 'Details' && <DetailTab
         selectedRequest={request}
         setSelectedRequest={setRequest}
@@ -166,7 +173,9 @@ function RequestDetailsPage({ referenceNumber, onClose }) {
         fetchRequests={fetchAllRequests}
         isAuthorized={isAuthorized}
       />}
-      {activeTab === 'Activity' && <ActivityTab referenceNumber={request.reference_number} />}
+      {activeTab === 'Activity' && <ActivityTab
+        referenceNumber={request.reference_number}
+      />}
     </div>
   );
 }

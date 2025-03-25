@@ -107,12 +107,21 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
               withCredentials: true
             })
             // ToastNotification.success("Success!", "Activity logged successfully.");
+            getRequestActivity();
         }
-    } catch (error) {
-        ToastNotification.error("Error!", "Failed to update status or log activity.");
-        console.error("Status update or activity log failed:", error);
-    }
-};
+      } catch (error) {
+          ToastNotification.error("Error!", "Failed to update status or log activity.");
+          console.error("Status update or activity log failed:", error);
+          }
+      };
+
+      const getRequestActivity = async () => {
+        await axios({
+            method: "GET",
+            url: `/request_activity/${referenceNumber}`,
+            withCredentials: true,
+        })
+    };
 
 
   return (

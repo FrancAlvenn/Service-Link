@@ -7,7 +7,6 @@ import { Typography, Chip, Button } from "@material-tailwind/react";
 import { AuthContext } from '../../../features/authentication';
 import axios from 'axios';
 import { ReadCvLogo, ShoppingCart, CalendarCheck, Car } from "@phosphor-icons/react";
-import RequestDetailsPage from './RequestDetailsPage';
 
 function PortalDashboard() {
   const { jobRequests } = useContext(JobRequestsContext);
@@ -18,14 +17,13 @@ function PortalDashboard() {
 
   const [statusOptions, setStatusOptions] = useState([]);
   const [selectedType, setSelectedType] = useState('All');
-  const [selectedRequest, setSelectedRequest] = useState(null);
 
   // Icon mapping for request types
   const typeIcons = {
-    'Job Request': <span className='p-2 rounded-md bg-blue-500'><ReadCvLogo size={24} color="white" /></span>,
-    'Purchasing Request': <span className='p-2 rounded-md bg-green-500'><ShoppingCart size={24} color="white" /></span>,
-    'Venue Request': <span className='p-2 rounded-md bg-purple-500'><CalendarCheck size={24} color="white" /></span>,
-    'Vehicle Request': <span className='p-2 rounded-md bg-red-500'><Car size={24} color="white" /></span>,
+    'Job Request': <span className='p-2 rounded-md bg-blue-500'><ReadCvLogo size={24} color="white"  /></span>,
+    'Purchasing Request': <span className='p-2 rounded-md bg-green-500'><ShoppingCart size={24} color="white" /> </span>,
+    'Venue Request': <span className='p-2 rounded-md bg-purple-500'><CalendarCheck size={24} color="white" /> </span>,
+    'Vehicle Request': <span className='p-2 rounded-md bg-red-500'><Car size={24} color="white" /> </span>,
   };
 
   // Combine all requests and filter by user's reference number
@@ -60,15 +58,6 @@ function PortalDashboard() {
     getStatus();
   }, []);
 
-  // Open RequestDetailsPage
-  const openRequestDetails = (referenceNumber) => {
-    const request = allRequests.find(req => req.reference_number === referenceNumber);
-    setSelectedRequest(request);
-  };
-
-  // Close RequestDetailsPage
-  const closeRequestDetails = () => setSelectedRequest(null);
-
   return (
     <div className="h-full bg-white rounded-lg w-full mt-0 px-3 py-4 flex flex-col gap-6">
       <Typography variant="h5" className="text-gray-800">My Requests</Typography>
@@ -101,11 +90,7 @@ function PortalDashboard() {
           <Typography variant="h6" className="text-gray-500">No requests found.</Typography>
         ) : (
           filteredRequests.map((request) => (
-            <div
-              key={request.reference_number}
-              className="flex flex-col bg-gray-100 p-3 rounded-lg shadow-md w-full max-w-[full] cursor-pointer"
-              onClick={() => openRequestDetails(request.reference_number)}
-            >
+            <div key={request.id} className="flex flex-col bg-gray-100 p-3 rounded-lg shadow-md w-full max-w-[full]">
               <div className='flex flex-col justify-between items-start gap-2'>
                 <div className="flex items-center gap-2 w-full mb-1">
                   {typeIcons[request.type]}
@@ -129,7 +114,7 @@ function PortalDashboard() {
                 </div>
               </div>
 
-              {/* Optional: Show purpose on larger screens */}
+              {/* hidden sm:block - optional to make it responsive for mobile view (removes the purpose) */}
               <Typography
                 variant="small"
                 className="text-gray-600 mb-1 hidden sm:block"
@@ -141,13 +126,6 @@ function PortalDashboard() {
           ))
         )}
       </div>
-
-      {selectedRequest && (
-        <RequestDetailsPage
-          referenceNumber={selectedRequest.reference_number}
-          onClose={closeRequestDetails}
-        />
-      )}
     </div>
   );
 }

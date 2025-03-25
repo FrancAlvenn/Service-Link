@@ -17,7 +17,7 @@ export async function createRequestActivity(req, res) {
             details: req.body.details,
             created_by: req.body.performed_by,
         }, { transaction });
-
+ 
         await transaction.commit();
 
         await createLog({

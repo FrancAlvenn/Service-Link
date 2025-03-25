@@ -5,6 +5,7 @@ import { UserContext } from "../../../context/UserContext";
 import ToastNotification from "../../../utils/ToastNotification";
 import { formatDate } from "../../../utils/dateFormatter";
 import DepartmentModal from "../../../utils/departmentModal";
+import { Chip } from "@material-tailwind/react";
 
 const DetailTab = ({ selectedRequest, setSelectedRequest, requestType, fetchRequests, isAuthorized }) => {
   const { getUserByReferenceNumber } = useContext(UserContext);
@@ -14,6 +15,13 @@ const DetailTab = ({ selectedRequest, setSelectedRequest, requestType, fetchRequ
   if (!selectedRequest) {
     return <p className="text-gray-500">Select a request to view details.</p>;
   }
+
+  const statusOptions = [
+    { status: "Pending", color: "yellow" },
+    { status: "Approved", color: "green" },
+    { status: "Rejected", color: "red" },
+    { status: "In-review", color: "blue" },
+  ];
 
   const requestFieldConfig = {
     job_request: [
@@ -86,24 +94,14 @@ const DetailTab = ({ selectedRequest, setSelectedRequest, requestType, fetchRequ
 
   const handleUpdate = async (field) => {
     try {
-      const isDateOrTimeField = [
-        "date_required", "created_at", "updated_at",
-        "event_dates", "date_of_trip", "time_of_departure", "time_of_arrival"
-      ].includes(field);
-
       await axios.put(`/${requestType}/${editedRequest.reference_number}`, {
         ...selectedRequest,
-        [field]: isDateOrTimeField
-          ? editedRequest[field] || selectedRequest[field]
-          : editedRequest[field],
+        [field]: editedRequest[field],
       });
-
       fetchRequests();
       setSelectedRequest((prev) => ({
         ...prev,
-        [field]: isDateOrTimeField
-          ? editedRequest[field] || prev[field]
-          : editedRequest[field],
+        [field]: editedRequest[field],
       }));
     } catch (error) {
       console.error("Update failed:", error);
@@ -117,9 +115,8 @@ const DetailTab = ({ selectedRequest, setSelectedRequest, requestType, fetchRequ
   };
 
   const handleKeyDown = (event, field) => {
-    if (event.key === "Enter") {
-      event.target.blur();
-    } else if (event.key === "Escape") {
+    if (event.key === "Enter") event.target.blur();
+    else if (event.key === "Escape") {
       setEditedRequest({ ...selectedRequest });
       setEditingField(null);
     }
@@ -128,7 +125,7 @@ const DetailTab = ({ selectedRequest, setSelectedRequest, requestType, fetchRequ
   return (
     <div className="flex flex-col gap-4 py-3 mb-3">
       <p className="text-sm font-semibold text-gray-600">Details</p>
-  
+
       {fields.map(({ key, label, type, readOnly }) => (
         <div key={key} className="flex flex-col gap-1">
           <p className="font-semibold text-sm">{label}</p>
@@ -164,9 +161,7 @@ const DetailTab = ({ selectedRequest, setSelectedRequest, requestType, fetchRequ
                 {["date_required", "created_at", "updated_at", "event_dates", "date_of_trip"].includes(key)
                   ? formatDate(selectedRequest[key])
                   : key === "requester"
-                  ? getUserByReferenceNumber(selectedRequest[key]) || (
-                      <span className="text-gray-400 italic">Click to edit</span>
-                    )
+                  ? getUserByReferenceNumber(selectedRequest[key]) || <span className="text-gray-400 italic">Click to edit</span>
                   : key === "department" ? (
                       <DepartmentModal
                         request={selectedRequest}
@@ -184,9 +179,7 @@ const DetailTab = ({ selectedRequest, setSelectedRequest, requestType, fetchRequ
               {["date_required", "created_at", "updated_at", "event_dates", "date_of_trip"].includes(key)
                 ? formatDate(selectedRequest[key])
                 : key === "requester"
-                ? getUserByReferenceNumber(selectedRequest[key]) || (
-                    <span className="text-gray-400 italic">N/A</span>
-                  )
+                ? getUserByReferenceNumber(selectedRequest[key]) || <span className="text-gray-400 italic">N/A</span>
                 : key === "department" ? (
                     <DepartmentModal
                       request={selectedRequest}
@@ -201,9 +194,47 @@ const DetailTab = ({ selectedRequest, setSelectedRequest, requestType, fetchRequ
           )}
         </div>
       ))}
+
+      {/* Approvers Section */}
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2">
+          <p className="text-sm font-semibold">Immediate Head Approval</p>
+          <Chip
+            key={selectedRequest.immediate_head_approval}
+            size="sm"
+            variant="ghost"
+            value={selectedRequest.immediate_head_approval}
+            className="text-center h-9 cursor-pointer w-full"
+            color={statusOptions.find((option) => option.status === selectedRequest.immediate_head_approval)?.color || "gray"}
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <p className="text-sm font-semibold">GSO Director Approval</p>
+          <Chip
+            key={selectedRequest.gso_director_approval}
+            size="sm"
+            variant="ghost"
+            value={selectedRequest.gso_director_approval}
+            className="text-center h-9 cursor-pointer w-full"
+            color={statusOptions.find((option) => option.status === selectedRequest.gso_director_approval)?.color || "gray"}
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <p className="text-sm font-semibold">Operations Director Approval</p>
+          <Chip
+            key={selectedRequest.operations_director_approval}
+            size="sm"
+            variant="ghost"
+            value={selectedRequest.operations_director_approval}
+            className="text-center h-9 cursor-pointer w-full"
+            color={statusOptions.find((option) => option.status === selectedRequest.operations_director_approval)?.color || "gray"}
+          />
+        </div>
+      </div>
     </div>
   );
-  
 };
 
 export default DetailTab;

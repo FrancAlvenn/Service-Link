@@ -15,7 +15,7 @@ const ProtectedRoute = ({ children, requiredAccess }) => {
   if (user.access_level !== requiredAccess) {
     // Redirect to appropriate page if access level is not authorized
     return user.access_level === 'user'
-      ? <Navigate to="/portal" />
+      ? <Navigate to="/portal/dashboard" />
       : <Navigate to="/" />;
   }
 

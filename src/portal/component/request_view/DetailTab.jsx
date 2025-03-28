@@ -124,16 +124,16 @@ const DetailTab = ({ selectedRequest, setSelectedRequest, requestType, fetchRequ
 
   return (
     <div className="flex flex-col gap-4 py-3 mb-3">
-      <p className="text-sm font-semibold text-gray-600">Details</p>
-
+      <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">Details</p>
+  
       {fields.map(({ key, label, type, readOnly }) => (
         <div key={key} className="flex flex-col gap-1">
-          <p className="font-semibold text-sm">{label}</p>
+          <p className="font-semibold text-sm dark:text-gray-300">{label}</p>
           {isAuthorized ? (
             editingField === key ? (
               type === "textarea" ? (
                 <textarea
-                  className="text-sm p-2 w-full border border-gray-300 rounded-md"
+                  className="text-sm p-2 w-full border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                   value={editedRequest[key]}
                   onChange={(e) => handleChange(key, e.target.value)}
                   onBlur={() => handleBlur(key)}
@@ -143,7 +143,7 @@ const DetailTab = ({ selectedRequest, setSelectedRequest, requestType, fetchRequ
               ) : (
                 <input
                   type={type}
-                  className="text-sm p-2 w-full border border-gray-300 rounded-md"
+                  className="text-sm p-2 w-full border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                   value={editedRequest[key]}
                   onChange={(e) => handleChange(key, e.target.value)}
                   onBlur={() => handleBlur(key)}
@@ -153,15 +153,15 @@ const DetailTab = ({ selectedRequest, setSelectedRequest, requestType, fetchRequ
               )
             ) : (
               <p
-                className={`text-sm p-2 w-full border border-gray-300 rounded-md cursor-pointer ${
-                  readOnly ? "text-gray-500" : ""
+                className={`text-sm p-2 w-full border border-gray-300 rounded-md cursor-pointer dark:border-gray-600 dark:bg-gray-800 dark:text-white ${
+                  readOnly ? "text-gray-500 dark:text-gray-500" : ""
                 }`}
                 onClick={() => !readOnly && setEditingField(key)}
               >
                 {["date_required", "created_at", "updated_at", "event_dates", "date_of_trip"].includes(key)
                   ? formatDate(selectedRequest[key])
                   : key === "requester"
-                  ? getUserByReferenceNumber(selectedRequest[key]) || <span className="text-gray-400 italic">Click to edit</span>
+                  ? getUserByReferenceNumber(selectedRequest[key]) || <span className="text-gray-400 dark:text-gray-500 italic">Click to edit</span>
                   : key === "department" ? (
                       <DepartmentModal
                         request={selectedRequest}
@@ -170,16 +170,16 @@ const DetailTab = ({ selectedRequest, setSelectedRequest, requestType, fetchRequ
                         requestType={requestType}
                       />
                     ) : (
-                      selectedRequest[key] || <span className="text-gray-400 italic">Click to edit</span>
+                      selectedRequest[key] || <span className="text-gray-400 dark:text-gray-500 italic">Click to edit</span>
                     )}
               </p>
             )
           ) : (
-            <p className="text-sm p-2 w-full border border-gray-300 rounded-md">
+            <p className="text-sm p-2 w-full border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-800 dark:text-white">
               {["date_required", "created_at", "updated_at", "event_dates", "date_of_trip"].includes(key)
                 ? formatDate(selectedRequest[key])
                 : key === "requester"
-                ? getUserByReferenceNumber(selectedRequest[key]) || <span className="text-gray-400 italic">N/A</span>
+                ? getUserByReferenceNumber(selectedRequest[key]) || <span className="text-gray-400 dark:text-gray-500 italic">N/A</span>
                 : key === "department" ? (
                     <DepartmentModal
                       request={selectedRequest}
@@ -188,47 +188,47 @@ const DetailTab = ({ selectedRequest, setSelectedRequest, requestType, fetchRequ
                       requestType={requestType}
                     />
                   ) : (
-                    selectedRequest[key] || <span className="text-gray-400 italic">N/A</span>
+                    selectedRequest[key] || <span className="text-gray-400 dark:text-gray-500 italic">N/A</span>
                   )}
             </p>
           )}
         </div>
       ))}
-
+  
       {/* Approvers Section */}
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-2">
-          <p className="text-sm font-semibold">Immediate Head Approval</p>
+          <p className="text-sm font-semibold dark:text-gray-300">Immediate Head Approval</p>
           <Chip
             key={selectedRequest.immediate_head_approval}
             size="sm"
             variant="ghost"
             value={selectedRequest.immediate_head_approval}
-            className="text-center h-9 cursor-pointer w-full"
+            className="text-center h-9 cursor-pointer w-full dark:bg-gray-800 dark:text-white"
             color={statusOptions.find((option) => option.status === selectedRequest.immediate_head_approval)?.color || "gray"}
           />
         </div>
-
+  
         <div className="flex flex-col gap-2">
-          <p className="text-sm font-semibold">GSO Director Approval</p>
+          <p className="text-sm font-semibold dark:text-gray-300">GSO Director Approval</p>
           <Chip
             key={selectedRequest.gso_director_approval}
             size="sm"
             variant="ghost"
             value={selectedRequest.gso_director_approval}
-            className="text-center h-9 cursor-pointer w-full"
+            className="text-center h-9 cursor-pointer w-full dark:bg-gray-800 dark:text-white"
             color={statusOptions.find((option) => option.status === selectedRequest.gso_director_approval)?.color || "gray"}
           />
         </div>
-
+  
         <div className="flex flex-col gap-2">
-          <p className="text-sm font-semibold">Operations Director Approval</p>
+          <p className="text-sm font-semibold dark:text-gray-300">Operations Director Approval</p>
           <Chip
             key={selectedRequest.operations_director_approval}
             size="sm"
             variant="ghost"
             value={selectedRequest.operations_director_approval}
-            className="text-center h-9 cursor-pointer w-full"
+            className="text-center h-9 cursor-pointer w-full dark:bg-gray-800 dark:text-white"
             color={statusOptions.find((option) => option.status === selectedRequest.operations_director_approval)?.color || "gray"}
           />
         </div>

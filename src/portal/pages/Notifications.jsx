@@ -76,33 +76,10 @@ const NotificationPage = () => {
         setSelectedRequest(null);
     };
 
-    const filteredActivities = activities.filter(activity =>
-        selectedTab === "all" || activity.request_type === selectedTab
-    );
-
-    // Activity type and color mappings
-    const getActivityLabel = (type) => {
-        switch (type) {
-            case "comment": return "Comment";
-            case "approval": return "Approval";
-            case "status_change": return "Status Change";
-            default: return "Activity";
-        }
-    };
-
-    const getActivityColor = (type) => {
-        switch (type) {
-            case "approval": return "green";
-            case "status_change": return "blue";
-            case "comment": return "blue";
-            default: return "gray";
-        }
-    };
-
     return (
-        <div className="flex flex-col gap-4 p-6 border-gray-300 rounded-md bg-white pb-24">
-            <h2 className="text-xl font-semibold text-gray-800">Notifications</h2>
-
+        <div className=" bg-white dark:bg-gray-900 rounded-lg w-full mt-0 px-3 py-4 flex flex-col gap-6 pb-24">
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Notifications</h2>
+    
             {/* Tab Filters */}
             <div className="flex flex-wrap gap-3 mb-4">
                 {["all", "comment", "approval", "status_change"].map((tab) => (
@@ -111,14 +88,14 @@ const NotificationPage = () => {
                         variant={selectedTab === tab ? "filled" : "outlined"}
                         color={selectedTab === tab ? "blue" : "gray"}
                         size="sm"
-                        className="md:min-w-fit"
+                        className="md:min-w-fit dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
                         onClick={() => handleTabChange(tab)}
                     >
                         {tab.replace("_", " ")}
                     </Button>
                 ))}
             </div>
-
+    
             {/* Activity Feed */}
             <div className="flex flex-col max-h-[500px] overflow-auto">
                 <div className="flex flex-col gap-3">
@@ -130,14 +107,14 @@ const NotificationPage = () => {
                             )
                             .map((activity) => {
                                 const isUser = activity.created_by === user.reference_number;
-
+    
                                 // Different UI for each request type
                                 if (activity.request_type === "status_change") {
                                     return (
-                                        <div key={activity.id} className="py-2 px-3 bg-blue-100 text-blue-900 border-l-4 border-blue-500 rounded-md shadow-md cursor-pointer" onClick={() => openRequestDetails(activity.request_id)}>
+                                        <div key={activity.id} className="py-2 px-3 bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 border-l-4 border-blue-500 rounded-md shadow-md cursor-pointer" onClick={() => openRequestDetails(activity.request_id)}>
                                             <div className="flex items-center justify-between">
                                                 <p className="text-xs font-semibold" dangerouslySetInnerHTML={{ __html: activity.action }}></p>
-                                                <span className="text-xs text-gray-500">{dayjs(activity.created_at).fromNow()}</span>
+                                                <span className="text-xs text-gray-500 dark:text-gray-400">{dayjs(activity.created_at).fromNow()}</span>
                                             </div>
                                             <div className="flex items-center justify-between pt-1">
                                                 <p className="text-sm">{activity.details}</p>
@@ -152,13 +129,13 @@ const NotificationPage = () => {
                                         </div>
                                     );
                                 }
-
+    
                                 if (activity.request_type === "approval") {
                                     return (
-                                        <div key={activity.id} className="py-2 px-3 bg-green-100 text-green-900 border-l-4 border-green-500 rounded-md shadow-md cursor-pointer" onClick={() => openRequestDetails(activity.request_id)}>
+                                        <div key={activity.id} className="py-2 px-3 bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-100 border-l-4 border-green-500 rounded-md shadow-md cursor-pointer" onClick={() => openRequestDetails(activity.request_id)}>
                                             <div className="flex items-center justify-between">
                                                 <p className="text-xs font-semibold" dangerouslySetInnerHTML={{ __html: activity.action }}></p>
-                                                <span className="text-xs text-gray-500">{dayjs(activity.created_at).fromNow()}</span>
+                                                <span className="text-xs text-gray-500 dark:text-gray-400">{dayjs(activity.created_at).fromNow()}</span>
                                             </div>
                                             <div className="flex items-center justify-between pt-1">
                                                 <p className="text-sm">{activity.details}</p>
@@ -173,26 +150,26 @@ const NotificationPage = () => {
                                         </div>
                                     );
                                 }
-
+    
                                 // Default UI for Comments
                                 return (
-                                    <div className="flex flex-col w-full  py-2 px-3 bg-gray-100 text-gray-900 border-l-4 border-gray-500 rounded-md shadow-md cursor-pointer" onClick={() => openRequestDetails(activity.request_id)}>
-                                        <div className="w-full flex  items-center justify-between">
-                                            <Typography variant="small" color="blue-gray" className="text-xs font-semibold">
+                                    <div className="flex flex-col w-full py-2 px-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200 border-l-4 border-gray-500 dark:border-gray-700 rounded-md shadow-md cursor-pointer" onClick={() => openRequestDetails(activity.request_id)}>
+                                        <div className="w-full flex items-center justify-between">
+                                            <Typography variant="small" color="blue-gray" className="text-xs font-semibold dark:text-gray-300">
                                                 {activity.action}
                                             </Typography>
-                                            <Typography variant="small" className="text-xs text-gray-500">
+                                            <Typography variant="small" className="text-xs text-gray-500 dark:text-gray-400">
                                                 {dayjs(activity.created_at).fromNow()}
                                             </Typography>
                                         </div>
-
+    
                                         <div className="flex justify-between items-center pt-1">
-                                            <Typography variant="small" className="mt-1 text-gray-700">
+                                            <Typography variant="small" className="mt-1 text-gray-700 dark:text-gray-300">
                                                 <p dangerouslySetInnerHTML={{ __html: activity.details }} className="text-sm font-normal"></p>
                                             </Typography>
                                             <Chip
                                                 size="sm"
-                                                className="rounded "
+                                                className="rounded"
                                                 variant="outlined"
                                                 color='black'
                                                 value={activity.request_id}
@@ -202,17 +179,15 @@ const NotificationPage = () => {
                                 );
                             })
                     ) : (
-                        <div className="text-gray-500 w-full text-sm text-center py-5 flex flex-col gap-4 items-center justify-center">
+                        <div className="text-gray-500 dark:text-gray-400 w-full text-sm text-center py-5 flex flex-col gap-4 items-center justify-center">
                             <img src={email} alt="No act" className="w-full h-auto max-w-sm sm:max-w-md md:max-w-md lg:max-w-md xl:max-w-md"/>
-
-                            <Typography variant="h6" className="text-gray-500">Looks like it's a bit quiet around here!</Typography>
+    
+                            <Typography variant="h6" className="text-gray-500 dark:text-gray-300">Looks like it's a bit quiet around here!</Typography>
                         </div>
-
                     )}
                 </div>
             </div>
-
-
+    
             {/* Request Details Panel */}
             <AnimatePresence>
                 {selectedRequest && (
@@ -226,14 +201,14 @@ const NotificationPage = () => {
                             className="fixed inset-0 bg-black z-40"
                             onClick={closeRequestDetails}
                         />
-
+    
                         {/* Sliding Request Panel */}
                         <motion.div
                             initial={{ x: "100%" }}
                             animate={{ x: 0 }}
                             exit={{ x: "100%" }}
                             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                            className="fixed top-0 right-0 w-full max-w-[750px] h-full bg-white shadow-lg z-50"
+                            className="fixed top-0 right-0 w-full max-w-[750px] h-full bg-white dark:bg-gray-900 shadow-lg z-50"
                         >
                             <RequestDetailsPage
                                 referenceNumber={selectedRequest.reference_number}
@@ -245,6 +220,7 @@ const NotificationPage = () => {
             </AnimatePresence>
         </div>
     );
+    
 };
 
 export default NotificationPage;

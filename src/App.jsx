@@ -36,6 +36,7 @@ import Portal from './portal/pages/Portal';
 import PortalDashboard from './portal/component/dashboard/PortalDashboard';
 import RequestDetailsPage from './portal/component/request_view/RequestDetailsPage';
 import Notifications from './portal/pages/Notifications';
+import Profile from './portal/pages/Profile';
 
 
 
@@ -131,6 +132,14 @@ const router = createBrowserRouter([
       {
         path: 'notifications',
         element: <ProtectedRoute requiredAccess={'user'}><Notifications/></ProtectedRoute>,
+      },
+      {
+        path: 'profile',
+        element: <ProtectedRoute requiredAccess={'user'}><Profile/></ProtectedRoute>,
+      },
+      {
+        path: "create-request",
+        element: <ProtectedRoute requiredAccess={'user'}><RaiseRequest/></ProtectedRoute>,
       }
     ]
   },
@@ -139,24 +148,24 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <UserProvider>
-          <TicketProvider>
-            <AssetProvider>
-              <EmployeeProvider>
-              <RequestsProviderWrapper>
-                <div className="App font-sans">
-                  <RouterProvider router={router} />
-                  <CustomToastContainer />
-                </div>
-              </RequestsProviderWrapper>
-              </EmployeeProvider>
-            </AssetProvider>
-          </TicketProvider>
-        </UserProvider>
-      </AuthProvider>
-    </ThemeProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <UserProvider>
+            <TicketProvider>
+              <AssetProvider>
+                <EmployeeProvider>
+                <RequestsProviderWrapper>
+                  <div className="App font-sans dark:bg-gray-900 dark:text-gray-100">
+                    <RouterProvider router={router} />
+                    <CustomToastContainer />
+                  </div>
+                </RequestsProviderWrapper>
+                </EmployeeProvider>
+              </AssetProvider>
+            </TicketProvider>
+          </UserProvider>
+        </AuthProvider>
+      </ThemeProvider>
   );
 }
 

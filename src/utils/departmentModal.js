@@ -97,51 +97,53 @@ function DepartmentModal({ request, input, referenceNumber, requestType, onDepar
             size="sm"
             variant="ghost"
             value={currentDepartment || "Select Department"}
-            className={`text-center w-fit cursor-pointer ${isAuthorized ? "cursor-pointer" : "cursor-not-allowed"}`}
+            className={`text-center w-fit ${isAuthorized ? "cursor-pointer" : "cursor-not-allowed"} dark:bg-gray-800 dark:text-gray-200`}
             color={departmentOptions.find(option => option.name === currentDepartment)?.color || "gray"}
           />
         </MenuHandler>
-        {isAuthorized && <MenuList className="mt-2 divide-y divide-gray-100 rounded-md bg-white shadow-lg shadow-topping ring-2 ring-black/5 border-none">
-          {departmentOptions.length > 0 ? (
-            <div className="flex flex-col">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[300px] overflow-y-auto">
-                {departmentOptions.map((option) => (
-                  <MenuItem
-                    key={option.id}
-                    className="flex justify-between items-center px-4 py-2 text-xs"
-                    onClick={() => handleDepartmentChange(option.name)}
-                  >
-                    <Chip
-                      size="sm"
-                      variant="ghost"
-                      value={option.name}
-                      className="text-center w-fit cursor-pointer"
-                      color={option.color}
+        {isAuthorized && (
+          <MenuList className="mt-2 divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-900 shadow-lg shadow-topping ring-2 ring-black/5 dark:ring-gray-700 border-none">
+            {departmentOptions.length > 0 ? (
+              <div className="flex flex-col">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[300px] overflow-y-auto">
+                  {departmentOptions.map((option) => (
+                    <MenuItem
+                      key={option.id}
+                      className="flex justify-between items-center px-4 py-2 text-xs dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                      onClick={() => handleDepartmentChange(option.name)}
                     >
-                      {option.name}
-                    </Chip>
-                  </MenuItem>
-                ))}
+                      <Chip
+                        size="sm"
+                        variant="ghost"
+                        value={option.name}
+                        className="text-center w-fit cursor-pointer dark:bg-gray-700 dark:text-gray-300"
+                        color={option.color}
+                      >
+                        {option.name}
+                      </Chip>
+                    </MenuItem>
+                  ))}
+                </div>
+                <div className="flex items-center mt-2 py-2 justify-center text-xs rounded-lg bg-gray-100 dark:bg-gray-800">
+                  <Typography
+                    color="blue-gray"
+                    className="flex items-center gap-2 font-semibold text-sm text-gray-500 dark:text-gray-300 cursor-pointer"
+                  >
+                    <PlusCircle size={18} className="cursor-pointer" />
+                    Add new department
+                  </Typography>
+                </div>
               </div>
-              <div className="flex items-center mt-2 py-2 justify-center text-xs rounded-lg bg-gray-100">
-                <Typography
-                  color="blue-gray"
-                  className="flex items-center gap-2 font-semibold text-sm text-gray-500 cursor-pointer"
-                >
-                  <PlusCircle size={18} className="cursor-pointer" />
-                  Add new department
-                </Typography>
-              </div>
-            </div>
-          ) : (
-            <MenuItem className="flex items-center justify-center text-xs text-gray-500">
-              Loading department options...
-            </MenuItem>
-          )}
-        </MenuList>}
+            ) : (
+              <MenuItem className="flex items-center justify-center text-xs text-gray-500 dark:text-gray-400">
+                Loading department options...
+              </MenuItem>
+            )}
+          </MenuList>
+        )}
       </Menu>
     </div>
-  );
+);
 }
 
 export default DepartmentModal;

@@ -28,6 +28,16 @@ const UserPreference = sequelize.define('UserPreference', {
         defaultValue: true,
         allowNull: true
     },
+    email_notifications_enabled: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true,
+        allowNull: true
+    },
+    sms_notifications_enabled: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true,
+        allowNull: true
+    },
     language: {
         type: DataTypes.STRING,
         allowNull: true,

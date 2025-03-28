@@ -11,7 +11,7 @@ import RequestDetailsPage from '../request_view/RequestDetailsPage';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOutletContext } from 'react-router-dom';
 
-import service_request from '../../../assets/service_request.png';
+import service_request from '../../../assets/service_requests.png';
 
 function PortalDashboard() {
   const { jobRequests } = useContext(JobRequestsContext);
@@ -87,8 +87,10 @@ function PortalDashboard() {
 
 
   return (
-    <div className="h-full bg-white rounded-lg w-full mt-0 px-3 py-4 flex flex-col gap-6 pb-24">
-      <Typography variant="h5" className="text-gray-800">My Requests</Typography>
+    <div className="h-full bg-white dark:bg-gray-900 rounded-lg w-full mt-0 px-3 py-4 flex flex-col gap-6 pb-24">
+      <Typography variant="h5" className="text-gray-800 dark:text-gray-200">
+        My Requests
+      </Typography>
 
       {/* Filter Buttons */}
       <div className="flex flex-wrap gap-2 overflow-x-auto md:justify-start justify-start">
@@ -115,16 +117,18 @@ function PortalDashboard() {
       {/* Scrollable Container */}
       <div className="flex flex-wrap gap-4 overflow-y-auto">
         {searchedRequests.length === 0 ? (
-          <div className="text-gray-500 text-sm py-3 text-center flex flex-col gap-3 items-center justify-center w-full">
-            <img src={service_request} alt="No act" className="w-full h-auto max-w-xs sm:max-w-sm md:max-w-sm lg:max-w-sm xl:max-w-sm" />
+          <div className="text-gray-500 dark:text-gray-400  text-sm py-3 text-center flex flex-col gap-3 items-center justify-center w-full">
+            <img src={service_request} alt="No act" className="bg-transparent w-full h-auto max-w-xs sm:max-w-sm md:max-w-sm lg:max-w-sm xl:max-w-sm" />
 
-            <Typography variant="h6" className="text-gray-500">Nothing to see yet. Start a request and be the first to fill this space!</Typography>
+            <Typography variant="h6" className="text-gray-500 dark:text-gray-400">
+              Nothing to see yet. Start a request and be the first to fill this space!
+            </Typography>
           </div>
         ) : (
           searchedRequests.map((request) => (
             <div
               key={request.reference_number}
-              className="flex flex-col bg-gray-100 p-3 rounded-lg shadow-md w-full max-w-[full] cursor-pointer"
+              className="flex flex-col bg-gray-100 dark:bg-gray-800 p-3 rounded-lg shadow-md w-full max-w-[full] cursor-pointer"
               onClick={() => openRequestDetails(request.reference_number)}
             >
               <div className='flex flex-col justify-between items-start gap-2'>
@@ -132,10 +136,10 @@ function PortalDashboard() {
                   {typeIcons[request.type]}
                   <div className='flex flex-col w-full'>
                     <div className='flex justify-between w-full items-center gap-2'>
-                      <Typography variant="small" className="font-semibold mb-1">
+                      <Typography variant="small" className="font-semibold mb-1 dark:text-gray-200">
                         {request.title || "Request Title"}
                       </Typography>
-                      <Typography variant="small" className="text-gray-500 text-xs ml-auto hidden sm:block">
+                      <Typography variant="small" className="text-gray-500 dark:text-gray-400 text-xs ml-auto hidden sm:block">
                         Requested on: {new Date(request.created_at).toLocaleDateString()}
                       </Typography>
                     </div>
@@ -144,10 +148,10 @@ function PortalDashboard() {
                         size="sm"
                         variant="ghost"
                         value={request.status}
-                        className="text-center w-fit cursor-pointer"
+                        className="text-center w-fit cursor-pointer dark:bg-opacity-20 dark:text-gray-300 dark:border-gray-600"
                         color={statusOptions.find(option => option.status === request.status)?.color || "gray"}
                       />
-                      <Typography variant="small" className="text-gray-500 text-xs ml-auto block sm:hidden">
+                      <Typography variant="small" className="text-gray-500 dark:text-gray-400 text-xs ml-auto block sm:hidden">
                         Requested on: {new Date(request.created_at).toLocaleDateString()}
                       </Typography>
                     </div>
@@ -157,7 +161,7 @@ function PortalDashboard() {
 
               <Typography
                 variant="small"
-                className="text-gray-600 mb-1 hidden sm:block"
+                className="text-gray-600 dark:text-gray-300 mb-1 hidden sm:block"
               >
                 {request.purpose || "No description available."}
               </Typography>
@@ -175,7 +179,7 @@ function PortalDashboard() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.5 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.1 }} // Faster transition for instant appearance
+              transition={{ duration: 0.1 }}
               className="fixed inset-0 bg-black z-40"
               onClick={closeRequestDetails}
             />
@@ -186,7 +190,7 @@ function PortalDashboard() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed top-0 right-0 w-full max-w-[750px] h-full bg-white shadow-lg z-50"
+              className="fixed top-0 right-0 w-full max-w-[750px] h-full bg-white dark:bg-gray-900 shadow-lg z-50"
             >
               <RequestDetailsPage
                 referenceNumber={selectedRequest.reference_number}
@@ -196,9 +200,9 @@ function PortalDashboard() {
           </>
         )}
       </AnimatePresence>
-
     </div>
   );
+
 }
 
 export default PortalDashboard;

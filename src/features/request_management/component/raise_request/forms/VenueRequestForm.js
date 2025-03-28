@@ -175,25 +175,25 @@ const VenueRequestForm = ({setSelectedRequest}) => {
     return (
         <div className="py-2 text-sm space-y-4 overflow-y-auto">
             {/* Requester & Department */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Requester</label>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Requester</label>
                     <input
                         type="text"
                         name="requester"
                         value={getUserByReferenceNumber(user.reference_number)}
                         readOnly
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-100"
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-gray-100 dark:bg-gray-800 dark:text-gray-200"
                     />
                 </div>
-
+    
                 <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Department</label>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Department</label>
                     <select
                         name="department"
                         value={request.department || ""}
                         onChange={handleChange}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
                         required
                     >
                         <option value="">Select Department</option>
@@ -204,14 +204,14 @@ const VenueRequestForm = ({setSelectedRequest}) => {
                         ))}
                     </select>
                 </div>
-
+    
                 <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Venue</label>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Venue</label>
                     <select
                         name="venue_id"
                         value={request.venue_id || ""}
                         onChange={handleChange}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
                         required
                     >
                         <option value="">Select Venue</option>
@@ -223,203 +223,107 @@ const VenueRequestForm = ({setSelectedRequest}) => {
                     </select>
                 </div>
             </div>
-
+    
             {/* Organization & Event Title */}
             <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Organization</label>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Organization</label>
                 <input
                     type="text"
                     name="organization"
                     value={request.organization || ""}
                     onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
                 />
             </div>
-
+    
             <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Event Title</label>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Event Title</label>
                 <input
                     type="text"
                     name="event_title"
                     value={request.event_title || ""}
                     onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
                     required
                 />
             </div>
-
-            <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Nature of Event</label>
-                <input
-                    type="text"
-                    name="event_nature"
-                    value={request.event_nature || ""}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-                    required
-                />
-            </div>
-
+    
             {/* Event Details */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Event Date</label>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Event Date</label>
                     <input
                         type="date"
                         name="event_dates"
                         value={request.event_dates || ""}
                         onChange={handleChange}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
                         required
                     />
-                    {errorMessage === "Invalid Date" && <p className="text-red-500 font-semibold text-xs pl-2 pt-1">{errorMessage}</p>}
                 </div>
+    
                 <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Start Time</label>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Start Time</label>
                     <input
                         type="time"
                         name="event_start_time"
                         value={request.event_start_time || ""}
                         onChange={handleChange}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
                         required
                     />
-                    {errorMessage === "Invalid Time. Start time must be earlier than end time." && <p className="text-red-500 font-semibold text-xs pl-2 pt-1">{errorMessage}</p>}
                 </div>
+    
                 <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">End Time</label>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">End Time</label>
                     <input
                         type="time"
                         name="event_end_time"
                         value={request.event_end_time || ""}
                         onChange={handleChange}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
                         required
                     />
-                    {errorMessage === "Invalid Time. Event duration must be at least 1 hour." && <p className="text-red-500 font-semibold text-xs pl-2 pt-1">{errorMessage}</p>}
                 </div>
             </div>
-
+    
             {/* Participants & Venue */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Participants</label>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Participants</label>
                     <input
                         type="text"
                         name="participants"
                         value={request.participants || ""}
                         onChange={handleChange}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
                     />
                 </div>
-
+    
                 <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Pax Estimation</label>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Pax Estimation</label>
                     <input
                         type="number"
                         name="pax_estimation"
                         value={request.pax_estimation || ""}
                         onChange={handleChange}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
                     />
                 </div>
             </div>
-
+    
             {/* Purpose */}
             <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Purpose</label>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Purpose</label>
                 <textarea
                     name="purpose"
                     value={request.purpose}
                     onChange={(e) => handleQuillChange("purpose", e.target.value)}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
                     required
                 />
             </div>
-
-            {/* Particulars Section */}
-            <div className="flex flex-col gap-3">
-                <Typography className="text-xs font-semibold text-gray-600">Particulars</Typography>
-                {request.details.map((detail, index) => (
-                    <div key={index} className="flex flex-col gap-1 p-3 border rounded-md">
-                        <div className="flex items-center gap-4">
-                            {editingIndex === index ? (
-                                <>
-                                    <input
-                                        type="text"
-                                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-                                        value={editedParticular.particulars}
-                                        onChange={(e) => setEditedParticular({ ...editedParticular, particulars: e.target.value })}
-                                    />
-                                    <input
-                                        type="number"
-                                        className="w-20 border border-gray-300 rounded-md px-3 py-2 text-sm"
-                                        value={editedParticular.quantity}
-                                        onChange={(e) => setEditedParticular({ ...editedParticular, quantity: e.target.value })}
-                                    />
-                                </>
-                            ) : (
-                                <>
-                                    <Typography className="font-semibold">{detail.particulars}</Typography>
-                                    <Typography className="font-semibold">x{detail.quantity}</Typography>
-                                </>
-                            )}
-
-                            <span className="flex gap-3 ml-auto">
-                                {editingIndex === index ? (
-                                    <>
-                                        <button className="hover:text-green-500" onClick={() => handleSaveEdit(index)}>
-                                            <FloppyDisk size={18} />
-                                        </button>
-                                        <button className="hover:text-red-500" onClick={() => setEditingIndex(null)}>
-                                            <Prohibit size={18} />
-                                        </button>
-                                    </>
-                                ) : (
-                                    <button className="hover:text-blue-500" onClick={() => handleEditClick(index)}>
-                                        <PencilSimpleLine size={18} />
-                                    </button>
-                                )}
-                                <X className="cursor-pointer hover:text-red-500" onClick={() => handleDetailRemove(index)} />
-                            </span>
-                        </div>
-
-                        {editingIndex === index ? (
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
-                                <textarea
-                                    name="description"
-                                    value={editedParticular.description}
-                                    onChange={(e) => setEditedParticular({ ...editedParticular, description: e.target.value })}
-                                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white mt-1"
-                                    required
-                                />
-                            </div>
-                        ) : (
-                            <Typography className="text-xs">{detail.description}</Typography>
-                        )}
-                    </div>
-                ))}
-
-                {/* Add Particular Button */}
-                <button className="flex items-center gap-1 p-3 border rounded-md hover:text-green-500" onClick={handleAddParticular}>
-                    <Plus size={18} />
-                    <Typography className="text-xs">Add Particular</Typography>
-                </button>
-            </div>
-
-             {/* Remarks */}
-             <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1 pt-1">Remarks</label>
-                <textarea
-                    name="remarks"
-                    value={request.remarks}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white"
-                    required
-                />
-            </div>
-
+    
             {/* Submit Button */}
             <Button
                 color="blue"
@@ -438,9 +342,11 @@ const VenueRequestForm = ({setSelectedRequest}) => {
                     !request.pax_estimation ||
                     !request.purpose
                 }
+                className="dark:bg-blue-600 dark:hover:bg-blue-500 w-full md:w-auto"
             >
                 Submit Request
             </Button>
+
         </div>
     );
 };

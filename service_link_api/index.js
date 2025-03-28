@@ -21,7 +21,11 @@ import cookieParser from "cookie-parser";
 const app = express();
 
 const corsOptions = {
-    origin: 'http://localhost:3000', //Frontend URL (React)
+    origin:
+    [
+        'http://localhost:3000',
+        'https://b8eb-2001-4452-2f2-9300-30f9-3915-2282-42e8.ngrok-free.app'
+    ],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,

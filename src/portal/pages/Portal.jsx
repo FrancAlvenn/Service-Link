@@ -1,90 +1,107 @@
 import React, { useState } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import logo from "../../assets/dyci_logo.png";
-import { MagnifyingGlass, X, Bell, User, House, DotsThreeCircle } from '@phosphor-icons/react';
+import { MagnifyingGlass, X, Bell, House, DotsThreeCircle, Plus } from '@phosphor-icons/react';
 
 function Portal() {
   const [isSearching, setIsSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [tab, setTab] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
+  const currentTab = location.pathname.split('/')[2]; // Extracts the current section
 
   const handleSearchToggle = () => {
     setIsSearching((prev) => !prev);
-    setSearchQuery(''); // Clear input when closing search
+    if (isSearching) setSearchQuery(''); // Clear input on close
   };
 
-  const handleNavigation = (path, tab) => {
-    setTab(tab);
+  const handleNavigation = (path) => {
     navigate(path);
   };
 
   return (
-    <div className="h-full bg-white rounded-lg w-full mt-0 px-3 flex flex-col justify-between relative">
+    <div className="bg-white dark:bg-gray-900 w-full mt-0 px-3 flex flex-col justify-between relative transition-colors">
+      
       {/* Top Navigation */}
-      <nav className="w-full bg-white z-10 sticky top-0">
-        <div className="flex justify-between items-center px-2 py-4 border-gray-200">
-
+      <nav className="w-full z-10 sticky top-0">
+        <div className="flex justify-between items-center px-2 py-4 bg-white dark:bg-gray-900">
+          
           {/* Logo and Title */}
-          <div className="flex items-center gap-3 w-full">
-            {!isSearching ? (
-              <>
+          {currentTab !== 'profile' && (
+            <div className="flex items-center gap-3  w-full">
+              {!isSearching ? (
+                <>
                 <img src={logo} alt="DYCI" className="w-10 h-10" />
-                <p className="text-lg font-semibold">Service Link</p>
-              </>
-            ) : (
-              <input
-                type="text"
-                autoFocus
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search requests..."
-                className="text-sm p-2 w-full border border-gray-300 rounded-md"
-              />
-            )}
-          </div>
+                  <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">Service Link</p>
+                </>
+              ) : (
+                <input
+                  type="text"
+                  autoFocus
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search requests..."
+                  className="text-sm p-2 w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md"
+                />
+              )}
+            </div>
+          )}
 
           {/* Search Toggle Button */}
-          {tab === 'home' && (<button
-            className="rounded-md bg-gray-200 p-1 hover:bg-gray-300 transition ml-3"
-            aria-label="Toggle Search"
-            onClick={handleSearchToggle}
-          >
-            {isSearching ? <X size={20} /> : <MagnifyingGlass size={20} />}
-          </button>)}
-
+          {currentTab === 'dashboard' && (
+            <button
+              className="rounded-md bg-gray-200 dark:bg-gray-700 p-1 hover:bg-gray-300 dark:hover:bg-gray-600 transition ml-3 cursor-pointer"
+              aria-label="Toggle Search"
+              onClick={handleSearchToggle}
+            >
+              {isSearching ? <X size={20} className="text-gray-900 dark:text-gray-100" /> : <MagnifyingGlass size={20} className="text-gray-900 dark:text-gray-100" />}
+            </button>
+          )}
         </div>
       </nav>
 
       {/* Main Content */}
-      <div className="flex flex-col gap-4 h-full mb-16"> {/* Added mb-16 to prevent content overlap */}
+      <div className="flex flex-col gap-4 h-full mb-16">
         <Outlet context={{ searchQuery }} />
       </div>
 
+      {/* Floating Action Button (Create Request) */}
+      <button
+        className="fixed bottom-24 sm:bottom-24 right-6 sm:right-10 md:right-20  bg-blue-600 dark:bg-blue-500 text-white p-3 rounded-xl shadow-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition"
+        onClick={() => handleNavigation('/portal/create-request')}
+        aria-label="Create New Request"
+      >
+        <Plus size={24} />
+      </button>
+
+
       {/* Bottom Navigation Bar */}
-      <nav className="fixed bottom-4 left-0 right-0 mx-auto w-[90%] h-16 bg-white shadow-lg border border-gray-200 z-20 rounded-xl">
+      <nav className="fixed bottom-4 left-0 right-0 mx-auto w-[90%] h-16 bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 z-20 rounded-xl transition-colors">
         <div className="flex justify-around items-center h-full p-5">
 
-          {/* Home (Portal) */}
+          {/* Home (Dashboard) */}
           <button
-            className="flex flex-col items-center text-gray-600 hover:text-blue transition w-full"
-            onClick={() => handleNavigation('/portal/dashboard', 'home')}
+            className={`flex flex-col items-center ${currentTab === 'dashboard' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'} hover:text-blue-500 dark:hover:text-blue-300 transition w-full cursor-pointer`}
+            onClick={() => handleNavigation('/portal/dashboard')}
+            aria-label="Go to Dashboard"
           >
             <House size={24} />
           </button>
 
           {/* Notifications */}
           <button
-            className="flex flex-col items-center text-gray-600 hover:text-blue transition w-full"
-            onClick={() => handleNavigation('/portal/notifications', 'notifications')}
+            className={`flex flex-col items-center ${currentTab === 'notifications' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'} hover:text-blue-500 dark:hover:text-blue-300 transition w-full cursor-pointer`}
+            onClick={() => handleNavigation('/portal/notifications')}
+            aria-label="View Notifications"
           >
             <Bell size={24} />
           </button>
 
           {/* Profile/Settings */}
           <button
-            className="flex flex-col items-center text-gray-600 hover:text-blue transition w-full"
-            onClick={() => handleNavigation('/portal/profile', 'settings')}
+            className={`flex flex-col items-center ${currentTab === 'profile' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'} hover:text-blue-500 dark:hover:text-blue-300 transition w-full cursor-pointer`}
+            onClick={() => handleNavigation('/portal/profile')}
+            aria-label="Go to Profile"
           >
             <DotsThreeCircle size={24} />
           </button>

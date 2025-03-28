@@ -122,25 +122,25 @@ const VehicleRequestForm = ({setSelectedRequest}) => {
     return (
         <div className="py-2 text-sm space-y-4">
             {/* Requester & Department */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Requester</label>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Requester</label>
                     <input
                         type="text"
                         name="requester"
                         value={getUserByReferenceNumber(user.reference_number)}
                         readOnly
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-100"
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-gray-100 dark:bg-gray-800 dark:text-white"
                     />
                 </div>
-
+    
                 <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Department</label>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Department</label>
                     <select
                         name="department"
                         value={request.department || ""}
                         onChange={handleChange}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-white"
                         required
                     >
                         <option value="">Select Department</option>
@@ -152,30 +152,28 @@ const VehicleRequestForm = ({setSelectedRequest}) => {
                     </select>
                 </div>
             </div>
-
-            {/* Title & Designation */}
-            <div className="grid grid-cols-1 gap-4">
-                <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Title</label>
-                    <input
-                        type="text"
-                        name="title"
-                        value={request.title || ""}
-                        onChange={handleChange}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-                    />
-                </div>
+    
+            {/* Title */}
+            <div>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+                <input
+                    type="text"
+                    name="title"
+                    value={request.title || ""}
+                    onChange={handleChange}
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-white"
+                />
             </div>
-
+    
             {/* Vehicle Requested & Destination */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Vehicle Requested</label>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Vehicle Requested</label>
                     <select
                         name="vehicle_requested"
                         value={request.vehicle_requested || ""}
                         onChange={handleChange}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-white"
                     >
                         <option value="">Select Vehicle</option>
                         {vehicleOptions?.map((vehicle) => (
@@ -185,93 +183,93 @@ const VehicleRequestForm = ({setSelectedRequest}) => {
                         ))}
                     </select>
                 </div>
-
+    
                 <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Destination</label>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Destination</label>
                     <input
                         type="text"
                         name="destination"
                         value={request.destination || ""}
                         onChange={handleChange}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-white"
                     />
                 </div>
             </div>
-
+    
             {/* Date of Trip, Departure & Arrival Times */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Date of Trip</label>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Date of Trip</label>
                     <input
                         type="date"
                         name="date_of_trip"
                         value={request.date_of_trip || ""}
                         onChange={handleChange}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-white"
                         required
                     />
                     {errorMessage === "Invalid Date" && <p className="text-xs text-red-500">{errorMessage}</p>}
                 </div>
                 <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Time of Departure</label>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Time of Departure</label>
                     <input
                         type="time"
                         name="time_of_departure"
                         value={request.time_of_departure || ""}
                         onChange={handleChange}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-white"
                         required
                     />
                     {errorMessage === "Invalid Time. Departure time must be earlier than arrival time." && <p className="text-xs text-red-500">{errorMessage}</p>}
                 </div>
                 <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Time of Arrival</label>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Time of Arrival</label>
                     <input
                         type="time"
                         name="time_of_arrival"
                         value={request.time_of_arrival || ""}
                         onChange={handleChange}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-white"
                     />
                 </div>
             </div>
-
+    
             {/* Number of Passengers */}
             <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Number of Passengers</label>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Number of Passengers</label>
                 <input
                     type="number"
                     name="number_of_passengers"
                     value={request.number_of_passengers || ""}
                     onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-white"
                 />
             </div>
-
+    
             {/* Purpose */}
             <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Purpose</label>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Purpose</label>
                 <textarea
                     name="purpose"
                     value={request.purpose}
                     onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-white"
                     required
                 />
             </div>
-
+    
             {/* Remarks */}
             <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1 pt-1">Remarks</label>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Remarks</label>
                 <textarea
                     name="remarks"
                     value={request.remarks}
                     onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-white"
                     required
                 />
             </div>
-
+    
             {/* Submit Button */}
             <Button
                 color="blue"
@@ -288,6 +286,7 @@ const VehicleRequestForm = ({setSelectedRequest}) => {
                     !request.number_of_passengers ||
                     !request.purpose
                 }
+                className="dark:bg-blue-600 dark:hover:bg-blue-500 w-full md:w-auto"
             >
                 Submit Request
             </Button>

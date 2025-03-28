@@ -199,13 +199,13 @@ function LoginForm() {
     //var accessToken = gapi.auth.getToken().access_token;
 
     return (
-        <div className='flex flex-col min-h-[90vh]'>
+        <div className='flex flex-col p-3 min-h-[90vh]'>
         <AuthHeader/>
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md flex-grow">
-            <div className="w-full max-w-[430px] bg-white py-8 px-2  sm:rounded-lg sm:px-10" >
+            <div className="w-full max-w-[410px] bg-white py-8 px-2  sm:rounded-lg sm:px-10" >
 
                 <div>
-                    <h1 className='text-3xl font-medium text-center mb-4'>Welcome to Service Link</h1>
+                    <h1 className='text-3xl font-medium text-center mb-4 whitespace-nowrap'>Welcome to Service Link</h1>
                     <p className='text-sm text-center text-gray-500'>To get started, please sign in</p>
                 </div>
 

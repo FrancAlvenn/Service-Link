@@ -125,7 +125,7 @@ function GoogleAuthLogin() {
                     prompt= 'select_account'
                     auto_select={false}
                     // login_hint='dyci.edu.ph'
-                    width={"350"}
+                    width={"330"}
                     // type='standard'
                     // useOneTap  // not added cause it doesn't work need further research on this one tap login
                     ux_mode='popup'

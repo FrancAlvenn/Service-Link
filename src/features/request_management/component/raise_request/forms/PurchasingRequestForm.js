@@ -143,25 +143,25 @@ const PurchasingRequestForm = ({setSelectedRequest}) => {
     return (
         <div className="py-2 text-sm space-y-4 overflow-y-auto">
             {/* Requester & Department */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Requester</label>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Requester</label>
                     <input
                         type="text"
                         name="requester"
                         value={getUserByReferenceNumber(user.reference_number)}
                         readOnly
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-100"
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-gray-100 dark:bg-gray-800 dark:text-gray-300"
                     />
                 </div>
-
+    
                 <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Department</label>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Department</label>
                     <select
                         name="department"
                         value={request.department || ""}
                         onChange={handleChange}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-300"
                         required
                     >
                         <option value="">Select Department</option>
@@ -173,41 +173,41 @@ const PurchasingRequestForm = ({setSelectedRequest}) => {
                     </select>
                 </div>
             </div>
-
+    
             {/* Title & Date Required */}
             <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Title</label>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
                 <input
                     type="text"
                     name="title"
                     value={request.title || ""}
                     onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-300"
                     required
                 />
             </div>
-
+    
             <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Date Required</label>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Date Required</label>
                 <input
                     type="date"
                     name="date_required"
                     value={request.date_required || ""}
                     onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-300"
                     required
                 />
                 {errorMessage && <p className="text-red-500 font-semibold text-xs pl-2 pt-1">{errorMessage}</p>}
             </div>
-
+    
             {/* Supply Category */}
             <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Supply Category</label>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Supply Category</label>
                 <select
                     name="supply_category"
                     value={request.supply_category || ""}
                     onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-300"
                     required
                 >
                     <option value="">Select Category</option>
@@ -218,36 +218,36 @@ const PurchasingRequestForm = ({setSelectedRequest}) => {
                     ))}
                 </select>
             </div>
-
+    
             {/* Purpose */}
             <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Purpose</label>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Purpose</label>
                 <textarea
                     name="purpose"
                     value={request.purpose}
                     onChange={(e) => handleQuillChange("purpose", e.target.value)}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-300"
                     required
                 />
             </div>
-
+    
             {/* Particulars Section */}
             <div className="flex flex-col gap-3">
-                <Typography className="text-xs font-semibold text-gray-600">Particulars</Typography>
+                <Typography className="text-xs font-semibold text-gray-600 dark:text-gray-300">Particulars</Typography>
                 {request.details.map((detail, index) => (
-                    <div key={index} className="flex flex-col gap-1 p-3 border rounded-md">
-                        <div className="flex items-center gap-4">
+                    <div key={index} className="flex flex-col gap-1 p-3 border rounded-md dark:border-gray-600">
+                        <div className="flex flex-col sm:flex-row items-center gap-4">
                             {editingIndex === index ? (
                                 <>
                                     <input
                                         type="text"
-                                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                                        className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-300"
                                         value={editedParticular.particulars}
                                         onChange={(e) => setEditedParticular({ ...editedParticular, particulars: e.target.value })}
                                     />
                                     <input
                                         type="number"
-                                        className="w-20 border border-gray-300 rounded-md px-3 py-2 text-sm"
+                                        className="w-20 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-300"
                                         value={editedParticular.quantity}
                                         onChange={(e) => setEditedParticular({ ...editedParticular, quantity: e.target.value })}
                                     />
@@ -258,34 +258,16 @@ const PurchasingRequestForm = ({setSelectedRequest}) => {
                                     <Typography className="font-semibold">x{detail.quantity}</Typography>
                                 </>
                             )}
-
-                            <span className="flex gap-3 ml-auto">
-                                {editingIndex === index ? (
-                                    <>
-                                        <button className="hover:text-green-500" onClick={() => handleSaveEdit(index)}>
-                                            <FloppyDisk size={18} />
-                                        </button>
-                                        <button className="hover:text-red-500" onClick={() => setEditingIndex(null)}>
-                                            <Prohibit size={18} />
-                                        </button>
-                                    </>
-                                ) : (
-                                    <button className="hover:text-blue-500" onClick={() => handleEditClick(index)}>
-                                        <PencilSimpleLine size={18} />
-                                    </button>
-                                )}
-                                <X className="cursor-pointer hover:text-red-500" onClick={() => handleDetailRemove(index)} />
-                            </span>
                         </div>
-
+    
                         {editingIndex === index ? (
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
+                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
                                 <textarea
                                     name="description"
                                     value={editedParticular.description}
                                     onChange={(e) => setEditedParticular({ ...editedParticular, description: e.target.value })}
-                                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white mt-1"
+                                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-300 mt-1"
                                     required
                                 />
                             </div>
@@ -294,28 +276,28 @@ const PurchasingRequestForm = ({setSelectedRequest}) => {
                         )}
                     </div>
                 ))}
-
+    
                 {/* Add Particular Button */}
-                <button className="flex items-center gap-1 p-3 border rounded-md hover:text-green-500" onClick={handleAddParticular}>
+                <button className="flex items-center gap-1 p-3 border rounded-md hover:text-green-500 dark:border-gray-600 dark:hover:text-green-400" onClick={handleAddParticular}>
                     <Plus size={18} />
                     <Typography className="text-xs">Add Particular</Typography>
                 </button>
             </div>
-
+    
             {/* Remarks */}
             <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1 pt-1">Remarks</label>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 pt-1">Remarks</label>
                 <textarea
                     name="remarks"
                     value={request.remarks}
                     onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-300"
                     required
                 />
             </div>
-
+    
             <Button 
-                color="blue" 
+                color="blue"
                 onClick={submitPurchasingRequest}
                 disabled={
                     !request.department ||
@@ -324,6 +306,7 @@ const PurchasingRequestForm = ({setSelectedRequest}) => {
                     !request.supply_category ||
                     !request.purpose
                 }
+                className="dark:bg-blue-600 dark:hover:bg-blue-500 w-full md:w-auto"
             >
                 Submit Request
             </Button>

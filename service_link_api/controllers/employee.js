@@ -123,7 +123,7 @@ export const updateEmployee = async (req, res) => {
     if (updatedRows === 0) {
       await transaction.rollback();
       return res.status(404).json({ message: "Employee not found." });
-    }
+    } 
 
     await transaction.commit();
 

@@ -85,27 +85,33 @@ function ApprovalStatusModal({ input, referenceNumber, requestType, approvingPos
             size="sm"
             variant="ghost"
             value={currentStatus || "Select Status"}
-            className="text-center w-fit cursor-pointer"
+            className="text-center w-fit cursor-pointer dark:bg-gray-800 dark:text-gray-200"
             color={statusOptions.find(option => option.status === currentStatus)?.color || "gray"}
           />
         </MenuHandler>
-        <MenuList className="mt-2 divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-2 ring-black/5 border-none">
+        <MenuList className="mt-2 divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-900 shadow-lg ring-2 ring-black/5 dark:ring-gray-700 border-none">
           <div className="flex flex-col">
             <div className="grid grid-cols-2 gap-2">
               {statusOptions.map((option) => (
                 <MenuItem
                   key={option.id}
-                  className="flex justify-between items-center px-4 py-2 text-xs"
+                  className="flex justify-between items-center px-4 py-2 text-xs dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                   onClick={() => handleStatusChange(option.status)}
                 >
-                  <Chip size="sm" variant="ghost" value={option.status} color={option.color}>
+                  <Chip
+                    size="sm"
+                    variant="ghost"
+                    value={option.status}
+                    color={option.color}
+                    className="dark:bg-gray-700 dark:text-gray-300"
+                  >
                     {option.status}
                   </Chip>
                 </MenuItem>
               ))}
             </div>
-            <div className="flex items-center mt-2 py-2 justify-center text-xs rounded-lg bg-gray-100">
-              <Typography color="blue-gray" className="flex items-center gap-2 font-semibold text-sm text-gray-500 cursor-pointer">
+            <div className="flex items-center mt-2 py-2 justify-center text-xs rounded-lg bg-gray-100 dark:bg-gray-800">
+              <Typography color="blue-gray" className="flex items-center gap-2 font-semibold text-sm text-gray-500 dark:text-gray-300 cursor-pointer">
                 <PlusCircle size={18} className="cursor-pointer" />
                 Add new status
               </Typography>
@@ -114,7 +120,7 @@ function ApprovalStatusModal({ input, referenceNumber, requestType, approvingPos
         </MenuList>
       </Menu>
     </div>
-  );
+);
 }
 
 export default ApprovalStatusModal;

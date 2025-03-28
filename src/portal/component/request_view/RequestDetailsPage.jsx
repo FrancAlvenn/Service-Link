@@ -20,7 +20,7 @@ function RequestDetailsPage({ referenceNumber, onClose }) {
   const { vehicleRequests, fetchVehicleRequests } = useContext(VehicleRequestsContext);
   const { user } = useContext(AuthContext);
 
-  const [activeTab, setActiveTab] = useState('Main');
+  const [activeTab, setActiveTab] = useState('Summary');
   const [request, setRequest] = useState(null);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editedTitle, setEditedTitle] = useState('');
@@ -114,18 +114,18 @@ function RequestDetailsPage({ referenceNumber, onClose }) {
   };
 
   return (
-    <div className="fixed top-0 right-0 w-full max-w-[750px] h-full bg-white z-100 p-6 overflow-y-auto">
+    <div className="fixed top-0 right-0 w-full max-w-[750px] h-full bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200 z-100 p-6 overflow-y-auto">
       <div className="flex flex-col justify-between items-start mb-6">
         <div className="p-1 rounded-md bg-red-500 mb-3">
           <X color="white" onClick={onClose} className="cursor-pointer" />
         </div>
-
+  
         {/* Editable Title */}
         {isAuthorized ? (
           isEditingTitle ? (
             <input
               type="text"
-              className="border w-full border-gray-300 rounded-md p-2 font-bold text-xl"
+              className="border w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-md p-2 font-bold text-xl text-gray-900 dark:text-gray-200"
               value={editedTitle}
               onChange={(e) => setEditedTitle(e.target.value)}
               onKeyDown={handleTitleKeyDown}
@@ -133,22 +133,28 @@ function RequestDetailsPage({ referenceNumber, onClose }) {
               autoFocus
             />
           ) : (
-            <Typography variant="h5" className="text-gray-800 font-bold text-xl cursor-pointer" onClick={handleEditTitle}>
+            <Typography
+              variant="h5"
+              className="text-gray-800 dark:text-gray-200 font-bold text-xl cursor-pointer"
+              onClick={handleEditTitle}
+            >
               {request.title || 'Request Details'}
             </Typography>
           )
         ) : (
-          <Typography variant="h5" className="text-gray-800 font-bold text-xl">{request.title || 'Request Details'}</Typography>
+          <Typography variant="h5" className="text-gray-800 dark:text-gray-200 font-bold text-xl">
+            {request.title || 'Request Details'}
+          </Typography>
         )}
       </div>
-
+  
       {/* Tab Navigation */}
-      <div className="flex gap-4 mb-6 items-center justify-between bg-gray-100 shadow-sm  rounded-lg w-full max-w-full">
-        {['Main', 'Details', 'Activity'].map(tab => (
+      <div className="flex gap-4 mb-6 items-center justify-between bg-gray-100 dark:bg-gray-800 shadow-sm rounded-lg w-full max-w-full">
+        {['Summary', 'Details', 'Activity'].map(tab => (
           <Button
             key={tab}
             size="sm"
-            className='w-full'
+            className="w-full dark:text-gray-300"
             variant={activeTab === tab ? 'filled' : 'text'}
             color={activeTab === tab ? 'blue' : 'black'}
             onClick={() => setActiveTab(tab)}
@@ -157,27 +163,30 @@ function RequestDetailsPage({ referenceNumber, onClose }) {
           </Button>
         ))}
       </div>
-
+  
       {/* Render Active Tab */}
-      {activeTab === 'Main' && <MainTab
-        request={request}
-        setRequest={setRequest}
-        requestType={requestType}
-        fetchRequests={fetchAllRequests}
-        onClose={onClose}
-      />}
-      {activeTab === 'Details' && <DetailTab
-        selectedRequest={request}
-        setSelectedRequest={setRequest}
-        requestType={requestType}
-        fetchRequests={fetchAllRequests}
-        isAuthorized={isAuthorized}
-      />}
-      {activeTab === 'Activity' && <ActivityTab
-        referenceNumber={request.reference_number}
-      />}
+      {activeTab === 'Summary' && (
+        <MainTab
+          request={request}
+          setRequest={setRequest}
+          requestType={requestType}
+          fetchRequests={fetchAllRequests}
+          onClose={onClose}
+        />
+      )}
+      {activeTab === 'Details' && (
+        <DetailTab
+          selectedRequest={request}
+          setSelectedRequest={setRequest}
+          requestType={requestType}
+          fetchRequests={fetchAllRequests}
+          isAuthorized={isAuthorized}
+        />
+      )}
+      {activeTab === 'Activity' && <ActivityTab referenceNumber={request.reference_number} />}
     </div>
   );
+  
 }
 
 export default RequestDetailsPage;

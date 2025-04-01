@@ -11,6 +11,7 @@ import { X } from '@phosphor-icons/react';
 import axios from 'axios';
 import { AuthContext } from '../../../features/authentication';
 import ToastNotification from '../../../utils/ToastNotification';
+import RequestAccess from './RequestAccess';
 
 
 function RequestDetailsPage({ referenceNumber, onClose }) {
@@ -116,8 +117,11 @@ function RequestDetailsPage({ referenceNumber, onClose }) {
   return (
     <div className="fixed top-0 right-0 w-full max-w-[750px] h-full bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200 z-100 p-6 overflow-y-auto">
       <div className="flex flex-col justify-between items-start mb-6">
-        <div className="p-1 rounded-md bg-red-500 mb-3">
-          <X color="white" onClick={onClose} className="cursor-pointer" />
+        <div className='flex items-center justify-between w-full  mb-3'>
+          <div className="p-1 rounded-md bg-red-500">
+            <X color="white" onClick={onClose} className="cursor-pointer" />
+          </div>
+          <RequestAccess selectedRequest={request} requestType={requestType} />
         </div>
   
         {/* Editable Title */}

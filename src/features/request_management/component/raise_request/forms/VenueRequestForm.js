@@ -333,7 +333,7 @@ const VenueRequestForm = ({setSelectedRequest}) => {
                     !request.department ||
                     !request.venue_id ||
                     !request.organization ||
-                    !request.event_nature ||
+                    // !request.event_nature ||
                     !request.event_title ||
                     !request.event_dates ||
                     !request.event_start_time ||

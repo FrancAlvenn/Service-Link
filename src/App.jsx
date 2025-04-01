@@ -155,7 +155,7 @@ function App() {
               <AssetProvider>
                 <EmployeeProvider>
                 <RequestsProviderWrapper>
-                  <div className="App font-sans dark:bg-gray-900 dark:text-gray-100">
+                  <div className="App font-sans ">
                     <RouterProvider router={router} />
                     <CustomToastContainer />
                   </div>

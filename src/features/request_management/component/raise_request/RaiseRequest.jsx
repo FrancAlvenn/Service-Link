@@ -7,7 +7,7 @@ const RaiseRequest = () => {
   const [selectedRequest, setSelectedRequest] = useState("");
 
   return (
-    <div className="h-full w-full bg-white dark:bg-gray-900 rounded-lg mt-0 px-3 flex flex-col justify-between transition-colors">
+    <div className="min-h-screen h-full w-full bg-white dark:bg-gray-900 rounded-lg mt-0 px-3 flex flex-col justify-between transition-colors">
       <div className="flex flex-col h-full">
         {/* Header */}
         <CardHeader floated={false} shadow={false} className="rounded-none min-h-fit pb-4 dark:bg-gray-900">

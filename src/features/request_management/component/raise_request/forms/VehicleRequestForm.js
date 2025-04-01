@@ -75,6 +75,7 @@ const VehicleRequestForm = ({setSelectedRequest}) => {
         const fetchData = async () => {
             try {
                 const departmentResponse = await axios.get("/settings/department", { withCredentials: true });
+
                 if (Array.isArray(departmentResponse.data.departments)) {
                     setDepartmentOptions(departmentResponse.data.departments);
                 }
@@ -90,9 +91,17 @@ const VehicleRequestForm = ({setSelectedRequest}) => {
 
     const submitVehicleRequest = async () => {
         try {
-            const requestData = { ...request };
+            const requestData = {
+                ...request,
+                authorized_access: [...(request.authorized_access || []), user.reference_number]
+            };
 
-            const response = await axios.post("/vehicle_request", requestData, { withCredentials: true });
+            const response = await axios({
+                method: "POST",
+                url: "/vehicle_request",
+                data: requestData,
+                withCredentials: true,
+            })
 
             if (response.status === 201) {
                 ToastNotification.success("Success!", response.data.message);

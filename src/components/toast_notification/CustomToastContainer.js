@@ -1,8 +1,6 @@
-import React from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-// Custom ToastContainer with custom styles or props
 const CustomToastContainer = () => {
   return (
     <ToastContainer
@@ -13,10 +11,10 @@ const CustomToastContainer = () => {
       newestOnTop={false}
       closeOnClick
       rtl={false}
-      pauseOnFocusLoss
+      // pauseOnFocusLoss
       draggable
       pauseOnHover
-      theme="light" // You can customize this or use "light" or "dark"
+      theme="light"
     />
   );
 };

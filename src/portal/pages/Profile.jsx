@@ -1,4 +1,4 @@
-import { Typography } from '@material-tailwind/react';
+import { Button, Dialog, DialogBody, DialogFooter, DialogHeader, Typography } from '@material-tailwind/react';
 import { Bell, ChatCircleText, FileText, Gear, Lightbulb, Lock, PuzzlePiece, Sparkle, Sun, User } from '@phosphor-icons/react';
 import React, { useContext, useState } from 'react';
 import { AuthContext } from '../../features/authentication';
@@ -8,13 +8,23 @@ import NotificationSettings from '../component/settings/NotificationSettings';
 import ThemeSetting from '../component/settings/ThemeSetting';
 import PrivacyPolicy from '../component/settings/PrivacyPolicy';
 import TermsOfServices from '../component/settings/TermsOfServices';
+import { useNavigate } from 'react-router-dom';
 
 function Profile() {
-    const { user } = useContext(AuthContext);
+    const { user, clearAuthData } = useContext(AuthContext);
     const [selectedSetting, setSelectedSetting] = useState('');
+    const navigate = useNavigate();
+
+    const [openLogoutModal, setOpenLogoutModal] = useState(false);
 
     function closeSettingOverlay() {
         setSelectedSetting('');
+    }
+
+    function logOut() {
+        // document.documentElement.classList.remove("dark");
+        clearAuthData();
+        navigate('/');
     }
 
     const renderSettingComponent = () => {
@@ -35,7 +45,8 @@ function Profile() {
     };
 
     return (
-        <div className=" bg-white dark:bg-gray-900 rounded-lg w-full mt-0 px-3 pt-4 flex flex-col gap-6 pb-22">
+        <div className=" bg-white dark:bg-gray-900 rounded-lg w-full mt-0 px-3 pt-4 pb-20 flex flex-col gap-6">
+
             <div className='flex flex-col items-center justify-center gap-3 w-full'>
                 <span className='p-2 rounded-lg bg-blue-500 dark:bg-blue-700 w-fit'>
                     <User size={40} className='text-white' />
@@ -82,11 +93,15 @@ function Profile() {
                 </div>
             </div>
 
-            <div className='mt-3 pb-28'>
-                <Typography className="text-sm font-medium w-full text-center text-red-500 hover:underline dark:text-red-400">
-                    Log out from Service Link
+            <div className='mt-3'>
+            <Typography 
+                className="text-sm font-medium w-full text-center text-red-500 hover:underline dark:text-red-400"
+                onClick={() => setOpenLogoutModal(true)}
+                >
+                Log out from Service Link
                 </Typography>
             </div>
+
 
             <AnimatePresence>
                 {selectedSetting && (
@@ -114,6 +129,27 @@ function Profile() {
                     </>
                 )}
             </AnimatePresence>
+
+            <Dialog open={openLogoutModal} handler={setOpenLogoutModal} size="sm" className="dark:text-gray-100 dark:bg-gray-800">
+                <DialogHeader className="text-gray-900 dark:text-gray-200">
+                    Confirm Logout
+                </DialogHeader>
+                
+                <DialogBody className="w-full bg-white dark:bg-gray-800">
+                    <Typography className="font-normal text-sm text-gray-800 dark:text-gray-300">
+                    Are you sure you want to log out? You will need to sign in again to access your account.
+                    </Typography>
+                </DialogBody>
+
+                <DialogFooter className="flex gap-2 w-full bg-white dark:bg-gray-800">
+                    <Button color="gray" onClick={() => setOpenLogoutModal(false)} className=" bg-gray-500 dark:bg-gray-700 cursor-pointer">
+                    Cancel
+                    </Button>
+                    <Button onClick={logOut} className="bg-red-500 dark:bg-red-600 cursor-pointer">
+                    Logout
+                    </Button>
+                </DialogFooter>
+            </Dialog>
         </div>
     );
 }

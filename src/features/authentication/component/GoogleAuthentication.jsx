@@ -81,6 +81,7 @@ function GoogleAuthLogin() {
                         setAuthData(response.data.response.dataValues);
                         localStorage.setItem('userPreference', JSON.stringify(response.data.userPreference));
 
+                        fetchThemePreference();
                         //fetch all request data
                         fetchAllRequests();
 
@@ -114,6 +115,20 @@ function GoogleAuthLogin() {
      */
     const onError = () => {
         ToastNotification.error('Login Failed', 'Unable to log in with Google. Please try again.');
+    };
+
+    const fetchThemePreference = async () => {
+        try {
+        const userPreferences = JSON.parse(localStorage.getItem("userPreference"));
+
+        if (userPreferences?.theme === "1") {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
+        } catch (error) {
+        console.error("Error fetching theme preference:", error);
+        }
     };
 
     return (

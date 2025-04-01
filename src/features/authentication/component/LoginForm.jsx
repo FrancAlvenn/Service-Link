@@ -125,6 +125,7 @@ function LoginForm() {
                     setAuthData(res.data);
                     localStorage.setItem('userPreference', JSON.stringify(res.data.userPreference));
 
+                    fetchThemePreference();
                     //fetch all request data
                     fetchAllRequests();
 
@@ -197,6 +198,24 @@ function LoginForm() {
 
     //get the access token from the user
     //var accessToken = gapi.auth.getToken().access_token;
+
+
+
+
+    const fetchThemePreference = async () => {
+        try {
+        const userPreferences = JSON.parse(localStorage.getItem("userPreference"));
+
+        if (userPreferences?.theme === "1") {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
+        } catch (error) {
+        console.error("Error fetching theme preference:", error);
+        }
+    };
+
 
     return (
         <div className='flex flex-col p-3 min-h-[90vh]'>

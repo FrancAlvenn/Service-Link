@@ -294,7 +294,7 @@ const MainTab = ({ request, setRequest, requestType, fetchRequests, onClose }) =
       )}
 
       {/* Delete Confirmation Modal */}
-      <Dialog open={openDeleteModal} handler={setOpenDeleteModal} size="sm">
+      <Dialog open={openDeleteModal} handler={setOpenDeleteModal} size="sm" className="dark:text-gray-100 dark:bg-gray-800">
         <DialogHeader className="text-gray-900 dark:text-gray-200">Confirm Request Deletion</DialogHeader>
         <DialogBody className="w-full bg-white dark:bg-gray-800">
           <Typography className="font-normal text-sm text-gray-800 dark:text-gray-300">

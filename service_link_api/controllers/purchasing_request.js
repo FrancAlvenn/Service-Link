@@ -34,7 +34,7 @@ export async function createPurchasingRequest(req, res) {
             operations_director_approval : "Pending",
             archived: req.body.archived || false,
             remarks: req.body.remarks || null,
-            authorized_users: [req.body.requester] || null,
+            authorized_access : [req.body.requester],
         }, { transaction });
 
         const detailsData = req.body.details.map(detail => ({

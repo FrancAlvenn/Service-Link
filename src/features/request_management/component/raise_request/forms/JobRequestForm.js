@@ -114,7 +114,8 @@ const JobRequestForm = ({setSelectedRequest}) => {
             // Prepare request payload with correctly formatted date
             const requestData = {
                 ...request,
-                date_required: formattedDate, // Ensure valid MySQL date format
+                date_required: formattedDate,
+                authorized_access: [...(request.authorized_access || []), user.reference_number]
             };
     
             const response = await axios({

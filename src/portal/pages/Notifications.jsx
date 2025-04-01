@@ -60,8 +60,17 @@ const NotificationPage = () => {
     };
 
     useEffect(() => {
-        if (allRequests.length > 0) getRequestActivity();
-    }, [allRequests]);
+        if (allRequests.length > 0) {
+            getRequestActivity(); // Fetch immediately
+
+            const interval = setInterval(() => {
+                getRequestActivity(); // Fetch every 60 seconds
+            }, 60000);
+
+            return () => clearInterval(interval); // Cleanup interval on unmount
+        }
+    }, [allRequests.length]); // Depend only on the length to avoid excessive re-fetching
+
 
     const handleTabChange = (tab) => {
         setSelectedTab(tab);
@@ -77,7 +86,7 @@ const NotificationPage = () => {
     };
 
     return (
-        <div className=" bg-white dark:bg-gray-900 rounded-lg w-full mt-0 px-3 py-4 flex flex-col gap-6 pb-24">
+        <div className="min-h-screen  bg-white dark:bg-gray-900 rounded-lg w-full mt-0 px-3 py-4 flex flex-col gap-6 pb-24">
             <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Notifications</h2>
     
             {/* Tab Filters */}
@@ -113,14 +122,14 @@ const NotificationPage = () => {
                                     return (
                                         <div key={activity.id} className="py-2 px-3 bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 border-l-4 border-blue-500 rounded-md shadow-md cursor-pointer" onClick={() => openRequestDetails(activity.request_id)}>
                                             <div className="flex items-center justify-between">
-                                                <p className="text-xs font-semibold" dangerouslySetInnerHTML={{ __html: activity.action }}></p>
+                                                <div className="dangerous-p dark:text-gray-100 text-xs font-semibold" dangerouslySetInnerHTML={{ __html: activity.action }}></div>
                                                 <span className="text-xs text-gray-500 dark:text-gray-400">{dayjs(activity.created_at).fromNow()}</span>
                                             </div>
                                             <div className="flex items-center justify-between pt-1">
                                                 <p className="text-sm">{activity.details}</p>
                                                 <Chip
                                                     size="sm"
-                                                    className="rounded "
+                                                    className="rounded dark:bg-gray-700 dark:text-gray-100 "
                                                     variant="outlined"
                                                     color='black'
                                                     value={activity.request_id}
@@ -134,14 +143,14 @@ const NotificationPage = () => {
                                     return (
                                         <div key={activity.id} className="py-2 px-3 bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-100 border-l-4 border-green-500 rounded-md shadow-md cursor-pointer" onClick={() => openRequestDetails(activity.request_id)}>
                                             <div className="flex items-center justify-between">
-                                                <p className="text-xs font-semibold" dangerouslySetInnerHTML={{ __html: activity.action }}></p>
+                                                <div className="dangerous-p dark:text-gray-100 text-xs font-semibold" dangerouslySetInnerHTML={{ __html: activity.action }}></div>
                                                 <span className="text-xs text-gray-500 dark:text-gray-400">{dayjs(activity.created_at).fromNow()}</span>
                                             </div>
                                             <div className="flex items-center justify-between pt-1">
                                                 <p className="text-sm">{activity.details}</p>
                                                 <Chip
                                                     size="sm"
-                                                    className="rounded "
+                                                    className="rounded dark:bg-gray-700 dark:text-gray-100"
                                                     variant="outlined"
                                                     color='black'
                                                     value={activity.request_id}
@@ -164,12 +173,12 @@ const NotificationPage = () => {
                                         </div>
     
                                         <div className="flex justify-between items-center pt-1">
-                                            <Typography variant="small" className="mt-1 text-gray-700 dark:text-gray-300">
-                                                <p dangerouslySetInnerHTML={{ __html: activity.details }} className="text-sm font-normal"></p>
+                                            <Typography variant="small" className="mt-1 text-gray-700 dark:text-gray-300 ">
+                                                <div className="dangerous-p  text-sm font-normal dark:text-gray-100" dangerouslySetInnerHTML={{ __html: activity.details }} />
                                             </Typography>
                                             <Chip
                                                 size="sm"
-                                                className="rounded"
+                                                className="rounded dark:bg-gray-700 dark:text-gray-100"
                                                 variant="outlined"
                                                 color='black'
                                                 value={activity.request_id}

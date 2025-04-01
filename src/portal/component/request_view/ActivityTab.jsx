@@ -181,7 +181,7 @@ const ActivityTab = ({ referenceNumber }) => {
                                     return (
                                         <div key={activity.id} className="py-2 px-3 bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-200 border-l-4 border-blue-500 dark:border-blue-400 rounded-md shadow-md">
                                             <div className="flex items-center justify-between">
-                                                <p className="text-xs font-semibold" dangerouslySetInnerHTML={{ __html: activity.action }}></p>
+                                                <div className=" dangerous-p dark:text-gray-100  text-xs font-semibold" dangerouslySetInnerHTML={{ __html: activity.action }}></div>
                                                 <span className="text-xs text-gray-500 dark:text-gray-400">{dayjs(activity.created_at).fromNow()}</span>
                                             </div>
                                             <p className="text-sm">{activity.details}</p>
@@ -193,7 +193,7 @@ const ActivityTab = ({ referenceNumber }) => {
                                     return (
                                         <div key={activity.id} className="py-2 px-3 bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-200 border-l-4 border-green-500 dark:border-green-400 rounded-md shadow-md">
                                             <div className="flex items-center justify-between">
-                                                <p className="text-xs font-semibold" dangerouslySetInnerHTML={{ __html: activity.action }}></p>
+                                                <div className="dangerous-p dark:text-gray-100  text-xs font-semibold" dangerouslySetInnerHTML={{ __html: activity.action }}></div>
                                                 <span className="text-xs text-gray-500 dark:text-gray-400">{dayjs(activity.created_at).fromNow()}</span>
                                             </div>
                                             <p className="text-sm">{activity.details}</p>
@@ -218,10 +218,10 @@ const ActivityTab = ({ referenceNumber }) => {
                                                 ) : (
                                                     <div>
                                                         <span className="flex items-center justify-between gap-10">
-                                                            <p className="text-xs font-semibold">{getUserByReferenceNumber(activity.created_by)}</p>
-                                                            <span className="text-xs ml-auto text-gray-500 dark:text-gray-400 block mt-1">{dayjs(activity.created_at).fromNow()}</span>
+                                                            <p className=" dark:text-gray-100 text-xs font-semibold">{getUserByReferenceNumber(activity.created_by)}</p>
+                                                            <span className="text-xs ml-auto text-gray-500 dark:text-gray-400 block">{dayjs(activity.created_at).fromNow()}</span>
                                                         </span>
-                                                        <p dangerouslySetInnerHTML={{ __html: activity.details }} className="text-sm break-words whitespace-pre-wrap"></p>
+                                                        <div dangerouslySetInnerHTML={{ __html: activity.details }} className="dangerous-p dark:text-gray-100 text-sm break-words whitespace-pre-wrap"></div>
                                                     </div>
                                                 )}
                                             </div>

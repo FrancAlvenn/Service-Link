@@ -3,7 +3,7 @@ import { ArrowLeft } from 'react-feather';
 
 function TermsOfServices({ onClose }) {
     return (
-        <div className="fixed top-0 right-0 w-full max-w-[750px] h-full bg-white dark:bg-gray-800 dark:text-gray-100 z-100 p-6 overflow-y-auto border-l border-gray-200 dark:border-gray-700">
+        <div className="fixed top-0 right-0 w-full max-w-[750px] h-full bg-white dark:bg-gray-900 dark:text-gray-100 z-100 p-6 overflow-y-auto border-l border-gray-200 dark:border-gray-700">
             <div className="flex flex-col justify-between items-start mb-6 w-full">
                 <div className="flex items-center justify-between w-full">
                     <div className="p-1 rounded-md bg-gray-500 dark:bg-gray-700 mb-3">

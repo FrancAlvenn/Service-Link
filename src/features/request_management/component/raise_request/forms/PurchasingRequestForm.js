@@ -116,9 +116,17 @@ const PurchasingRequestForm = ({setSelectedRequest}) => {
     const submitPurchasingRequest = async () => {
         try {
             const formattedDate = request.date_required ? new Date(request.date_required).toISOString().split("T")[0] : null;
-            const requestData = { ...request, date_required: formattedDate };
+            const requestData = {
+                ...request,
+                date_required: formattedDate,
+                authorized_access: [...(request.authorized_access || []), user.reference_number] };
 
-            const response = await axios.post("/purchasing_request", requestData, { withCredentials: true });
+            const response = await axios({
+                method: "POST",
+                url: "/purchasing_request",
+                data: requestData,
+                withCredentials: true,
+            })
 
             if (response.status === 201) {
                 ToastNotification.success("Success!", response.data.message);

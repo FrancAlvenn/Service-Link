@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import logo from "../../assets/dyci_logo.png";
 import { MagnifyingGlass, X, Bell, House, DotsThreeCircle, Plus } from '@phosphor-icons/react';
@@ -19,8 +19,34 @@ function Portal() {
     navigate(path);
   };
 
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    const fetchThemePreference = async () => {
+      try {
+        const userPreferences = JSON.parse(localStorage.getItem("userPreference"));
+
+        if (userPreferences?.theme !== undefined) {
+          setDarkMode(userPreferences.theme);
+        }
+      } catch (error) {
+        console.error("Error fetching theme preference:", error);
+      }
+    };
+
+    fetchThemePreference();
+  }, []);
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [darkMode]);
+
   return (
-    <div className="bg-white dark:bg-gray-900 w-full mt-0 px-3 flex flex-col justify-between relative transition-colors">
+    <div className=" min-h-fit bg-white dark:bg-gray-900 w-full mt-0 px-3 flex flex-col justify-between transition-colors pb-22">
       
       {/* Top Navigation */}
       <nav className="w-full z-10 sticky top-0">
@@ -67,7 +93,7 @@ function Portal() {
 
       {/* Floating Action Button (Create Request) */}
       <button
-        className="fixed bottom-24 sm:bottom-24 right-6 sm:right-10 md:right-20  bg-blue-600 dark:bg-blue-500 text-white p-3 rounded-xl shadow-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition"
+        className="fixed inset-auto bottom-24 sm:bottom-24 right-6 sm:right-10 md:right-20  bg-blue-600 dark:bg-blue-500 text-white p-3 rounded-xl shadow-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition"
         onClick={() => handleNavigation('/portal/create-request')}
         aria-label="Create New Request"
       >
@@ -76,8 +102,8 @@ function Portal() {
 
 
       {/* Bottom Navigation Bar */}
-      <nav className="fixed bottom-4 left-0 right-0 mx-auto w-[90%] h-16 bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 z-20 rounded-xl transition-colors">
-        <div className="flex justify-around items-center h-full p-5">
+      <nav className="fixed bottom-4 left-0 right-0 mx-auto w-[85%] h-16 bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 z-20 rounded-xl transition-colors">
+        <div className="flex justify-around items-center h-full p-5 w-full">
 
           {/* Home (Dashboard) */}
           <button

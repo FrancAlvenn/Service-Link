@@ -46,7 +46,8 @@
     "sass": "^1.80.6",
     "sequelize": "^6.37.5",
     "styled-components": "^6.1.15",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "workbox-webpack-plugin": "^7.3.0"
   },
   "scripts": {
     "tailwind": "npx tailwindcss -i ./src/assets/input.css -o ./src/assets/output.css --watch",

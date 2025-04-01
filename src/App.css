@@ -20,124 +20,18 @@
   height: 100vh;
 }
 
-/* === 🌙 DARK MODE STYLES === */
-
-/* Base Dark Mode */
-.dark .app-container {
-  @apply bg-gray-900 text-white;
+.dark .dangerous-p{
+  @apply dark:text-gray-100;
 }
 
-/* Text Colors */
-.dark .text-primary {
-  @apply text-gray-300;
+
+.dangerous-p p {
+  margin-bottom: 0.5rem;
+  color: inherit;
+}
+.dangerous-p a {
+  color: blue;
+  text-decoration: underline;
 }
 
-.dark .text-secondary {
-  @apply text-gray-400;
-}
-
-/* Backgrounds */
-.dark .bg-primary {
-  @apply bg-gray-800;
-}
-
-.dark .bg-secondary {
-  @apply bg-gray-700;
-}
-
-.dark .bg-accent {
-  @apply bg-gray-600;
-}
-
-/* Borders */
-.dark .border-primary {
-  @apply border-gray-600;
-}
-
-.dark .border-secondary {
-  @apply border-gray-500;
-}
-
-/* Buttons */
-.dark .button-primary {
-  @apply bg-blue-600 text-white border-blue-500 hover:bg-blue-500;
-}
-
-.dark .button-secondary {
-  @apply bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600;
-}
-
-.dark .button-danger {
-  @apply bg-red-600 text-white border-red-500 hover:bg-red-500;
-}
-
-/* Inputs & Textareas */
-.dark .input {
-  @apply bg-gray-800 text-white border-gray-600 placeholder-gray-400 focus:ring-blue-500;
-}
-
-.dark .textarea {
-  @apply bg-gray-800 text-white border-gray-600 placeholder-gray-400 focus:ring-blue-500;
-}
-
-/* Cards & Panels */
-.dark .card {
-  @apply bg-gray-800 text-white border-gray-700 shadow-md;
-}
-
-.dark .modal {
-  @apply bg-gray-800 text-white border-gray-600;
-}
-
-/* Table Styling */
-.dark .table {
-  @apply bg-gray-800 text-gray-300 border-gray-700;
-}
-
-.dark .table-header {
-  @apply bg-gray-700 text-gray-300;
-}
-
-.dark .table-row {
-  @apply hover:bg-gray-700 border-b border-gray-600;
-}
-
-/* Sidebar & Navbars */
-.dark .sidebar {
-  @apply bg-gray-800 text-gray-300 border-gray-700;
-}
-
-.dark .navbar {
-  @apply bg-gray-900 text-gray-300 border-gray-700;
-}
-
-/* Chips & Badges */
-.dark .chip {
-  @apply bg-gray-700 text-gray-300 border-gray-600;
-}
-
-.dark .badge-success {
-  @apply bg-green-600 text-white border-green-500;
-}
-
-.dark .badge-warning {
-  @apply bg-yellow-600 text-white border-yellow-500;
-}
-
-.dark .badge-error {
-  @apply bg-red-600 text-white border-red-500;
-}
-
-/* Scrollbars */
-.dark ::-webkit-scrollbar {
-  width: 8px;
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  @apply bg-gray-700 rounded-md;
-}
-
-.dark ::-webkit-scrollbar-track {
-  @apply bg-gray-900;
-}
 

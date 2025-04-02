@@ -119,7 +119,8 @@ const PurchasingRequestForm = ({setSelectedRequest}) => {
             const requestData = {
                 ...request,
                 date_required: formattedDate,
-                authorized_access: [...(request.authorized_access || []), user.reference_number] };
+                authorized_access: [...(request.authorized_access || []), user.reference_number]
+            };
 
             const response = await axios({
                 method: "POST",

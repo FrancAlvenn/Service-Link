@@ -87,7 +87,7 @@ function PortalDashboard() {
 
 
   return (
-    <div className="min-h-screen h-full bg-white dark:bg-gray-900 rounded-lg w-full mt-0 px-1 py-4 flex flex-col gap-4 pb-24">
+    <div className="min-h-screen h-full bg-white dark:bg-gray-900 rounded-lg w-full mt-0 px-1 py-4 flex flex-col  gap-4 pb-24">
       <Typography variant="h5" className="text-gray-800 dark:text-gray-200">
         My Requests
       </Typography>

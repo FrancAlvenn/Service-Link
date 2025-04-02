@@ -76,9 +76,28 @@ const NotificationPage = () => {
         setSelectedTab(tab);
     };
 
-    const openRequestDetails = (referenceNumber) => {
-        const request = allRequests.find(req => req.reference_number === referenceNumber);
+    const openRequestDetails = (requestID, ID) => {
+        const request = allRequests.find(req => req.reference_number === requestID);
         if (request) setSelectedRequest(request);
+
+        // Mark the activity as viewed
+        axios({
+            method: "PUT",
+            url: `/request_activity/${ID}`,
+            data: { viewed: true },
+            withCredentials: true
+        }).then(()=>{
+            // Update activities state
+            setActivities((prevActivities) =>
+                prevActivities.map(activity =>
+                    activity.id === ID ? { ...activity, viewed: true } : activity
+                )
+            );
+        })
+        .catch(error => {
+            console.error("Error marking activity as viewed:", error);
+        });
+        
     };
 
     const closeRequestDetails = () => {
@@ -108,74 +127,73 @@ const NotificationPage = () => {
             {/* Activity Feed */}
             <div className="flex flex-col max-h-[500px] overflow-auto">
                 <div className="flex flex-col gap-3">
-                    {activities?.length > 0 ? (
-                        activities
-                            .filter(activity =>
-                                (activity.visibility !== "internal" || activity.created_by === user.reference_number) &&
-                                (selectedTab === "all" || activity.request_type === selectedTab)
-                            )
-                            .map((activity) => {
-                                const isUser = activity.created_by === user.reference_number;
-    
-                                // Different UI for each request type
-                                if (activity.request_type === "status_change") {
-                                    return (
-                                        <div key={activity.id} className="py-2 px-3 bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 border-l-4 border-blue-500 rounded-md shadow-md cursor-pointer" onClick={() => openRequestDetails(activity.request_id)}>
-                                            <div className="flex items-center justify-between">
-                                                <div className="dangerous-p dark:text-gray-100 text-xs font-semibold" dangerouslySetInnerHTML={{ __html: activity.action }}></div>
-                                                <span className="text-xs text-gray-500 dark:text-gray-400">{dayjs(activity.created_at).fromNow()}</span>
-                                            </div>
-                                            <div className="flex items-center justify-between pt-1">
-                                                <p className="text-sm">{activity.details}</p>
-                                                <Chip
-                                                    size="sm"
-                                                    className="rounded dark:bg-gray-700 dark:text-gray-100 "
-                                                    variant="outlined"
-                                                    color='black'
-                                                    value={activity.request_id}
-                                                />
-                                            </div>
-                                        </div>
-                                    );
-                                }
-    
-                                if (activity.request_type === "approval") {
-                                    return (
-                                        <div key={activity.id} className="py-2 px-3 bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-100 border-l-4 border-green-500 rounded-md shadow-md cursor-pointer" onClick={() => openRequestDetails(activity.request_id)}>
-                                            <div className="flex items-center justify-between">
-                                                <div className="dangerous-p dark:text-gray-100 text-xs font-semibold" dangerouslySetInnerHTML={{ __html: activity.action }}></div>
-                                                <span className="text-xs text-gray-500 dark:text-gray-400">{dayjs(activity.created_at).fromNow()}</span>
-                                            </div>
-                                            <div className="flex items-center justify-between pt-1">
-                                                <p className="text-sm">{activity.details}</p>
-                                                <Chip
-                                                    size="sm"
-                                                    className="rounded dark:bg-gray-700 dark:text-gray-100"
-                                                    variant="outlined"
-                                                    color='black'
-                                                    value={activity.request_id}
-                                                />
-                                            </div>
-                                        </div>
-                                    );
-                                }
-    
-                                // Default UI for Comments
+                {activities?.length > 0 ? (
+                    activities
+                        .filter(activity =>
+                            (activity.visibility !== "internal" || activity.created_by === user.reference_number) &&
+                            (selectedTab === "all" || activity.request_type === selectedTab)
+                        )
+                        .map((activity) => {
+                            const isUser = activity.created_by === user.reference_number;
+                            const isViewed = activity.viewed; // Check if activity is viewed
+                            const bgColor = "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 border-gray-500";
+                            const statusColor = "bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 border-blue-500";
+                            const requestColor = "bg-pink-100 dark:bg-pink-900 text-pink-900 dark:text-pink-100 border-pink-500";
+                            const approvalColor = "bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-100 border-green-500";
+
+                            // Different UI for each request type
+                            if (activity.request_type === "status_change") {
                                 return (
-                                    <div className="flex flex-col w-full py-2 px-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200 border-l-4 border-gray-500 dark:border-gray-700 rounded-md shadow-md cursor-pointer" onClick={() => openRequestDetails(activity.request_id)}>
-                                        <div className="w-full flex items-center justify-between">
-                                            <Typography variant="small" color="blue-gray" className="text-xs font-semibold dark:text-gray-300">
-                                                {activity.action}
-                                            </Typography>
-                                            <Typography variant="small" className="text-xs text-gray-500 dark:text-gray-400">
-                                                {dayjs(activity.created_at).fromNow()}
-                                            </Typography>
+                                    <div key={activity.id} className={`py-2 px-3 ${isViewed ? bgColor : statusColor} border-l-4 rounded-md shadow-md cursor-pointer`} onClick={() => openRequestDetails(activity.request_id, activity.id)}>
+                                        <div className="flex items-center justify-between">
+                                            <div className="dangerous-p dark:text-gray-100 text-xs font-semibold" dangerouslySetInnerHTML={{ __html: activity.action }}></div>
+                                            <span className="text-xs text-gray-500 dark:text-gray-400">{dayjs(activity.created_at).fromNow()}</span>
                                         </div>
-    
-                                        <div className="flex justify-between items-center pt-1">
-                                            <Typography variant="small" className="mt-1 text-gray-700 dark:text-gray-300 ">
-                                                <div className="dangerous-p  text-sm font-normal dark:text-gray-100" dangerouslySetInnerHTML={{ __html: activity.details }} />
-                                            </Typography>
+                                        <div className="flex items-center justify-between pt-1">
+                                            <p className="text-sm">{activity.details}</p>
+                                            <Chip
+                                                size="sm"
+                                                className="rounded dark:bg-gray-700 dark:text-gray-100 "
+                                                variant="outlined"
+                                                color='black'
+                                                value={activity.request_id}
+                                            />
+                                        </div>
+                                    </div>
+                                );
+                            }
+
+                            // request_access
+                            if (activity.request_type === "request_access") {
+                                return (
+                                    <div key={activity.id} className={`py-2 px-3 ${isViewed ? bgColor : requestColor} border-l-4 rounded-md shadow-md cursor-pointer`} onClick={() => openRequestDetails(activity.request_id, activity.id)}>
+                                        <div className="flex items-center justify-between">
+                                            <div className="dangerous-p dark:text-gray-100 text-xs font-semibold" dangerouslySetInnerHTML={{ __html: activity.action }}></div>
+                                            <span className="text-xs text-gray-500 dark:text-gray-400">{dayjs(activity.created_at).fromNow()}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between pt-1">
+                                            <p className="text-sm">{activity.details}</p>
+                                            <Chip
+                                                size="sm"
+                                                className="rounded dark:bg-gray-700 dark:text-gray-100 "
+                                                variant="outlined"
+                                                color='black'
+                                                value={activity.request_id}
+                                            />
+                                        </div>
+                                    </div>
+                                );
+                            }
+
+                            if (activity.request_type === "approval") {
+                                return (
+                                    <div key={activity.id} className={`py-2 px-3 ${isViewed ? bgColor : approvalColor} border-l-4 rounded-md shadow-md cursor-pointer`} onClick={() => openRequestDetails(activity.request_id, activity.id)}>
+                                        <div className="flex items-center justify-between">
+                                            <div className="dangerous-p dark:text-gray-100 text-xs font-semibold" dangerouslySetInnerHTML={{ __html: activity.action }}></div>
+                                            <span className="text-xs text-gray-500 dark:text-gray-400">{dayjs(activity.created_at).fromNow()}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between pt-1">
+                                            <p className="text-sm">{activity.details}</p>
                                             <Chip
                                                 size="sm"
                                                 className="rounded dark:bg-gray-700 dark:text-gray-100"
@@ -186,14 +204,43 @@ const NotificationPage = () => {
                                         </div>
                                     </div>
                                 );
-                            })
-                    ) : (
-                        <div className="text-gray-500 dark:text-gray-400 w-full text-sm text-center py-5 flex flex-col gap-4 items-center justify-center">
-                            <img src={email} alt="No act" className="w-full h-auto max-w-sm sm:max-w-md md:max-w-md lg:max-w-md xl:max-w-md"/>
-    
-                            <Typography variant="h6" className="text-gray-500 dark:text-gray-300">Looks like it's a bit quiet around here!</Typography>
-                        </div>
-                    )}
+                            }
+
+                            // Default UI for Comments
+                            return (
+                                <div className={`flex flex-col w-full py-2 px-3 ${isViewed ? bgColor : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200 border-gray-500 dark:border-gray-700"} border-l-4 rounded-md shadow-md cursor-pointer`} onClick={() => openRequestDetails(activity.request_id, activity.id)}>
+                                    <div className="w-full flex items-center justify-between">
+                                        <Typography variant="small" color="blue-gray" className="text-xs font-semibold dark:text-gray-300">
+                                            {activity.action}
+                                        </Typography>
+                                        <Typography variant="small" className="text-xs text-gray-500 dark:text-gray-400">
+                                            {dayjs(activity.created_at).fromNow()}
+                                        </Typography>
+                                    </div>
+
+                                    <div className="flex justify-between items-center pt-1">
+                                        <Typography variant="small" className="mt-1 text-gray-700 dark:text-gray-300 ">
+                                            <div className="dangerous-p  text-sm font-normal dark:text-gray-100" dangerouslySetInnerHTML={{ __html: activity.details }} />
+                                        </Typography>
+                                        <Chip
+                                            size="sm"
+                                            className="rounded dark:bg-gray-700 dark:text-gray-100"
+                                            variant="outlined"
+                                            color='black'
+                                            value={activity.request_id}
+                                        />
+                                    </div>
+                                </div>
+                            );
+                        })
+                ) : (
+                    <div className="text-gray-500 dark:text-gray-400 w-full text-sm text-center py-5 flex flex-col gap-4 items-center justify-center">
+                        <img src={email} alt="No act" className="w-full h-auto max-w-sm sm:max-w-md md:max-w-md lg:max-w-md xl:max-w-md"/>
+
+                        <Typography variant="h6" className="text-gray-500 dark:text-gray-300">Looks like it's a bit quiet around here!</Typography>
+                    </div>
+                )}
+
                 </div>
             </div>
     

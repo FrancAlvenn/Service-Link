@@ -12,6 +12,7 @@ export async function createRequestActivity(req, res) {
         const newActivity = await RequestActivityModel.create({
             request_id: req.body.reference_number,
             visibility: req.body.visibility,
+            viewed: req.body.viewed || false,
             request_type: req.body.type || "comment",
             action: req.body.action,
             details: req.body.details,

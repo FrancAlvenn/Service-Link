@@ -17,6 +17,11 @@ const RequestActivityModel = sequelize.define(
       type: DataTypes.STRING(50),
       allowNull: false,
     },
+    viewed: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
+    },
     request_type: {
       type: DataTypes.STRING(50),
       allowNull: false,

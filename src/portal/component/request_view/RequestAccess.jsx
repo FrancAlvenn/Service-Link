@@ -46,27 +46,48 @@ const RequestAccess = ({selectedRequest, requestType}) => {
     }
   };
 
-  const handleGrantAccess = async (user) => {
+  const handleGrantAccess = async (grantedUser) => {
     try {
+      const updatedAccess = [...userWithAccess, grantedUser];
+
       await axios.put(`/${requestType}/${selectedRequest.reference_number}`, {
         ...selectedRequest,
-        authorized_access: ([...selectedRequest.authorized_access, user]),
-      }).then(() => {
-        getAccessRequest();
-        ToastNotification.success("Success", `Request access to ${selectedRequest.title || "document"} has been granted.`);
-      })
+        authorized_access: updatedAccess,
+      });
+
+      // Update local state
+      setUserWithAccess(updatedAccess);
+      setAccessRequest((prev) => prev.filter((request) => request.created_by !== grantedUser));
+
+      ToastNotification.success("Success", `Request access to ${selectedRequest.title || "document"} has been granted.`);
+
+      // Update activity
+      const newActivity = {
+        reference_number: selectedRequest.reference_number,
+        type: "request_access",
+        visibility: "external",
+        action: "Request Access",
+        details: "Access granted!",
+        performed_by: grantedUser,
+      };
+
+      await axios.post("/request_activity", newActivity, { withCredentials: true });
+
+      // ToastNotification.info("Success", "Access request processed successfully");
+
     } catch (error) {
       console.error("Update failed:", error);
-      ToastNotification.error("Error", `Failed to update.`);
+      ToastNotification.error("Error", "Failed to update access.");
     }
   };
+  
 
 
 
   return (
     <Menu placement="bottom-end" dismiss={{ itemPress: false }}>
       <MenuHandler>
-        <Button variant="outlined" color="blue" className="flex items-center font-bold rounded-full py-2 px-4" >
+        <Button variant="outlined" color="blue" className="flex items-center font-bold py-2 px-4" >
           Request Access
         </Button>
       </MenuHandler>

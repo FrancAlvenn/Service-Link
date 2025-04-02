@@ -63,8 +63,8 @@ function ApprovalStatusModal({ input, referenceNumber, requestType, approvingPos
           reference_number: referenceNumber,
           visibility: "external",
           type: "approval",
-          action: `${approvalTitle} approval updated to <i>${status}</i>`,
-          details: "Status updated",
+          action: "Status updated",
+          details: `${approvalTitle} approval updated to <i>${status}</i>`,
           performed_by: user.reference_number,
         },
         withCredentials: true

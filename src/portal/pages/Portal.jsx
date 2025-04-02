@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import logo from "../../assets/dyci_logo.png";
 import { MagnifyingGlass, X, Bell, House, DotsThreeCircle, Plus } from '@phosphor-icons/react';
+import { UserContext } from '../../context/UserContext';
 
 function Portal() {
   const [isSearching, setIsSearching] = useState(false);
@@ -9,6 +10,8 @@ function Portal() {
   const navigate = useNavigate();
   const location = useLocation();
   const currentTab = location.pathname.split('/')[2]; // Extracts the current section
+
+  const { fetchUsers } = useContext(UserContext);
 
   const handleSearchToggle = () => {
     setIsSearching((prev) => !prev);
@@ -34,6 +37,7 @@ function Portal() {
       }
     };
 
+    fetchUsers();
     fetchThemePreference();
   }, []);
 
@@ -87,13 +91,15 @@ function Portal() {
       </nav>
 
       {/* Main Content */}
-      <div className="flex flex-col gap-4 h-full mb-16">
-        <Outlet context={{ searchQuery }} />
+      <div className='w-full flex flex-col items-center'>
+        <div className="flex flex-col justify-center w-full max-w-[800px] sm:shadow-xl sm:p-8 gap-4 h-full mb-16">
+          <Outlet context={{ searchQuery }} />
+        </div>
       </div>
 
       {/* Floating Action Button (Create Request) */}
       <button
-        className="fixed inset-auto bottom-24 sm:bottom-24 right-6 sm:right-10 md:right-20  bg-blue-600 dark:bg-blue-500 text-white p-3 rounded-xl shadow-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition"
+        className="fixed inset-auto bottom-24 sm:bottom-24 right-8 sm:right-16 md:right-[25%]  bg-blue-600 dark:bg-blue-500 text-white p-3 rounded-xl shadow-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition"
         onClick={() => handleNavigation('/portal/create-request')}
         aria-label="Create New Request"
       >
@@ -102,7 +108,7 @@ function Portal() {
 
 
       {/* Bottom Navigation Bar */}
-      <nav className="fixed bottom-4 left-0 right-0 mx-auto w-[85%] h-16 bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 z-20 rounded-xl transition-colors">
+      <nav className="fixed bottom-4 left-0 right-0 mx-auto w-[85%] max-w-[800px] h-16 bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 z-20 rounded-xl transition-colors">
         <div className="flex justify-around items-center h-full p-5 w-full">
 
           {/* Home (Dashboard) */}

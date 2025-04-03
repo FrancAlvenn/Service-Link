@@ -61,7 +61,7 @@ function Sidebar() {
     <div
       className={`bg-white flex flex-col h-full p-4 transition-all ${
         state.isMinimized ? "w-12" : "w-72 justify-center"
-      } shadow-xl shadow-black-900/5 rounded-none rounded-tr-lg rounded-br-lg`}
+      } shadow-xl shadow-black-900/5 rounded-none `}
     >
       <div className={`mt-0 flex items-center ${state.isMinimized ? "justify-center" : "justify-between"}`}>
         {!state.isMinimized && (

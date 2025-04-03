@@ -1,4 +1,4 @@
-import { CaretDown, UserCircle } from "@phosphor-icons/react";
+import { CaretDown, UserCircle, X, CaretRight } from "@phosphor-icons/react";
 import ToastNotification from "../../utils/ToastNotification";
 import axios from "axios";
 import { useContext, useEffect, useState } from "react";
@@ -180,149 +180,119 @@ const SidebarView = ({ open, onClose, referenceNumber, requests }) => {
 
   return (
     <>
-      {/* Overlay */}
-      <div
-        className={`fixed inset-0 z-40 bg-black bg-opacity-50 transition-opacity duration-300 ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
-        onClick={handleClose}
-      ></div>
+  {/* Overlay */}
+  {/* <div
+    className={`shadow-lg bg-black bg-opacity-50 transition-opacity duration-300 ${
+      isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+    }`}
+    onClick={handleClose}
+  ></div> */}
 
-      {/* Sidebar */}
-      <div
-        onClick={handleSidebarClick}
-        className={`fixed top-0 right-0 z-50 w-[650px] h-full p-5 bg-white transform transition-transform duration-300 ${isOpen ? "translate-x-0" : "translate-x-full"}`}
-      >
-        {request ? (
-          <div className="flex flex-col overflow-y-auto h-full">
-            {/* Editable Title */}
-            <h2 className="text-xl font-bold mb-4">
+  {/* Sidebar */}
+  <div
+    onClick={handleSidebarClick}
+    className={`shadow-lg w-[650px] h-full p-5 bg-white transform transition-transform duration-300 ${
+      isOpen ? "translate-x-0" : "translate-x-full"
+    }`}
+  >
+    {request ? (
+      <div className="flex flex-col overflow-y-auto h-full">
+        {/* Close Button & Request Access */}
+        <div className="flex items-center justify-between w-full mb-4">
+          <div className="p-1 rounded-md bg-white">
+            <CaretRight color="black" size={20} onClick={handleClose} className="cursor-pointer" />
+          </div>
+          <RequestAccess selectedRequest={request} />
+        </div>
+
+        {/* Editable Title */}
+        <h2 className="text-xl font-bold mb-4">
+          {isAuthorized ? (
+            isEditingTitle ? (
+              <input
+                type="text"
+                className="border w-full border-gray-300 rounded-md p-2"
+                value={editedTitle}
+                onChange={(e) => setEditedTitle(e.target.value)}
+                onKeyDown={handleTitleKeyDown}
+                onBlur={handleSaveTitle}
+                autoFocus
+              />
+            ) : (
+              <p onClick={handleEditTitle} className="w-full cursor-pointer">{request.title}</p>
+            )
+          ) : (
+            <p className="w-full">{request.title}</p>
+          )}
+        </h2>
+
+        {/* Status & Approvals */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 mb-5">
+            <div title="Request Status">
+              <StatusModal input={request.status} referenceNumber={request.reference_number} requestType={requestType} title="Status" />
+            </div>
+            <div title="Immediate Head Approval">
+              <ApprovalStatusModal input={request.immediate_head_approval} referenceNumber={request.reference_number} approvingPosition="immediate_head_approval" requestType={requestType} />
+            </div>
+            <div title="Operations Director Approval">
+              <ApprovalStatusModal input={request.operations_director_approval} referenceNumber={request.reference_number} approvingPosition="operations_director_approval" requestType={requestType} />
+            </div>
+            <div title="GSO Director Approval">
+              <ApprovalStatusModal input={request.gso_director_approval} referenceNumber={request.reference_number} approvingPosition="gso_director_approval" requestType={requestType} />
+            </div>
+          </div>
+        </div>
+
+        {/* Editable Purpose */}
+        <div className="flex flex-col p-3 gap-2 border-gray-400 border rounded-md">
+          <span className="flex items-center mb-2">
+            <UserCircle size={24} />
+            <p className="ml-2 text-sm">
+              <span className="font-semibold">{getUserByReferenceNumber(request.requester)}</span> raised this request
+            </p>
+          </span>
+          <span className="flex flex-col gap-3">
+            <p className="text-sm font-semibold text-gray-600">Purpose</p>
             {isAuthorized ? (
-              isEditingTitle ? (
-                <input
-                  type="text"
-                  className="border w-full border-gray-300 rounded-md p-2"
-                  value={editedTitle}
-                  onChange={(e) => setEditedTitle(e.target.value)}
-                  onKeyDown={handleTitleKeyDown}
-                  onBlur={handleSaveTitle}
+              isEditingPurpose ? (
+                <textarea
+                  className="text-sm p-2 border w-full border-gray-300 rounded-md"
+                  value={editedPurpose}
+                  onChange={(e) => setEditedPurpose(e.target.value)}
+                  onBlur={handleSavePurpose}
                   autoFocus
                 />
               ) : (
-                <p onClick={handleEditTitle} className="w-full cursor-pointer">{request.title}</p>
+                <p onClick={handleEditPurpose} className="text-sm cursor-pointer">{request.purpose}</p>
               )
-            ): (
-              <p className="w-full cursor-pointer">{request.title}</p>
+            ) : (
+              <p className="text-sm">{request.purpose}</p>
             )}
-            </h2>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 mb-5">
-                <div title="Request Status">
-                  <StatusModal
-                    input={request.status}
-                    referenceNumber={request.reference_number}
-                    requestType={requestType}
-                    title="Status"
-                  />
-                </div>
+          </span>
+        </div>
 
-                <div title="Immediate Head Approval">
-                  <ApprovalStatusModal
-                    input={request.immediate_head_approval}
-                    referenceNumber={request.reference_number}
-                    approvingPosition="immediate_head_approval"
-                    requestType={requestType}
-                  />
-                </div>
-
-                <div title="Operations Director Approval">
-                  <ApprovalStatusModal
-                    input={request.operations_director_approval}
-                    referenceNumber={request.reference_number}
-                    approvingPosition="operations_director_approval"
-                    requestType={requestType}
-                  />
-                </div>
-
-                <div title="GSO Director Approval">
-                  <ApprovalStatusModal
-                    input={request.gso_director_approval}
-                    referenceNumber={request.reference_number}
-                    approvingPosition="gso_director_approval"
-                    requestType={requestType}
-                  />
-                </div>
-              </div>
-              <div className="flex items-center mb-5">
-                <RequestAccess selectedRequest={request} />
-              </div>
-            </div>
-
-
-            {/* Editable Purpose */}
-            <div className="flex flex-col p-3 gap-2 border-gray-400 border rounded-md">
-              <span className="flex items-center mb-2">
-                <UserCircle size={24} />
-                <p className="ml-2 text-sm">
-                  <span className="font-semibold">{getUserByReferenceNumber(request.requester)}</span> raised this request
-                </p>
-              </span>
-              <span className="flex flex-col gap-3">
-                <p className="text-sm font-semibold text-gray-600">Purpose</p>
-                {isAuthorized ? (
-                  isEditingPurpose ? (
-                    <textarea
-                      className="text-sm p-2 border w-full border-gray-300 rounded-md"
-                      value={editedPurpose}
-                      onChange={(e) => setEditedPurpose(e.target.value)}
-                      onBlur={handleSavePurpose}
-                      autoFocus
-                    />
-                  ) : (
-                    <p onClick={handleEditPurpose} className="text-sm cursor-pointer">{request.purpose}</p>
-                  )
-                ): (
-                  <p className="text-sm cursor-pointer">{request.purpose}</p>
-                )}
-              </span>
-            </div>
-
-            {/* Show ParticularsTab only for Job and Purchasing Requests */}
-            {["job_request", "purchasing_request", "venue_request"].includes(requestType) &&
-              request && // Ensure request is not null
-              Object.keys(request).length > 0 && ( // Ensure request has data
-                <ParticularsTab
-                  request={request}
-                  setRequest={setRequest}
-                  requestType={requestType}
-                  referenceNumber={referenceNumber}
-                  fetchRequests={fetchAllRequests}
-                  user={user}
-                  isAuthorized={isAuthorized}
-                />
-              )}
-
-
-            <div className="my-3 flex gap-1 p-3 border-gray-400 border rounded-md">
-              <p className="text-sm font-semibold text-gray-600">Similar Requests</p>
-              <CaretDown size={18} className="ml-auto cursor-pointer" />
-            </div>
-
-            <DetailsTab
-              selectedRequest={request}
-              setSelectedRequest={setRequest}
-              requestType={requestType}
-              fetchRequests={fetchAllRequests}
-              user={user}
-              isAuthorized={isAuthorized}
-            />
-
-            <ActivityTab referenceNumber={referenceNumber} />
-          </div>
-        ) : (
-          <div className="flex justify-center items-center h-full text-xl text-gray-600">No request found.</div>
+        {/* Show ParticularsTab only for Job, Purchasing, and Venue Requests */}
+        {["job_request", "purchasing_request", "venue_request"].includes(requestType) && request && Object.keys(request).length > 0 && (
+          <ParticularsTab request={request} setRequest={setRequest} requestType={requestType} referenceNumber={referenceNumber} fetchRequests={fetchAllRequests} user={user} isAuthorized={isAuthorized} />
         )}
+
+        <div className="my-3 flex gap-1 p-3 border-gray-400 border rounded-md">
+          <p className="text-sm font-semibold text-gray-600">Similar Requests</p>
+          <CaretDown size={18} className="ml-auto cursor-pointer" />
+        </div>
+
+        <DetailsTab selectedRequest={request} setSelectedRequest={setRequest} requestType={requestType} fetchRequests={fetchAllRequests} user={user} isAuthorized={isAuthorized} />
+
+        <ActivityTab referenceNumber={referenceNumber} />
       </div>
-    </>
+    ) : (
+      <div className="flex justify-center items-center h-full text-xl text-gray-600">No request found.</div>
+    )}
+  </div>
+</>
   );
+
 };
 
 export default SidebarView;

@@ -7,7 +7,7 @@ function Layout({ children }) {
         <div className="flex flex-col h-full bg-gray-200">
             <Navbar/>
 
-            <div className="flex flex-1 mt-2 mb-0 h-[90%] ">
+            <div className="flex flex-1 mb-0 h-[90%] ">
                 <Sidebar/>
 
 

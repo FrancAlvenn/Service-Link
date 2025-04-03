@@ -78,7 +78,7 @@ const RequestAccess = ({selectedRequest}) => {
             }
 
             {/* This should be in the activity tab use that when you finished it // REMARKS */}
-
+{/* 
             <Typography variant="paragraph" color="gray" className="flex items-center">
                 <span className="mr-2 w-full">
                     <input type="text" className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
@@ -87,7 +87,7 @@ const RequestAccess = ({selectedRequest}) => {
                       onChange={(e) => handleContentChange(e.target.value)}
                     />
                 </span>
-            </Typography>
+            </Typography> */}
 
             <MenuItem>
                 <Button variant="contained" color="blue" className="w-full" onClick={handleRequestAccess}>

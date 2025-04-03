@@ -65,8 +65,8 @@ function Sidebar() {
     >
       <div className={`mt-0 flex items-center ${state.isMinimized ? "justify-center" : "justify-between"}`}>
         {!state.isMinimized && (
-          <Typography color="black" className="text-lg font-bold whitespace-nowrap font-body">
-            Requests Management
+          <Typography color="black" className="text-md font-bold whitespace-nowrap font-body">
+            {state.selectedControl}
           </Typography>
         )}
         <button className="text-xl" onClick={() => dispatch({ type: "TOGGLE_MINIMIZE" })}>

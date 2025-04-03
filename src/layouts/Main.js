@@ -5,7 +5,7 @@ function Main({ children }) {
     
 
     return (
-        <main className="flex-1 pl-4 h-full">
+        <main className="flex-1 pl-1 h-full">
             {children}
             
         </main>

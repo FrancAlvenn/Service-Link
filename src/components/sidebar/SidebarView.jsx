@@ -192,7 +192,7 @@ const SidebarView = ({ open, onClose, referenceNumber, requests }) => {
   <div
     onClick={handleSidebarClick}
     className={`shadow-lg w-[650px] h-full p-5 bg-white transform transition-transform duration-300 ${
-      isOpen ? "translate-x-0" : "translate-x-full"
+      isOpen ? "translate-x-0" : "hidden"
     }`}
   >
     {request ? (
@@ -287,7 +287,7 @@ const SidebarView = ({ open, onClose, referenceNumber, requests }) => {
         <ActivityTab referenceNumber={referenceNumber} />
       </div>
     ) : (
-      <div className="flex justify-center items-center h-full text-xl text-gray-600">No request found.</div>
+      <div className="hidden">No request found.</div>
     )}
   </div>
 </>

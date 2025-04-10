@@ -37,6 +37,7 @@ import PortalDashboard from './portal/component/dashboard/PortalDashboard';
 import RequestDetailsPage from './portal/component/request_view/RequestDetailsPage';
 import Notifications from './portal/pages/Notifications';
 import Profile from './portal/pages/Profile';
+import Reports from './features/request_management/component/reporting_dashboard/Reports';
 
 
 
@@ -90,6 +91,10 @@ const router = createBrowserRouter([
       {
         path: 'requests-management/raise-request',
         element: <ProtectedRoute requiredAccess={'admin'}><RaiseRequest/></ProtectedRoute>
+      },
+      {
+        path: "requests-management/reports",
+        element: <ProtectedRoute requiredAccess={'admin'}><Reports/></ProtectedRoute>
       },
       {
         path: 'ticket-management/board',

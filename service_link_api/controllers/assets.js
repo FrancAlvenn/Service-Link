@@ -13,7 +13,7 @@ function generateAssetReferenceNumber(lastAssetId) {
 // Create a new Asset
 export async function createAsset(req, res) {
     let transaction;
-    try {
+    try {  
       transaction = await sequelize.transaction();
   
       // Check if serial number is unique

@@ -107,7 +107,7 @@ function RequestsManagementControls() {
             <ListItemPrefix>
                 <ChartBar size={20} />
             </ListItemPrefix>
-            <Typography  color="black" className="mr-auto font-normal text-sm">
+            <Typography  color="black" className="mr-auto font-normal text-sm" onClick={() => navigate("/workspace/requests-management/reports")}>
                 Reporting Dashboard
             </Typography>
             </ListItem>

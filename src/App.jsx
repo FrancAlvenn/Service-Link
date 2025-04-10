@@ -38,6 +38,7 @@ import RequestDetailsPage from './portal/component/request_view/RequestDetailsPa
 import Notifications from './portal/pages/Notifications';
 import Profile from './portal/pages/Profile';
 import Reports from './features/request_management/component/reporting_dashboard/Reports';
+import CalendarView from './features/request_management/component/calendar_board/CalendarView';
 
 
 
@@ -87,6 +88,10 @@ const router = createBrowserRouter([
       {
         path: 'requests-management/views/kanban-board',
         element: <ProtectedRoute requiredAccess={'admin'}><KanbanBoard/></ProtectedRoute>
+      },
+      {
+        path: 'requests-management/views/calendar',
+        element: <ProtectedRoute requiredAccess={'admin'}><CalendarView/></ProtectedRoute>
       },
       {
         path: 'requests-management/raise-request',

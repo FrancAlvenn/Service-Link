@@ -10,6 +10,7 @@ import { PurchasingRequestsContext } from '../../context/PurchasingRequestsConte
 import axios from 'axios';
 import { AuthContext } from '../../../authentication';
 import ToastNotification from '../../../../utils/ToastNotification';
+import SidebarView from '../../../../components/sidebar/SidebarView';
 
 export function KanbanBoard() {
     const [columns, setColumns] = useState([]);
@@ -23,6 +24,8 @@ export function KanbanBoard() {
     const { venueRequests, fetchVenueRequests, setVenueRequests } = useContext(VenueRequestsContext);
     const { user } = useContext(AuthContext);
 
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [selectedReferenceNumber, setSelectedReferenceNumber] = useState('')
 
     const fetchData = async () => {
         try {
@@ -134,84 +137,90 @@ export function KanbanBoard() {
     };
 
     return (
-        <div className="h-full bg-white rounded-lg w-full mt-0 p-1 flex flex-col justify-between">
-            <div className="flex flex-col gap-2 h-full">
-                <CardHeader floated={false} shadow={false} className="rounded-none min-h-fit pb-2">
-                    <div className="mb-1 flex items-center justify-between gap-5">
-                        <Typography color="black" className="text-lg px-3 font-bold">Kanban Board</Typography>
-                    </div>
-
-                    <div className="flex items-center justify-between px-3 gap-4 mt-2">
-                        {/* Search Bar */}
-                        <div className="relative w-1/4 max-w-sm min-w-[150px]">
-                            <input
-                                className="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md pl-3 pr-28 py-2 focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
-                                placeholder="Search"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
-                            />
-                            <span className="absolute top-1 right-1 flex items-center rounded py-1.5 px-3 text-black shadow-sm hover:shadow">
-                                <MagnifyingGlass size={16} />
-                            </span>
+        <div className="flex justify-between h-full bg-white">
+            <div className={`h-full bg-white rounded-lg w-full mt-0 p-1 flex justify-between transition-[max-width] duration-300 ${sidebarOpen ? "max-w-[55%]" : "w-full"}`}>
+                <div className="flex flex-col gap-2 h-full w-full">
+                    <CardHeader floated={false} shadow={false} className="rounded-none min-h-fit pb-2">
+                        <div className="mb-1 flex items-center justify-between gap-5">
+                            <Typography color="black" className="text-lg px-3 font-bold">Kanban Board</Typography>
                         </div>
 
-                        {/* Request Type Selection */}
-                        <div className="flex justify-end items-center gap-2 w-1/2">
-                            <span className="text-xs font-semibold whitespace-nowrap text-gray-700">GROUP BY</span>
-                            <Menu placement="bottom-end">
-                                <MenuHandler>
-                                    <button className="font-semibold border border-slate-300 text-sm py-2 px-5 w-fit rounded-md shadow-sm focus:outline-none focus:border-slate-500 hover:border-slate-400">
-                                        {requestType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                                    </button>
-                                </MenuHandler>
-                                <MenuList>
-                                    <MenuItem onClick={() => setRequestType('job_request')}>Job Requests</MenuItem>
-                                    <MenuItem onClick={() => setRequestType('purchasing_request')}>Purchasing Requests</MenuItem>
-                                    <MenuItem onClick={() => setRequestType('vehicle_request')}>Vehicle Requests</MenuItem>
-                                    <MenuItem onClick={() => setRequestType('venue_request')}>Venue Requests</MenuItem>
-                                </MenuList>
-                            </Menu>
+                        <div className="flex items-center justify-between px-3 gap-4 mt-2">
+                            {/* Search Bar */}
+                            <div className="relative w-1/4 max-w-sm min-w-[150px]">
+                                <input
+                                    className="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md pl-3 pr-28 py-2 focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
+                                    placeholder="Search"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
+                                />
+                                <span className="absolute top-1 right-1 flex items-center rounded py-1.5 px-3 text-black shadow-sm hover:shadow">
+                                    <MagnifyingGlass size={16} />
+                                </span>
+                            </div>
 
-                            {/* Add Column Menu */}
-                            <Menu placement="bottom-end">
-                                <MenuHandler>
-                                    <button className="font-semibold border border-slate-300 text-sm py-2 px-5 rounded-md shadow-sm focus:outline-none focus:border-slate-500 hover:border-slate-400">
-                                        Add Column
-                                    </button>
-                                </MenuHandler>
-                                <MenuList>
-                                    {status.map((stat) => (
-                                        <MenuItem key={stat.id} onClick={() => addColumn(stat.status)}>
-                                            {stat.status}
-                                        </MenuItem>
-                                    ))}
-                                </MenuList>
-                            </Menu>
-                        </div>
-                    </div>
-                </CardHeader>
+                            {/* Request Type Selection */}
+                            <div className="flex justify-end items-center gap-2 w-1/2">
+                                <span className="text-xs font-semibold whitespace-nowrap text-gray-700">GROUP BY</span>
+                                <Menu placement="bottom-end">
+                                    <MenuHandler>
+                                        <button className="font-semibold border border-slate-300 text-sm py-2 px-5 w-fit rounded-md shadow-sm focus:outline-none focus:border-slate-500 hover:border-slate-400">
+                                            {requestType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                        </button>
+                                    </MenuHandler>
+                                    <MenuList>
+                                        <MenuItem onClick={() => setRequestType('job_request')}>Job Requests</MenuItem>
+                                        <MenuItem onClick={() => setRequestType('purchasing_request')}>Purchasing Requests</MenuItem>
+                                        <MenuItem onClick={() => setRequestType('vehicle_request')}>Vehicle Requests</MenuItem>
+                                        <MenuItem onClick={() => setRequestType('venue_request')}>Venue Requests</MenuItem>
+                                    </MenuList>
+                                </Menu>
 
-                <CardBody className="custom-scrollbar h-full pt-0">
-                    <DragDropContext onDragEnd={handleOnDragEnd}>
-                        <div className="flex justify-between items-center flex-row gap-3">
-                            {columns.map((column) => (
-                                <Column
-                                key={column.name}
-                                title={column.name}
-                                tasks={filteredTasks((Array.isArray(requests) ? requests : []).filter(task => task.status === column.name))}
-                                id={column.name}
-                                columnID={column.id}
-                                requestType={requestType}
-                                setRequests={setRequests}
-                                user={user}
-                                columns={columns}
-                                setColumns={setColumns}
-                                fetchData={fetchData} />
-                            ))}
+                                {/* Add Column Menu */}
+                                <Menu placement="bottom-end">
+                                    <MenuHandler>
+                                        <button className="font-semibold border border-slate-300 text-sm py-2 px-5 rounded-md shadow-sm focus:outline-none focus:border-slate-500 hover:border-slate-400">
+                                            Add Column
+                                        </button>
+                                    </MenuHandler>
+                                    <MenuList>
+                                        {status.map((stat) => (
+                                            <MenuItem key={stat.id} onClick={() => addColumn(stat.status)}>
+                                                {stat.status}
+                                            </MenuItem>
+                                        ))}
+                                    </MenuList>
+                                </Menu>
+                            </div>
                         </div>
-                    </DragDropContext>
-                </CardBody>
+                    </CardHeader>
+
+                    <CardBody className="custom-scrollbar h-full pt-0">
+                        <DragDropContext onDragEnd={handleOnDragEnd}>
+                            <div className="flex justify-between items-center flex-row gap-3">
+                                {columns.map((column) => (
+                                    <Column
+                                    key={column.name}
+                                    title={column.name}
+                                    tasks={filteredTasks((Array.isArray(requests) ? requests : []).filter(task => task.status === column.name))}
+                                    id={column.name}
+                                    columnID={column.id}
+                                    requestType={requestType}
+                                    setRequests={setRequests}
+                                    user={user}
+                                    columns={columns}
+                                    setColumns={setColumns}
+                                    fetchData={fetchData}
+                                    setSelectedReferenceNumber={setSelectedReferenceNumber}
+                                    setSidebarOpen={setSidebarOpen}
+                                    />
+                                ))}
+                            </div>
+                        </DragDropContext>
+                    </CardBody>
+                </div>
             </div>
+            <SidebarView open={sidebarOpen} onClose={() => setSidebarOpen(false)} referenceNumber={selectedReferenceNumber} />
         </div>
     );
 }

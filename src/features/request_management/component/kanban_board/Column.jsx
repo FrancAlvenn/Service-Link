@@ -5,7 +5,7 @@ import axios from 'axios';
 import { X } from '@phosphor-icons/react';
 
 
-export default function Column({title, tasks, id, columnID, requestType, setRequests, user, columns, setColumns, fetchData}) {
+export default function Column({title, tasks, id, columnID, requestType, setRequests, user, columns, setColumns, fetchData, setSelectedReferenceNumber, setSidebarOpen}) {
 
   const removeColumn = async (id) => {
     if (!id) return;
@@ -41,7 +41,7 @@ export default function Column({title, tasks, id, columnID, requestType, setRequ
           <div ref={provided.innerRef} {...provided.droppableProps} className="flex-grow min-h-[100px] rounded-sm">
             {tasks.map((task, index) => (
               <div key={task.id} className="mb-2">
-                <Task key={task.id} task={task} index={index} requestType={requestType} setRequests={setRequests} />
+                <Task key={task.id} task={task} index={index} requestType={requestType} setRequests={setRequests} setSelectedReferenceNumber={setSelectedReferenceNumber} setSidebarOpen={setSidebarOpen} />
               </div>
             ))}
             {provided.placeholder}

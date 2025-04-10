@@ -86,7 +86,7 @@ function RequestsManagementControls() {
                     <ListItem className="text-xs" onClick={() => navigate("/workspace/requests-management/views/kanban-board")}>
                         Kanban Board
                     </ListItem>
-                    <ListItem className="text-xs">
+                    <ListItem className="text-xs" onClick={() => navigate("/workspace/requests-management/views/calendar")}>
                         Calendar
                     </ListItem>
                 </List>

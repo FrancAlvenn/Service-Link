@@ -8,9 +8,8 @@ import { AuthContext } from "../../../authentication";
 import ToastNotification from '../../../../utils/ToastNotification';
 import SidebarView from '../../../../components/sidebar/SidebarView';
 
-export default function Task({ task, index, requestType, setRequests }) {
+export default function Task({ task, index, requestType, setRequests, setSelectedReferenceNumber, setSidebarOpen }) {
   const { user } = useContext(AuthContext);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   async function handleArchiveRequest(task) {
     try {
@@ -44,7 +43,10 @@ export default function Task({ task, index, requestType, setRequests }) {
             <Typography
             color="black"
             className="text-sm font-semibold cursor-pointer"
-            onClick={() => setSidebarOpen(true)}
+            onClick={() => {
+              setSelectedReferenceNumber(task.reference_number);
+              setSidebarOpen(true)
+            }}
             >
               {task.title}
             </Typography>
@@ -73,7 +75,10 @@ export default function Task({ task, index, requestType, setRequests }) {
             <Typography
              color="black"
              className="text-xs cursor-pointer"
-             onClick={() => setSidebarOpen(true)}
+             onClick={() => {
+                setSelectedReferenceNumber(task.reference_number);
+                setSidebarOpen(true)
+              }}
              >
               {task.reference_number}
             </Typography>
@@ -83,7 +88,6 @@ export default function Task({ task, index, requestType, setRequests }) {
         </div>
       )}
     </Draggable>
-    <SidebarView open={sidebarOpen} onClose={() => setSidebarOpen(false)} referenceNumber={task.reference_number} />
     </>
   )
 }

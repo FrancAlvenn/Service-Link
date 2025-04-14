@@ -1,14 +1,21 @@
-import { UserCircle } from "@phosphor-icons/react";
+import { CaretRight } from "@phosphor-icons/react";
 import axios from "axios";
 import { useContext, useEffect, useState } from "react";
-import { Button, Input } from "@material-tailwind/react";
+import { Button } from "@material-tailwind/react";
 import AssetContext from "../context/AssetContext";
 import { AuthContext } from "../../authentication";
 import { UserContext } from "../../../context/UserContext";
 import ToastNotification from "../../../utils/ToastNotification";
 import { formatDate } from "../../../utils/dateFormatter";
 
-const AssetSidebar = ({ open, onClose, referenceNumber, assets, fetchAssets, deleteAsset }) => {
+const AssetSidebar = ({
+  open,
+  onClose,
+  referenceNumber,
+  assets,
+  fetchAssets,
+  deleteAsset,
+}) => {
   const [isOpen, setIsOpen] = useState(open);
   const { user } = useContext(AuthContext);
   const { getUserByReferenceNumber } = useContext(UserContext);
@@ -16,32 +23,36 @@ const AssetSidebar = ({ open, onClose, referenceNumber, assets, fetchAssets, del
   const [asset, setAsset] = useState(null);
   const [editedFields, setEditedFields] = useState({});
   const [editingField, setEditingField] = useState(null);
+  const [newAdditionalDetail, setNewAdditionalDetail] = useState({
+    key: "",
+    value: "",
+  });
 
   const assetFieldConfig = [
-    { key: "reference_number", label: "Reference Number", type: "text", readOnly: true },
+    {
+      key: "reference_number",
+      label: "Reference Number",
+      type: "text",
+      readOnly: true,
+    },
     { key: "name", label: "Asset Name", type: "text" },
     { key: "asset_type", label: "Asset Type", type: "text" },
     { key: "description", label: "Description", type: "textarea" },
     { key: "location", label: "Location", type: "text" },
-    { key: "capacity", label: "Capacity", type: "number" },
-    { key: "manufacturer", label: "Manufacturer", type: "text" },
-    { key: "model", label: "Model", type: "text" },
-    { key: "serial_number", label: "Serial Number", type: "text" },
     { key: "purchase_date", label: "Purchase Date", type: "date" },
     { key: "purchase_cost", label: "Purchase Cost", type: "number" },
     { key: "status", label: "Status", type: "text" },
     { key: "last_maintenance", label: "Last Maintenance", type: "date" },
     { key: "warranty_expiry", label: "Warranty Expiry", type: "date" },
-    { key: "type_specific_1", label: "Type Specific 1", type: "text" },
-    { key: "type_specific_2", label: "Type Specific 2", type: "text" },
-    { key: "type_specific_3", label: "Type Specific 3", type: "text" },
     { key: "createdAt", label: "Created At", type: "date", readOnly: true },
     { key: "updatedAt", label: "Updated At", type: "date", readOnly: true },
   ];
 
   useEffect(() => {
     if (isOpen && referenceNumber) {
-      const foundAsset = assets.find((asset) => asset.reference_number === referenceNumber);
+      const foundAsset = assets.find(
+        (a) => a.reference_number === referenceNumber
+      );
       setAsset(foundAsset);
     }
   }, [assets, referenceNumber, isOpen]);
@@ -64,19 +75,46 @@ const AssetSidebar = ({ open, onClose, referenceNumber, assets, fetchAssets, del
   };
 
   const handleSave = async (field) => {
-    // if (!asset || !editedFields[field]) return;
     try {
-      await axios.put(
-        `/assets/${asset.reference_number}`,
-        {
+      const isAdditional =
+        asset.additional_details &&
+        asset.additional_details.find((detail) => detail.key === field);
+
+      //If no changes are made to the value
+      if (!editedFields[field]) return;
+
+      // Check if the value has changed before updating
+      const originalValue = isAdditional
+        ? asset.additional_details.find((detail) => detail.key === field)?.value
+        : asset[field];
+
+      const editedValue = editedFields[field];
+
+      // Only update if the value has changed
+      if (originalValue !== editedValue) {
+        const updatedAsset = {
           ...asset,
-          [field]: editedFields[field],
           requester: user.reference_number,
-        },
-        { withCredentials: true }
-      );
-      fetchAssets();
-      // ToastNotification.success("Success", `${field} updated successfully.`);
+          additional_details: isAdditional
+            ? asset.additional_details.map((detail) =>
+                detail.key === field
+                  ? { ...detail, value: editedFields[field] }
+                  : detail
+              )
+            : {
+                ...asset,
+                [field]: editedFields[field],
+              },
+        };
+
+        // Update the asset with the new details
+        await axios.put(`/assets/${asset.reference_number}`, updatedAsset, {
+          withCredentials: true,
+        });
+
+        // Fetch assets again to reflect the changes
+        fetchAssets();
+      }
     } catch (error) {
       console.error("Update failed:", error);
       ToastNotification.error("Error", `Failed to update ${field}.`);
@@ -90,17 +128,34 @@ const AssetSidebar = ({ open, onClose, referenceNumber, assets, fetchAssets, del
     }
   };
 
-  const handleDelete = async () => {
-    try {
-      await axios.delete(`/assets/${asset.reference_number}`, { withCredentials: true });
-      fetchAssets();
+  const handleAddAdditionalDetail = async () => {
+    if (!newAdditionalDetail.key || !newAdditionalDetail.value) {
+      ToastNotification.error("Error", "Please fill in both key and value.");
+      return;
+    }
 
-      ToastNotification.success("Success", "Asset deleted successfully.");
+    try {
+      const updatedAsset = {
+        ...asset,
+        requester: user.reference_number,
+        additional_details: [
+          ...asset.additional_details,
+          { key: newAdditionalDetail.key, value: newAdditionalDetail.value },
+        ],
+      };
+
+      await axios.put(`/assets/${asset.reference_number}`, updatedAsset, {
+        withCredentials: true,
+      });
+
+      // Clear the input fields
+      setNewAdditionalDetail({ key: "", value: "" });
+
+      // Fetch assets again to reflect the changes
+      fetchAssets();
     } catch (error) {
-      console.error("Delete failed:", error);
-      ToastNotification.error("Error", `Failed to delete asset.`);
-    } finally {
-      handleClose();
+      console.error("Failed to add additional detail:", error);
+      ToastNotification.error("Error", "Failed to add additional detail.");
     }
   };
 
@@ -111,35 +166,45 @@ const AssetSidebar = ({ open, onClose, referenceNumber, assets, fetchAssets, del
 
   const renderFieldValue = (field, value) => {
     if (field.type === "date" && value) return formatDate(value);
-    if (!value && !field.readOnly) return <span className="text-gray-500">Click to edit</span>;
+    if (!value && !field.readOnly)
+      return <span className="text-gray-500">Click to edit</span>;
+    if (typeof value === "object" && value !== null) {
+      return value.value || JSON.stringify(value);
+    }
     return value || "N/A";
   };
 
   return (
     <>
-      {/* Sidebar Overlay */}
       <div
-        className={`fixed inset-0 z-40 bg-black bg-opacity-50 transition-opacity duration-300 ${
+        className={`bg-black bg-opacity-50 transition-opacity duration-300 ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={handleClose}
       ></div>
 
-      {/* Sidebar Container */}
       <div
         onClick={handleSidebarClick}
-        className={`fixed top-0 right-0 z-50 w-[650px] h-full p-5 bg-white transform transition-transform duration-300 ${
-          isOpen ? "translate-x-0" : "translate-x-full"
+        className={`z-50 shadow-lg w-[650px] h-full p-5 bg-white transform transition-transform duration-300 ${
+          isOpen ? "translate-x-0" : "hidden"
         }`}
       >
         {asset ? (
           <div className="flex flex-col overflow-y-auto h-full">
-            {/* Asset Name (Editable) */}
+            <div className="p-1 rounded-md bg-white">
+              <CaretRight
+                color="black"
+                size={20}
+                onClick={handleClose}
+                className="cursor-pointer"
+              />
+            </div>
+
             <h2 className="text-xl font-bold mb-4">
               {editingField === "name" ? (
                 <input
                   type="text"
-                  className="border w-full border-gray-300 rounded-md p-2 text-xl font-bold" // Keep font size and weight
+                  className="border w-full border-gray-300 rounded-md p-2 text-xl font-bold"
                   value={editedFields.name ?? asset.name}
                   onChange={(e) => handleFieldChange("name", e.target.value)}
                   onBlur={() => handleSave("name")}
@@ -147,31 +212,41 @@ const AssetSidebar = ({ open, onClose, referenceNumber, assets, fetchAssets, del
                   autoFocus
                 />
               ) : (
-                <p onClick={() => setEditingField("name")} className="cursor-pointer">
+                <p
+                  onClick={() => setEditingField("name")}
+                  className="cursor-pointer"
+                >
                   {asset.name || "Click to edit"}
                 </p>
               )}
             </h2>
 
-
-            {/* Asset Details */}
+            {/* Main Fields */}
             <div className="flex flex-col p-3 gap-2 border-gray-400 border rounded-md">
               {assetFieldConfig.map((field) => {
                 if (field.key === "name") return null;
                 const value = asset[field.key];
 
                 return (
-                  <div key={field.key} className="mb-3 flex justify-between items-center">
-                    <p className="text-sm font-semibold capitalize">{field.label}</p>
-
+                  <div
+                    key={field.key}
+                    className="mb-3 flex justify-between items-center"
+                  >
+                    <p className="text-sm font-semibold capitalize">
+                      {field.label}
+                    </p>
                     {field.readOnly ? (
-                      <p className="text-sm w-[60%] truncate">{renderFieldValue(field, value)}</p>
+                      <p className="text-sm w-[60%] truncate">
+                        {renderFieldValue(field, value)}
+                      </p>
                     ) : editingField === field.key ? (
                       <input
                         type={field.type === "date" ? "date" : "text"}
                         className="text-sm p-2 border border-gray-300 rounded-md w-[60%]"
                         value={editedFields[field.key] ?? value}
-                        onChange={(e) => handleFieldChange(field.key, e.target.value)}
+                        onChange={(e) =>
+                          handleFieldChange(field.key, e.target.value)
+                        }
                         onBlur={() => handleSave(field.key)}
                         onKeyDown={(e) => handleKeyDown(e, field.key)}
                         autoFocus
@@ -187,15 +262,87 @@ const AssetSidebar = ({ open, onClose, referenceNumber, assets, fetchAssets, del
                   </div>
                 );
               })}
-
             </div>
-              <Button color="red" onClick={() => deleteAsset(asset.reference_number)} className="w-full min-h-[40px] max-w-[160px] mt-3">Delete Asset</Button>
+
+            {/* Additional Info Section */}
+            {asset.additional_details && (
+              <div className="mt-4 flex flex-col p-3 gap-2 border border-blue-gray-200 rounded-md">
+                <p className="font-semibold text-base">
+                  Additional Information
+                </p>
+                {asset.additional_details.map((detail) => {
+                  const { key, value } = detail;
+                  return (
+                    <div
+                      key={key}
+                      className="mb-3 flex flex-col sm:flex-row sm:justify-between sm:items-center"
+                    >
+                      <p className="text-sm font-semibold capitalize mb-1 sm:mb-0 sm:w-1/3">
+                        {key.replace(/_/g, " ")}
+                      </p>
+
+                      {editingField === key ? (
+                        <input
+                          type="text"
+                          className="text-sm p-2 border border-gray-300 rounded-md sm:w-2/3"
+                          value={editedFields[key] ?? value}
+                          onChange={(e) =>
+                            handleFieldChange(key, e.target.value)
+                          }
+                          onBlur={() => handleSave(key)}
+                          onKeyDown={(e) => handleKeyDown(e, key)}
+                          autoFocus
+                        />
+                      ) : (
+                        <p
+                          onClick={() => setEditingField(key)}
+                          className={`text-sm cursor-pointer sm:w-2/3 ${
+                            !value ? "text-gray-500" : ""
+                          }`}
+                        >
+                          {value || "Click to edit"}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+                <div className="mt-2 flex gap-2">
+                  <input
+                    className="text-sm p-2 border border-gray-300 rounded-md"
+                    value={newAdditionalDetail.key}
+                    onChange={(e) =>
+                      setNewAdditionalDetail({
+                        ...newAdditionalDetail,
+                        key: e.target.value,
+                      })
+                    }
+                    placeholder="Detail Key"
+                  />
+                  <input
+                    className="text-sm p-2 border border-gray-300 rounded-md"
+                    value={newAdditionalDetail.value}
+                    onChange={(e) =>
+                      setNewAdditionalDetail({
+                        ...newAdditionalDetail,
+                        value: e.target.value,
+                      })
+                    }
+                    placeholder="Detail Value"
+                  />
+                  <Button
+                    onClick={handleAddAdditionalDetail}
+                    size="sm"
+                    className="w-1/4"
+                  >
+                    Add
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
-          <div className="flex justify-center items-center h-full text-xl text-gray-600">No asset found.</div>
+          <div>Loading asset...</div>
         )}
-
-
       </div>
     </>
   );

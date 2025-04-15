@@ -1,4 +1,4 @@
-import { CaretRight } from "@phosphor-icons/react";
+import { CaretRight, X } from "@phosphor-icons/react";
 import axios from "axios";
 import { useContext, useEffect, useState } from "react";
 import { Button } from "@material-tailwind/react";
@@ -36,16 +36,33 @@ const AssetSidebar = ({
       readOnly: true,
     },
     { key: "name", label: "Asset Name", type: "text" },
-    { key: "asset_type", label: "Asset Type", type: "text" },
+    { key: "asset_type", label: "Asset Type", type: "select" },
     { key: "description", label: "Description", type: "textarea" },
     { key: "location", label: "Location", type: "text" },
     { key: "purchase_date", label: "Purchase Date", type: "date" },
     { key: "purchase_cost", label: "Purchase Cost", type: "number" },
-    { key: "status", label: "Status", type: "text" },
+    { key: "status", label: "Status", type: "select" },
     { key: "last_maintenance", label: "Last Maintenance", type: "date" },
     { key: "warranty_expiry", label: "Warranty Expiry", type: "date" },
     { key: "createdAt", label: "Created At", type: "date", readOnly: true },
     { key: "updatedAt", label: "Updated At", type: "date", readOnly: true },
+  ];
+
+  const assetTypeOptions = [
+    { value: "", label: "Select Asset Type" },
+    { value: "Venue", label: "Venue" },
+    { value: "Vehicle", label: "Vehicle" },
+    { value: "Office Supplies", label: "Office Supplies" },
+    { value: "Device", label: "Device" },
+    { value: "Others", label: "Others" },
+  ];
+
+  const statusOptions = [
+    { value: "Available", label: "Available" },
+    { value: "In Use", label: "In Use" },
+    { value: "Under Maintenance", label: "Under Maintenance" },
+    { value: "Disposed", label: "Disposed" },
+    { value: "Lost", label: "Lost" },
   ];
 
   useEffect(() => {
@@ -64,6 +81,7 @@ const AssetSidebar = ({
   const handleClose = () => {
     setAsset(null);
     setEditedFields({});
+    setEditingField(null);
     setIsOpen(false);
     if (onClose) onClose();
   };
@@ -80,41 +98,40 @@ const AssetSidebar = ({
         asset.additional_details &&
         asset.additional_details.find((detail) => detail.key === field);
 
-      //If no changes are made to the value
-      if (!editedFields[field]) return;
-
-      // Check if the value has changed before updating
       const originalValue = isAdditional
-        ? asset.additional_details.find((detail) => detail.key === field)?.value
-        : asset[field];
+        ? asset.additional_details.find((detail) => detail.key === field)
+            ?.value || ""
+        : asset[field] || "";
 
       const editedValue = editedFields[field];
 
-      // Only update if the value has changed
-      if (originalValue !== editedValue) {
-        const updatedAsset = {
-          ...asset,
-          requester: user.reference_number,
-          additional_details: isAdditional
-            ? asset.additional_details.map((detail) =>
-                detail.key === field
-                  ? { ...detail, value: editedFields[field] }
-                  : detail
-              )
-            : {
-                ...asset,
-                [field]: editedFields[field],
-              },
-        };
-
-        // Update the asset with the new details
-        await axios.put(`/assets/${asset.reference_number}`, updatedAsset, {
-          withCredentials: true,
+      // If value hasn't changed, do nothing
+      if (originalValue === editedValue || editedValue === undefined) {
+        setEditingField(null);
+        setEditedFields((prev) => {
+          const newFields = { ...prev };
+          delete newFields[field];
+          return newFields;
         });
-
-        // Fetch assets again to reflect the changes
-        fetchAssets();
+        return;
       }
+
+      const updatedAsset = {
+        ...asset,
+        requester: user.reference_number,
+        additional_details: isAdditional
+          ? asset.additional_details.map((detail) =>
+              detail.key === field ? { ...detail, value: editedValue } : detail
+            )
+          : asset.additional_details,
+        ...(isAdditional ? {} : { [field]: editedValue }),
+      };
+
+      await axios.put(`/assets/${asset.reference_number}`, updatedAsset, {
+        withCredentials: true,
+      });
+
+      fetchAssets();
     } catch (error) {
       console.error("Update failed:", error);
       ToastNotification.error("Error", `Failed to update ${field}.`);
@@ -129,8 +146,22 @@ const AssetSidebar = ({
   };
 
   const handleAddAdditionalDetail = async () => {
-    if (!newAdditionalDetail.key || !newAdditionalDetail.value) {
+    const { key, value } = newAdditionalDetail;
+
+    if (!key || !value) {
       ToastNotification.error("Error", "Please fill in both key and value.");
+      return;
+    }
+
+    const keyExists = asset.additional_details.some(
+      (detail) => detail.key.trim().toLowerCase() === key.trim().toLowerCase()
+    );
+
+    if (keyExists) {
+      ToastNotification.error(
+        "Error",
+        "Key already exists. Please use a unique key name."
+      );
       return;
     }
 
@@ -140,7 +171,7 @@ const AssetSidebar = ({
         requester: user.reference_number,
         additional_details: [
           ...asset.additional_details,
-          { key: newAdditionalDetail.key, value: newAdditionalDetail.value },
+          { key: key.trim(), value: value.trim() },
         ],
       };
 
@@ -148,14 +179,34 @@ const AssetSidebar = ({
         withCredentials: true,
       });
 
-      // Clear the input fields
       setNewAdditionalDetail({ key: "", value: "" });
-
-      // Fetch assets again to reflect the changes
       fetchAssets();
     } catch (error) {
       console.error("Failed to add additional detail:", error);
       ToastNotification.error("Error", "Failed to add additional detail.");
+    }
+  };
+
+  const handleRemoveAdditionalDetail = async (keyToRemove) => {
+    try {
+      const updatedDetails = asset.additional_details.filter(
+        (detail) => detail.key !== keyToRemove
+      );
+
+      const updatedAsset = {
+        ...asset,
+        requester: user.reference_number,
+        additional_details: updatedDetails,
+      };
+
+      await axios.put(`/assets/${asset.reference_number}`, updatedAsset, {
+        withCredentials: true,
+      });
+
+      fetchAssets();
+    } catch (error) {
+      console.error("Failed to remove additional detail:", error);
+      ToastNotification.error("Error", "Failed to remove detail.");
     }
   };
 
@@ -166,12 +217,45 @@ const AssetSidebar = ({
 
   const renderFieldValue = (field, value) => {
     if (field.type === "date" && value) return formatDate(value);
-    if (!value && !field.readOnly)
-      return <span className="text-gray-500">Click to edit</span>;
     if (typeof value === "object" && value !== null) {
       return value.value || JSON.stringify(value);
     }
-    return value || "N/A";
+    return value || "Click to edit";
+  };
+
+  const renderEditableField = (field, value) => {
+    const currentValue = editedFields[field.key] ?? value;
+
+    if (field.type === "select") {
+      const options = field.key === "status" ? statusOptions : assetTypeOptions;
+      return (
+        <select
+          className="text-sm p-2 border border-gray-300 rounded-md w-[60%]"
+          value={currentValue}
+          onChange={(e) => handleFieldChange(field.key, e.target.value)}
+          onBlur={() => handleSave(field.key)}
+          autoFocus
+        >
+          {options.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      );
+    }
+
+    return (
+      <input
+        type={field.type === "date" ? "date" : field.type}
+        className="text-sm p-2 border border-gray-300 rounded-md w-[60%]"
+        value={currentValue}
+        onChange={(e) => handleFieldChange(field.key, e.target.value)}
+        onBlur={() => handleSave(field.key)}
+        onKeyDown={(e) => handleKeyDown(e, field.key)}
+        autoFocus
+      />
+    );
   };
 
   return (
@@ -221,7 +305,6 @@ const AssetSidebar = ({
               )}
             </h2>
 
-            {/* Main Fields */}
             <div className="flex flex-col p-3 gap-2 border-gray-400 border rounded-md">
               {assetFieldConfig.map((field) => {
                 if (field.key === "name") return null;
@@ -240,17 +323,7 @@ const AssetSidebar = ({
                         {renderFieldValue(field, value)}
                       </p>
                     ) : editingField === field.key ? (
-                      <input
-                        type={field.type === "date" ? "date" : "text"}
-                        className="text-sm p-2 border border-gray-300 rounded-md w-[60%]"
-                        value={editedFields[field.key] ?? value}
-                        onChange={(e) =>
-                          handleFieldChange(field.key, e.target.value)
-                        }
-                        onBlur={() => handleSave(field.key)}
-                        onKeyDown={(e) => handleKeyDown(e, field.key)}
-                        autoFocus
-                      />
+                      renderEditableField(field, value)
                     ) : (
                       <p
                         onClick={() => setEditingField(field.key)}
@@ -264,7 +337,6 @@ const AssetSidebar = ({
               })}
             </div>
 
-            {/* Additional Info Section */}
             {asset.additional_details && (
               <div className="mt-4 flex flex-col p-3 gap-2 border border-blue-gray-200 rounded-md">
                 <p className="font-semibold text-base">
@@ -275,64 +347,89 @@ const AssetSidebar = ({
                   return (
                     <div
                       key={key}
-                      className="mb-3 flex flex-col sm:flex-row sm:justify-between sm:items-center"
+                      className="mb-3 flex flex-col sm:flex-row sm:items-center sm:gap-4"
                     >
+                      {/* Key label */}
                       <p className="text-sm font-semibold capitalize mb-1 sm:mb-0 sm:w-1/3">
                         {key.replace(/_/g, " ")}
                       </p>
 
-                      {editingField === key ? (
-                        <input
-                          type="text"
-                          className="text-sm p-2 border border-gray-300 rounded-md sm:w-2/3"
-                          value={editedFields[key] ?? value}
-                          onChange={(e) =>
-                            handleFieldChange(key, e.target.value)
-                          }
-                          onBlur={() => handleSave(key)}
-                          onKeyDown={(e) => handleKeyDown(e, key)}
-                          autoFocus
+                      {/* Value display or input */}
+                      <div className="flex items-center sm:w-2/3">
+                        {editingField === key ? (
+                          <input
+                            type="text"
+                            className="text-sm p-2 border border-gray-300 rounded-md w-full"
+                            value={editedFields[key] ?? value}
+                            onChange={(e) =>
+                              handleFieldChange(key, e.target.value)
+                            }
+                            onBlur={() => handleSave(key)}
+                            onKeyDown={(e) => handleKeyDown(e, key)}
+                            autoFocus
+                          />
+                        ) : (
+                          <p
+                            onClick={() => setEditingField(key)}
+                            className="text-sm cursor-pointer w-full truncate"
+                          >
+                            {value || "Click to edit"}
+                          </p>
+                        )}
+
+                        {/* Remove Icon */}
+                        <X
+                          onClick={() => handleRemoveAdditionalDetail(key)}
+                          className="ml-2 text-red-500 hover:text-red-700 cursor-pointer shrink-0"
+                          title="Remove"
                         />
-                      ) : (
-                        <p
-                          onClick={() => setEditingField(key)}
-                          className={`text-sm cursor-pointer sm:w-2/3 ${
-                            !value ? "text-gray-500" : ""
-                          }`}
-                        >
-                          {value || "Click to edit"}
-                        </p>
-                      )}
+                      </div>
                     </div>
                   );
                 })}
-                <div className="mt-2 flex gap-2">
+
+                <div className="w-full max-w-[1/3]">
+                  <p className="font-semibold text-base">Add new detail</p>
+                </div>
+                <div className="flex gap-2 mt-2 w-full">
                   <input
-                    className="text-sm p-2 border border-gray-300 rounded-md"
+                    type="text"
+                    placeholder="Key"
+                    className="border p-2 rounded-md text-sm w-full"
                     value={newAdditionalDetail.key}
                     onChange={(e) =>
-                      setNewAdditionalDetail({
-                        ...newAdditionalDetail,
+                      setNewAdditionalDetail((prev) => ({
+                        ...prev,
                         key: e.target.value,
-                      })
+                      }))
                     }
-                    placeholder="Detail Key"
                   />
                   <input
-                    className="text-sm p-2 border border-gray-300 rounded-md"
+                    type="text"
+                    placeholder="Value"
+                    className="border p-2 rounded-md text-sm w-full"
                     value={newAdditionalDetail.value}
                     onChange={(e) =>
-                      setNewAdditionalDetail({
-                        ...newAdditionalDetail,
+                      setNewAdditionalDetail((prev) => ({
+                        ...prev,
                         value: e.target.value,
-                      })
+                      }))
                     }
-                    placeholder="Detail Value"
                   />
                   <Button
-                    onClick={handleAddAdditionalDetail}
+                    color="blue"
                     size="sm"
-                    className="w-1/4"
+                    onClick={handleAddAdditionalDetail}
+                    className="w-full"
+                    disabled={
+                      !newAdditionalDetail.key ||
+                      !newAdditionalDetail.value ||
+                      asset.additional_details.some(
+                        (detail) =>
+                          detail.key.trim().toLowerCase() ===
+                          newAdditionalDetail.key.trim().toLowerCase()
+                      )
+                    }
                   >
                     Add
                   </Button>
@@ -341,7 +438,7 @@ const AssetSidebar = ({
             )}
           </div>
         ) : (
-          <div>Loading asset...</div>
+          <p>Loading asset details...</p>
         )}
       </div>
     </>

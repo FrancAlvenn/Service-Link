@@ -26,7 +26,7 @@ const AssetForm = () => {
   const { fetchAssets } = useContext(AssetContext);
 
   const [errorMessage, setErrorMessage] = useState("");
-  const [additionalDetails, setAdditionalDetails] = useState([]); // Ensure it's initialized as an array
+  const [additionalDetails, setAdditionalDetails] = useState([]);
   const [newDetail, setNewDetail] = useState({ key: "", value: "" });
 
   const [asset, setAsset] = useState({
@@ -65,7 +65,7 @@ const AssetForm = () => {
       last_maintenance: new Date().toISOString().split("T")[0],
       warranty_expiry: null,
     });
-    setAdditionalDetails([]); // Reset additional details to an empty array
+    setAdditionalDetails([]);
     setNewDetail({ key: "", value: "" });
   };
 
@@ -79,7 +79,7 @@ const AssetForm = () => {
     try {
       const response = await axios.post(
         "/assets",
-        { ...asset, additional_details: additionalDetails }, // Send additional details as an array
+        { ...asset, additional_details: additionalDetails },
         { withCredentials: true }
       );
 
@@ -151,7 +151,27 @@ const AssetForm = () => {
           </select>
         </div>
 
-        {/* Remaining Fields */}
+        {/* Asset Status */}
+        <div>
+          <label className="block text-xs font-medium text-gray-700 mb-1">
+            Asset Status
+          </label>
+          <select
+            name="status"
+            value={asset.status}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+            required
+          >
+            <option value="Available">Available</option>
+            <option value="In Use">In Use</option>
+            <option value="Under Maintenance">Under Maintenance</option>
+            <option value="Disposed">Disposed</option>
+            <option value="Lost">Lost</option>
+          </select>
+        </div>
+
+        {/* Location, Description, Cost */}
         {[
           { name: "location", label: "Location" },
           { name: "description", label: "Description", type: "textarea" },
@@ -182,7 +202,7 @@ const AssetForm = () => {
           </div>
         ))}
 
-        {/* Additional Details */}
+        {/* Dates */}
         <div className="flex gap-2 w-full">
           {[
             { name: "purchase_date", label: "Purchase Date" },
@@ -204,7 +224,7 @@ const AssetForm = () => {
           ))}
         </div>
 
-        {/* Additional Fields (Editable) */}
+        {/* Additional Details Section */}
         <div>
           <label className="block text-xs font-medium text-gray-700 my-1">
             Additional Details
@@ -242,13 +262,11 @@ const AssetForm = () => {
           </div>
         )}
 
-        {/* Add Custom Detail */}
+        {/* Add Custom Field */}
         <div>
-          <div>
-            <label className="block text-xs font-medium text-gray-700 my-1">
-              Add Custom Field
-            </label>
-          </div>
+          <label className="block text-xs font-medium text-gray-700 my-1">
+            Add Custom Field
+          </label>
           <div className="grid grid-cols-2 gap-2">
             <input
               type="text"
@@ -269,7 +287,6 @@ const AssetForm = () => {
               className="border border-gray-300 rounded-md px-3 py-2 text-sm"
             />
           </div>
-
           <Button
             onClick={handleAddDetail}
             color="blue"
@@ -280,6 +297,7 @@ const AssetForm = () => {
           </Button>
         </div>
 
+        {/* Submit Button */}
         <div className="flex gap-2 w-full justify-between mt-4">
           <Button
             onClick={submitAsset}
@@ -290,6 +308,7 @@ const AssetForm = () => {
           </Button>
         </div>
 
+        {/* Error Message */}
         {errorMessage && (
           <div className="text-red-500 mt-2 text-sm">{errorMessage}</div>
         )}

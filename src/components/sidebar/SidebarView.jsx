@@ -12,9 +12,17 @@ import ParticularsTab from "./ParticularsTab";
 import { UserContext } from "../../context/UserContext";
 import StatusModal from "../../utils/statusModal";
 import ApprovalStatusModal from "../../utils/approverStatusModal";
-import { Button } from "@material-tailwind/react";
+import {
+  Button,
+  Tab,
+  TabPanel,
+  Tabs,
+  TabsBody,
+  TabsHeader,
+} from "@material-tailwind/react";
 import RequestAccess from "./RequestAccess";
 import ActivityTab from "./ActivityTab";
+import Assignment from "./Assignment";
 
 const SidebarView = ({ open, onClose, referenceNumber, requests }) => {
   const [isOpen, setIsOpen] = useState(open);
@@ -39,6 +47,8 @@ const SidebarView = ({ open, onClose, referenceNumber, requests }) => {
   const [editedTitle, setEditedTitle] = useState("");
   const [editedPurpose, setEditedPurpose] = useState("");
   const [isAuthorized, setIsAuthorized] = useState(false);
+
+  const [activeTab, setActiveTab] = useState("overview");
 
   // Fetch relevant request based on reference number
   useEffect(() => {
@@ -196,177 +206,234 @@ const SidebarView = ({ open, onClose, referenceNumber, requests }) => {
   const [openRequestAccess, setOpenRequestAccess] = useState(false);
 
   return (
-    <>
-      {/* Overlay */}
-      {/* <div
-    className={`shadow-lg bg-black bg-opacity-50 transition-opacity duration-300 ${
-      isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-    }`}
-    onClick={handleClose}
-  ></div> */}
-
-      {/* Sidebar */}
-      <div
-        onClick={handleSidebarClick}
-        className={`shadow-lg w-[650px] h-full p-5 bg-white transform transition-transform duration-300 ${
-          isOpen ? "translate-x-0" : "hidden"
-        }`}
-      >
-        {request ? (
-          <div className="flex flex-col overflow-y-auto h-full">
-            {/* Close Button & Request Access */}
-            <div className="flex items-center justify-between w-full mb-4">
-              <div className="p-1 rounded-md bg-white">
-                <CaretRight
-                  color="black"
-                  size={20}
-                  onClick={handleClose}
-                  className="cursor-pointer"
-                />
-              </div>
-              <RequestAccess selectedRequest={request} />
+    <div
+      onClick={handleSidebarClick}
+      className={`shadow-lg w-[650px] h-full p-5 bg-white transform transition-transform duration-300 ${
+        isOpen ? "translate-x-0" : "hidden"
+      }`}
+    >
+      {request ? (
+        <div className="flex flex-col overflow-y-auto h-full">
+          {/* Close Button & Request Access */}
+          <div className="flex items-center justify-between w-full mb-4">
+            <div className="p-1 rounded-md bg-white">
+              <CaretRight
+                color="black"
+                size={20}
+                onClick={handleClose}
+                className="cursor-pointer"
+              />
             </div>
+            <RequestAccess selectedRequest={request} />
+          </div>
 
-            {/* Editable Title */}
-            <h2 className="text-xl font-bold mb-4">
-              {isAuthorized ? (
-                isEditingTitle ? (
-                  <input
-                    type="text"
-                    className="border w-full border-gray-300 rounded-md p-2"
-                    value={editedTitle}
-                    onChange={(e) => setEditedTitle(e.target.value)}
-                    onKeyDown={handleTitleKeyDown}
-                    onBlur={handleSaveTitle}
-                    autoFocus
-                  />
-                ) : (
-                  <p
-                    onClick={handleEditTitle}
-                    className="w-full cursor-pointer"
-                  >
-                    {request.title}
-                  </p>
-                )
-              ) : (
-                <p className="w-full">{request.title}</p>
+          {/* TABS SECTION */}
+          <Tabs value={activeTab} onChange={setActiveTab}>
+            <TabsHeader
+              className="mb-2 text-xs font-sans"
+              indicatorProps={{
+                className: "shadow-none", // This controls the underline color
+              }}
+            >
+              <Tab
+                value="overview"
+                className="text-sm font-sans"
+                onClick={() => setActiveTab("overview")}
+              >
+                Overview
+              </Tab>
+              {["job_request", "purchasing_request", "venue_request"].includes(
+                requestType
+              ) && (
+                <Tab
+                  value="particulars"
+                  className="text-sm font-sans"
+                  onClick={() => setActiveTab("particulars")}
+                >
+                  Particulars
+                </Tab>
               )}
-            </h2>
+              <Tab
+                value="details"
+                className="text-sm font-sans"
+                onClick={() => setActiveTab("details")}
+              >
+                Details
+              </Tab>
+              <Tab
+                value="activity"
+                className="text-sm font-sans"
+                onClick={() => setActiveTab("activity")}
+              >
+                Activity
+              </Tab>
+              <Tab
+                value="assignment"
+                className="text-sm font-sans"
+                onClick={() => setActiveTab("assignment")}
+              >
+                Assignment
+              </Tab>
+            </TabsHeader>
 
-            {/* Status & Approvals */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 mb-5">
-                <div title="Request Status">
-                  <StatusModal
-                    input={request.status}
-                    referenceNumber={request.reference_number}
-                    requestType={requestType}
-                    title="Status"
-                  />
-                </div>
-                <div title="Immediate Head Approval">
-                  <ApprovalStatusModal
-                    input={request.immediate_head_approval}
-                    referenceNumber={request.reference_number}
-                    approvingPosition="immediate_head_approval"
-                    requestType={requestType}
-                  />
-                </div>
-                <div title="Operations Director Approval">
-                  <ApprovalStatusModal
-                    input={request.operations_director_approval}
-                    referenceNumber={request.reference_number}
-                    approvingPosition="operations_director_approval"
-                    requestType={requestType}
-                  />
-                </div>
-                <div title="GSO Director Approval">
-                  <ApprovalStatusModal
-                    input={request.gso_director_approval}
-                    referenceNumber={request.reference_number}
-                    approvingPosition="gso_director_approval"
-                    requestType={requestType}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Editable Purpose */}
-            <div className="flex flex-col p-3 gap-2 border-gray-400 border rounded-md">
-              <span className="flex items-center mb-2">
-                <UserCircle size={24} />
-                <p className="ml-2 text-sm">
-                  <span className="font-semibold">
-                    {getUserByReferenceNumber(request.requester)}
-                  </span>{" "}
-                  raised this request
-                </p>
-              </span>
-              <span className="flex flex-col gap-3">
-                <p className="text-sm font-semibold text-gray-600">Purpose</p>
-                {isAuthorized ? (
-                  isEditingPurpose ? (
-                    <textarea
-                      className="text-sm p-2 border w-full border-gray-300 rounded-md"
-                      value={editedPurpose}
-                      onChange={(e) => setEditedPurpose(e.target.value)}
-                      onBlur={handleSavePurpose}
-                      autoFocus
-                    />
+            <TabsBody>
+              {/* Overview Tab */}
+              <TabPanel value="overview">
+                {/* Editable Title */}
+                <h2 className="text-xl font-bold mb-4">
+                  {isAuthorized ? (
+                    isEditingTitle ? (
+                      <input
+                        type="text"
+                        className="border w-full border-gray-300 rounded-md p-2"
+                        value={editedTitle}
+                        onChange={(e) => setEditedTitle(e.target.value)}
+                        onKeyDown={handleTitleKeyDown}
+                        onBlur={handleSaveTitle}
+                        autoFocus
+                      />
+                    ) : (
+                      <p
+                        onClick={handleEditTitle}
+                        className="w-full cursor-pointer"
+                      >
+                        {request.title}
+                      </p>
+                    )
                   ) : (
-                    <p
-                      onClick={handleEditPurpose}
-                      className="text-sm cursor-pointer"
-                    >
-                      {request.purpose}
-                    </p>
-                  )
-                ) : (
-                  <p className="text-sm">{request.purpose}</p>
-                )}
-              </span>
-            </div>
+                    <p className="w-full">{request.title}</p>
+                  )}
+                </h2>
 
-            {/* Show ParticularsTab only for Job, Purchasing, and Venue Requests */}
-            {["job_request", "purchasing_request", "venue_request"].includes(
-              requestType
-            ) &&
-              request &&
-              Object.keys(request).length > 0 && (
-                <ParticularsTab
-                  request={request}
-                  setRequest={setRequest}
+                {/* Status & Approvals */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div title="Request Status">
+                      <StatusModal
+                        input={request.status}
+                        referenceNumber={request.reference_number}
+                        requestType={requestType}
+                        title="Status"
+                      />
+                    </div>
+                    <div title="Immediate Head Approval">
+                      <ApprovalStatusModal
+                        input={request.immediate_head_approval}
+                        referenceNumber={request.reference_number}
+                        approvingPosition="immediate_head_approval"
+                        requestType={requestType}
+                      />
+                    </div>
+                    <div title="Operations Director Approval">
+                      <ApprovalStatusModal
+                        input={request.operations_director_approval}
+                        referenceNumber={request.reference_number}
+                        approvingPosition="operations_director_approval"
+                        requestType={requestType}
+                      />
+                    </div>
+                    <div title="GSO Director Approval">
+                      <ApprovalStatusModal
+                        input={request.gso_director_approval}
+                        referenceNumber={request.reference_number}
+                        approvingPosition="gso_director_approval"
+                        requestType={requestType}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Editable Purpose */}
+                <div className="flex flex-col p-3 gap-2 border-gray-400 border rounded-md">
+                  <span className="flex items-center mb-2">
+                    <UserCircle size={24} />
+                    <p className="ml-2 text-sm">
+                      <span className="font-semibold">
+                        {getUserByReferenceNumber(request.requester)}
+                      </span>{" "}
+                      raised this request
+                    </p>
+                  </span>
+                  <span className="flex flex-col gap-3">
+                    <p className="text-sm font-semibold text-gray-600">
+                      Purpose
+                    </p>
+                    {isAuthorized ? (
+                      isEditingPurpose ? (
+                        <textarea
+                          className="text-sm p-2 border w-full border-gray-300 rounded-md"
+                          value={editedPurpose}
+                          onChange={(e) => setEditedPurpose(e.target.value)}
+                          onBlur={handleSavePurpose}
+                          autoFocus
+                        />
+                      ) : (
+                        <p
+                          onClick={handleEditPurpose}
+                          className="text-sm cursor-pointer"
+                        >
+                          {request.purpose}
+                        </p>
+                      )
+                    ) : (
+                      <p className="text-sm">{request.purpose}</p>
+                    )}
+                  </span>
+                </div>
+              </TabPanel>
+              {/* Particulars Tab (conditional) */}
+              {["job_request", "purchasing_request", "venue_request"].includes(
+                requestType
+              ) && (
+                <TabPanel value="particulars">
+                  <ParticularsTab
+                    request={request}
+                    setRequest={setRequest}
+                    requestType={requestType}
+                    referenceNumber={referenceNumber}
+                    fetchRequests={fetchAllRequests}
+                    user={user}
+                    isAuthorized={isAuthorized}
+                  />
+                </TabPanel>
+              )}
+              {/* Details Tab */}
+              <TabPanel value="details">
+                <DetailsTab
+                  selectedRequest={request}
+                  setSelectedRequest={setRequest}
                   requestType={requestType}
-                  referenceNumber={referenceNumber}
                   fetchRequests={fetchAllRequests}
                   user={user}
                   isAuthorized={isAuthorized}
                 />
-              )}
+              </TabPanel>
+              {/* Activity Tab */}
+              <TabPanel value="activity">
+                <ActivityTab
+                  referenceNumber={referenceNumber}
+                  activeTab={activeTab}
+                />
+              </TabPanel>
 
-            <div className="my-3 flex gap-1 p-3 border-gray-400 border rounded-md">
-              <p className="text-sm font-semibold text-gray-600">
-                Similar Requests
-              </p>
-              <CaretDown size={18} className="ml-auto cursor-pointer" />
-            </div>
-
-            <DetailsTab
-              selectedRequest={request}
-              setSelectedRequest={setRequest}
-              requestType={requestType}
-              fetchRequests={fetchAllRequests}
-              user={user}
-              isAuthorized={isAuthorized}
-            />
-
-            <ActivityTab referenceNumber={referenceNumber} />
-          </div>
-        ) : (
-          <div className="hidden">No request found.</div>
-        )}
-      </div>
-    </>
+              {/* Assignment Tab - Placeholder */}
+              <TabPanel value="assignment">
+                <Assignment
+                  selectedRequest={request}
+                  setSelectedRequest={setRequest}
+                  requestType={requestType}
+                  fetchRequests={fetchAllRequests}
+                  user={user}
+                  isAuthorized={isAuthorized}
+                />
+              </TabPanel>
+            </TabsBody>
+          </Tabs>
+        </div>
+      ) : (
+        <p className="text-center text-gray-400">Loading request...</p>
+      )}
+    </div>
   );
 };
 

@@ -1,6 +1,19 @@
 import { useState, useEffect, useContext } from "react";
 import axios from "axios";
-import { Menu, MenuHandler, MenuList, MenuItem, Typography, Chip, Dialog, DialogHeader, DialogBody, DialogFooter, Input, Button } from "@material-tailwind/react";
+import {
+  Menu,
+  MenuHandler,
+  MenuList,
+  MenuItem,
+  Typography,
+  Chip,
+  Dialog,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
+  Input,
+  Button,
+} from "@material-tailwind/react";
 import { PlusCircle } from "@phosphor-icons/react";
 import AuthContext from "../features/authentication/context/AuthContext";
 import ToastNotification from "./ToastNotification";
@@ -10,7 +23,7 @@ import { VehicleRequestsContext } from "../features/request_management/context/V
 import { VenueRequestsContext } from "../features/request_management/context/VenueRequestsContext";
 
 function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
-  const [statusOptions, setStatusOptions] = useState([]); 
+  const [statusOptions, setStatusOptions] = useState([]);
   const [currentStatus, setCurrentStatus] = useState(input);
   const [selectedStatus, setSelectedStatus] = useState(null); // Status clicked
   const [actionTaken, setActionTaken] = useState(""); // Action input
@@ -34,7 +47,9 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
   useEffect(() => {
     const getStatus = async () => {
       try {
-        const response = await axios.get("/settings/status", { withCredentials: true });
+        const response = await axios.get("/settings/status", {
+          withCredentials: true,
+        });
 
         if (Array.isArray(response.data.status)) {
           setStatusOptions(response.data.status);
@@ -64,65 +79,67 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
   // Confirm status change
   const confirmStatusChange = async () => {
     if (!actionTaken.trim()) {
-        ToastNotification.error("Error!", "Please provide an action taken.");
-        return;
+      ToastNotification.error("Error!", "Please provide an action taken.");
+      return;
     }
 
     try {
-        setCurrentStatus(selectedStatus);
-        setOpenModal(false); // Close popup
+      setCurrentStatus(selectedStatus);
+      setOpenModal(false); // Close popup
 
-        // Update the request status
-        const response = await axios({
-          method: "patch",
-          url: `/${requestType}/${referenceNumber}/status`,
-          data: {
-            requester: user.reference_number,
-            status: selectedStatus,
-            action: actionTaken
-          },
-          withCredentials: true
-        })
+      // Update the request status
+      const response = await axios({
+        method: "patch",
+        url: `/${requestType}/${referenceNumber}/status`,
+        data: {
+          requester: user.reference_number,
+          status: selectedStatus,
+          action: actionTaken,
+        },
+        withCredentials: true,
+      });
 
-        if (response.status === 200) {
-            ToastNotification.success("Success!", response.data.message);
-            fetchAllRequests();
+      if (response.status === 200) {
+        ToastNotification.success("Success!", response.data.message);
+        fetchAllRequests();
 
-            if (onStatusUpdate) {
-                onStatusUpdate(selectedStatus);
-            }
-
-            // Log the request activity
-            await axios({
-              method: "post",
-              url: "/request_activity",
-              data: {
-                reference_number: referenceNumber,
-                visibility: "external",
-                type: "status_change",
-                action: `Status updated to <i>${selectedStatus}</i>`,
-                details: actionTaken,
-                performed_by: user.reference_number,
-              },
-              withCredentials: true
-            })
-            // ToastNotification.success("Success!", "Activity logged successfully.");
-            getRequestActivity();
+        if (onStatusUpdate) {
+          onStatusUpdate(selectedStatus);
         }
-      } catch (error) {
-          ToastNotification.error("Error!", "Failed to update status or log activity.");
-          console.error("Status update or activity log failed:", error);
-          }
-      };
 
-      const getRequestActivity = async () => {
+        // Log the request activity
         await axios({
-            method: "GET",
-            url: `/request_activity/${referenceNumber}`,
-            withCredentials: true,
-        })
-    };
+          method: "post",
+          url: "/request_activity",
+          data: {
+            reference_number: referenceNumber,
+            visibility: "external",
+            type: "status_change",
+            action: `Status updated to <i>${selectedStatus}</i>`,
+            details: actionTaken,
+            performed_by: user.reference_number,
+          },
+          withCredentials: true,
+        });
+        // ToastNotification.success("Success!", "Activity logged successfully.");
+        getRequestActivity();
+      }
+    } catch (error) {
+      ToastNotification.error(
+        "Error!",
+        "Failed to update status or log activity."
+      );
+      console.error("Status update or activity log failed:", error);
+    }
+  };
 
+  const getRequestActivity = async () => {
+    await axios({
+      method: "GET",
+      url: `/request_activity/${referenceNumber}`,
+      withCredentials: true,
+    });
+  };
 
   return (
     <div className="flex flex-col gap-2">
@@ -133,7 +150,10 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
             variant="ghost"
             value={currentStatus || "Select Status"}
             className="text-center w-fit cursor-pointer"
-            color={statusOptions.find(option => option.status === currentStatus)?.color || "gray"}
+            color={
+              statusOptions.find((option) => option.status === currentStatus)
+                ?.color || "gray"
+            }
           />
         </MenuHandler>
         <MenuList className="mt-2 divide-y divide-gray-100 rounded-md bg-white shadow-lg shadow-topping ring-2 ring-black/5 border-none w-fit">
@@ -176,12 +196,18 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
       </Menu>
 
       {/* Status Confirmation Modal */}
-      <Dialog open={openModal} handler={setOpenModal} size="sm">
+      <Dialog
+        open={openModal}
+        handler={setOpenModal}
+        size="sm"
+        className="backdrop:bg-transparent"
+      >
         <DialogHeader>Confirm Status Change</DialogHeader>
         <DialogBody>
           <div className="flex flex-col gap-4">
             <Typography variant="small" className="font-sans">
-              You selected <strong>{selectedStatus}</strong>. Please enter the action taken before proceeding.
+              You selected <strong>{selectedStatus}</strong>. Please enter the
+              action taken before proceeding.
             </Typography>
             <Input
               type="text"
@@ -192,10 +218,18 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
           </div>
         </DialogBody>
         <DialogFooter>
-          <Button color="gray" onClick={() => setOpenModal(false)} className="mr-2 bg-gray-500 cursor-pointer">
+          <Button
+            color="gray"
+            onClick={() => setOpenModal(false)}
+            className="mr-2 bg-gray-500 cursor-pointer"
+          >
             Cancel
           </Button>
-          <Button onClick={confirmStatusChange} disabled={!actionTaken.trim()} className="bg-blue-500 cursor-pointer">
+          <Button
+            onClick={confirmStatusChange}
+            disabled={!actionTaken.trim()}
+            className="bg-blue-500 cursor-pointer"
+          >
             Confirm
           </Button>
         </DialogFooter>

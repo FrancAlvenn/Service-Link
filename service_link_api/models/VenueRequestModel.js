@@ -17,7 +17,7 @@ const VenueRequest = sequelize.define(
     title: {
       type: DataTypes.STRING(255),
       allowNull: true,
-      defaultValue: null
+      defaultValue: null,
     },
     venue_id: {
       type: DataTypes.INTEGER,
@@ -30,22 +30,22 @@ const VenueRequest = sequelize.define(
     department: {
       type: DataTypes.STRING(100),
       allowNull: true,
-      defaultValue: null
+      defaultValue: null,
     },
     organization: {
       type: DataTypes.STRING(100),
       allowNull: true,
-      defaultValue: null
+      defaultValue: null,
     },
     event_title: {
       type: DataTypes.STRING(255),
       allowNull: true,
-      defaultValue: null
+      defaultValue: null,
     },
     purpose: {
       type: DataTypes.TEXT,
       allowNull: true,
-      defaultValue: null
+      defaultValue: null,
     },
     event_nature: {
       type: DataTypes.STRING(255),
@@ -70,7 +70,7 @@ const VenueRequest = sequelize.define(
     pax_estimation: {
       type: DataTypes.INTEGER,
       allowNull: true,
-      defaultValue: 0
+      defaultValue: 0,
     },
     status: {
       type: DataTypes.STRING(100),
@@ -99,8 +99,13 @@ const VenueRequest = sequelize.define(
     authorized_access: {
       type: DataTypes.JSON,
       allowNull: true,
-      defaultValue: null
-    }
+      defaultValue: null,
+    },
+    assigned_to: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      comment: "Array of assigned employee reference numbers or full objects",
+    },
   },
   {
     tableName: "venue_requests",

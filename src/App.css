@@ -15,15 +15,13 @@
   border-radius: 4px; /* Border radius of the scrollbar thumb */
 }
 
-
-.App{
+.App {
   height: 100vh;
 }
 
-.dark .dangerous-p{
+.dark .dangerous-p {
   @apply dark:text-gray-100;
 }
-
 
 .dangerous-p p {
   margin-bottom: 0.5rem;
@@ -34,4 +32,27 @@
   text-decoration: underline;
 }
 
+/* Full Calendar */
 
+/* Customize the navigation buttons (prev, next, today) */
+.fc-prev-button,
+.fc-next-button,
+.fc-today-button {
+  @apply text-white text-sm font-medium bg-blue-500 hover:bg-blue-400 border-none !important;
+}
+
+/* Customize the title */
+.fc-toolbar-title {
+  @apply text-xl font-bold !important;
+}
+
+/* Customize the view buttons */
+.fc-dayGridMonth-button,
+.fc-timeGridWeek-button,
+.fc-timeGridDay-button {
+  @apply text-white font-medium text-sm bg-blue-500 hover:bg-blue-400 border-none !important;
+}
+
+.fc-view-harness {
+  @apply w-full;
+}

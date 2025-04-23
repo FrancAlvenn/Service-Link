@@ -15,6 +15,7 @@ import {
   DialogBody,
   Input,
   DialogFooter,
+  Chip,
 } from "@material-tailwind/react";
 import { MagnifyingGlass } from "@phosphor-icons/react";
 import { JobRequestsContext } from "../../context/JobRequestsContext";
@@ -231,6 +232,13 @@ export function KanbanBoard() {
     }
   };
 
+  const requestTypeColor = {
+    job_request: "blue",
+    purchasing_request: "green",
+    venue_request: "purple",
+    vehicle_request: "orange",
+  };
+
   return (
     <div className="flex justify-between h-full bg-white">
       <div
@@ -272,7 +280,7 @@ export function KanbanBoard() {
                     onFilterChange={setFilters}
                   />
                 </div>
-                <div className="flex lg:flex-row lg:justify-end items-center gap-2 w-full">
+                <div className="flex lg:flex-row lg:justify-end items-center gap-2 w-fit">
                   <span className="text-xs font-semibold whitespace-nowrap text-gray-700 text-center sm:text-left">
                     GROUP BY
                   </span>
@@ -281,47 +289,90 @@ export function KanbanBoard() {
 
                   <Menu placement="bottom-end">
                     <MenuHandler>
-                      <button className="font-semibold border border-slate-300 w-full h-fit sm:w-fit text-nowrap text-sm py-2 px-5 rounded-md shadow-sm focus:outline-none focus:border-slate-500 hover:border-slate-400">
-                        {requestType
-                          .replace("_", " ")
-                          .replace(/\b\w/g, (l) => l.toUpperCase())}
-                      </button>
+                      <div className="cursor-pointer w-fit">
+                        <Chip
+                          value={requestType
+                            .replace("_", " ")
+                            .replace(/\b\w/g, (l) => l.toUpperCase())}
+                          variant="filled"
+                          color={requestTypeColor[requestType] || "gray"}
+                          className="pointer-events-none" // Prevent Chip's default click
+                        />
+                      </div>
                     </MenuHandler>
-                    <MenuList>
-                      <MenuItem onClick={() => setRequestType("job_request")}>
-                        Job Requests
-                      </MenuItem>
-                      <MenuItem
+
+                    <MenuList className="flex flex-col flex-wrap gap-2 px-3 py-2">
+                      <Chip
+                        value="Job Requests"
+                        onClick={() => setRequestType("job_request")}
+                        variant={
+                          requestType === "job_request" ? "filled" : "ghost"
+                        }
+                        color={requestType === "job_request" ? "blue" : "gray"}
+                        className="cursor-pointer w-fit"
+                      />
+                      <Chip
+                        value="Purchasing Requests"
                         onClick={() => setRequestType("purchasing_request")}
-                      >
-                        Purchasing Requests
-                      </MenuItem>
-                      <MenuItem
+                        variant={
+                          requestType === "purchasing_request"
+                            ? "filled"
+                            : "ghost"
+                        }
+                        color={
+                          requestType === "purchasing_request"
+                            ? "green"
+                            : "gray"
+                        }
+                        className="cursor-pointer w-fit"
+                      />
+                      <Chip
+                        value="Vehicle Requests"
                         onClick={() => setRequestType("vehicle_request")}
-                      >
-                        Vehicle Requests
-                      </MenuItem>
-                      <MenuItem onClick={() => setRequestType("venue_request")}>
-                        Venue Requests
-                      </MenuItem>
+                        variant={
+                          requestType === "vehicle_request" ? "filled" : "ghost"
+                        }
+                        color={
+                          requestType === "vehicle_request" ? "amber" : "gray"
+                        }
+                        className="cursor-pointer w-fit"
+                      />
+                      <Chip
+                        value="Venue Requests"
+                        onClick={() => setRequestType("venue_request")}
+                        variant={
+                          requestType === "venue_request" ? "filled" : "ghost"
+                        }
+                        color={
+                          requestType === "venue_request" ? "purple" : "gray"
+                        }
+                        className="cursor-pointer w-fit"
+                      />
                     </MenuList>
                   </Menu>
 
-                  {/* Add Column Menu */}
                   <Menu placement="bottom-end">
                     <MenuHandler>
-                      <button className="font-semibold border border-slate-300 w-full h-fit sm:w-fit text-nowrap text-sm py-2 px-5 rounded-md shadow-sm focus:outline-none focus:border-slate-500 hover:border-slate-400">
-                        Add Column
-                      </button>
+                      <div className="cursor-pointer w-fit">
+                        <Chip
+                          value="Add Column"
+                          variant="ghost"
+                          color="gray"
+                          className="pointer-events-none"
+                        />
+                      </div>
                     </MenuHandler>
-                    <MenuList>
+
+                    <MenuList className="flex flex-col flex-wrap gap-2 px-3 py-2">
                       {status.map((stat) => (
-                        <MenuItem
+                        <Chip
                           key={stat.id}
+                          value={stat.status}
                           onClick={() => addColumn(stat.status)}
-                        >
-                          {stat.status}
-                        </MenuItem>
+                          variant="ghost"
+                          color={stat.color || "gray"}
+                          className="cursor-pointer w-fit"
+                        />
                       ))}
                     </MenuList>
                   </Menu>

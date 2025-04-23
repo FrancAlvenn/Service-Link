@@ -29,14 +29,6 @@ const AssetModel = sequelize.define(
       type: DataTypes.STRING(255),
       allowNull: true,
     },
-    purchase_date: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
-    purchase_cost: {
-      type: DataTypes.DECIMAL(10, 2),
-      allowNull: true,
-    },
     status: {
       type: DataTypes.STRING(50),
       defaultValue: "Available",
@@ -46,11 +38,6 @@ const AssetModel = sequelize.define(
       type: DataTypes.DATE,
       allowNull: true,
     },
-    warranty_expiry: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
-
     // Additional Details for specific assets - e.g., capacity, manufacturer, model, serial number, etc.
     additional_details: {
       type: DataTypes.JSON,

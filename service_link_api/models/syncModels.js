@@ -6,43 +6,48 @@ import Status from "./SettingsModels/StatusModel.js";
 
 import AssetsModel from "./AssetsModel.js";
 import ImageModel from "./ImageModel.js";
-import { JobRequestModel, JobRequestDetails, PurchasingRequestModel, PurchasingRequestDetails, VenueRequests, VenueRequestDetail } from "./index.js";
+import {
+  JobRequestModel,
+  JobRequestDetails,
+  PurchasingRequestModel,
+  PurchasingRequestDetails,
+  VenueRequests,
+  VenueRequestDetail,
+} from "./index.js";
 import SystemLogsModel from "./SystemLogs.js";
 import Ticket from "./TicketModel.js";
 import UserModel from "./UserModel.js";
 import VehicleRequestModel from "./VehicleRequestModel.js";
 import RequestActivity from "./RequestActivity.js";
 
-
 const models = [
-    DepartmentsModel,
-    Designation,
-    Organization,
-    Priority,
-    Status,
-    AssetsModel,
-    ImageModel,
-    JobRequestModel,
-    JobRequestDetails,
-    PurchasingRequestModel,
-    PurchasingRequestDetails,
-    VenueRequests,
-    VenueRequestDetail,
-    RequestActivity,
-    SystemLogsModel,
-    Ticket,
-    UserModel,
-    VehicleRequestModel
+  DepartmentsModel,
+  Designation,
+  Organization,
+  Priority,
+  Status,
+  AssetsModel,
+  ImageModel,
+  JobRequestModel,
+  JobRequestDetails,
+  PurchasingRequestModel,
+  PurchasingRequestDetails,
+  VenueRequests,
+  VenueRequestDetail,
+  RequestActivity,
+  SystemLogsModel,
+  Ticket,
+  UserModel,
+  VehicleRequestModel,
 ]; // Add all models to this array
 
 const syncModels = async (sequelizeInstance) => {
   try {
     await sequelizeInstance.sync({ force: true }); // Safely update schema
     console.log("✅ All models synchronized successfully.");
-    
+
     // Seed default values
     await seedData();
-
   } catch (error) {
     console.error("❌ Error synchronizing models:", error);
   }
@@ -63,14 +68,54 @@ const seedData = async () => {
 // Seed Statuses
 const seedStatuses = async () => {
   const defaultStatuses = [
-    { status: "Approved", color: "green", description: "Request has been approved", archived: false },
-    { status: "Rejected", color: "red", description: "Request has been rejected", archived: false },
-    { status: "Approved w/ Condition", color: "orange", description: "Request approved with conditions", archived: false },
-    { status: "Pending", color: "amber", description: "Request is currently under review", archived: false },
-    { status: "In Progress", color: "blue", description: "Request is being processed", archived: false },
-    { status: "On Hold", color: "gray", description: "Request is on hold due to some reasons", archived: false },
-    { status: "Completed", color: "green", description: "Request has been completed", archived: false },
-    { status: "Canceled", color: "pink", description: "Request has been canceled", archived: false },
+    {
+      status: "Approved",
+      color: "green",
+      description: "Request has been approved",
+      archived: false,
+    },
+    {
+      status: "Rejected",
+      color: "red",
+      description: "Request has been rejected",
+      archived: false,
+    },
+    {
+      status: "Approved w/ Condition",
+      color: "orange",
+      description: "Request approved with conditions",
+      archived: false,
+    },
+    {
+      status: "Pending",
+      color: "amber",
+      description: "Request is currently under review",
+      archived: false,
+    },
+    {
+      status: "In Progress",
+      color: "blue",
+      description: "Request is being processed",
+      archived: false,
+    },
+    {
+      status: "On Hold",
+      color: "gray",
+      description: "Request is on hold due to some reasons",
+      archived: false,
+    },
+    {
+      status: "Completed",
+      color: "green",
+      description: "Request has been completed",
+      archived: false,
+    },
+    {
+      status: "Canceled",
+      color: "pink",
+      description: "Request has been canceled",
+      archived: false,
+    },
   ];
 
   for (const status of defaultStatuses) {
@@ -80,7 +125,6 @@ const seedStatuses = async () => {
     });
   }
 };
-
 
 // Seed Priorities
 const seedPriorities = async () => {
@@ -101,16 +145,46 @@ const seedPriorities = async () => {
 // Seed Departments
 const seedDepartments = async () => {
   const defaultDepartments = [
-    { name: "College of Accountancy", description: "Department for Accounting and Finance" },
-    { name: "College of Arts and Sciences", description: "Department for Academic Programs" },
-    { name: "College of Business Administration", description: "Department for Business and Management" },
-    { name: "College of Computer Studies", description: "Department for IT and CS programs" },
-    { name: "College of Education", description: "Department for Teacher Education" },
-    { name: "College of Health Science", description: "Department for Nursing and Allied Health" },
-    { name: "College of Hospitality Management and Tourism", description: "Department for Hospitality and Tourism" },
-    { name: "College of Maritime Engineering", description: "Department for Marine Engineering" },
-    { name: "School of Mechanical Engineering", description: "Department for Mechanical Engineering" },
-    { name: "School of Psychology", description: "Department for Psychology programs" }
+    {
+      name: "College of Accountancy",
+      description: "Department for Accounting and Finance",
+    },
+    {
+      name: "College of Arts and Sciences",
+      description: "Department for Academic Programs",
+    },
+    {
+      name: "College of Business Administration",
+      description: "Department for Business and Management",
+    },
+    {
+      name: "College of Computer Studies",
+      description: "Department for IT and CS programs",
+    },
+    {
+      name: "College of Education",
+      description: "Department for Teacher Education",
+    },
+    {
+      name: "College of Health Science",
+      description: "Department for Nursing and Allied Health",
+    },
+    {
+      name: "College of Hospitality Management and Tourism",
+      description: "Department for Hospitality and Tourism",
+    },
+    {
+      name: "College of Maritime Engineering",
+      description: "Department for Marine Engineering",
+    },
+    {
+      name: "School of Mechanical Engineering",
+      description: "Department for Mechanical Engineering",
+    },
+    {
+      name: "School of Psychology",
+      description: "Department for Psychology programs",
+    },
   ];
 
   for (const department of defaultDepartments) {
@@ -120,7 +194,6 @@ const seedDepartments = async () => {
     });
   }
 };
-
 
 // Seed Job Requests
 const seedJobRequests = async () => {
@@ -137,11 +210,21 @@ const seedJobRequests = async () => {
       gso_director_approval: "Pending",
       operations_director_approval: "Pending",
       archived: false,
-      authorized_access: [ "DYCI-2025-00001" ],
+      authorized_access: ["DYCI-2025-00001"],
       details: [
-        { quantity: "3", particulars: "Circuit Breakers", description: "Replace faulty circuit breakers", remarks: "Essential for safety compliance" },
-        { quantity: "5", particulars: "Electrical Wires", description: "Replace worn-out wires in classrooms", remarks: "To prevent short circuits" }
-      ]
+        {
+          quantity: "3",
+          particulars: "Circuit Breakers",
+          description: "Replace faulty circuit breakers",
+          remarks: "Essential for safety compliance",
+        },
+        {
+          quantity: "5",
+          particulars: "Electrical Wires",
+          description: "Replace worn-out wires in classrooms",
+          remarks: "To prevent short circuits",
+        },
+      ],
     },
     {
       reference_number: "JR-2025-00002",
@@ -155,21 +238,21 @@ const seedJobRequests = async () => {
       gso_director_approval: "Pending",
       operations_director_approval: "Pending",
       archived: false,
-      authorized_access: [ "DYCI-2025-00002" ],
+      authorized_access: ["DYCI-2025-00002"],
       details: [
         {
           quantity: "2",
           particulars: "Air Conditioning Unit",
           description: "Clean and replace filters",
-          remarks: "Scheduled maintenance"
+          remarks: "Scheduled maintenance",
         },
         {
           quantity: "1",
           particulars: "Refrigerant",
           description: "Refill refrigerant for cooling efficiency",
-          remarks: "Standard procedure"
-        }
-      ]
+          remarks: "Standard procedure",
+        },
+      ],
     },
     {
       reference_number: "JR-2025-00003",
@@ -183,32 +266,34 @@ const seedJobRequests = async () => {
       gso_director_approval: "Pending",
       operations_director_approval: "Pending",
       archived: false,
-      authorized_access: [ "DYCI-2025-00004" ],
+      authorized_access: ["DYCI-2025-00004"],
       details: [
         {
           quantity: "3",
           particulars: "Projector Bulb",
           description: "Replace old and damaged bulbs",
-          remarks: "Urgent for lectures"
+          remarks: "Urgent for lectures",
         },
         {
           quantity: "1",
           particulars: "Projector Lens",
           description: "Check and clean for clarity",
-          remarks: "Preventive maintenance"
-        }
-      ]
-    }
+          remarks: "Preventive maintenance",
+        },
+      ],
+    },
   ];
 
   for (const request of jobRequests) {
     const jobRequest = await JobRequestModel.create(request);
     for (const detail of request.details) {
-      await JobRequestDetails.create({ ...detail, job_request_id: jobRequest.reference_number });
+      await JobRequestDetails.create({
+        ...detail,
+        job_request_id: jobRequest.reference_number,
+      });
     }
   }
 };
-
 
 // Seed Purchasing Requests
 const seedPurchasingRequests = async () => {
@@ -227,11 +312,21 @@ const seedPurchasingRequests = async () => {
       operations_director_approval: "Pending",
       archived: false,
       remarks: "",
-      authorized_access: [ "DYCI-2025-00001" ],
+      authorized_access: ["DYCI-2025-00001"],
       details: [
-        { quantity: 6, particulars: "Printer Ink", description: "Black ink cartridge", remarks: "Urgent" },
-        { quantity: 10, particulars: "Notebooks", description: "A5 notebooks", remarks: "For meetings" }
-      ]
+        {
+          quantity: 6,
+          particulars: "Printer Ink",
+          description: "Black ink cartridge",
+          remarks: "Urgent",
+        },
+        {
+          quantity: 10,
+          particulars: "Notebooks",
+          description: "A5 notebooks",
+          remarks: "For meetings",
+        },
+      ],
     },
     {
       reference_number: "PR-2025-00002",
@@ -247,11 +342,21 @@ const seedPurchasingRequests = async () => {
       operations_director_approval: "Pending",
       archived: false,
       remarks: "",
-      authorized_access: [ "DYCI-2025-00002" ],
+      authorized_access: ["DYCI-2025-00002"],
       details: [
-        { quantity: 2, particulars: "Microscopes", description: "Advanced optical microscopes", remarks: "For biology lab" },
-        { quantity: 5, particulars: "Glass Beakers", description: "500ml capacity beakers", remarks: "Chemistry experiments" }
-      ]
+        {
+          quantity: 2,
+          particulars: "Microscopes",
+          description: "Advanced optical microscopes",
+          remarks: "For biology lab",
+        },
+        {
+          quantity: 5,
+          particulars: "Glass Beakers",
+          description: "500ml capacity beakers",
+          remarks: "Chemistry experiments",
+        },
+      ],
     },
     {
       reference_number: "PR-2025-00003",
@@ -267,28 +372,40 @@ const seedPurchasingRequests = async () => {
       operations_director_approval: "Pending",
       archived: false,
       remarks: "",
-      authorized_access: [ "DYCI-2025-00003" ],
+      authorized_access: ["DYCI-2025-00003"],
       details: [
-        { quantity: 3, particulars: "Wireless Keyboards", description: "Mechanical wireless keyboards", remarks: "For faculty use" },
-        { quantity: 4, particulars: "Computer Mouse", description: "Ergonomic wireless mouse", remarks: "Office and lab use" }
-      ]
-    }
+        {
+          quantity: 3,
+          particulars: "Wireless Keyboards",
+          description: "Mechanical wireless keyboards",
+          remarks: "For faculty use",
+        },
+        {
+          quantity: 4,
+          particulars: "Computer Mouse",
+          description: "Ergonomic wireless mouse",
+          remarks: "Office and lab use",
+        },
+      ],
+    },
   ];
 
   for (const request of purchasingRequests) {
     const purchasingRequest = await PurchasingRequestModel.create(request);
     for (const detail of request.details) {
-      await PurchasingRequestDetails.create({ ...detail, purchasing_request_id: purchasingRequest.reference_number });
+      await PurchasingRequestDetails.create({
+        ...detail,
+        purchasing_request_id: purchasingRequest.reference_number,
+      });
     }
   }
 };
-
 
 const seedVenueRequests = async () => {
   const venueRequests = [
     {
       reference_number: "VR-2025-00001",
-      venue_id: 1,
+      venue_requested: "Elida Court",
       title: "Annual Coding Bootcamp Request",
       requester: "DYCI-2025-00001",
       department: "College of Computer Studies",
@@ -307,15 +424,25 @@ const seedVenueRequests = async () => {
       immediate_head_approval: "Pending",
       gso_director_approval: "Pending",
       operations_director_approval: "Pending",
-      authorized_access: [ "DYCI-2025-00001" ],
+      authorized_access: ["DYCI-2025-00001"],
       details: [
-        { quantity: "2", particulars: "Extension Cords", description: "For laptop power supply", remarks: "Essential for the event" },
-        { quantity: "1", particulars: "Whiteboard", description: "For lecture explanations", remarks: "Standard requirement" }
-      ]
+        {
+          quantity: "2",
+          particulars: "Extension Cords",
+          description: "For laptop power supply",
+          remarks: "Essential for the event",
+        },
+        {
+          quantity: "1",
+          particulars: "Whiteboard",
+          description: "For lecture explanations",
+          remarks: "Standard requirement",
+        },
+      ],
     },
     {
       reference_number: "VR-2025-00002",
-      venue_id: 2,
+      venue_requested: "Elida Court",
       title: "Leadership Training Seminar Request",
       requester: "DYCI-2025-00002",
       department: "College of Business Administration",
@@ -334,15 +461,25 @@ const seedVenueRequests = async () => {
       immediate_head_approval: "Pending",
       gso_director_approval: "Pending",
       operations_director_approval: "Pending",
-      authorized_access: [ "DYCI-2025-00002" ],
+      authorized_access: ["DYCI-2025-00002"],
       details: [
-        { quantity: "3", particulars: "Microphones", description: "Wireless microphones for speakers", remarks: "Ensure good audio coverage" },
-        { quantity: "1", particulars: "Podium", description: "For speaker presentations", remarks: "Requested by event host" }
-      ]
+        {
+          quantity: "3",
+          particulars: "Microphones",
+          description: "Wireless microphones for speakers",
+          remarks: "Ensure good audio coverage",
+        },
+        {
+          quantity: "1",
+          particulars: "Podium",
+          description: "For speaker presentations",
+          remarks: "Requested by event host",
+        },
+      ],
     },
     {
       reference_number: "VR-2025-00003",
-      venue_id: 3,
+      venue_requested: "Elida Court",
       title: "Cultural Night Venue Request",
       requester: "DYCI-2025-00003",
       department: "College of Arts and Sciences",
@@ -361,22 +498,34 @@ const seedVenueRequests = async () => {
       immediate_head_approval: "Pending",
       gso_director_approval: "Pending",
       operations_director_approval: "Pending",
-      authorized_access: [ "DYCI-2025-00003" ],
+      authorized_access: ["DYCI-2025-00003"],
       details: [
-        { quantity: "4", particulars: "Stage Lights", description: "Colored stage lighting for performances", remarks: "To enhance stage ambiance" },
-        { quantity: "2", particulars: "Speakers", description: "High-powered speakers for performances", remarks: "For quality sound output" }
-      ]
-    }
+        {
+          quantity: "4",
+          particulars: "Stage Lights",
+          description: "Colored stage lighting for performances",
+          remarks: "To enhance stage ambiance",
+        },
+        {
+          quantity: "2",
+          particulars: "Speakers",
+          description: "High-powered speakers for performances",
+          remarks: "For quality sound output",
+        },
+      ],
+    },
   ];
 
   for (const request of venueRequests) {
     const venueRequest = await VenueRequests.create(request);
     for (const detail of request.details) {
-      await VenueRequestDetail.create({ ...detail, venue_request_id: venueRequest.reference_number });
+      await VenueRequestDetail.create({
+        ...detail,
+        venue_request_id: venueRequest.reference_number,
+      });
     }
   }
 };
-
 
 const seedVehicleRequests = async () => {
   const vehicleRequests = [
@@ -400,9 +549,9 @@ const seedVehicleRequests = async () => {
       immediate_head_approval: "Pending",
       gso_director_approval: "Pending",
       operations_director_approval: "Pending",
-      authorized_access: [ "DYCI-2025-00001" ],
+      authorized_access: ["DYCI-2025-00001"],
       created_at: "2024-11-14T10:00:00.000Z",
-      updated_at: "2024-11-14T10:00:00.000Z"
+      updated_at: "2024-11-14T10:00:00.000Z",
     },
     {
       reference_number: "SV-2025-00002",
@@ -424,9 +573,9 @@ const seedVehicleRequests = async () => {
       immediate_head_approval: "Pending",
       gso_director_approval: "Pending",
       operations_director_approval: "Pending",
-      authorized_access: [ "DYCI-2025-00002" ],
+      authorized_access: ["DYCI-2025-00002"],
       created_at: "2024-11-10T09:00:00.000Z",
-      updated_at: "2024-11-10T09:00:00.000Z"
+      updated_at: "2024-11-10T09:00:00.000Z",
     },
     {
       reference_number: "SV-2025-00003",
@@ -448,10 +597,10 @@ const seedVehicleRequests = async () => {
       immediate_head_approval: "Pending",
       gso_director_approval: "Pending",
       operations_director_approval: "Pending",
-      authorized_access: [ "DYCI-2025-00003" ],
+      authorized_access: ["DYCI-2025-00003"],
       created_at: "2024-12-01T08:30:00.000Z",
-      updated_at: "2024-12-01T08:30:00.000Z"
-    }
+      updated_at: "2024-12-01T08:30:00.000Z",
+    },
   ];
 
   for (const request of vehicleRequests) {
@@ -459,9 +608,4 @@ const seedVehicleRequests = async () => {
   }
 };
 
-
-
-
-
 export { syncModels };
-

@@ -1,228 +1,409 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { DragDropContext } from 'react-beautiful-dnd';
-import Column from './Column';
-import { CardBody, CardHeader, Typography, Menu, MenuHandler, MenuList, MenuItem } from '@material-tailwind/react';
-import { MagnifyingGlass } from '@phosphor-icons/react';
-import { JobRequestsContext } from '../../context/JobRequestsContext';
-import { VenueRequestsContext } from '../../context/VenueRequestsContext';
-import { VehicleRequestsContext } from '../../context/VehicleRequestsContext';
-import { PurchasingRequestsContext } from '../../context/PurchasingRequestsContext';
-import axios from 'axios';
-import { AuthContext } from '../../../authentication';
-import ToastNotification from '../../../../utils/ToastNotification';
-import SidebarView from '../../../../components/sidebar/SidebarView';
+import React, { useContext, useEffect, useState } from "react";
+import { DragDropContext } from "react-beautiful-dnd";
+import Column from "./Column";
+import {
+  CardBody,
+  CardHeader,
+  Typography,
+  Menu,
+  MenuHandler,
+  MenuList,
+  MenuItem,
+  Button,
+  Dialog,
+  DialogHeader,
+  DialogBody,
+  Input,
+  DialogFooter,
+} from "@material-tailwind/react";
+import { MagnifyingGlass } from "@phosphor-icons/react";
+import { JobRequestsContext } from "../../context/JobRequestsContext";
+import { VenueRequestsContext } from "../../context/VenueRequestsContext";
+import { VehicleRequestsContext } from "../../context/VehicleRequestsContext";
+import { PurchasingRequestsContext } from "../../context/PurchasingRequestsContext";
+import axios from "axios";
+import { AuthContext } from "../../../authentication";
+import ToastNotification from "../../../../utils/ToastNotification";
+import SidebarView from "../../../../components/sidebar/SidebarView";
+import RequestFilter from "../../utils/requestFilter";
 
 export function KanbanBoard() {
-    const [columns, setColumns] = useState([]);
-    const [status, setStatus] = useState([]); // Stores departments from DB
-    const [requestType, setRequestType] = useState('job_request'); // Default request type
-    const [searchQuery, setSearchQuery] = useState('');
+  const [columns, setColumns] = useState([]);
+  const [status, setStatus] = useState([]); // Stores departments from DB
+  const [requestType, setRequestType] = useState("job_request"); // Default request type
+  const [searchQuery, setSearchQuery] = useState("");
 
-    const { jobRequests, fetchJobRequests, setJobRequests } = useContext(JobRequestsContext);
-    const { purchasingRequests, fetchPurchasingRequests, setPurchasingRequests } = useContext(PurchasingRequestsContext);
-    const { vehicleRequests, fetchVehicleRequests, setVehicleRequests } = useContext(VehicleRequestsContext);
-    const { venueRequests, fetchVenueRequests, setVenueRequests } = useContext(VenueRequestsContext);
-    const { user } = useContext(AuthContext);
+  const { jobRequests, fetchJobRequests, setJobRequests } =
+    useContext(JobRequestsContext);
+  const { purchasingRequests, fetchPurchasingRequests, setPurchasingRequests } =
+    useContext(PurchasingRequestsContext);
+  const { vehicleRequests, fetchVehicleRequests, setVehicleRequests } =
+    useContext(VehicleRequestsContext);
+  const { venueRequests, fetchVenueRequests, setVenueRequests } =
+    useContext(VenueRequestsContext);
+  const { user } = useContext(AuthContext);
 
-    const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [selectedReferenceNumber, setSelectedReferenceNumber] = useState('')
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedReferenceNumber, setSelectedReferenceNumber] = useState("");
 
-    const fetchData = async () => {
-        try {
-            // Retrieve user preferences
-            const userPreferences = JSON.parse(localStorage.getItem('userPreference'));
-            if (userPreferences?.kanban_config) {
-                setColumns(userPreferences.kanban_config.columns);
-            }
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [actionTaken, setActionTaken] = useState("");
 
-            // Fetch status list from the backend
-            const { data } = await axios.get('/settings/status', { withCredentials: true });
-            if (Array.isArray(data.status)) {
-                setStatus(data.status);
-            } else {
-            console.error("Invalid response: 'status' is not an array");
-            }
-        } catch (error) {
-            console.error('Error fetching status:', error);
-        }
-    };
+  const [filters, setFilters] = useState({
+    status: "",
+    department: "",
+  });
 
-    // Fetch user preferences and departments on mount
-    useEffect(() => {
-        fetchData();
-    }, []);
+  const fetchData = async () => {
+    try {
+      // Retrieve user preferences
+      const userPreferences = JSON.parse(
+        localStorage.getItem("userPreference")
+      );
+      if (userPreferences?.kanban_config) {
+        setColumns(userPreferences.kanban_config.columns);
+      }
 
-    const getRequestData = () => {
-        switch (requestType) {
-            case 'job_request':
-                return { requests: jobRequests, setRequests: setJobRequests, fetchRequests: fetchJobRequests };
-            case 'purchasing_request':
-                return { requests: purchasingRequests, setRequests: setPurchasingRequests, fetchRequests: fetchPurchasingRequests };
-            case 'vehicle_request':
-                return { requests: vehicleRequests, setRequests: setVehicleRequests, fetchRequests: fetchVehicleRequests };
-            case 'venue_request':
-                return { requests: venueRequests, setRequests: setVenueRequests, fetchRequests: fetchVenueRequests };
-            default:
-                return { requests: [], setRequests: () => {}, fetchRequests: () => {} };
-        }
-    };
+      // Fetch status list from the backend
+      const { data } = await axios.get("/settings/status", {
+        withCredentials: true,
+      });
+      if (Array.isArray(data.status)) {
+        setStatus(data.status);
+      } else {
+        console.error("Invalid response: 'status' is not an array");
+      }
+    } catch (error) {
+      console.error("Error fetching status:", error);
+    }
+  };
 
-    const { requests, setRequests, fetchRequests } = getRequestData();
+  // Fetch user preferences and departments on mount
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-    const handleStatusChange = async (referenceNumber, status) => {
-        try {
-            const response = await axios.patch(
-                `/${requestType}/${referenceNumber}/status`,
-                { requester: user.reference_number, status },
-                { withCredentials: true }
-            );
-            if (response.status === 200) {
-                fetchRequests();
-            }
-        } catch (error) {
-            console.error('Status update failed:', error);
-        }
-    };
-
-    const handleOnDragEnd = (result) => {
-        const { destination, source, draggableId } = result;
-        if (!destination || source.droppableId === destination.droppableId) return;
-
-        const referenceNumber = draggableId.toString();
-        const newStatus = destination.droppableId;
-
-        setRequests((prevRequests) =>
-            prevRequests.map((task) =>
-                task.reference_number === referenceNumber ? { ...task, status: newStatus } : task
-            )
-        );
-
-        handleStatusChange(referenceNumber, newStatus);
-    };
-
-    const filteredTasks = (tasks) => {
-        return tasks.filter(task =>
-            task.title.toLowerCase().includes(searchQuery) ||
-            task.reference_number.toLowerCase().includes(searchQuery)
-        );
-    };
-
-    const addColumn = async (status) => {
-        if (!status) return;
-
-        if(columns.some(column => column.name === status)){
-            ToastNotification.info('Notice!', 'Column already exists');
-            return;
+  const getRequestData = () => {
+    switch (requestType) {
+      case "job_request":
+        return {
+          requests: jobRequests,
+          setRequests: setJobRequests,
+          fetchRequests: fetchJobRequests,
         };
+      case "purchasing_request":
+        return {
+          requests: purchasingRequests,
+          setRequests: setPurchasingRequests,
+          fetchRequests: fetchPurchasingRequests,
+        };
+      case "vehicle_request":
+        return {
+          requests: vehicleRequests,
+          setRequests: setVehicleRequests,
+          fetchRequests: fetchVehicleRequests,
+        };
+      case "venue_request":
+        return {
+          requests: venueRequests,
+          setRequests: setVenueRequests,
+          fetchRequests: fetchVenueRequests,
+        };
+      default:
+        return { requests: [], setRequests: () => {}, fetchRequests: () => {} };
+    }
+  };
 
-        const newColumn = { id: columns.length + 1, name: status};
-        const updatedColumns = [...columns, newColumn];
+  const { requests, setRequests, fetchRequests } = getRequestData();
 
-        try {
-            await axios({
-                method: "put",
-                url: `/settings/user_preference/${user.reference_number}`,
-                data: {
-                    kanban_config: { columns: updatedColumns },
-                },
-                withCredentials: true
-            })
-            setColumns(updatedColumns);
-            localStorage.setItem('userPreference', JSON.stringify({ kanban_config: { columns: updatedColumns } }));
-            fetchData();
-        } catch (error) {
-            console.error('Failed to add column:', error);
+  const handleStatusChange = async (referenceNumber, status) => {
+    try {
+      const response = await axios.patch(
+        `/${requestType}/${referenceNumber}/status`,
+        { requester: user.reference_number, status },
+        { withCredentials: true }
+      );
+      if (response.status === 200) {
+        fetchRequests();
+      }
+    } catch (error) {
+      console.error("Status update failed:", error);
+    }
+  };
 
-        }
-    };
+  const confirmStatusChange = async () => {
+    try {
+      await axios.patch(
+        `/${requestType}/${selectedReferenceNumber}/status`,
+        { requester: user.reference_number, status: selectedStatus },
+        { withCredentials: true }
+      );
 
-    return (
-        <div className="flex justify-between h-full bg-white">
-            <div className={`h-full bg-white rounded-lg w-full mt-0 p-1 flex justify-between transition-[max-width] duration-300 ${sidebarOpen ? "max-w-[55%]" : "w-full"}`}>
-                <div className="flex flex-col gap-2 h-full w-full">
-                    <CardHeader floated={false} shadow={false} className="rounded-none min-h-fit pb-2">
-                        <div className="mb-1 flex items-center justify-between gap-5">
-                            <Typography color="black" className="text-lg px-3 font-bold">Kanban Board</Typography>
-                        </div>
+      // Log the request activity
+      await axios.post(
+        "/request_activity",
+        {
+          reference_number: selectedReferenceNumber,
+          visibility: "external",
+          type: "status_change",
+          action: `Status updated to <i>${selectedStatus}</i>`,
+          details: actionTaken,
+          performed_by: user.reference_number,
+        },
+        { withCredentials: true }
+      );
 
-                        <div className="flex items-center justify-between px-3 gap-4 mt-2">
-                            {/* Search Bar */}
-                            <div className="relative w-1/4 max-w-sm min-w-[150px]">
-                                <input
-                                    className="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md pl-3 pr-28 py-2 focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
-                                    placeholder="Search"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
-                                />
-                                <span className="absolute top-1 right-1 flex items-center rounded py-1.5 px-3 text-black shadow-sm hover:shadow">
-                                    <MagnifyingGlass size={16} />
-                                </span>
-                            </div>
+      // Refresh request data
+      getRequestData().fetchRequests();
+      ToastNotification.success(
+        "Success!",
+        "Status updated and activity logged."
+      );
+    } catch (error) {
+      console.error("Error during status change:", error);
+      ToastNotification.error("Error", "Failed to update status.");
+    } finally {
+      setOpenModal(false);
+      setActionTaken("");
+      setSelectedReferenceNumber("");
+      setSelectedStatus("");
+    }
+  };
 
-                            {/* Request Type Selection */}
-                            <div className="flex justify-end items-center gap-2 w-1/2">
-                                <span className="text-xs font-semibold whitespace-nowrap text-gray-700">GROUP BY</span>
-                                <Menu placement="bottom-end">
-                                    <MenuHandler>
-                                        <button className="font-semibold border border-slate-300 text-sm py-2 px-5 w-fit rounded-md shadow-sm focus:outline-none focus:border-slate-500 hover:border-slate-400">
-                                            {requestType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                                        </button>
-                                    </MenuHandler>
-                                    <MenuList>
-                                        <MenuItem onClick={() => setRequestType('job_request')}>Job Requests</MenuItem>
-                                        <MenuItem onClick={() => setRequestType('purchasing_request')}>Purchasing Requests</MenuItem>
-                                        <MenuItem onClick={() => setRequestType('vehicle_request')}>Vehicle Requests</MenuItem>
-                                        <MenuItem onClick={() => setRequestType('venue_request')}>Venue Requests</MenuItem>
-                                    </MenuList>
-                                </Menu>
+  const handleOnDragEnd = (result) => {
+    const { destination, source, draggableId } = result;
+    if (!destination || source.droppableId === destination.droppableId) return;
 
-                                {/* Add Column Menu */}
-                                <Menu placement="bottom-end">
-                                    <MenuHandler>
-                                        <button className="font-semibold border border-slate-300 text-sm py-2 px-5 rounded-md shadow-sm focus:outline-none focus:border-slate-500 hover:border-slate-400">
-                                            Add Column
-                                        </button>
-                                    </MenuHandler>
-                                    <MenuList>
-                                        {status.map((stat) => (
-                                            <MenuItem key={stat.id} onClick={() => addColumn(stat.status)}>
-                                                {stat.status}
-                                            </MenuItem>
-                                        ))}
-                                    </MenuList>
-                                </Menu>
-                            </div>
-                        </div>
-                    </CardHeader>
+    setSelectedReferenceNumber(draggableId.toString());
+    setSelectedStatus(destination.droppableId);
+    setOpenModal(true);
+  };
 
-                    <CardBody className="custom-scrollbar h-full pt-0">
-                        <DragDropContext onDragEnd={handleOnDragEnd}>
-                            <div className="flex justify-between items-center flex-row gap-3">
-                                {columns.map((column) => (
-                                    <Column
-                                    key={column.name}
-                                    title={column.name}
-                                    tasks={filteredTasks((Array.isArray(requests) ? requests : []).filter(task => task.status === column.name))}
-                                    id={column.name}
-                                    columnID={column.id}
-                                    requestType={requestType}
-                                    setRequests={setRequests}
-                                    user={user}
-                                    columns={columns}
-                                    setColumns={setColumns}
-                                    fetchData={fetchData}
-                                    setSelectedReferenceNumber={setSelectedReferenceNumber}
-                                    setSidebarOpen={setSidebarOpen}
-                                    />
-                                ))}
-                            </div>
-                        </DragDropContext>
-                    </CardBody>
-                </div>
+  const filteredTasks = (tasks) => {
+    return tasks.filter((task) => {
+      const matchesSearch =
+        task.title.toLowerCase().includes(searchQuery) ||
+        task.reference_number.toLowerCase().includes(searchQuery);
+
+      const matchesStatus = filters.status
+        ? task.status === filters.status
+        : true;
+
+      const matchesDepartment = filters.department
+        ? task.department
+            ?.toLowerCase()
+            .includes(filters.department.toLowerCase())
+        : true;
+
+      return matchesSearch && matchesStatus && matchesDepartment;
+    });
+  };
+
+  const addColumn = async (status) => {
+    if (!status) return;
+
+    if (columns.some((column) => column.name === status)) {
+      ToastNotification.info("Notice!", "Column already exists");
+      return;
+    }
+
+    const newColumn = { id: columns.length + 1, name: status };
+    const updatedColumns = [...columns, newColumn];
+
+    try {
+      await axios({
+        method: "put",
+        url: `/settings/user_preference/${user.reference_number}`,
+        data: {
+          kanban_config: { columns: updatedColumns },
+        },
+        withCredentials: true,
+      });
+      setColumns(updatedColumns);
+      localStorage.setItem(
+        "userPreference",
+        JSON.stringify({ kanban_config: { columns: updatedColumns } })
+      );
+      fetchData();
+    } catch (error) {
+      console.error("Failed to add column:", error);
+    }
+  };
+
+  return (
+    <div className="flex justify-between h-full bg-white">
+      <div
+        className={`h-full bg-white rounded-lg w-full mt-0 p-1 flex justify-between transition-[max-width] duration-300 ${
+          sidebarOpen ? "max-w-[55%]" : "w-full"
+        }`}
+      >
+        <div className="flex flex-col gap-2 h-full w-full">
+          <CardHeader
+            floated={false}
+            shadow={false}
+            className="rounded-none min-h-fit pb-2"
+          >
+            <div className="mb-1 flex items-center justify-between gap-5">
+              <Typography color="black" className="text-lg px-3 font-bold">
+                Kanban Board
+              </Typography>
             </div>
-            <SidebarView open={sidebarOpen} onClose={() => setSidebarOpen(false)} referenceNumber={selectedReferenceNumber} />
+
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between px-3 gap-4 mt-2 w-full">
+              {/* Search Bar */}
+              <div className="relative w-full max-w-[230px] min-w-[150px]">
+                <input
+                  className="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md pl-3 pr-28 py-2 focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
+                  placeholder="Search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
+                />
+                <span className="absolute top-1 right-1 flex items-center rounded py-1.5 px-3 text-black shadow-sm hover:shadow">
+                  <MagnifyingGlass size={16} />
+                </span>
+              </div>
+
+              {/* Filter & Menus */}
+              <div className="flex flex-col  lg:flex-row lg:justify-end lg:items-center gap-2 w-full">
+                <div className="w-full">
+                  <RequestFilter
+                    filters={filters}
+                    onFilterChange={setFilters}
+                  />
+                </div>
+                <div className="flex lg:flex-row lg:justify-end items-center gap-2 w-full">
+                  <span className="text-xs font-semibold whitespace-nowrap text-gray-700 text-center sm:text-left">
+                    GROUP BY
+                  </span>
+
+                  {/* Request Type Menu */}
+
+                  <Menu placement="bottom-end">
+                    <MenuHandler>
+                      <button className="font-semibold border border-slate-300 w-full h-fit sm:w-fit text-nowrap text-sm py-2 px-5 rounded-md shadow-sm focus:outline-none focus:border-slate-500 hover:border-slate-400">
+                        {requestType
+                          .replace("_", " ")
+                          .replace(/\b\w/g, (l) => l.toUpperCase())}
+                      </button>
+                    </MenuHandler>
+                    <MenuList>
+                      <MenuItem onClick={() => setRequestType("job_request")}>
+                        Job Requests
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => setRequestType("purchasing_request")}
+                      >
+                        Purchasing Requests
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => setRequestType("vehicle_request")}
+                      >
+                        Vehicle Requests
+                      </MenuItem>
+                      <MenuItem onClick={() => setRequestType("venue_request")}>
+                        Venue Requests
+                      </MenuItem>
+                    </MenuList>
+                  </Menu>
+
+                  {/* Add Column Menu */}
+                  <Menu placement="bottom-end">
+                    <MenuHandler>
+                      <button className="font-semibold border border-slate-300 w-full h-fit sm:w-fit text-nowrap text-sm py-2 px-5 rounded-md shadow-sm focus:outline-none focus:border-slate-500 hover:border-slate-400">
+                        Add Column
+                      </button>
+                    </MenuHandler>
+                    <MenuList>
+                      {status.map((stat) => (
+                        <MenuItem
+                          key={stat.id}
+                          onClick={() => addColumn(stat.status)}
+                        >
+                          {stat.status}
+                        </MenuItem>
+                      ))}
+                    </MenuList>
+                  </Menu>
+                </div>
+              </div>
+            </div>
+          </CardHeader>
+
+          <CardBody className="custom-scrollbar h-full pt-0">
+            <DragDropContext onDragEnd={handleOnDragEnd}>
+              <div className="flex justify-between items-center flex-row gap-3">
+                {columns.map((column) => (
+                  <Column
+                    key={column.name}
+                    title={column.name}
+                    tasks={filteredTasks(
+                      (Array.isArray(requests) ? requests : []).filter(
+                        (task) => task.status === column.name
+                      )
+                    )}
+                    id={column.name}
+                    columnID={column.id}
+                    requestType={requestType}
+                    setRequests={setRequests}
+                    user={user}
+                    columns={columns}
+                    setColumns={setColumns}
+                    fetchData={fetchData}
+                    setSelectedReferenceNumber={setSelectedReferenceNumber}
+                    setSidebarOpen={setSidebarOpen}
+                  />
+                ))}
+              </div>
+            </DragDropContext>
+          </CardBody>
         </div>
-    );
+      </div>
+      <SidebarView
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        referenceNumber={selectedReferenceNumber}
+      />
+      <Dialog
+        open={openModal}
+        handler={setOpenModal}
+        size="sm"
+        className="backdrop:bg-transparent"
+      >
+        <DialogHeader>Confirm Status Change</DialogHeader>
+        <DialogBody>
+          <div className="flex flex-col gap-4">
+            <Typography variant="small" className="font-sans">
+              You selected <strong>{selectedStatus}</strong>. Please enter the
+              action taken before proceeding.
+            </Typography>
+            <Input
+              type="text"
+              placeholder="Action Taken"
+              value={actionTaken}
+              onChange={(e) => setActionTaken(e.target.value)}
+            />
+          </div>
+        </DialogBody>
+        <DialogFooter>
+          <Button
+            color="gray"
+            onClick={() => setOpenModal(false)}
+            className="mr-2 bg-gray-500 cursor-pointer"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={confirmStatusChange}
+            disabled={!actionTaken.trim()}
+            className="bg-blue-500 cursor-pointer"
+          >
+            Confirm
+          </Button>
+        </DialogFooter>
+      </Dialog>
+    </div>
+  );
 }
 
 export default KanbanBoard;

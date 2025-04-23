@@ -1,13 +1,27 @@
 import React, { useContext, useReducer, useEffect } from "react";
-import { Typography, Menu, MenuHandler, MenuList, MenuItem } from "@material-tailwind/react";
-import { ClipboardText, Ticket, ArchiveBox, UsersThree, CaretDown, CaretLeft, CaretRight } from "@phosphor-icons/react";
+import {
+  Typography,
+  Menu,
+  MenuHandler,
+  MenuList,
+  MenuItem,
+} from "@material-tailwind/react";
+import {
+  ClipboardText,
+  Ticket,
+  ArchiveBox,
+  UsersThree,
+  CaretDown,
+  CaretLeft,
+  CaretRight,
+} from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import ControlRenderer from "./component/sidebar/ControlRenderer";
 import { AuthContext } from "../features/authentication";
 
 const options = {
   "Requests Management": <ClipboardText size={20} />,
-  "Ticket Management": <Ticket size={20} />,
+  // "Ticket Management": <Ticket size={20} />,
   "Asset Management": <ArchiveBox size={20} />,
   "Employee Management": <UsersThree size={20} />,
 };
@@ -28,7 +42,10 @@ function reducer(state, action) {
       return { ...state, selectedControl: action.payload, openDropdown: true };
     case "TOGGLE_MINIMIZE":
       const newState = { ...state, isMinimized: !state.isMinimized };
-      localStorage.setItem("sidebarMinimized", JSON.stringify(newState.isMinimized)); // Persist state
+      localStorage.setItem(
+        "sidebarMinimized",
+        JSON.stringify(newState.isMinimized)
+      ); // Persist state
       return newState;
     default:
       return state;
@@ -40,9 +57,12 @@ function Sidebar() {
   const navigate = useNavigate();
 
   // Get sidebar state from localStorage (or fallback to userPreference)
-  const initialSidebarState = JSON.parse(localStorage.getItem("sidebarMinimized"));
+  const initialSidebarState = JSON.parse(
+    localStorage.getItem("sidebarMinimized")
+  );
   const initialControl = JSON.parse(localStorage.getItem("selectedControl"));
-  const isMinimized = initialSidebarState ?? (userPreference?.sidebar_view === false);
+  const isMinimized =
+    initialSidebarState ?? userPreference?.sidebar_view === false;
 
   const initialState = {
     openDropdown: false,
@@ -63,14 +83,28 @@ function Sidebar() {
         state.isMinimized ? "w-12" : "w-72 justify-center"
       } shadow-xl shadow-black-900/5 rounded-none `}
     >
-      <div className={`mt-0 flex items-center ${state.isMinimized ? "justify-center" : "justify-between"}`}>
+      <div
+        className={`mt-0 flex items-center ${
+          state.isMinimized ? "justify-center" : "justify-between"
+        }`}
+      >
         {!state.isMinimized && (
-          <Typography color="black" className="text-md font-bold whitespace-nowrap font-body">
+          <Typography
+            color="black"
+            className="text-md font-bold whitespace-nowrap font-body"
+          >
             {state.selectedControl}
           </Typography>
         )}
-        <button className="text-xl" onClick={() => dispatch({ type: "TOGGLE_MINIMIZE" })}>
-          {state.isMinimized ? <CaretRight size={20} /> : <CaretLeft size={20} />}
+        <button
+          className="text-xl"
+          onClick={() => dispatch({ type: "TOGGLE_MINIMIZE" })}
+        >
+          {state.isMinimized ? (
+            <CaretRight size={20} />
+          ) : (
+            <CaretLeft size={20} />
+          )}
         </button>
       </div>
 
@@ -78,7 +112,11 @@ function Sidebar() {
 
       {!state.isMinimized && (
         <>
-          <Menu className="w-full" open={state.openDropdown} handler={() => dispatch({ type: "TOGGLE_DROPDOWN" })}>
+          <Menu
+            className="w-full"
+            open={state.openDropdown}
+            handler={() => dispatch({ type: "TOGGLE_DROPDOWN" })}
+          >
             <MenuHandler>
               <button
                 onClick={() => dispatch({ type: "TOGGLE_DROPDOWN" })}
@@ -98,7 +136,9 @@ function Sidebar() {
               </button>
             </MenuHandler>
             <MenuList className="mt-2 border-none w-60 py-3 shadow-md whitespace-nowrap">
-              <span className="py-3 text-xs font-bold text-black ">Workspace</span>
+              <span className="py-3 text-xs font-bold text-black ">
+                Workspace
+              </span>
               <hr className="my-3 h-px text-gray-400" />
               {Object.keys(options).map((control) => (
                 <MenuItem

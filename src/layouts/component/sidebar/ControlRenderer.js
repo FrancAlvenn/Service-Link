@@ -26,19 +26,31 @@ function ControlRenderer({ selectedControl }) {
   const renderControls = () => {
     let controlComponent = null;
 
-    if (location.pathname.includes("requests-management") || selectedControl === "Requests Management") {
+    if (
+      location.pathname.includes("requests-management") ||
+      selectedControl === "Requests Management"
+    ) {
       controlComponent = <RequestsManagementControls />;
     }
 
-    if (location.pathname.includes("ticket-management/board") || selectedControl === "Ticket Management") {
+    if (
+      location.pathname.includes("ticket-management/board") ||
+      selectedControl === "Ticket Management"
+    ) {
       controlComponent = <TicketManagementControls />;
     }
 
-    if (location.pathname.includes("asset-management/board") || selectedControl === "Asset Management") {
+    if (
+      location.pathname.includes("asset-management/board") ||
+      selectedControl === "Asset Management"
+    ) {
       controlComponent = <AssetManagementControls />;
     }
 
-    if (location.pathname.includes("employee-management/board") || selectedControl === "Employee Management") {
+    if (
+      location.pathname.includes("employee-management/board") ||
+      selectedControl === "Employee Management"
+    ) {
       controlComponent = <EmployeeManagementControls />;
     }
 

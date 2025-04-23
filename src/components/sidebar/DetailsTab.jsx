@@ -55,6 +55,7 @@ const requestFieldConfig = {
     { key: "organization", label: "Organization", type: "text" },
     { key: "event_title", label: "Event Title", type: "text" },
     { key: "event_nature", label: "Event Nature", type: "text" },
+    { key: "venue_requested", label: "Venue Requested", type: "select" },
     { key: "event_dates", label: "Event Date", type: "date" },
     { key: "event_start_time", label: "Start Time", type: "time" },
     { key: "event_end_time", label: "End Time", type: "time" },
@@ -76,7 +77,7 @@ const requestFieldConfig = {
     { key: "title", label: "Title", type: "text" },
     { key: "requester", label: "Requester", type: "text", readOnly: true },
     { key: "department", label: "Department", type: "text", readOnly: true },
-    { key: "vehicle_requested", label: "Vehicle Type", type: "text" },
+    { key: "vehicle_requested", label: "Vehicle Requested", type: "select" },
     { key: "date_of_trip", label: "Date of Trip", type: "date" },
     { key: "time_of_departure", label: "Departure Time", type: "time" },
     { key: "time_of_arrival", label: "Arrival Time", type: "time" },
@@ -117,6 +118,49 @@ const DetailsTab = ({
   const [editedRequest, setEditedRequest] = useState(
     selectedRequest ? { ...selectedRequest } : {}
   );
+
+  const [vehicleOptions, setVehicleOptions] = useState([]);
+  const [venueOptions, setVenueOptions] = useState([]);
+
+  useEffect(() => {
+    axios({
+      method: "GET",
+      url: "/assets/",
+      withCredentials: true,
+    })
+      .then((response) => {
+        const vehicleAssets = [];
+        response.data.forEach((asset) => {
+          if (asset.asset_type === "Vehicle") {
+            vehicleAssets.push(asset);
+          }
+        });
+        setVehicleOptions(vehicleAssets);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
+
+  useEffect(() => {
+    axios({
+      method: "GET",
+      url: "/assets/",
+      withCredentials: true,
+    })
+      .then((response) => {
+        const venueAssets = [];
+        response.data.forEach((asset) => {
+          if (asset.asset_type === "Venue") {
+            venueAssets.push(asset);
+          }
+        });
+        setVenueOptions(venueAssets);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
 
   const [editingField, setEditingField] = useState(null);
 
@@ -184,7 +228,7 @@ const DetailsTab = ({
   };
 
   return (
-    <div className="flex flex-col gap-4 p-3 mb-3 border-gray-400 border rounded-md">
+    <div className="flex flex-col gap-4 p-3 mb-3 border-gray-400 border rounded-md h-[70vh] overflow-y-auto">
       <span className="flex gap-1">
         <p className="text-sm font-semibold text-gray-600">Details</p>
       </span>
@@ -203,6 +247,26 @@ const DetailsTab = ({
                   onKeyDown={(e) => handleKeyDown(e, key)}
                   autoFocus
                 />
+              ) : type === "select" ? (
+                <select
+                  className="text-sm p-1 ml-auto min-w-52 w-52 max-w-72 border border-gray-300 rounded-md"
+                  value={editedRequest[key] || ""}
+                  onChange={(e) => handleChange(key, e.target.value)}
+                  onBlur={() => handleBlur(key)}
+                  autoFocus
+                >
+                  <option value="" disabled>
+                    Select a value
+                  </option>
+                  {(key === "vehicle_requested"
+                    ? vehicleOptions
+                    : venueOptions
+                  ).map((asset) => (
+                    <option key={asset.asset_id} value={asset.name}>
+                      {asset.name}
+                    </option>
+                  ))}
+                </select>
               ) : (
                 <input
                   type={type}

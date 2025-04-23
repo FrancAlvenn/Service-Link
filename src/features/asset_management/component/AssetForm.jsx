@@ -7,17 +7,27 @@ import ToastNotification from "../../../utils/ToastNotification";
 
 const defaultDetailsByType = {
   Venue: [{ key: "Capacity", value: "" }],
-  Vehicle: [{ key: "Plate Number", value: "" }],
+  Vehicle: [
+    { key: "Plate Number", value: "" },
+    { key: "Purchase Cost", value: "" },
+    { key: "Purchase Date", value: "" },
+    { key: "Warranty Expiry", value: "" },
+  ],
   Device: [
     { key: "Model", value: "" },
     { key: "Manufacturer", value: "" },
     { key: "Processor", value: "" },
     { key: "RAM", value: "" },
     { key: "Storage", value: "" },
+    { key: "Purchase Cost", value: "" },
+    { key: "Purchase Date", value: "" },
+    { key: "Warranty Expiry", value: "" },
   ],
   "Office Supplies": [
     { key: "Brand", value: "" },
     { key: "Unit Count", value: "" },
+    { key: "Purchase Cost", value: "" },
+    { key: "Purchase Date", value: "" },
   ],
 };
 
@@ -175,7 +185,6 @@ const AssetForm = () => {
         {[
           { name: "location", label: "Location" },
           { name: "description", label: "Description", type: "textarea" },
-          { name: "purchase_cost", label: "Purchase Cost", type: "number" },
         ].map(({ name, label, type = "text" }) => (
           <div key={name}>
             <label className="block text-xs font-medium text-gray-700 mb-1">
@@ -201,28 +210,6 @@ const AssetForm = () => {
             )}
           </div>
         ))}
-
-        {/* Dates */}
-        <div className="flex gap-2 w-full">
-          {[
-            { name: "purchase_date", label: "Purchase Date" },
-            { name: "warranty_expiry", label: "Warranty Expiry" },
-          ].map(({ name, label }) => (
-            <div key={name} className="flex-1">
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                {label}
-              </label>
-              <input
-                type="date"
-                name={name}
-                value={asset[name] || ""}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-                required
-              />
-            </div>
-          ))}
-        </div>
 
         {/* Additional Details Section */}
         <div>

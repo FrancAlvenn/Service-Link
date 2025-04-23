@@ -130,7 +130,7 @@ const ActivityTab = ({ referenceNumber, activeTab }) => {
   }
 
   return (
-    <div className="flex flex-col gap-2 p-3 border-gray-400 border rounded-md">
+    <div className="flex flex-col gap-2 p-3 mb-3 border-gray-400 border rounded-md h-[70vh] overflow-y-auto">
       <span className="flex gap-1">
         <p className="text-sm font-semibold text-gray-600">Activity</p>
       </span>

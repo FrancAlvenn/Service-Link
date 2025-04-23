@@ -19,8 +19,8 @@ const VenueRequest = sequelize.define(
       allowNull: true,
       defaultValue: null,
     },
-    venue_id: {
-      type: DataTypes.INTEGER,
+    venue_requested: {
+      type: DataTypes.STRING(255),
       allowNull: false,
     },
     requester: {

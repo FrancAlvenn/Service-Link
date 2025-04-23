@@ -106,7 +106,7 @@ const ParticularsTab = ({
   };
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 h-[70vh] overflow-y-auto">
       <p className="text-sm font-semibold  text-gray-600">Particulars</p>
       <div className="flex flex-col gap-3">
         {request.details.map((detail, index) => (

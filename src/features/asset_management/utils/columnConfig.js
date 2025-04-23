@@ -93,34 +93,6 @@ export const getColumnConfig = ({ setIsSidebarOpen, setSelectedAsset }) => [
     ),
   },
   {
-    key: "purchase_date",
-    label: "Purchase Date",
-    header: (
-      <Typography variant="small" color="blue-gray" className={normalText}>
-        Purchase Date
-      </Typography>
-    ),
-    render: (row) => (
-      <Typography variant="small" color="blue-gray" className={normalText}>
-        {formatDate(row.purchase_date)}
-      </Typography>
-    ),
-  },
-  {
-    key: "purchase_cost",
-    label: "Purchase Cost",
-    header: (
-      <Typography variant="small" color="blue-gray" className={normalText}>
-        Purchase Cost
-      </Typography>
-    ),
-    render: (row) => (
-      <Typography variant="small" color="blue-gray" className={normalText}>
-        ₱ {row.purchase_cost}
-      </Typography>
-    ),
-  },
-  {
     key: "status",
     label: "Status",
     header: (
@@ -141,20 +113,6 @@ export const getColumnConfig = ({ setIsSidebarOpen, setSelectedAsset }) => [
     render: (row) => (
       <Typography variant="small" color="blue-gray" className={normalText}>
         {formatDate(row.last_maintenance)}
-      </Typography>
-    ),
-  },
-  {
-    key: "warranty_expiry",
-    label: "Warranty Expiry",
-    header: (
-      <Typography variant="small" color="blue-gray" className={normalText}>
-        Warranty Expiry
-      </Typography>
-    ),
-    render: (row) => (
-      <Typography variant="small" color="blue-gray" className={normalText}>
-        {formatDate(row.warranty_expiry)}
       </Typography>
     ),
   },

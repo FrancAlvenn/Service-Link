@@ -56,3 +56,16 @@
 .fc-view-harness {
   @apply w-full;
 }
+
+.calendar-container .fc-header-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: white;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.fc-col-header {
+  @apply sticky top-12 bg-white z-10 shadow-md; /* Adjust `top` if toolbar height differs */
+}

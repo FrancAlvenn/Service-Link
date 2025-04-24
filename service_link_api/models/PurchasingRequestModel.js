@@ -45,6 +45,11 @@ const PurchasingRequest = sequelize.define(
       type: DataTypes.STRING(100),
       defaultValue: "Pending",
     },
+    priority: {
+      type: DataTypes.STRING(100),
+      defaultValue: "Low",
+      allowNull: true,
+    },
     immediate_head_approval: {
       type: DataTypes.STRING(255),
       defaultValue: "Pending",

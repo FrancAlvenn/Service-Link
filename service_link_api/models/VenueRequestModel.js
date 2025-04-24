@@ -76,6 +76,11 @@ const VenueRequest = sequelize.define(
       type: DataTypes.STRING(100),
       defaultValue: "Pending",
     },
+    priority: {
+      type: DataTypes.STRING(100),
+      defaultValue: "Low",
+      allowNull: true,
+    },
     remarks: {
       type: DataTypes.TEXT,
       allowNull: true,

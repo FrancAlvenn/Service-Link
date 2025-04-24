@@ -197,7 +197,12 @@ export function KanbanBoard() {
             .includes(filters.department.toLowerCase())
         : true;
 
-      return matchesSearch && matchesStatus && matchesDepartment;
+      const matchesPriority =
+        !filters.priority || task.priority === filters.priority;
+
+      return (
+        matchesSearch && matchesStatus && matchesDepartment && matchesPriority
+      );
     });
   };
 
@@ -243,7 +248,7 @@ export function KanbanBoard() {
     <div className="flex justify-between h-full bg-white">
       <div
         className={`h-full bg-white rounded-lg w-full mt-0 p-1 flex justify-between transition-[max-width] duration-300 ${
-          sidebarOpen ? "max-w-[55%]" : "w-full"
+          sidebarOpen ? "max-w-[65%]" : "w-full"
         }`}
       >
         <div className="flex flex-col gap-2 h-full w-full">

@@ -14,7 +14,14 @@ import {
   Menu,
 } from "@material-tailwind/react";
 import RequestFilter from "../../utils/requestFilter";
-import { MagnifyingGlass } from "@phosphor-icons/react";
+import {
+  LockSimple,
+  LockSimpleOpen,
+  MagnifyingGlass,
+  PencilSimple,
+  PencilSimpleLine,
+  PencilSimpleSlash,
+} from "@phosphor-icons/react";
 import { AuthContext } from "../../../authentication";
 
 import FullCalendar from "@fullcalendar/react";
@@ -22,6 +29,9 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import SidebarView from "../../../../components/sidebar/SidebarView";
+import { throttle } from "lodash";
+import axios from "axios";
+import ToastNotification from "../../../../utils/ToastNotification";
 
 const CalendarView = () => {
   const [status, setStatus] = useState([]);
@@ -48,6 +58,8 @@ const CalendarView = () => {
 
   const calendarRef = useRef(null); // Ref for FullCalendar
 
+  const [isAuthorized, setIsAuthorized] = useState(false);
+
   const getRequestData = () => {
     switch (requestType) {
       case "job_request":
@@ -71,19 +83,21 @@ const CalendarView = () => {
   }, []);
 
   useEffect(() => {
-    const handleGlobalClick = () => {
-      // Trigger updateSize whenever there's a click anywhere on the page
-      setInterval(() => {
-        calendarRef.current?.getApi().updateSize();
-      }, [50]);
+    const throttledUpdateSize = throttle(() => {
+      calendarRef.current?.getApi().updateSize();
+    }, 50); // Limit updates to once every 200ms
+
+    const handleGlobalInteraction = () => {
+      throttledUpdateSize();
     };
 
-    // Add global click event listener
-    window.addEventListener("click", handleGlobalClick);
+    window.addEventListener("click", handleGlobalInteraction);
+    window.addEventListener("touchend", handleGlobalInteraction); // For tablet & mobile
 
-    // Cleanup the event listener on component unmount
     return () => {
-      window.removeEventListener("click", handleGlobalClick);
+      window.removeEventListener("click", handleGlobalInteraction);
+      window.removeEventListener("touchend", handleGlobalInteraction);
+      throttledUpdateSize.cancel(); // Cleanup for throttle
     };
   }, []);
 
@@ -102,7 +116,12 @@ const CalendarView = () => {
             .includes(filters.department.toLowerCase())
         : true;
 
-      return matchesSearch && matchesStatus && matchesDepartment;
+      const matchesPriority =
+        !filters.priority || task.priority === filters.priority;
+
+      return (
+        matchesSearch && matchesStatus && matchesDepartment && matchesPriority
+      );
     });
   };
 
@@ -118,6 +137,13 @@ const CalendarView = () => {
     purchasing_request: "#22c55e", // Tailwind green-500
     venue_request: "#a855f7", // Tailwind purple-500
     vehicle_request: "#f59e0b", // Tailwind amber-500
+  };
+
+  const pillColorClass = {
+    job_request: "bg-blue-700", // Tailwind blue-700
+    purchasing_request: "bg-green-700", // Tailwind green-700
+    venue_request: "bg-purple-700", // Tailwind purple-700
+    vehicle_request: "bg-amber-700", // Tailwind amber-700
   };
 
   const getVehicleTripDateTime = (date, time) => {
@@ -151,8 +177,11 @@ const CalendarView = () => {
       allDay = true;
     }
 
+    const hasAccess =
+      task.authorized_access?.includes(user.reference_number) ?? false;
+
     return {
-      title: `${task.title || "Untitled"} (${task.status})`,
+      title: task.title || "Untitled",
       start,
       ...(end && { end }),
       allDay,
@@ -160,11 +189,36 @@ const CalendarView = () => {
         referenceNumber: task.reference_number,
         department: task.department,
         requestType: requestType,
+        status: task.status,
+        hasAccess,
       },
       backgroundColor: "white",
       borderColor: "white",
     };
   });
+
+  const renderEventContent = (arg) => {
+    const { title, extendedProps } = arg.event;
+    const { hasAccess } = extendedProps;
+    const typeColor = requestTypeColor[extendedProps.requestType] || "gray";
+
+    const pillBgColor = pillColorClass[requestType] || "#4b5563";
+
+    return (
+      <Chip
+        value={title}
+        color={typeColor}
+        className={`!text-white text-wrap whitespace-normal text-xs h-fit font-medium px-2 py-1 cursor-pointer relative ${
+          !hasAccess ? "bg-gray-400" : ""
+        }`}
+        icon={
+          hasAccess ? (
+            <div className={`w-3 h-3 rounded-full ${pillBgColor}`} />
+          ) : null
+        }
+      />
+    );
+  };
 
   const handleEventClick = (info) => {
     setSelectedReferenceNumber(info.event.extendedProps.referenceNumber);
@@ -172,10 +226,113 @@ const CalendarView = () => {
     calendarRef.current?.getApi().updateSize(); // Trigger the updateSize method on click
   };
 
+  const getLocalDateOnly = (date) => {
+    return (
+      date.getFullYear() +
+      "-" +
+      String(date.getMonth() + 1).padStart(2, "0") +
+      "-" +
+      String(date.getDate()).padStart(2, "0")
+    );
+  };
+
+  const handleEventDrop = async (info) => {
+    const { referenceNumber, requestType } = info.event.extendedProps;
+    const droppedStart = info.event.start;
+    const droppedEnd = info.event.end;
+    const viewType = info.view.type;
+
+    const originalDurationMs = droppedEnd
+      ? droppedEnd.getTime() - droppedStart.getTime()
+      : 0;
+
+    const dateOnly = getLocalDateOnly(droppedStart);
+    const startTimeOnly = droppedStart.toTimeString().substring(0, 5);
+
+    const requests = {
+      job_request: jobRequests,
+      purchasing_request: purchasingRequests,
+      vehicle_request: vehicleRequests,
+      venue_request: venueRequests,
+    };
+
+    const foundRequest = requests[requestType]?.find(
+      (req) => req.reference_number === referenceNumber
+    );
+
+    const isAuthorized =
+      foundRequest?.authorized_access?.includes(user.reference_number) || false;
+
+    if (!isAuthorized) {
+      ToastNotification.warning(
+        "Unauthorized",
+        "You do not have access to this request."
+      );
+      return info.revert();
+    }
+
+    let endTimeOnly = startTimeOnly;
+    if (originalDurationMs > 0) {
+      const newEnd = new Date(droppedStart.getTime() + originalDurationMs);
+      endTimeOnly = newEnd.toTimeString().substring(0, 5);
+    }
+
+    let updateData = {};
+
+    if (viewType === "dayGridMonth") {
+      if (
+        requestType === "job_request" ||
+        requestType === "purchasing_request"
+      ) {
+        updateData = { date_required: dateOnly };
+      } else if (requestType === "vehicle_request") {
+        updateData = { date_of_trip: dateOnly };
+      } else if (requestType === "venue_request") {
+        updateData = { event_dates: dateOnly };
+      }
+    } else if (viewType === "timeGridWeek" || viewType === "timeGridDay") {
+      if (requestType === "vehicle_request") {
+        updateData = {
+          date_of_trip: dateOnly,
+          time_of_departure: startTimeOnly,
+        };
+      } else if (requestType === "venue_request") {
+        updateData = {
+          event_dates: dateOnly,
+          event_start_time: startTimeOnly,
+          event_end_time: endTimeOnly,
+        };
+      } else {
+        ToastNotification.warning(
+          "Not Allowed",
+          "Date change is only allowed in Month view for this request type."
+        );
+        return info.revert();
+      }
+    }
+
+    try {
+      await axios({
+        method: "put",
+        url: `/${requestType}/${referenceNumber}`,
+        data: updateData,
+        withCredentials: true,
+      });
+
+      fetchJobRequests?.();
+      fetchPurchasingRequests?.();
+      fetchVehicleRequests?.();
+      fetchVenueRequests?.();
+    } catch (err) {
+      console.error("Failed to update backend:", err);
+      info.revert();
+    }
+  };
+
   return (
     <div className="flex justify-between h-full bg-white">
       <div
-        className={`h-full bg-white rounded-lg w-full mt-0 p-1 flex justify-between transition-[max-width] duration-300 ${
+        className={` bg-white rounded-lg w-full mt-0 p-1 flex justify-between transition-[max-width] duration-300 ${
           sidebarOpen ? "max-w-[65%]" : "w-full"
         }`}
       >
@@ -290,8 +447,12 @@ const CalendarView = () => {
               </div>
             </CardHeader>
 
-            <CardBody>
-              <div className="calendar-container h-[59vh] lg:h-[70vh] lg:overflow-y-auto lg:overflow-x-auto">
+            <CardBody
+              className={`p-4  overflow-y-auto ${
+                sidebarOpen ? "h-[65vh]" : "h-[75vh]"
+              }`}
+            >
+              <div className="calendar-container h-full overflow-y-auto overflow-x-auto">
                 <FullCalendar
                   ref={calendarRef} // Add the ref to FullCalendar
                   plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
@@ -301,24 +462,28 @@ const CalendarView = () => {
                     center: "title",
                     right: "dayGridMonth,timeGridWeek,timeGridDay",
                   }}
+                  editable={true}
+                  droppable={true}
                   height="auto"
                   handleWindowResize={true}
                   expandRows={true}
                   events={events}
+                  eventContent={renderEventContent}
                   eventClick={handleEventClick}
-                  eventContent={(arg) => {
-                    const { title, extendedProps } = arg.event;
-                    const typeColor =
-                      requestTypeColor[extendedProps.requestType] || "gray";
+                  eventDrop={handleEventDrop}
+                  // eventContent={(arg) => {
+                  //   const { title, extendedProps } = arg.event;
+                  //   const typeColor =
+                  //     requestTypeColor[extendedProps.requestType] || "gray";
 
-                    return (
-                      <Chip
-                        value={title}
-                        color={typeColor}
-                        className="!text-white text-wrap whitespace-normal text-xs h-fit font-medium px-2 py-1 cursor-pointer !border-none"
-                      />
-                    );
-                  }}
+                  //   return (
+                  //     <Chip
+                  //       value={title}
+                  //       color={typeColor}
+                  //       className="!text-white text-wrap whitespace-normal text-xs h-fit font-medium px-2 py-1 cursor-pointer !border-none"
+                  //     />
+                  //   );
+                  // }}
                   // Trigger resize when window is resized
                   windowResize={() =>
                     calendarRef.current?.getApi().updateSize()
@@ -340,6 +505,7 @@ const CalendarView = () => {
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         referenceNumber={selectedReferenceNumber}
+        className="!h-full"
       />
     </div>
   );

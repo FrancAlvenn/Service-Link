@@ -5,6 +5,7 @@ import ToastNotification from "../../utils/ToastNotification";
 import { UserContext } from "../../context/UserContext";
 import { formatDate } from "../../utils/dateFormatter";
 import DepartmentModal from "../../utils/departmentModal";
+import PriorityModal from "../../utils/priorityModal";
 
 const requestFieldConfig = {
   job_request: [
@@ -15,6 +16,7 @@ const requestFieldConfig = {
       readOnly: true,
     },
     { key: "title", label: "Title", type: "text" },
+    { key: "priority", label: "Priority", type: "select" },
     { key: "requester", label: "Requester", type: "text", readOnly: true },
     { key: "department", label: "Department", type: "text", readOnly: true },
     { key: "date_required", label: "Date Required", type: "date" },
@@ -32,6 +34,7 @@ const requestFieldConfig = {
       readOnly: true,
     },
     { key: "title", label: "Title", type: "text" },
+    { key: "priority", label: "Priority", type: "select" },
     { key: "requester", label: "Requester", type: "text", readOnly: true },
     { key: "supply_category", label: "Supply Category", type: "text" },
     { key: "department", label: "Department", type: "text", readOnly: true },
@@ -50,6 +53,7 @@ const requestFieldConfig = {
       readOnly: true,
     },
     { key: "title", label: "Title", type: "text" },
+    { key: "priority", label: "Priority", type: "select" },
     { key: "requester", label: "Requester", type: "text", readOnly: true },
     { key: "department", label: "Department", type: "text", readOnly: true },
     { key: "organization", label: "Organization", type: "text" },
@@ -75,6 +79,7 @@ const requestFieldConfig = {
       readOnly: true,
     },
     { key: "title", label: "Title", type: "text" },
+    { key: "priority", label: "Priority", type: "select" },
     { key: "requester", label: "Requester", type: "text", readOnly: true },
     { key: "department", label: "Department", type: "text", readOnly: true },
     { key: "vehicle_requested", label: "Vehicle Requested", type: "select" },
@@ -248,25 +253,37 @@ const DetailsTab = ({
                   autoFocus
                 />
               ) : type === "select" ? (
-                <select
-                  className="text-sm p-1 ml-auto min-w-52 w-52 max-w-72 border border-gray-300 rounded-md"
-                  value={editedRequest[key] || ""}
-                  onChange={(e) => handleChange(key, e.target.value)}
-                  onBlur={() => handleBlur(key)}
-                  autoFocus
-                >
-                  <option value="" disabled>
-                    Select a value
-                  </option>
-                  {(key === "vehicle_requested"
-                    ? vehicleOptions
-                    : venueOptions
-                  ).map((asset) => (
-                    <option key={asset.asset_id} value={asset.name}>
-                      {asset.name}
+                key === "priority" ? (
+                  <div className="w-full flex justify-end">
+                    <PriorityModal
+                      request={selectedRequest}
+                      input={selectedRequest[key]}
+                      referenceNumber={selectedRequest.reference_number}
+                      requestType={requestType}
+                      onBlur={() => handleBlur(key)}
+                    />
+                  </div>
+                ) : (
+                  <select
+                    className="text-sm p-1 ml-auto min-w-52 w-52 max-w-72 border border-gray-300 rounded-md"
+                    value={editedRequest[key] || ""}
+                    onChange={(e) => handleChange(key, e.target.value)}
+                    onBlur={() => handleBlur(key)}
+                    autoFocus
+                  >
+                    <option value="" disabled>
+                      Select a value
                     </option>
-                  ))}
-                </select>
+                    {(key === "vehicle_requested"
+                      ? vehicleOptions
+                      : venueOptions
+                    ).map((asset) => (
+                      <option key={asset.asset_id} value={asset.name}>
+                        {asset.name}
+                      </option>
+                    ))}
+                  </select>
+                )
               ) : (
                 <input
                   type={type}
@@ -306,6 +323,13 @@ const DetailsTab = ({
                       requestType={requestType}
                     />
                   </span>
+                ) : key === "priority" ? (
+                  <PriorityModal
+                    request={selectedRequest}
+                    input={selectedRequest[key]}
+                    referenceNumber={selectedRequest.reference_number}
+                    requestType={requestType}
+                  />
                 ) : (
                   selectedRequest[key] || (
                     <span className="text-gray-400 italic">Click to edit</span>
@@ -329,6 +353,13 @@ const DetailsTab = ({
                 )
               ) : key === "department" ? (
                 <DepartmentModal
+                  request={selectedRequest}
+                  input={selectedRequest[key]}
+                  referenceNumber={selectedRequest.reference_number}
+                  requestType={requestType}
+                />
+              ) : key === "priority" ? (
+                <PriorityModal
                   request={selectedRequest}
                   input={selectedRequest[key]}
                   referenceNumber={selectedRequest.reference_number}

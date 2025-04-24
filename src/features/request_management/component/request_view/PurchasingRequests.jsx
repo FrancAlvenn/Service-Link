@@ -60,7 +60,12 @@ export function PurchasingRequests() {
     const matchesDepartment =
       !filters.department || row.department === filters.department;
 
-    return matchesSearch && matchesStatus && matchesDepartment;
+    const matchesPriority =
+      !filters.priority || row.priority === filters.priority;
+
+    return (
+      matchesSearch && matchesStatus && matchesDepartment && matchesPriority
+    );
   });
 
   const requestType = "purchasing_request"; // Can be set dynamically based on the page or user input
@@ -76,7 +81,7 @@ export function PurchasingRequests() {
     <div className="flex justify-between h-full bg-white">
       <div
         className={`h-full bg-white w-full mt-0 px-3 flex flex-col justify-between transition-[max-width] duration-300 ${
-          sidebarOpen ? "max-w-[55%]" : "w-full"
+          sidebarOpen ? "max-w-[65%]" : "w-full"
         }`}
       >
         <div className="flex flex-col gap-4 h-full">

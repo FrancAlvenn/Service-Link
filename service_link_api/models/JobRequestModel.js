@@ -36,6 +36,11 @@ const JobRequest = sequelize.define(
       type: DataTypes.STRING(255),
       defaultValue: "pending",
     },
+    priority: {
+      type: DataTypes.STRING(100),
+      defaultValue: "Low",
+      allowNull: true,
+    },
     requester: {
       type: DataTypes.STRING(255),
       allowNull: false,

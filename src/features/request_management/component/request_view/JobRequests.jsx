@@ -45,8 +45,12 @@ export function JobRequests() {
       const matchesStatus = !filters.status || row.status === filters.status;
       const matchesDepartment =
         !filters.department || row.department === filters.department;
+      const matchesPriority =
+        !filters.priority || row.priority === filters.priority;
 
-      return matchesSearch && matchesStatus && matchesDepartment;
+      return (
+        matchesSearch && matchesStatus && matchesDepartment && matchesPriority
+      );
     }
   );
 
@@ -63,7 +67,7 @@ export function JobRequests() {
     <div className="flex justify-between h-full bg-white">
       <div
         className={`h-full bg-white w-full mt-0 px-3 flex flex-col justify-between transition-[max-width] duration-300 ${
-          sidebarOpen ? "max-w-[55%]" : "w-full"
+          sidebarOpen ? "max-w-[65%]" : "w-full"
         }`}
       >
         <div className="flex flex-col gap-4 h-full">

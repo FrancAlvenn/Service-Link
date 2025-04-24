@@ -68,6 +68,11 @@ const VehicleRequest = sequelize.define(
       type: DataTypes.STRING(100),
       defaultValue: "Pending",
     },
+    priority: {
+      type: DataTypes.STRING(100),
+      defaultValue: "Low",
+      allowNull: true,
+    },
     vehicle_id: {
       type: DataTypes.INTEGER,
       allowNull: true,

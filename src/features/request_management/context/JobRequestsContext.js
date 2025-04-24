@@ -18,10 +18,12 @@ export const JobRequestsContext = createContext();
  */
 export const JobRequestsProvider = ({ children }) => {
   const [jobRequests, setJobRequests] = useState([]);
+  const [archivedJobRequest, setArchivedJobRequest] = useState();
 
   // Fetch job requests from the database
   useEffect(() => {
     fetchJobRequests();
+    fetchArchivedJobRequests();
   }, []);
 
   const fetchJobRequests = async () => {
@@ -37,6 +39,18 @@ export const JobRequestsProvider = ({ children }) => {
     }
   };
 
+  const fetchArchivedJobRequests = async () => {
+    try {
+      const { data } = await axios({
+        method: "get",
+        url: "/job_request/archived",
+        withCredentials: true,
+      });
+      setArchivedJobRequest(data);
+    } catch (error) {
+      console.error("Error fetching archived job requests:", error);
+    }
+  };
 
   return (
     <JobRequestsContext.Provider
@@ -44,6 +58,9 @@ export const JobRequestsProvider = ({ children }) => {
         jobRequests,
         fetchJobRequests,
         setJobRequests,
+        archivedJobRequest,
+        fetchArchivedJobRequests,
+        setArchivedJobRequest,
       }}
     >
       {children}

@@ -24,6 +24,7 @@ import {
   ChatCircle,
   ChartBar,
   CaretDown,
+  Archive,
 } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 
@@ -173,6 +174,21 @@ function RequestsManagementControls() {
           }
         >
           Raise a Request
+        </Typography>
+      </ListItem>
+
+      <ListItem className="text-sm">
+        <ListItemPrefix>
+          <Archive size={20} />
+        </ListItemPrefix>
+        <Typography
+          color="black"
+          className="mr-auto font-normal text-sm"
+          onClick={() =>
+            navigate("/workspace/requests-management/archived-request")
+          }
+        >
+          Archived Requests
         </Typography>
       </ListItem>
 

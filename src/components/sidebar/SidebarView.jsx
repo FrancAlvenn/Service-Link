@@ -26,15 +26,32 @@ import Assignment from "./Assignment";
 
 const SidebarView = ({ open, onClose, referenceNumber, requests }) => {
   const [isOpen, setIsOpen] = useState(open);
-  const { jobRequests, fetchJobRequests } = useContext(JobRequestsContext);
-  const { purchasingRequests, fetchPurchasingRequests } = useContext(
-    PurchasingRequestsContext
-  );
-  const { vehicleRequests, fetchVehicleRequests } = useContext(
-    VehicleRequestsContext
-  );
-  const { venueRequests, fetchVenueRequests } =
-    useContext(VenueRequestsContext);
+
+  const {
+    jobRequests,
+    archivedJobRequest,
+    fetchJobRequests,
+    fetchArchivedJobRequests,
+  } = useContext(JobRequestsContext);
+  const {
+    purchasingRequests,
+    archivedPurchasingRequest,
+    fetchPurchasingRequests,
+    fetchArchivedPurchasingRequests,
+  } = useContext(PurchasingRequestsContext);
+  const {
+    vehicleRequests,
+    archivedVehicleRequest,
+    fetchVehicleRequests,
+    fetchArchivedVehicleRequests,
+  } = useContext(VehicleRequestsContext);
+  const {
+    venueRequests,
+    archivedVenueRequest,
+    fetchVenueRequests,
+    fetchArchivedVenueRequests,
+  } = useContext(VenueRequestsContext);
+
   const { user } = useContext(AuthContext);
   const { getUserByReferenceNumber } = useContext(UserContext);
 
@@ -50,62 +67,95 @@ const SidebarView = ({ open, onClose, referenceNumber, requests }) => {
 
   const [activeTab, setActiveTab] = useState("overview");
 
+  useEffect(() => {
+    fetchAllRequests(); // fetch all active and archived requests on component mount
+  }, []);
+
   // Fetch relevant request based on reference number
   useEffect(() => {
-    if (isOpen && referenceNumber) {
-      const type = referenceNumber.slice(0, 2);
-      let requests, typeName;
+    if (!isOpen || !referenceNumber || !user?.reference_number) return;
 
-      switch (type) {
-        case "JR":
-          typeName = "job_request";
-          requests = jobRequests;
-          break;
-        case "PR":
-          typeName = "purchasing_request";
-          requests = purchasingRequests;
-          break;
-        case "SV":
-          typeName = "vehicle_request";
-          requests = vehicleRequests;
-          break;
-        case "VR":
-          typeName = "venue_request";
-          requests = venueRequests;
-          break;
-        default:
-          console.warn("Unknown request type:", type);
-          return;
-      }
+    const type = referenceNumber.slice(0, 2);
+    let combinedRequests = [];
+    let typeName = "";
 
-      setRequestType(typeName);
-      setRequest({
-        ...requests.find((req) => req.reference_number === referenceNumber),
-      });
+    const requestMap = {
+      JR: {
+        type: "job_request",
+        data: [
+          ...(Array.isArray(jobRequests) ? jobRequests : []),
+          ...(Array.isArray(archivedJobRequest) ? archivedJobRequest : []),
+        ],
+      },
+      PR: {
+        type: "purchasing_request",
+        data: [
+          ...(Array.isArray(purchasingRequests) ? purchasingRequests : []),
+          ...(Array.isArray(archivedPurchasingRequest)
+            ? archivedPurchasingRequest
+            : []),
+        ],
+      },
+      SV: {
+        type: "vehicle_request",
+        data: [
+          ...(Array.isArray(vehicleRequests) ? vehicleRequests : []),
+          ...(Array.isArray(archivedVehicleRequest)
+            ? archivedVehicleRequest
+            : []),
+        ],
+      },
+      VR: {
+        type: "venue_request",
+        data: [
+          ...(Array.isArray(venueRequests) ? venueRequests : []),
+          ...(Array.isArray(archivedVenueRequest) ? archivedVenueRequest : []),
+        ],
+      },
+    };
 
-      const foundRequest = requests.find(
-        (req) => req.reference_number === referenceNumber
-      );
+    const mapped = requestMap[type];
+
+    if (mapped) {
+      typeName = mapped.type;
+      combinedRequests = mapped.data;
+    } else {
+      console.warn("Unknown request type:", type);
+      return;
+    }
+
+    if (!combinedRequests.length) {
+      console.warn("Requests not yet loaded for", typeName);
+      return;
+    }
+
+    const foundRequest = combinedRequests.find(
+      (req) => req.reference_number === referenceNumber
+    );
+
+    if (foundRequest) {
       setRequestType(typeName);
       setRequest(foundRequest);
-
-      // Check if user is authorized
-      if (foundRequest?.authorized_access) {
-        setIsAuthorized(
-          foundRequest.authorized_access.includes(user.reference_number)
-        );
-      } else {
-        setIsAuthorized(false);
-      }
+      setIsAuthorized(
+        foundRequest?.authorized_access?.includes(user.reference_number) ||
+          false
+      );
+    } else {
+      setRequest(null);
+      setIsAuthorized(false);
     }
   }, [
-    jobRequests,
-    purchasingRequests,
-    vehicleRequests,
-    venueRequests,
-    referenceNumber,
     isOpen,
+    referenceNumber,
     user,
+    jobRequests,
+    archivedJobRequest,
+    purchasingRequests,
+    archivedPurchasingRequest,
+    vehicleRequests,
+    archivedVehicleRequest,
+    venueRequests,
+    archivedVenueRequest,
   ]);
 
   // Fetch all requests
@@ -114,6 +164,10 @@ const SidebarView = ({ open, onClose, referenceNumber, requests }) => {
     fetchPurchasingRequests();
     fetchVehicleRequests();
     fetchVenueRequests();
+    fetchArchivedJobRequests();
+    fetchArchivedPurchasingRequests();
+    fetchArchivedVehicleRequests();
+    fetchArchivedVenueRequests();
   };
 
   // Sync open state
@@ -205,6 +259,12 @@ const SidebarView = ({ open, onClose, referenceNumber, requests }) => {
 
   const [openRequestAccess, setOpenRequestAccess] = useState(false);
 
+  useEffect(() => {
+    console.log(jobRequests);
+  }, [request]);
+
+  console.log(jobRequests);
+  console.log(archivedJobRequest);
   return (
     <div
       onClick={handleSidebarClick}

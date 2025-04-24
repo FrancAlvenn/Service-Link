@@ -12,10 +12,12 @@ export const VehicleRequestsContext = createContext();
  */
 export const VehicleRequestsProvider = ({ children }) => {
   const [vehicleRequests, setVehicleRequests] = useState([]);
+  const [archivedVehicleRequests, setArchivedVehicleRequests] = useState([]);
 
   // Fetch job requests from the database
   useEffect(() => {
     fetchVehicleRequests();
+    fetchArchivedVehicleRequests();
   }, []);
 
   const fetchVehicleRequests = async () => {
@@ -31,13 +33,28 @@ export const VehicleRequestsProvider = ({ children }) => {
     }
   };
 
+  const fetchArchivedVehicleRequests = async () => {
+    try {
+      const { data } = await axios({
+        method: "get",
+        url: "/vehicle_request/archived",
+        withCredentials: true,
+      });
+      setArchivedVehicleRequests(data);
+    } catch (error) {
+      console.error("Error fetching job requests:", error);
+    }
+  };
 
   return (
     <VehicleRequestsContext.Provider
       value={{
         vehicleRequests,
         fetchVehicleRequests,
-        setVehicleRequests
+        setVehicleRequests,
+        archivedVehicleRequests,
+        setArchivedVehicleRequests,
+        fetchArchivedVehicleRequests,
       }}
     >
       {children}

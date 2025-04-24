@@ -14,10 +14,12 @@ export const VenueRequestsContext = createContext();
  */
 export const VenueRequestsProvider = ({ children }) => {
   const [venueRequests, setVenueRequests] = useState([]);
+  const [archivedVenueRequests, setArchivedVenueRequests] = useState([]);
 
   // Fetch job requests from the database
   useEffect(() => {
     fetchVenueRequests();
+    fetchArchivedVenueRequests();
   }, []);
 
   const fetchVenueRequests = async () => {
@@ -33,13 +35,28 @@ export const VenueRequestsProvider = ({ children }) => {
     }
   };
 
+  const fetchArchivedVenueRequests = async () => {
+    try {
+      const { data } = await axios({
+        method: "get",
+        url: "/venue_request/archived",
+        withCredentials: true,
+      });
+      setArchivedVenueRequests(data);
+    } catch (error) {
+      console.error("Error fetching job requests:", error);
+    }
+  };
 
   return (
     <VenueRequestsContext.Provider
       value={{
         venueRequests,
         fetchVenueRequests,
-        setVenueRequests
+        setVenueRequests,
+        archivedVenueRequests,
+        fetchArchivedVenueRequests,
+        setArchivedVenueRequests,
       }}
     >
       {children}

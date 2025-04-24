@@ -15,10 +15,14 @@ export const PurchasingRequestsContext = createContext();
 
 export const PurchasingRequestsProvider = ({ children }) => {
   const [purchasingRequests, setPurchasingRequests] = useState([]);
+  const [archivedPurchasingRequests, setArchivedPurchasingRequests] = useState(
+    []
+  );
 
   // Fetch job requests from the database
   useEffect(() => {
     fetchPurchasingRequests();
+    fetchArchivedPurchasingRequests();
   }, []);
 
   const fetchPurchasingRequests = async () => {
@@ -34,13 +38,28 @@ export const PurchasingRequestsProvider = ({ children }) => {
     }
   };
 
+  const fetchArchivedPurchasingRequests = async () => {
+    try {
+      const { data } = await axios({
+        method: "get",
+        url: "/purchasing_request/archived",
+        withCredentials: true,
+      });
+      setArchivedPurchasingRequests(data);
+    } catch (error) {
+      console.error("Error fetching job requests:", error);
+    }
+  };
 
   return (
     <PurchasingRequestsContext.Provider
       value={{
         purchasingRequests,
         fetchPurchasingRequests,
-        setPurchasingRequests
+        setPurchasingRequests,
+        archivedPurchasingRequests,
+        fetchArchivedPurchasingRequests,
+        setArchivedPurchasingRequests,
       }}
     >
       {children}

@@ -83,12 +83,19 @@ const CalendarView = () => {
   }, []);
 
   useEffect(() => {
-    const throttledUpdateSize = throttle(() => {
-      calendarRef.current?.getApi().updateSize();
-    }, 50); // Limit updates to once every 200ms
+    let timeoutId = null;
+
+    const updateSize = () => {
+      if (timeoutId) return;
+
+      timeoutId = setTimeout(() => {
+        calendarRef.current?.getApi().updateSize();
+        timeoutId = null;
+      }, 200); // Debounce with 200ms delay
+    };
 
     const handleGlobalInteraction = () => {
-      throttledUpdateSize();
+      updateSize();
     };
 
     window.addEventListener("click", handleGlobalInteraction);
@@ -97,7 +104,7 @@ const CalendarView = () => {
     return () => {
       window.removeEventListener("click", handleGlobalInteraction);
       window.removeEventListener("touchend", handleGlobalInteraction);
-      throttledUpdateSize.cancel(); // Cleanup for throttle
+      if (timeoutId) clearTimeout(timeoutId);
     };
   }, []);
 

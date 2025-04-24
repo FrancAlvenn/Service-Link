@@ -84,7 +84,7 @@ export default function RequestFilter({ filters, onFilterChange }) {
   };
 
   return (
-    <div className="flex flex-wrap gap-3 w-full max-w-[100vw] sm:max-w-[40vw] ">
+    <div className="flex flex-wrap gap-3 w-full max-w-[100vw] sm:max-w-[50vw] ">
       {/* Status Filter */}
       <Menu placement="bottom-start">
         <MenuHandler>
@@ -136,7 +136,7 @@ export default function RequestFilter({ filters, onFilterChange }) {
             icon={<FunnelSimple size={16} />}
           />
         </MenuHandler>
-        <MenuList className="mt-2 p-2 max-h-[50vh] overflow-y-auto p-2 gap-2 flex flex-col">
+        <MenuList className="mt-2 p-2 max-h-[50vh] overflow-y-auto gap-2 flex flex-col">
           <Typography variant="small" className="mb-2 font-semibold">
             Department
           </Typography>

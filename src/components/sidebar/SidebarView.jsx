@@ -29,25 +29,25 @@ const SidebarView = ({ open, onClose, referenceNumber, requests }) => {
 
   const {
     jobRequests,
-    archivedJobRequest,
+    archivedJobRequests,
     fetchJobRequests,
     fetchArchivedJobRequests,
   } = useContext(JobRequestsContext);
   const {
     purchasingRequests,
-    archivedPurchasingRequest,
+    archivedPurchasingRequests,
     fetchPurchasingRequests,
     fetchArchivedPurchasingRequests,
   } = useContext(PurchasingRequestsContext);
   const {
     vehicleRequests,
-    archivedVehicleRequest,
+    archivedVehicleRequests,
     fetchVehicleRequests,
     fetchArchivedVehicleRequests,
   } = useContext(VehicleRequestsContext);
   const {
     venueRequests,
-    archivedVenueRequest,
+    archivedVenueRequests,
     fetchVenueRequests,
     fetchArchivedVenueRequests,
   } = useContext(VenueRequestsContext);
@@ -84,15 +84,15 @@ const SidebarView = ({ open, onClose, referenceNumber, requests }) => {
         type: "job_request",
         data: [
           ...(Array.isArray(jobRequests) ? jobRequests : []),
-          ...(Array.isArray(archivedJobRequest) ? archivedJobRequest : []),
+          ...(Array.isArray(archivedJobRequests) ? archivedJobRequests : []),
         ],
       },
       PR: {
         type: "purchasing_request",
         data: [
           ...(Array.isArray(purchasingRequests) ? purchasingRequests : []),
-          ...(Array.isArray(archivedPurchasingRequest)
-            ? archivedPurchasingRequest
+          ...(Array.isArray(archivedPurchasingRequests)
+            ? archivedPurchasingRequests
             : []),
         ],
       },
@@ -100,8 +100,8 @@ const SidebarView = ({ open, onClose, referenceNumber, requests }) => {
         type: "vehicle_request",
         data: [
           ...(Array.isArray(vehicleRequests) ? vehicleRequests : []),
-          ...(Array.isArray(archivedVehicleRequest)
-            ? archivedVehicleRequest
+          ...(Array.isArray(archivedVehicleRequests)
+            ? archivedVehicleRequests
             : []),
         ],
       },
@@ -109,7 +109,9 @@ const SidebarView = ({ open, onClose, referenceNumber, requests }) => {
         type: "venue_request",
         data: [
           ...(Array.isArray(venueRequests) ? venueRequests : []),
-          ...(Array.isArray(archivedVenueRequest) ? archivedVenueRequest : []),
+          ...(Array.isArray(archivedVenueRequests)
+            ? archivedVenueRequests
+            : []),
         ],
       },
     };
@@ -149,13 +151,13 @@ const SidebarView = ({ open, onClose, referenceNumber, requests }) => {
     referenceNumber,
     user,
     jobRequests,
-    archivedJobRequest,
+    archivedJobRequests,
     purchasingRequests,
-    archivedPurchasingRequest,
+    archivedPurchasingRequests,
     vehicleRequests,
-    archivedVehicleRequest,
+    archivedVehicleRequests,
     venueRequests,
-    archivedVenueRequest,
+    archivedVenueRequests,
   ]);
 
   // Fetch all requests
@@ -264,7 +266,7 @@ const SidebarView = ({ open, onClose, referenceNumber, requests }) => {
   }, [request]);
 
   console.log(jobRequests);
-  console.log(archivedJobRequest);
+  console.log(archivedJobRequests);
   return (
     <div
       onClick={handleSidebarClick}

@@ -31,16 +31,25 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
 
   const { user } = useContext(AuthContext);
 
-  const { fetchJobRequests } = useContext(JobRequestsContext);
-  const { fetchPurchasingRequests } = useContext(PurchasingRequestsContext);
-  const { fetchVehicleRequests } = useContext(VehicleRequestsContext);
-  const { fetchVenueRequests } = useContext(VenueRequestsContext);
+  const { fetchJobRequests, fetchArchivedJobRequests } =
+    useContext(JobRequestsContext);
+  const { fetchPurchasingRequests, fetchArchivedPurchasingRequests } =
+    useContext(PurchasingRequestsContext);
+  const { fetchVehicleRequests, fetchArchivedVehicleRequests } = useContext(
+    VehicleRequestsContext
+  );
+  const { fetchVenueRequests, fetchArchivedVenueRequests } =
+    useContext(VenueRequestsContext);
 
   const fetchAllRequests = () => {
     fetchJobRequests();
     fetchPurchasingRequests();
     fetchVehicleRequests();
     fetchVenueRequests();
+    fetchArchivedJobRequests();
+    fetchArchivedPurchasingRequests();
+    fetchArchivedVehicleRequests();
+    fetchArchivedVenueRequests();
   };
 
   // Fetch status options from backend

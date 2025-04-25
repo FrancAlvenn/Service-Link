@@ -1,6 +1,13 @@
 import { useState, useEffect, useContext } from "react";
 import axios from "axios";
-import { Menu, MenuHandler, MenuList, MenuItem, Typography, Chip } from "@material-tailwind/react";
+import {
+  Menu,
+  MenuHandler,
+  MenuList,
+  MenuItem,
+  Typography,
+  Chip,
+} from "@material-tailwind/react";
 import { PlusCircle } from "@phosphor-icons/react";
 import AuthContext from "../features/authentication/context/AuthContext";
 import ToastNotification from "./ToastNotification";
@@ -9,15 +16,26 @@ import { PurchasingRequestsContext } from "../features/request_management/contex
 import { VehicleRequestsContext } from "../features/request_management/context/VehicleRequestsContext";
 import { VenueRequestsContext } from "../features/request_management/context/VenueRequestsContext";
 
-function DepartmentModal({ request, input, referenceNumber, requestType, onDepartmentUpdate }) {
+function DepartmentModal({
+  request,
+  input,
+  referenceNumber,
+  requestType,
+  onDepartmentUpdate,
+}) {
   const [departmentOptions, setDepartmentOptions] = useState([]);
   const [currentDepartment, setCurrentDepartment] = useState(input);
 
   const { user } = useContext(AuthContext);
-  const { fetchJobRequests } = useContext(JobRequestsContext);
-  const { fetchPurchasingRequests } = useContext(PurchasingRequestsContext);
-  const { fetchVehicleRequests } = useContext(VehicleRequestsContext);
-  const { fetchVenueRequests } = useContext(VenueRequestsContext);
+  const { fetchJobRequests, fetchArchivedJobRequests } =
+    useContext(JobRequestsContext);
+  const { fetchPurchasingRequests, fetchArchivedPurchasingRequests } =
+    useContext(PurchasingRequestsContext);
+  const { fetchVehicleRequests, fetchArchivedVehicleRequests } = useContext(
+    VehicleRequestsContext
+  );
+  const { fetchVenueRequests, fetchArchivedVenueRequests } =
+    useContext(VenueRequestsContext);
 
   const [isAuthorized, setIsAuthorized] = useState(false);
 
@@ -26,13 +44,19 @@ function DepartmentModal({ request, input, referenceNumber, requestType, onDepar
     fetchPurchasingRequests();
     fetchVehicleRequests();
     fetchVenueRequests();
+    fetchArchivedJobRequests();
+    fetchArchivedPurchasingRequests();
+    fetchArchivedVehicleRequests();
+    fetchArchivedVenueRequests();
   };
 
   // Fetch department options from backend
   useEffect(() => {
     const getDepartments = async () => {
       try {
-        const response = await axios.get("/settings/department", { withCredentials: true });
+        const response = await axios.get("/settings/department", {
+          withCredentials: true,
+        });
 
         if (Array.isArray(response.data.departments)) {
           setDepartmentOptions(response.data.departments);
@@ -44,12 +68,14 @@ function DepartmentModal({ request, input, referenceNumber, requestType, onDepar
       }
     };
 
-      // Check if user is authorized
-      if (request?.authorized_access) {
-        setIsAuthorized(request.authorized_access.includes(user.reference_number));
-      } else {
-        setIsAuthorized(false);
-      }
+    // Check if user is authorized
+    if (request?.authorized_access) {
+      setIsAuthorized(
+        request.authorized_access.includes(user.reference_number)
+      );
+    } else {
+      setIsAuthorized(false);
+    }
 
     getDepartments();
   }, []);
@@ -68,11 +94,11 @@ function DepartmentModal({ request, input, referenceNumber, requestType, onDepar
         method: "put",
         url: `/${requestType}/${referenceNumber}`,
         data: {
-            ...request,
-            department: department,
+          ...request,
+          department: department,
         },
-        withCredentials: true
-      })
+        withCredentials: true,
+      });
 
       if (response.status === 200) {
         ToastNotification.success("Success!", response.data.message);
@@ -97,8 +123,14 @@ function DepartmentModal({ request, input, referenceNumber, requestType, onDepar
             size="sm"
             variant="ghost"
             value={currentDepartment || "Select Department"}
-            className={`text-center w-fit ${isAuthorized ? "cursor-pointer" : "cursor-not-allowed"} dark:bg-gray-800 dark:text-gray-200`}
-            color={departmentOptions.find(option => option.name === currentDepartment)?.color || "gray"}
+            className={`text-center w-fit ${
+              isAuthorized ? "cursor-pointer" : "cursor-not-allowed"
+            } dark:bg-gray-800 dark:text-gray-200`}
+            color={
+              departmentOptions.find(
+                (option) => option.name === currentDepartment
+              )?.color || "gray"
+            }
           />
         </MenuHandler>
         {isAuthorized && (
@@ -143,7 +175,7 @@ function DepartmentModal({ request, input, referenceNumber, requestType, onDepar
         )}
       </Menu>
     </div>
-);
+  );
 }
 
 export default DepartmentModal;

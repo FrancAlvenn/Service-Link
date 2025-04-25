@@ -1,27 +1,62 @@
 import { useState, useContext, useEffect } from "react";
 import axios from "axios";
-import { Menu, MenuHandler, MenuList, MenuItem, Typography, Chip } from "@material-tailwind/react";
+import {
+  Menu,
+  MenuHandler,
+  MenuList,
+  MenuItem,
+  Typography,
+  Chip,
+} from "@material-tailwind/react";
 import { PlusCircle } from "@phosphor-icons/react";
 import { JobRequestsContext } from "../features/request_management/context/JobRequestsContext";
 import ToastNotification from "./ToastNotification";
 import AuthContext from "../features/authentication/context/AuthContext";
+import { PurchasingRequestsContext } from "../features/request_management/context/PurchasingRequestsContext";
+import { VehicleRequestsContext } from "../features/request_management/context/VehicleRequestsContext";
+import { VenueRequestsContext } from "../features/request_management/context/VenueRequestsContext";
 
-function ApprovalStatusModal({ input, referenceNumber, requestType, approvingPosition, onStatusUpdate }) {
+function ApprovalStatusModal({
+  input,
+  referenceNumber,
+  requestType,
+  approvingPosition,
+  onStatusUpdate,
+}) {
   const { user } = useContext(AuthContext);
-  const { fetchJobRequests } = useContext(JobRequestsContext);
+  const { fetchJobRequests, fetchArchivedJobRequests } =
+    useContext(JobRequestsContext);
+  const { fetchPurchasingRequests, fetchArchivedPurchasingRequests } =
+    useContext(PurchasingRequestsContext);
+  const { fetchVehicleRequests, fetchArchivedVehicleRequests } = useContext(
+    VehicleRequestsContext
+  );
+  const { fetchVenueRequests, fetchArchivedVenueRequests } =
+    useContext(VenueRequestsContext);
 
   // Predefined approval status options
   const statusOptions = [
     { id: 1, status: "Approved", color: "green" },
     { id: 2, status: "Rejected", color: "red" },
-    { id: 3, status: "Pending", color: "amber" }
+    { id: 3, status: "Pending", color: "amber" },
   ];
+
+  const fetchAllRequests = () => {
+    fetchJobRequests();
+    fetchPurchasingRequests();
+    fetchVehicleRequests();
+    fetchVenueRequests();
+    fetchArchivedJobRequests();
+    fetchArchivedPurchasingRequests();
+    fetchArchivedVehicleRequests();
+    fetchArchivedVenueRequests();
+  };
 
   // Define a mapping of approval roles to readable titles
   const approvalTitles = {
     immediate_head_approval: "Immediate Head",
     gso_director_approval: "GSO Director",
-    operations_director_approval: "Operations Director"
+    operations_director_approval: "Operations Director",
   };
 
   // Get the readable title or default to "Unknown"
@@ -46,13 +81,10 @@ function ApprovalStatusModal({ input, referenceNumber, requestType, approvingPos
       );
 
       if (response.status === 200) {
-        fetchJobRequests();
+        fetchAllRequests();
         ToastNotification.success("Success!", response.data.message);
 
-        // Notify parent component if needed
-        if (onStatusUpdate) {
-          onStatusUpdate(status);
-        }
+        setCurrentStatus(status);
       }
 
       // Log the request activity
@@ -67,10 +99,8 @@ function ApprovalStatusModal({ input, referenceNumber, requestType, approvingPos
           details: `${approvalTitle} approval updated to <i>${status}</i>`,
           performed_by: user.reference_number,
         },
-        withCredentials: true
-      })
-
-
+        withCredentials: true,
+      });
     } catch (error) {
       ToastNotification.error("Error!", "Failed to update status.");
       console.error("Status update failed:", error);
@@ -86,7 +116,10 @@ function ApprovalStatusModal({ input, referenceNumber, requestType, approvingPos
             variant="ghost"
             value={currentStatus || "Select Status"}
             className="text-center w-fit cursor-pointer dark:bg-gray-800 dark:text-gray-200"
-            color={statusOptions.find(option => option.status === currentStatus)?.color || "gray"}
+            color={
+              statusOptions.find((option) => option.status === currentStatus)
+                ?.color || "gray"
+            }
           />
         </MenuHandler>
         <MenuList className="mt-2 divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-900 shadow-lg ring-2 ring-black/5 dark:ring-gray-700 border-none">
@@ -111,7 +144,10 @@ function ApprovalStatusModal({ input, referenceNumber, requestType, approvingPos
               ))}
             </div>
             <div className="flex items-center mt-2 py-2 justify-center text-xs rounded-lg bg-gray-100 dark:bg-gray-800">
-              <Typography color="blue-gray" className="flex items-center gap-2 font-semibold text-sm text-gray-500 dark:text-gray-300 cursor-pointer">
+              <Typography
+                color="blue-gray"
+                className="flex items-center gap-2 font-semibold text-sm text-gray-500 dark:text-gray-300 cursor-pointer"
+              >
                 <PlusCircle size={18} className="cursor-pointer" />
                 Add new status
               </Typography>
@@ -120,7 +156,7 @@ function ApprovalStatusModal({ input, referenceNumber, requestType, approvingPos
         </MenuList>
       </Menu>
     </div>
-);
+  );
 }
 
 export default ApprovalStatusModal;

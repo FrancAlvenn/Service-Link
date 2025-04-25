@@ -33,9 +33,9 @@ export function ArchivedRequests() {
   const [requestType, setRequestType] = useState("job_request"); // Default request type
 
   const {
-    archivedJobRequest,
+    archivedJobRequests,
     fetchArchivedJobRequests,
-    setArchivedJobRequest,
+    setArchivedJobRequests,
   } = useContext(JobRequestsContext);
   const {
     archivedPurchasingRequests,
@@ -64,7 +64,7 @@ export function ArchivedRequests() {
   });
 
   const allRequests = [
-    ...(Array.isArray(archivedJobRequest) ? archivedJobRequest : []),
+    ...(Array.isArray(archivedJobRequests) ? archivedJobRequests : []),
     ...(Array.isArray(archivedPurchasingRequests)
       ? archivedPurchasingRequests
       : []),
@@ -76,8 +76,8 @@ export function ArchivedRequests() {
     switch (requestType) {
       case "job_request":
         return {
-          requests: archivedJobRequest,
-          setRequests: setArchivedJobRequest,
+          requests: archivedJobRequests,
+          setRequests: setArchivedJobRequests,
           fetchRequests: fetchArchivedJobRequests,
         };
       case "purchasing_request":
@@ -110,7 +110,7 @@ export function ArchivedRequests() {
   } = getRequestData() || {};
 
   // Filter data based on search query
-  const filteredRows = (Array.isArray(allRequests) ? allRequests : []).filter(
+  const filteredRows = (Array.isArray(requests) ? requests : []).filter(
     (row) => {
       const rowString = Object.entries(row)
         .filter(([key]) => key !== "details")

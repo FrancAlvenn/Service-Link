@@ -16,27 +16,31 @@ import { PurchasingRequestsContext } from "../features/request_management/contex
 import { VehicleRequestsContext } from "../features/request_management/context/VehicleRequestsContext";
 import { VenueRequestsContext } from "../features/request_management/context/VenueRequestsContext";
 
-function PriorityModal({
-  input,
-  referenceNumber,
-  requestType,
-  onPriorityUpdate,
-}) {
+function PriorityModal({ input, referenceNumber, requestType }) {
   const [priorityOptions, setPriorityOptions] = useState([]);
   const [currentPriority, setCurrentPriority] = useState(input);
 
   const { user } = useContext(AuthContext);
 
-  const { fetchJobRequests } = useContext(JobRequestsContext);
-  const { fetchPurchasingRequests } = useContext(PurchasingRequestsContext);
-  const { fetchVehicleRequests } = useContext(VehicleRequestsContext);
-  const { fetchVenueRequests } = useContext(VenueRequestsContext);
+  const { fetchJobRequests, fetchArchivedJobRequests } =
+    useContext(JobRequestsContext);
+  const { fetchPurchasingRequests, fetchArchivedPurchasingRequests } =
+    useContext(PurchasingRequestsContext);
+  const { fetchVehicleRequests, fetchArchivedVehicleRequests } = useContext(
+    VehicleRequestsContext
+  );
+  const { fetchVenueRequests, fetchArchivedVenueRequests } =
+    useContext(VenueRequestsContext);
 
   const fetchAllRequests = () => {
     fetchJobRequests();
     fetchPurchasingRequests();
     fetchVehicleRequests();
     fetchVenueRequests();
+    fetchArchivedJobRequests();
+    fetchArchivedPurchasingRequests();
+    fetchArchivedVehicleRequests();
+    fetchArchivedVenueRequests();
   };
 
   // Fetch priority options from backend
@@ -89,9 +93,7 @@ function PriorityModal({
         ToastNotification.success("Success!", response.data.message);
         fetchAllRequests();
 
-        if (onPriorityUpdate) {
-          onPriorityUpdate(selectedPriority);
-        }
+        setCurrentPriority(selectedPriority);
       }
     } catch (error) {
       ToastNotification.error("Error!", "Failed to update priority.");
@@ -100,14 +102,14 @@ function PriorityModal({
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 w-full">
       <Menu placement="bottom-start">
         <MenuHandler>
           <Chip
             size="sm"
             variant="ghost"
             value={currentPriority || "Select Priority"}
-            className="text-center w-fit cursor-pointer"
+            className="text-center w-fit cursor-pointer ml-auto"
             color={
               priorityOptions.find(
                 (option) => option.priority === currentPriority

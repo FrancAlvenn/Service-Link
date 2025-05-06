@@ -71,6 +71,9 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
       });
   }, []);
 
+  //Check if date and asset has conflict in time with other requests
+  const checkConflict = async () => {};
+
   const handleChange = (e) => {
     // Validate Date: Ensure date_required is not in the past
     if (e.target.name === "event_dates") {

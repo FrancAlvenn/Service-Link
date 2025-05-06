@@ -9,7 +9,7 @@ import {
 } from "@material-tailwind/react";
 
 import { ArrowClockwise, MagnifyingGlass } from "@phosphor-icons/react";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { PurchasingRequestsContext } from "../../context/PurchasingRequestsContext.js";
 import { formatDate } from "../../../../utils/dateFormatter.js";
 import {
@@ -24,6 +24,7 @@ import SidebarView from "../../../../components/sidebar/SidebarView.jsx";
 import { UserContext } from "../../../../context/UserContext.js";
 import { getColumnConfig } from "../../utils/columnConfig.js";
 import RequestFilter from "../../utils/requestFilter.js";
+import { useLocation } from "react-router-dom";
 
 export function PurchasingRequests() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -39,6 +40,20 @@ export function PurchasingRequests() {
     status: "",
     department: "",
   });
+
+  function useQuery() {
+    return new URLSearchParams(useLocation().search);
+  }
+
+  const query = useQuery();
+  const preSelectedReference = query.get("referenceNumber");
+
+  useEffect(() => {
+    if (preSelectedReference) {
+      setSelectedReferenceNumber(preSelectedReference);
+      setSidebarOpen(true);
+    }
+  }, [preSelectedReference]);
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);

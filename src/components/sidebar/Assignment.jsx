@@ -14,6 +14,7 @@ import ToastNotification from "../../utils/ToastNotification";
 import { UserCircle } from "@phosphor-icons/react";
 import { UserContext } from "../../context/UserContext"; // Import UserContext
 import { AuthContext } from "../../features/authentication";
+import AssetContext from "../../features/asset_management/context/AssetContext";
 
 const Assignment = ({
   selectedRequest,
@@ -22,6 +23,7 @@ const Assignment = ({
   fetchRequests,
 }) => {
   const { employees, fetchEmployees } = useContext(EmployeeContext);
+  const { assets, fetchAssets } = useContext(AssetContext);
   const { user } = useContext(AuthContext); // Current logged-in user
 
   const [selectedEmployees, setSelectedEmployees] = useState([]);
@@ -36,6 +38,7 @@ const Assignment = ({
 
   useEffect(() => {
     fetchEmployees();
+    fetchAssets();
   }, []);
 
   useEffect(() => {
@@ -119,33 +122,39 @@ const Assignment = ({
             </Button>
           </MenuHandler>
           <MenuList className="max-h-64 overflow-y-auto w-full max-w-[440px]">
-            {employees.map((emp) => {
-              const isSelected = selectedRequest?.assigned_to?.includes(
-                emp.reference_number
-              );
-              return (
-                <MenuItem
-                  key={emp.reference_number}
-                  onClick={() => toggleEmployee(emp.reference_number)}
-                  className={`flex justify-between items-center ${
-                    isSelected ? "bg-blue-100" : ""
-                  }`}
-                >
-                  <span className="flex items-center w-full">
-                    <UserCircle size={20} className="mr-2" />
-                    {emp.first_name} {emp.last_name}
-                  </span>
-                  {isSelected && (
-                    <Chip
-                      size="sm"
-                      color="blue"
-                      value="Assigned"
-                      className="ml-2"
-                    />
-                  )}
-                </MenuItem>
-              );
-            })}
+            {employees.length > 0 ? (
+              employees.map((emp) => {
+                const isSelected = selectedRequest?.assigned_to?.includes(
+                  emp.reference_number
+                );
+                return (
+                  <MenuItem
+                    key={emp.reference_number}
+                    onClick={() => toggleEmployee(emp.reference_number)}
+                    className={`flex justify-between items-center ${
+                      isSelected ? "bg-blue-100" : ""
+                    }`}
+                  >
+                    <span className="flex items-center w-full">
+                      <UserCircle size={20} className="mr-2" />
+                      {emp.first_name} {emp.last_name}
+                    </span>
+                    {isSelected && (
+                      <Chip
+                        size="sm"
+                        color="blue"
+                        value="Assigned"
+                        className="ml-2"
+                      />
+                    )}
+                  </MenuItem>
+                );
+              })
+            ) : (
+              <MenuItem key="no-employees" disabled className="text-gray-900">
+                No employees available
+              </MenuItem>
+            )}
           </MenuList>
         </Menu>
 

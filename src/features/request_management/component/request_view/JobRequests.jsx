@@ -13,6 +13,7 @@ import { UserContext } from "../../../../context/UserContext.js";
 import { getColumnConfig } from "../../utils/columnConfig.js";
 import { AuthContext } from "../../../authentication/index.js";
 import RequestFilter from "../../utils/requestFilter.js";
+import { useLocation } from "react-router-dom";
 
 export function JobRequests() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -30,6 +31,20 @@ export function JobRequests() {
     status: "",
     department: "",
   });
+
+  function useQuery() {
+    return new URLSearchParams(useLocation().search);
+  }
+
+  const query = useQuery();
+  const preSelectedReference = query.get("referenceNumber");
+
+  useEffect(() => {
+    if (preSelectedReference) {
+      setSelectedReferenceNumber(preSelectedReference);
+      setSidebarOpen(true);
+    }
+  }, [preSelectedReference]);
 
   // Filter data based on search query
   const filteredRows = (Array.isArray(jobRequests) ? jobRequests : []).filter(

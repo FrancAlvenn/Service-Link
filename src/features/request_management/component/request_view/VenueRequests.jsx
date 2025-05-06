@@ -9,7 +9,7 @@ import {
 } from "@material-tailwind/react";
 
 import { ArrowClockwise, MagnifyingGlass } from "@phosphor-icons/react";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { VenueRequestsContext } from "../../context/VenueRequestsContext.js";
 import { formatDate } from "../../../../utils/dateFormatter.js";
 import {
@@ -24,6 +24,7 @@ import SidebarView from "../../../../components/sidebar/SidebarView.jsx";
 import { UserContext } from "../../../../context/UserContext.js";
 import { getColumnConfig } from "../../utils/columnConfig.js";
 import RequestFilter from "../../utils/requestFilter.js";
+import { useLocation } from "react-router-dom";
 
 export function VenueRequests() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -33,6 +34,20 @@ export function VenueRequests() {
   const { venueRequests, fetchVenueRequests } =
     useContext(VenueRequestsContext);
   const { getUserByReferenceNumber } = useContext(UserContext);
+
+  function useQuery() {
+    return new URLSearchParams(useLocation().search);
+  }
+
+  const query = useQuery();
+  const preSelectedReference = query.get("referenceNumber");
+
+  useEffect(() => {
+    if (preSelectedReference) {
+      setSelectedReferenceNumber(preSelectedReference);
+      setSidebarOpen(true);
+    }
+  }, [preSelectedReference]);
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
@@ -81,7 +96,7 @@ export function VenueRequests() {
       {/* Main content with smooth transition for max-width */}
       <div
         className={`h-full bg-white w-full mt-0 px-3 flex flex-col justify-between transition-[max-width] duration-300 ${
-          sidebarOpen ? "max-w-[65%]" : "w-full"
+          sidebarOpen ? "max-w-[55%]" : "w-full"
         }`}
       >
         <div className="flex flex-col gap-4 h-full">

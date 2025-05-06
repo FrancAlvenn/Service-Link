@@ -199,13 +199,13 @@ const ActivityTab = ({ referenceNumber, activeTab }) => {
 
       {/* Add Request Activity - Comment when there is visibility */}
       {visibility && (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-10">
           <ReactQuill
             theme="snow"
             value={content}
             onChange={handleContentChange}
           />
-          <div className="flex gap-2 mt-4">
+          <div className="flex gap-2 mt-2">
             <Button
               variant="outlined"
               color="blue"

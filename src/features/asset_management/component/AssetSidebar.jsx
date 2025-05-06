@@ -39,11 +39,8 @@ const AssetSidebar = ({
     { key: "asset_type", label: "Asset Type", type: "select" },
     { key: "description", label: "Description", type: "textarea" },
     { key: "location", label: "Location", type: "text" },
-    { key: "purchase_date", label: "Purchase Date", type: "date" },
-    { key: "purchase_cost", label: "Purchase Cost", type: "number" },
     { key: "status", label: "Status", type: "select" },
     { key: "last_maintenance", label: "Last Maintenance", type: "date" },
-    { key: "warranty_expiry", label: "Warranty Expiry", type: "date" },
     { key: "createdAt", label: "Created At", type: "date", readOnly: true },
     { key: "updatedAt", label: "Updated At", type: "date", readOnly: true },
   ];

@@ -242,7 +242,7 @@ const Assignment = ({
             <Button
               variant="outlined"
               size="sm"
-              className="flex items-center w-full py-3 text-left"
+              className="w-full py-3 text-left"
             >
               {selectedEmployees.length > 0
                 ? `Assigned (${selectedEmployees.length})`
@@ -321,7 +321,7 @@ const Assignment = ({
             <Button
               variant="outlined"
               size="sm"
-              className="flex items-center w-full py-3 text-left"
+              className="w-full py-3 text-left"
             >
               {selectedAssets.length > 0
                 ? `Assigned (${selectedAssets.length})`

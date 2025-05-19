@@ -27,6 +27,7 @@ import { AuthContext } from "../../../authentication";
 import ToastNotification from "../../../../utils/ToastNotification";
 import SidebarView from "../../../../components/sidebar/SidebarView";
 import RequestFilter from "../../utils/requestFilter";
+import Header from "../../../../layouts/header";
 
 export function KanbanBoard() {
   const [columns, setColumns] = useState([]);
@@ -245,219 +246,204 @@ export function KanbanBoard() {
   };
 
   return (
-    <div className="flex justify-between h-full bg-white">
-      <div
-        className={`h-full bg-white rounded-lg w-full mt-0 p-1 flex justify-between transition-[max-width] duration-300 ${
-          sidebarOpen ? "max-w-[65%]" : "w-full"
-        }`}
+    <div className="flex flex-col h-full bg-white">
+      <CardHeader
+        floated={false}
+        shadow={false}
+        className="rounded-none min-h-fit pb-2"
       >
-        <div className="flex flex-col gap-2 h-full w-full">
-          <CardHeader
-            floated={false}
-            shadow={false}
-            className="rounded-none min-h-fit pb-2"
-          >
-            <div className="mb-1 flex items-center justify-between gap-5">
-              <Typography color="black" className="text-lg px-3 font-bold">
-                Kanban Board
-              </Typography>
-            </div>
+        <Header title={"Kanban Board"} />
 
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between px-3 gap-4 mt-2 w-full">
-              {/* Search Bar */}
-              <div className="relative w-full max-w-[230px] min-w-[150px]">
-                <input
-                  className="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md pl-3 pr-28 py-2 focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
-                  placeholder="Search"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
-                />
-                <span className="absolute top-1 right-1 flex items-center rounded py-1.5 px-3 text-black shadow-sm hover:shadow">
-                  <MagnifyingGlass size={16} />
-                </span>
-              </div>
-
-              {/* Filter & Menus */}
-              <div className="flex flex-col  lg:flex-row lg:justify-end lg:items-center gap-2 w-full">
-                <div className="w-full">
-                  <RequestFilter
-                    filters={filters}
-                    onFilterChange={setFilters}
-                  />
-                </div>
-                <div className="flex lg:flex-row lg:justify-end items-center gap-2 w-fit">
-                  <span className="text-xs font-semibold whitespace-nowrap text-gray-700 text-center sm:text-left">
-                    GROUP BY
-                  </span>
-
-                  {/* Request Type Menu */}
-
-                  <Menu placement="bottom-end">
-                    <MenuHandler>
-                      <div className="cursor-pointer w-fit">
-                        <Chip
-                          value={requestType
-                            .replace("_", " ")
-                            .replace(/\b\w/g, (l) => l.toUpperCase())}
-                          variant="filled"
-                          color={requestTypeColor[requestType] || "gray"}
-                          className="pointer-events-none" // Prevent Chip's default click
-                        />
-                      </div>
-                    </MenuHandler>
-
-                    <MenuList className="flex flex-col flex-wrap gap-2 px-3 py-2">
-                      <Chip
-                        value="Job Requests"
-                        onClick={() => setRequestType("job_request")}
-                        variant={
-                          requestType === "job_request" ? "filled" : "ghost"
-                        }
-                        color={requestType === "job_request" ? "blue" : "gray"}
-                        className="cursor-pointer w-fit"
-                      />
-                      <Chip
-                        value="Purchasing Requests"
-                        onClick={() => setRequestType("purchasing_request")}
-                        variant={
-                          requestType === "purchasing_request"
-                            ? "filled"
-                            : "ghost"
-                        }
-                        color={
-                          requestType === "purchasing_request"
-                            ? "green"
-                            : "gray"
-                        }
-                        className="cursor-pointer w-fit"
-                      />
-                      <Chip
-                        value="Vehicle Requests"
-                        onClick={() => setRequestType("vehicle_request")}
-                        variant={
-                          requestType === "vehicle_request" ? "filled" : "ghost"
-                        }
-                        color={
-                          requestType === "vehicle_request" ? "amber" : "gray"
-                        }
-                        className="cursor-pointer w-fit"
-                      />
-                      <Chip
-                        value="Venue Requests"
-                        onClick={() => setRequestType("venue_request")}
-                        variant={
-                          requestType === "venue_request" ? "filled" : "ghost"
-                        }
-                        color={
-                          requestType === "venue_request" ? "purple" : "gray"
-                        }
-                        className="cursor-pointer w-fit"
-                      />
-                    </MenuList>
-                  </Menu>
-
-                  <Menu placement="bottom-end">
-                    <MenuHandler>
-                      <div className="cursor-pointer w-fit">
-                        <Chip
-                          value="Add Column"
-                          variant="ghost"
-                          color="gray"
-                          className="pointer-events-none"
-                        />
-                      </div>
-                    </MenuHandler>
-
-                    <MenuList className="flex flex-col flex-wrap gap-2 px-3 py-2">
-                      {status.map((stat) => (
-                        <Chip
-                          key={stat.id}
-                          value={stat.status}
-                          onClick={() => addColumn(stat.status)}
-                          variant="ghost"
-                          color={stat.color || "gray"}
-                          className="cursor-pointer w-fit"
-                        />
-                      ))}
-                    </MenuList>
-                  </Menu>
-                </div>
-              </div>
-            </div>
-          </CardHeader>
-
-          <CardBody className="custom-scrollbar h-full pt-0">
-            <DragDropContext onDragEnd={handleOnDragEnd}>
-              <div className="flex justify-between items-center flex-row gap-3">
-                {columns.map((column) => (
-                  <Column
-                    key={column.name}
-                    title={column.name}
-                    tasks={filteredTasks(
-                      (Array.isArray(requests) ? requests : []).filter(
-                        (task) => task.status === column.name
-                      )
-                    )}
-                    id={column.name}
-                    columnID={column.id}
-                    requestType={requestType}
-                    setRequests={setRequests}
-                    user={user}
-                    columns={columns}
-                    setColumns={setColumns}
-                    fetchData={fetchData}
-                    setSelectedReferenceNumber={setSelectedReferenceNumber}
-                    setSidebarOpen={setSidebarOpen}
-                  />
-                ))}
-              </div>
-            </DragDropContext>
-          </CardBody>
-        </div>
-      </div>
-      <SidebarView
-        open={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-        referenceNumber={selectedReferenceNumber}
-      />
-      <Dialog
-        open={openModal}
-        handler={setOpenModal}
-        size="sm"
-        className="backdrop:bg-transparent"
-      >
-        <DialogHeader>Confirm Status Change</DialogHeader>
-        <DialogBody>
-          <div className="flex flex-col gap-4">
-            <Typography variant="small" className="font-sans">
-              You selected <strong>{selectedStatus}</strong>. Please enter the
-              action taken before proceeding.
-            </Typography>
-            <Input
-              type="text"
-              placeholder="Action Taken"
-              value={actionTaken}
-              onChange={(e) => setActionTaken(e.target.value)}
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between px-3 gap-4 mt-2 w-full">
+          {/* Search Bar */}
+          <div className="relative w-full max-w-[230px] min-w-[150px]">
+            <input
+              className="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md pl-3 pr-28 py-2 focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
+              placeholder="Search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
             />
+            <span className="absolute top-1 right-1 flex items-center rounded py-1.5 px-3 text-black shadow-sm hover:shadow">
+              <MagnifyingGlass size={16} />
+            </span>
           </div>
-        </DialogBody>
-        <DialogFooter>
-          <Button
-            color="gray"
-            onClick={() => setOpenModal(false)}
-            className="mr-2 bg-gray-500 cursor-pointer"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={confirmStatusChange}
-            disabled={!actionTaken.trim()}
-            className="bg-blue-500 cursor-pointer"
-          >
-            Confirm
-          </Button>
-        </DialogFooter>
-      </Dialog>
+
+          {/* Filter & Menus */}
+          <div className="flex flex-col  lg:flex-row lg:justify-end lg:items-center gap-2 w-full">
+            <div className="w-full">
+              <RequestFilter filters={filters} onFilterChange={setFilters} />
+            </div>
+            <div className="flex lg:flex-row lg:justify-end items-center gap-2 w-fit">
+              <span className="text-xs font-semibold whitespace-nowrap text-gray-700 text-center sm:text-left">
+                GROUP BY
+              </span>
+
+              {/* Request Type Menu */}
+
+              <Menu placement="bottom-end">
+                <MenuHandler>
+                  <div className="cursor-pointer w-fit">
+                    <Chip
+                      value={requestType
+                        .replace("_", " ")
+                        .replace(/\b\w/g, (l) => l.toUpperCase())}
+                      variant="filled"
+                      color={requestTypeColor[requestType] || "gray"}
+                      className="pointer-events-none" // Prevent Chip's default click
+                    />
+                  </div>
+                </MenuHandler>
+
+                <MenuList className="flex flex-col flex-wrap gap-2 px-3 py-2">
+                  <Chip
+                    value="Job Requests"
+                    onClick={() => setRequestType("job_request")}
+                    variant={requestType === "job_request" ? "filled" : "ghost"}
+                    color={requestType === "job_request" ? "blue" : "gray"}
+                    className="cursor-pointer w-fit"
+                  />
+                  <Chip
+                    value="Purchasing Requests"
+                    onClick={() => setRequestType("purchasing_request")}
+                    variant={
+                      requestType === "purchasing_request" ? "filled" : "ghost"
+                    }
+                    color={
+                      requestType === "purchasing_request" ? "green" : "gray"
+                    }
+                    className="cursor-pointer w-fit"
+                  />
+                  <Chip
+                    value="Vehicle Requests"
+                    onClick={() => setRequestType("vehicle_request")}
+                    variant={
+                      requestType === "vehicle_request" ? "filled" : "ghost"
+                    }
+                    color={requestType === "vehicle_request" ? "amber" : "gray"}
+                    className="cursor-pointer w-fit"
+                  />
+                  <Chip
+                    value="Venue Requests"
+                    onClick={() => setRequestType("venue_request")}
+                    variant={
+                      requestType === "venue_request" ? "filled" : "ghost"
+                    }
+                    color={requestType === "venue_request" ? "purple" : "gray"}
+                    className="cursor-pointer w-fit"
+                  />
+                </MenuList>
+              </Menu>
+
+              <Menu placement="bottom-end">
+                <MenuHandler>
+                  <div className="cursor-pointer w-fit">
+                    <Chip
+                      value="Add Column"
+                      variant="ghost"
+                      color="gray"
+                      className="pointer-events-none"
+                    />
+                  </div>
+                </MenuHandler>
+
+                <MenuList className="flex flex-col flex-wrap gap-2 px-3 py-2">
+                  {status.map((stat) => (
+                    <Chip
+                      key={stat.id}
+                      value={stat.status}
+                      onClick={() => addColumn(stat.status)}
+                      variant="ghost"
+                      color={stat.color || "gray"}
+                      className="cursor-pointer w-fit"
+                    />
+                  ))}
+                </MenuList>
+              </Menu>
+            </div>
+          </div>
+        </div>
+      </CardHeader>
+
+      <div className="flex justify-between h-full bg-white">
+        <div
+          className={`h-full bg-white rounded-lg w-full mt-0 p-1 flex justify-between transition-[max-width] duration-300 ${
+            sidebarOpen ? "max-w-[55%]" : "w-full"
+          }`}
+        >
+          <div className="flex flex-col gap-2 h-full w-full">
+            <CardBody className="custom-scrollbar h-full pt-0">
+              <DragDropContext onDragEnd={handleOnDragEnd}>
+                <div className="flex justify-between items-center flex-row gap-3">
+                  {columns.map((column) => (
+                    <Column
+                      key={column.name}
+                      title={column.name}
+                      tasks={filteredTasks(
+                        (Array.isArray(requests) ? requests : []).filter(
+                          (task) => task.status === column.name
+                        )
+                      )}
+                      id={column.name}
+                      columnID={column.id}
+                      requestType={requestType}
+                      setRequests={setRequests}
+                      user={user}
+                      columns={columns}
+                      setColumns={setColumns}
+                      fetchData={fetchData}
+                      setSelectedReferenceNumber={setSelectedReferenceNumber}
+                      setSidebarOpen={setSidebarOpen}
+                    />
+                  ))}
+                </div>
+              </DragDropContext>
+            </CardBody>
+          </div>
+        </div>
+        <SidebarView
+          open={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          referenceNumber={selectedReferenceNumber}
+        />
+        <Dialog
+          open={openModal}
+          handler={setOpenModal}
+          size="sm"
+          className="backdrop:bg-transparent"
+        >
+          <DialogHeader>Confirm Status Change</DialogHeader>
+          <DialogBody>
+            <div className="flex flex-col gap-4">
+              <Typography variant="small" className="font-sans">
+                You selected <strong>{selectedStatus}</strong>. Please enter the
+                action taken before proceeding.
+              </Typography>
+              <Input
+                type="text"
+                placeholder="Action Taken"
+                value={actionTaken}
+                onChange={(e) => setActionTaken(e.target.value)}
+              />
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <Button
+              color="gray"
+              onClick={() => setOpenModal(false)}
+              className="mr-2 bg-gray-500 cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={confirmStatusChange}
+              disabled={!actionTaken.trim()}
+              className="bg-blue-500 cursor-pointer"
+            >
+              Confirm
+            </Button>
+          </DialogFooter>
+        </Dialog>
+      </div>
     </div>
   );
 }

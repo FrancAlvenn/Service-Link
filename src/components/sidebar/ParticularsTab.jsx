@@ -8,14 +8,8 @@ import {
 import { useState } from "react";
 import ToastNotification from "../../utils/ToastNotification";
 import axios from "axios";
+import { Button, Typography } from "@material-tailwind/react";
 
-/**
- * ParticularsTab Component
- * Handles displaying, editing, adding, and removing particulars in a request.
- *
- * @param {{ request: object, setRequest: function, requestType: string, referenceNumber: string, fetchRequests: function, user: object }} props
- * @returns {JSX.Element}
- */
 const ParticularsTab = ({
   request,
   setRequest,
@@ -32,13 +26,11 @@ const ParticularsTab = ({
     description: "",
   });
 
-  // Handle edit click
   const handleEditClick = (index) => {
     setEditingIndex(index);
     setEditedParticular({ ...request.details[index] });
   };
 
-  // Handle save edit
   const handleSaveEdit = async (index) => {
     const updatedDetails = [...request.details];
     updatedDetails[index] = editedParticular;
@@ -68,7 +60,6 @@ const ParticularsTab = ({
     setEditingIndex(null);
   };
 
-  // Handle delete particular
   const handleDetailRemove = async (index) => {
     const updatedDetails = [...request.details];
     updatedDetails.splice(index, 1);
@@ -96,7 +87,6 @@ const ParticularsTab = ({
     }
   };
 
-  // Handle add new particular
   const handleAddParticular = () => {
     const newDetail = { particulars: "", quantity: 0, description: "" };
     setRequest((prevRequest) => ({
@@ -106,115 +96,150 @@ const ParticularsTab = ({
   };
 
   return (
-    <div className="flex flex-col gap-3 h-[70vh] overflow-y-auto">
-      <p className="text-sm font-semibold  text-gray-600">Particulars</p>
-      <div className="flex flex-col gap-3">
-        {request.details.map((detail, index) => (
-          <div
-            key={index}
-            className="flex flex-col gap-1 p-3 border-gray-400 border rounded-md"
-          >
-            <span className="flex gap-4 items-center">
-              {isAuthorized && editingIndex === index ? (
-                <input
-                  type="text"
-                  className="text-sm p-1 min-w-20 w-full max-w-32 border border-gray-300 rounded-md"
-                  value={editedParticular.particulars}
-                  onChange={(e) =>
-                    setEditedParticular({
-                      ...editedParticular,
-                      particulars: e.target.value,
-                    })
-                  }
-                />
-              ) : (
-                <p className="text-sm font-semibold">{detail.particulars}</p>
-              )}
+    <div className="flex flex-col gap-4 p-3 mb-3 border-gray-400 border rounded-md h-[55vh] overflow-y-auto">
+      <p className="text-sm font-semibold text-gray-600">Particulars</p>
 
-              {isAuthorized && editingIndex === index ? (
-                <input
-                  type="number"
-                  className="text-sm p-1 w-20 border border-gray-300 rounded-md"
-                  value={editedParticular.quantity}
-                  onChange={(e) =>
-                    setEditedParticular({
-                      ...editedParticular,
-                      quantity: e.target.value,
-                    })
-                  }
-                />
-              ) : (
-                <p className="text-sm font-semibold">x{detail.quantity}</p>
-              )}
-
-              <span className="flex gap-3 ml-auto">
+      <table className="table-auto rounded-lg  -gray-300 w-full text-sm">
+        <thead>
+          <tr className="bg-gray-100 text-left">
+            <th className="p-2">Item</th>
+            <th className="p-2">Quantity</th>
+            <th className="p-2">Description</th>
+            {isAuthorized && <th className=" p-2">Actions</th>}
+          </tr>
+        </thead>
+        <tbody>
+          {request.details.map((detail, index) => (
+            <tr key={index} className="-t">
+              {/* Particulars */}
+              <td className=" p-3">
                 {isAuthorized && editingIndex === index ? (
-                  <span className="flex gap-3">
-                    <button
-                      className="hover:scale-[1.2] hover:text-green-500"
-                      title="Save"
-                      onClick={() => handleSaveEdit(index)}
-                    >
-                      <FloppyDisk size={18} />
-                    </button>
-                    <button
-                      className="hover:scale-[1.2] hover:text-red-500"
-                      title="Cancel"
-                      onClick={() => setEditingIndex(null)}
-                    >
-                      <Prohibit size={18} />
-                    </button>
-                  </span>
-                ) : (
-                  <button
-                    className="hover:scale-[1.2] hover:text-blue-500"
-                    title="Edit"
-                    onClick={() => handleEditClick(index)}
-                  >
-                    {isAuthorized && <PencilSimpleLine size={18} />}
-                  </button>
-                )}
-                {isAuthorized && (
-                  <X
-                    size={18}
-                    className="cursor-pointer hover:scale-[1.2] hover:text-red-500"
-                    title="Delete"
-                    onClick={() => handleDetailRemove(index)}
+                  <input
+                    type="text"
+                    className="w-full p-1  -gray-300 rounded font-normal"
+                    value={editedParticular.particulars}
+                    onChange={(e) =>
+                      setEditedParticular({
+                        ...editedParticular,
+                        particulars: e.target.value,
+                      })
+                    }
                   />
+                ) : (
+                  <Typography
+                    variant="small"
+                    color="blue-gray"
+                    className="font-normal"
+                  >
+                    {detail.particulars}
+                  </Typography>
                 )}
-              </span>
-            </span>
+              </td>
 
-            {isAuthorized && editingIndex === index ? (
-              <textarea
-                className="w-full p-1 mt-1 text-sm border border-gray-300 rounded-md"
-                value={editedParticular.description}
-                onChange={(e) =>
-                  setEditedParticular({
-                    ...editedParticular,
-                    description: e.target.value,
-                  })
-                }
-              />
-            ) : (
-              <p className="text-sm">{detail.description}</p>
-            )}
-          </div>
-        ))}
-      </div>
+              {/* Quantity */}
+              <td className=" p-3">
+                {isAuthorized && editingIndex === index ? (
+                  <input
+                    type="number"
+                    className="w-full p-1  -gray-300 rounded"
+                    value={editedParticular.quantity}
+                    onChange={(e) =>
+                      setEditedParticular({
+                        ...editedParticular,
+                        quantity: e.target.value,
+                      })
+                    }
+                  />
+                ) : (
+                  <Typography
+                    variant="small"
+                    color="blue-gray"
+                    className="font-normal"
+                  >
+                    {detail.quantity}
+                  </Typography>
+                )}
+              </td>
+
+              {/* Description */}
+              <td className=" p-3">
+                {isAuthorized && editingIndex === index ? (
+                  <textarea
+                    className="w-full p-1  -gray-300 rounded"
+                    value={editedParticular.description}
+                    onChange={(e) =>
+                      setEditedParticular({
+                        ...editedParticular,
+                        description: e.target.value,
+                      })
+                    }
+                  />
+                ) : (
+                  <Typography
+                    variant="small"
+                    color="blue-gray"
+                    className="font-normal"
+                  >
+                    {detail.description}
+                  </Typography>
+                )}
+              </td>
+
+              {/* Actions */}
+              {isAuthorized && (
+                <td className=" p-2">
+                  {editingIndex === index ? (
+                    <div className="flex gap-2 justify-center">
+                      <button
+                        className="text-green-600 hover:scale-110"
+                        title="Save"
+                        onClick={() => handleSaveEdit(index)}
+                      >
+                        <FloppyDisk size={18} />
+                      </button>
+                      <button
+                        className="text-red-500 hover:scale-110"
+                        title="Cancel"
+                        onClick={() => setEditingIndex(null)}
+                      >
+                        <Prohibit size={18} />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2 justify-center">
+                      <button
+                        className="text-blue-500 hover:scale-110"
+                        title="Edit"
+                        onClick={() => handleEditClick(index)}
+                      >
+                        <PencilSimpleLine size={18} />
+                      </button>
+                      <button
+                        className="text-red-500 hover:scale-110"
+                        title="Delete"
+                        onClick={() => handleDetailRemove(index)}
+                      >
+                        <X size={18} />
+                      </button>
+                    </div>
+                  )}
+                </td>
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
       {isAuthorized && (
-        <div
-          className="flex gap-1 p-3 border-gray-400 border rounded-md hover:text-green-500"
+        <Button
+          variant="outlined"
+          size="sm"
+          className="mt-3 flex items-center gap-2 text-green-600  p-2 rounded-lg border border-green-500  hover:bg-green-50 w-fit"
           onClick={handleAddParticular}
         >
-          <button className="text-sm text-center"> Add Particular</button>
-          <Plus
-            size={18}
-            className="ml-auto cursor-pointer hover:scale-[1.2] hover:text-green-500"
-            title="Add Particular"
-          />
-        </div>
+          <Plus size={16} />
+          Add Particular
+        </Button>
       )}
     </div>
   );

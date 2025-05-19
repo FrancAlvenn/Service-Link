@@ -19,6 +19,8 @@ import Ticket from "./TicketModel.js";
 import UserModel from "./UserModel.js";
 import VehicleRequestModel from "./VehicleRequestModel.js";
 import RequestActivity from "./RequestActivity.js";
+import AssetAssignmentLogModel from "./AssetAssignmentLog.js";
+import UserPreferenceModel from "./SettingsModels/UserPreferenceModel.js";
 
 const models = [
   DepartmentsModel,
@@ -27,6 +29,7 @@ const models = [
   Priority,
   Status,
   AssetsModel,
+  AssetAssignmentLogModel,
   ImageModel,
   JobRequestModel,
   JobRequestDetails,
@@ -39,6 +42,7 @@ const models = [
   Ticket,
   UserModel,
   VehicleRequestModel,
+  UserPreferenceModel,
 ]; // Add all models to this array
 
 const syncModels = async (sequelizeInstance) => {
@@ -55,6 +59,7 @@ const syncModels = async (sequelizeInstance) => {
 
 // Function to seed default data (if not already present)
 const seedData = async () => {
+  await seedUsers();
   await seedStatuses();
   await seedPriorities();
   await seedDepartments();
@@ -62,7 +67,99 @@ const seedData = async () => {
   await seedPurchasingRequests();
   await seedVenueRequests();
   await seedVehicleRequests();
+  await seedUserPreferences();
   console.log("✅ Default data seeded.");
+};
+
+const seedUsers = async () => {
+  const defaultUsers = [
+    {
+      reference_number: "DYCI-2025-00001",
+      google_id: "",
+      first_name: "Admin",
+      last_name: "0",
+      username: "admin@dyci.edu.ph",
+      password: "$2a$10$6cl.36kDK/EV/EJ64qn3/uLj35PnIGMEzWyGah.hx6UYfGHDLVub.", // hashed
+      email: "admin@dyci.edu.ph",
+      access_level: "admin",
+      status: "active",
+      immediate_head: "",
+      organization: "",
+      department: "",
+      designation: "",
+      archived: false,
+      created_at: new Date("2025-05-17T19:48:00"),
+      updated_at: new Date("2025-05-17T19:48:00"),
+    },
+    {
+      reference_number: "DYCI-2025-00002",
+      google_id: "108410569826211977045",
+      first_name: "Franc Alvenn",
+      last_name: "Dela Cruz",
+      username: "delacruz.falvenn00665@dyci.edu.ph",
+      password: "$2a$10$xjcf4lCf0ReoQL4U1lV8SOGEcsYdWOEh3VmhgCRVdj1qKDlMRP4KW", // hashed
+      email: "delacruz.falvenn00665@dyci.edu.ph",
+      access_level: "user",
+      status: "active",
+      immediate_head: "",
+      organization: "",
+      department: "",
+      designation: "",
+      archived: false,
+      created_at: new Date("2025-05-17T19:48:00"),
+      updated_at: new Date("2025-05-17T19:48:00"),
+    },
+  ];
+
+  for (const user of defaultUsers) {
+    await UserModel.findOrCreate({
+      where: { reference_number: user.reference_number },
+      defaults: user,
+    });
+  }
+};
+
+// Seed User Preferences
+const seedUserPreferences = async () => {
+  const defaultUserPreferences = [
+    {
+      user_id: "DYCI-2025-00001",
+      kanban_config: {
+        columns: [
+          { id: 1, name: "Pending" },
+          { id: 2, name: "In Progress" },
+          { id: 3, name: "Completed" },
+        ],
+      },
+      theme: "0",
+      notifications_enabled: true,
+      email_notifications_enabled: true,
+      sms_notifications_enabled: true,
+      language: "en",
+    },
+    {
+      user_id: "DYCI-2025-00002",
+      kanban_config: {
+        columns: [
+          { id: 1, name: "Pending" },
+          { id: 2, name: "In Progress" },
+          { id: 3, name: "Completed" },
+        ],
+      },
+      theme: "0",
+      notifications_enabled: true,
+      email_notifications_enabled: true,
+      sms_notifications_enabled: true,
+      language: "en",
+    },
+  ];
+
+  for (const preference of defaultUserPreferences) {
+    await UserPreferenceModel.findOrCreate({
+      where: { user_id: preference.user_id },
+      defaults: preference,
+    });
+  }
 };
 
 // Seed Statuses

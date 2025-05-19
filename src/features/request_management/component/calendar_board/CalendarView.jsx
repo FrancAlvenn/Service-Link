@@ -32,6 +32,7 @@ import SidebarView from "../../../../components/sidebar/SidebarView";
 import { throttle } from "lodash";
 import axios from "axios";
 import ToastNotification from "../../../../utils/ToastNotification";
+import Header from "../../../../layouts/header";
 
 const CalendarView = () => {
   const [status, setStatus] = useState([]);
@@ -337,183 +338,157 @@ const CalendarView = () => {
   };
 
   return (
-    <div className="flex justify-between h-full bg-white">
-      <div
-        className={` bg-white rounded-lg w-full mt-0 p-1 flex justify-between transition-[max-width] duration-300 ${
-          sidebarOpen ? "max-w-[65%]" : "w-full"
-        }`}
+    <div className="flex flex-col h-full bg-white">
+      <CardHeader
+        floated={false}
+        shadow={false}
+        className="rounded-none min-h-fit pb-2"
       >
-        <div className="w-full bg-white dark:bg-gray-900 space-y-6 transition-colors">
-          <div className="h-full bg-white rounded-lg w-full mt-0 p-1">
-            <CardHeader
-              floated={false}
-              shadow={false}
-              className="rounded-none min-h-fit pb-2"
-            >
-              <div className="mb-1 flex items-center justify-between gap-5">
-                <Typography color="black" className="text-lg px-3 font-bold">
-                  Calendar Board
-                </Typography>
-              </div>
+        <Header title={"Calendar View"} />
 
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between px-3 gap-4 mt-2 w-full">
-                <div className="relative w-full max-w-[230px] min-w-[150px]">
-                  <input
-                    className="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md pl-3 pr-28 py-2 focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
-                    placeholder="Search"
-                    value={searchQuery}
-                    onChange={(e) =>
-                      setSearchQuery(e.target.value.toLowerCase())
-                    }
-                  />
-                  <span className="absolute top-1 right-1 flex items-center rounded py-1.5 px-3 text-black shadow-sm hover:shadow">
-                    <MagnifyingGlass size={16} />
-                  </span>
-                </div>
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between px-3 gap-4 mt-2 w-full">
+          <div className="relative w-full max-w-[230px] min-w-[150px]">
+            <input
+              className="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md pl-3 pr-28 py-2 focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
+              placeholder="Search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
+            />
+            <span className="absolute top-1 right-1 flex items-center rounded py-1.5 px-3 text-black shadow-sm hover:shadow">
+              <MagnifyingGlass size={16} />
+            </span>
+          </div>
 
-                <div className="flex flex-col lg:flex-row lg:justify-end lg:items-center gap-2 w-full">
-                  <div className="w-full">
-                    <RequestFilter
-                      filters={filters}
-                      onFilterChange={setFilters}
+          <div className="flex flex-col lg:flex-row lg:justify-end lg:items-center gap-2 w-full">
+            <div className="w-full">
+              <RequestFilter filters={filters} onFilterChange={setFilters} />
+            </div>
+            <div className="flex lg:flex-row lg:justify-end items-center gap-2 w-fit">
+              <span className="text-xs font-semibold whitespace-nowrap text-gray-700 text-center sm:text-left">
+                GROUP BY
+              </span>
+              <Menu placement="bottom-end">
+                <MenuHandler>
+                  <div className="cursor-pointer w-fit">
+                    <Chip
+                      value={requestType
+                        .replace("_", " ")
+                        .replace(/\b\w/g, (l) => l.toUpperCase())}
+                      variant="filled"
+                      color={requestTypeColor[requestType] || "gray"}
+                      className="pointer-events-none" // Prevent Chip's default click
                     />
                   </div>
-                  <div className="flex lg:flex-row lg:justify-end items-center gap-2 w-fit">
-                    <span className="text-xs font-semibold whitespace-nowrap text-gray-700 text-center sm:text-left">
-                      GROUP BY
-                    </span>
-                    <Menu placement="bottom-end">
-                      <MenuHandler>
-                        <div className="cursor-pointer w-fit">
-                          <Chip
-                            value={requestType
-                              .replace("_", " ")
-                              .replace(/\b\w/g, (l) => l.toUpperCase())}
-                            variant="filled"
-                            color={requestTypeColor[requestType] || "gray"}
-                            className="pointer-events-none" // Prevent Chip's default click
-                          />
-                        </div>
-                      </MenuHandler>
+                </MenuHandler>
 
-                      <MenuList className="flex flex-col flex-wrap gap-2 px-3 py-2">
-                        <Chip
-                          value="Job Requests"
-                          onClick={() => setRequestType("job_request")}
-                          variant={
-                            requestType === "job_request" ? "filled" : "ghost"
-                          }
-                          color={
-                            requestType === "job_request" ? "blue" : "gray"
-                          }
-                          className="cursor-pointer w-fit"
-                        />
-                        <Chip
-                          value="Purchasing Requests"
-                          onClick={() => setRequestType("purchasing_request")}
-                          variant={
-                            requestType === "purchasing_request"
-                              ? "filled"
-                              : "ghost"
-                          }
-                          color={
-                            requestType === "purchasing_request"
-                              ? "green"
-                              : "gray"
-                          }
-                          className="cursor-pointer w-fit"
-                        />
-                        <Chip
-                          value="Vehicle Requests"
-                          onClick={() => setRequestType("vehicle_request")}
-                          variant={
-                            requestType === "vehicle_request"
-                              ? "filled"
-                              : "ghost"
-                          }
-                          color={
-                            requestType === "vehicle_request" ? "amber" : "gray"
-                          }
-                          className="cursor-pointer w-fit"
-                        />
-                        <Chip
-                          value="Venue Requests"
-                          onClick={() => setRequestType("venue_request")}
-                          variant={
-                            requestType === "venue_request" ? "filled" : "ghost"
-                          }
-                          color={
-                            requestType === "venue_request" ? "purple" : "gray"
-                          }
-                          className="cursor-pointer w-fit"
-                        />
-                      </MenuList>
-                    </Menu>
-                  </div>
-                </div>
-              </div>
-            </CardHeader>
-
-            <CardBody
-              className={`p-4  overflow-y-auto ${
-                sidebarOpen ? "h-[65vh]" : "h-[75vh]"
-              }`}
-            >
-              <div className="calendar-container h-full overflow-y-auto overflow-x-auto">
-                <FullCalendar
-                  ref={calendarRef} // Add the ref to FullCalendar
-                  plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-                  initialView="dayGridMonth"
-                  headerToolbar={{
-                    left: "prev,next today",
-                    center: "title",
-                    right: "dayGridMonth,timeGridWeek,timeGridDay",
-                  }}
-                  editable={true}
-                  droppable={true}
-                  height="auto"
-                  handleWindowResize={true}
-                  expandRows={true}
-                  events={events}
-                  eventContent={renderEventContent}
-                  eventClick={handleEventClick}
-                  eventDrop={handleEventDrop}
-                  // eventContent={(arg) => {
-                  //   const { title, extendedProps } = arg.event;
-                  //   const typeColor =
-                  //     requestTypeColor[extendedProps.requestType] || "gray";
-
-                  //   return (
-                  //     <Chip
-                  //       value={title}
-                  //       color={typeColor}
-                  //       className="!text-white text-wrap whitespace-normal text-xs h-fit font-medium px-2 py-1 cursor-pointer !border-none"
-                  //     />
-                  //   );
-                  // }}
-                  // Trigger resize when window is resized
-                  windowResize={() =>
-                    calendarRef.current?.getApi().updateSize()
-                  }
-                  views={{
-                    dayGridMonth: {
-                      contentHeight: "auto", // This allows it to take the height based on the container
-                    },
-                  }}
-                />
-              </div>
-            </CardBody>
+                <MenuList className="flex flex-col flex-wrap gap-2 px-3 py-2">
+                  <Chip
+                    value="Job Requests"
+                    onClick={() => setRequestType("job_request")}
+                    variant={requestType === "job_request" ? "filled" : "ghost"}
+                    color={requestType === "job_request" ? "blue" : "gray"}
+                    className="cursor-pointer w-fit"
+                  />
+                  <Chip
+                    value="Purchasing Requests"
+                    onClick={() => setRequestType("purchasing_request")}
+                    variant={
+                      requestType === "purchasing_request" ? "filled" : "ghost"
+                    }
+                    color={
+                      requestType === "purchasing_request" ? "green" : "gray"
+                    }
+                    className="cursor-pointer w-fit"
+                  />
+                  <Chip
+                    value="Vehicle Requests"
+                    onClick={() => setRequestType("vehicle_request")}
+                    variant={
+                      requestType === "vehicle_request" ? "filled" : "ghost"
+                    }
+                    color={requestType === "vehicle_request" ? "amber" : "gray"}
+                    className="cursor-pointer w-fit"
+                  />
+                  <Chip
+                    value="Venue Requests"
+                    onClick={() => setRequestType("venue_request")}
+                    variant={
+                      requestType === "venue_request" ? "filled" : "ghost"
+                    }
+                    color={requestType === "venue_request" ? "purple" : "gray"}
+                    className="cursor-pointer w-fit"
+                  />
+                </MenuList>
+              </Menu>
+            </div>
           </div>
         </div>
-      </div>
+      </CardHeader>
+      <div className="flex justify-between h-full bg-white">
+        <div
+          className={` bg-white rounded-lg w-full mt-0 p-1 flex justify-between transition-[max-width] duration-300 ${
+            sidebarOpen ? "max-w-[55%]" : "w-full"
+          }`}
+        >
+          <div className="w-full bg-white dark:bg-gray-900 space-y-6 transition-colors">
+            <div className="h-full bg-white rounded-lg w-full mt-0 p-1">
+              <CardBody className={`p-4  overflow-y-auto h-[80vh]`}>
+                <div className="calendar-container h-full overflow-y-auto overflow-x-auto">
+                  <FullCalendar
+                    ref={calendarRef} // Add the ref to FullCalendar
+                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+                    initialView="dayGridMonth"
+                    headerToolbar={{
+                      left: "prev,next today",
+                      center: "title",
+                      right: "dayGridMonth,timeGridWeek,timeGridDay",
+                    }}
+                    editable={true}
+                    droppable={true}
+                    height="auto"
+                    handleWindowResize={true}
+                    expandRows={true}
+                    events={events}
+                    eventContent={renderEventContent}
+                    eventClick={handleEventClick}
+                    eventDrop={handleEventDrop}
+                    // eventContent={(arg) => {
+                    //   const { title, extendedProps } = arg.event;
+                    //   const typeColor =
+                    //     requestTypeColor[extendedProps.requestType] || "gray";
 
-      {/* Sidebar for details view */}
-      <SidebarView
-        open={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-        referenceNumber={selectedReferenceNumber}
-        className="!h-full"
-      />
+                    //   return (
+                    //     <Chip
+                    //       value={title}
+                    //       color={typeColor}
+                    //       className="!text-white text-wrap whitespace-normal text-xs h-fit font-medium px-2 py-1 cursor-pointer !border-none"
+                    //     />
+                    //   );
+                    // }}
+                    // Trigger resize when window is resized
+                    windowResize={() =>
+                      calendarRef.current?.getApi().updateSize()
+                    }
+                    views={{
+                      dayGridMonth: {
+                        contentHeight: "auto", // This allows it to take the height based on the container
+                      },
+                    }}
+                  />
+                </div>
+              </CardBody>
+            </div>
+          </div>
+        </div>
+
+        {/* Sidebar for details view */}
+        <SidebarView
+          open={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          referenceNumber={selectedReferenceNumber}
+          className="!h-full"
+        />
+      </div>
     </div>
   );
 };

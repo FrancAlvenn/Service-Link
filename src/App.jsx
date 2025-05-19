@@ -51,6 +51,9 @@ import Profile from "./portal/pages/Profile";
 import Reports from "./features/request_management/component/reporting_dashboard/Reports";
 import CalendarView from "./features/request_management/component/calendar_board/CalendarView";
 import ArchivedRequests from "./features/request_management/component/request_view/ArchivedRequests";
+import Help from "./pages/Help";
+import AssetTrackingLog from "./features/asset_management/component/AssetTrackingLog";
+import { AssetAssignmentLogProvider } from "./features/asset_management/context/AssetAssignmentLogContext";
 
 library.add(fas, fab, far); // Add all the icons needed
 
@@ -198,6 +201,14 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: "asset-management/asset-tracking-log",
+        element: (
+          <ProtectedRoute requiredAccess={"admin"}>
+            <AssetTrackingLog />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: "asset-management/create-asset",
         element: (
           <ProtectedRoute requiredAccess={"admin"}>
@@ -273,6 +284,16 @@ const router = createBrowserRouter([
       },
     ],
   },
+  {
+    path: "/help",
+    element: <Help />,
+    children: [
+      {
+        path: "about",
+        // element: <About/>
+      },
+    ],
+  },
 ]);
 
 function App() {
@@ -282,14 +303,16 @@ function App() {
         <UserProvider>
           <TicketProvider>
             <AssetProvider>
-              <EmployeeProvider>
-                <RequestsProviderWrapper>
-                  <div className="App font-sans ">
-                    <RouterProvider router={router} />
-                    <CustomToastContainer />
-                  </div>
-                </RequestsProviderWrapper>
-              </EmployeeProvider>
+              <AssetAssignmentLogProvider>
+                <EmployeeProvider>
+                  <RequestsProviderWrapper>
+                    <div className="App font-sans ">
+                      <RouterProvider router={router} />
+                      <CustomToastContainer />
+                    </div>
+                  </RequestsProviderWrapper>
+                </EmployeeProvider>
+              </AssetAssignmentLogProvider>
             </AssetProvider>
           </TicketProvider>
         </UserProvider>

@@ -5,11 +5,30 @@ import { AuthContext } from "../../../features/authentication";
 import { UserContext } from "../../../context/UserContext";
 import ToastNotification from "../../../utils/ToastNotification";
 import ApprovalStatusModal from "../../../utils/approverStatusModal";
-import { FloppyDisk, PencilSimpleLine, Plus, Prohibit, X } from "@phosphor-icons/react";
-import { Button, Dialog, DialogBody, DialogFooter, DialogHeader, Typography } from "@material-tailwind/react";
+import {
+  FloppyDisk,
+  PencilSimpleLine,
+  Plus,
+  Prohibit,
+  X,
+} from "@phosphor-icons/react";
+import {
+  Button,
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  DialogHeader,
+  Typography,
+} from "@material-tailwind/react";
 
 // MainTab Component
-const MainTab = ({ request, setRequest, requestType, fetchRequests, onClose }) => {
+const MainTab = ({
+  request,
+  setRequest,
+  requestType,
+  fetchRequests,
+  onClose,
+}) => {
   const { user } = useContext(AuthContext);
   const { getUserByReferenceNumber } = useContext(UserContext);
 
@@ -27,7 +46,9 @@ const MainTab = ({ request, setRequest, requestType, fetchRequests, onClose }) =
 
   useEffect(() => {
     if (request) {
-      setIsAuthorized(request?.authorized_access?.includes(user.reference_number));
+      setIsAuthorized(
+        request?.authorized_access?.includes(user.reference_number)
+      );
     }
   }, [request, user]);
 
@@ -43,11 +64,15 @@ const MainTab = ({ request, setRequest, requestType, fetchRequests, onClose }) =
       return;
     }
     try {
-      await axios.put(`/${requestType}/${request.reference_number}`, {
-        ...request,
-        purpose: editedPurpose,
-        requester: user.reference_number,
-      }, { withCredentials: true });
+      await axios.put(
+        `/${requestType}/${request.reference_number}`,
+        {
+          ...request,
+          purpose: editedPurpose,
+          requester: user.reference_number,
+        },
+        { withCredentials: true }
+      );
 
       fetchRequests();
       setIsEditingPurpose(false);
@@ -73,10 +98,14 @@ const MainTab = ({ request, setRequest, requestType, fetchRequests, onClose }) =
     }));
 
     try {
-      const res = await axios.put(`/${requestType}/${request.reference_number}`, {
-        requester: user.reference_number,
-        details: updatedDetails,
-      }, { withCredentials: true });
+      const res = await axios.put(
+        `/${requestType}/${request.reference_number}`,
+        {
+          requester: user.reference_number,
+          details: updatedDetails,
+        },
+        { withCredentials: true }
+      );
 
       if (res.status === 200) {
         fetchRequests();
@@ -98,10 +127,14 @@ const MainTab = ({ request, setRequest, requestType, fetchRequests, onClose }) =
     }));
 
     try {
-      const res = await axios.put(`/${requestType}/${request.reference_number}`, {
-        requester: user.reference_number,
-        details: updatedDetails,
-      }, { withCredentials: true });
+      const res = await axios.put(
+        `/${requestType}/${request.reference_number}`,
+        {
+          requester: user.reference_number,
+          details: updatedDetails,
+        },
+        { withCredentials: true }
+      );
 
       if (res.status === 200) {
         fetchRequests();
@@ -122,12 +155,15 @@ const MainTab = ({ request, setRequest, requestType, fetchRequests, onClose }) =
 
   const handleDeleteRequest = async () => {
     try {
-      const res = await axios.delete(`/${requestType}/${request.reference_number}/archive/1`, {
-        data: {
-          requester: user.reference_number,
-        },
-        withCredentials: true,
-      });
+      const res = await axios.delete(
+        `/${requestType}/${request.reference_number}/archive/1`,
+        {
+          data: {
+            requester: user.reference_number,
+          },
+          withCredentials: true,
+        }
+      );
 
       if (res.status === 200) {
         fetchRequests();
@@ -136,24 +172,28 @@ const MainTab = ({ request, setRequest, requestType, fetchRequests, onClose }) =
       }
     } catch (error) {
       ToastNotification.error("Error!", "Failed to delete the request.");
-    }finally {
+    } finally {
       setOpenDeleteModal(false);
     }
   };
 
   return (
     <div className="flex flex-col gap-4">
-
       {/* Request Access */}
       <div className="flex flex-col p-3 gap-2 border-gray-400 border rounded-md bg-white dark:bg-gray-800 dark:border-gray-600">
         <span className="flex items-center mb-2">
           <UserCircle size={24} className="text-gray-700 dark:text-gray-300" />
           <p className="ml-2 text-sm text-gray-900 dark:text-gray-300">
-            <span className="font-semibold">{getUserByReferenceNumber(request.requester)}</span> raised this request
+            <span className="font-semibold">
+              {getUserByReferenceNumber(request.requester)}
+            </span>{" "}
+            raised this request
           </p>
         </span>
 
-        <p className="text-sm font-semibold text-gray-600 dark:text-gray-400">Purpose</p>
+        <p className="text-sm font-semibold text-gray-600 dark:text-gray-400">
+          Purpose
+        </p>
         {isAuthorized ? (
           isEditingPurpose ? (
             <textarea
@@ -164,118 +204,155 @@ const MainTab = ({ request, setRequest, requestType, fetchRequests, onClose }) =
               autoFocus
             />
           ) : (
-            <p onClick={handleEditPurpose} className="cursor-pointer text-gray-900 dark:text-gray-300">{request.purpose}</p>
+            <p
+              onClick={handleEditPurpose}
+              className="cursor-pointer text-gray-900 dark:text-gray-300"
+            >
+              {request.purpose}
+            </p>
           )
         ) : (
           <p className="text-gray-900 dark:text-gray-300">{request.purpose}</p>
         )}
       </div>
 
-      {/* Particulars Section */}
+      {/* Particulars Section as Table */}
       {Array.isArray(request.details) && request.details.length > 0 && (
         <div className="flex flex-col gap-3">
-          <p className="text-sm font-semibold mt-5 text-gray-600 dark:text-gray-400">Particulars</p>
-          <div className="flex flex-col gap-3">
-            {request.details.map((detail, index) => (
-              <div key={index} className="flex flex-col gap-1 p-3 border-gray-400 dark:border-gray-600 border rounded-md bg-white dark:bg-gray-800">
-                <span className="flex gap-4 items-center">
-                  {isAuthorized && editingIndex === index ? (
-                    <>
-                      <input
-                        type="text"
-                        className="text-sm font-semibold p-1 min-w-20 w-full max-w-32 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-200"
-                        placeholder="Particulars"
-                        value={editedParticular.particulars}
-                        onChange={(e) =>
-                          setEditedParticular({
-                            ...editedParticular,
-                            particulars: e.target.value,
-                          })
-                        }
-                      />
-                      <input
-                        type="number"
-                        className="text-sm font-semibold p-1 w-20 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-200"
-                        placeholder="Quantity"
-                        value={editedParticular.quantity}
-                        onChange={(e) =>
-                          setEditedParticular({
-                            ...editedParticular,
-                            quantity: e.target.value,
-                          })
-                        }
-                      />
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-sm font-semibold text-gray-900 dark:text-gray-300">{detail.particulars}</p>
-                      <p className="text-sm font-semibold text-gray-900 dark:text-gray-300">x{detail.quantity}</p>
-                    </>
+          <p className="text-sm font-semibold mt-5 text-gray-600 dark:text-gray-400">
+            Particulars
+          </p>
+          <div className="overflow-x-auto  rounded-lg dark:border-gray-700">
+            <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
+              <thead className="bg-gray-100 dark:bg-gray-800">
+                <tr>
+                  <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    Particulars
+                  </th>
+                  <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    Quantity
+                  </th>
+                  <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    Description
+                  </th>
+                  {isAuthorized && (
+                    <th className="px-4 py-2 text-center text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      Actions
+                    </th>
                   )}
-
-                  <span className="flex gap-3 ml-auto">
-                    {isAuthorized && editingIndex === index ? (
-                      <>
-                        <button
-                          onClick={() => handleSaveEdit(index)}
-                          title="Save"
-                          className="hover:scale-[1.2] hover:text-green-500"
-                        >
-                          <FloppyDisk size={18} />
-                        </button>
-                        <button
-                          onClick={() => setEditingIndex(null)}
-                          title="Cancel"
-                          className="hover:scale-[1.2] hover:text-red-500"
-                        >
-                          <Prohibit size={18} />
-                        </button>
-                      </>
-                    ) : (
-                      isAuthorized && (
-                        <button
-                          onClick={() => handleEditClick(index)}
-                          title="Edit"
-                          className="hover:scale-[1.2] hover:text-blue-500"
-                        >
-                          <PencilSimpleLine size={18} />
-                        </button>
-                      )
-                    )}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900">
+                {request.details.map((detail, index) => (
+                  <tr
+                    key={index}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                  >
+                    <td className="px-4 py-2 text-sm text-gray-900 dark:text-gray-200">
+                      {isAuthorized && editingIndex === index ? (
+                        <input
+                          type="text"
+                          className="w-full p-1 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700"
+                          placeholder="Particulars"
+                          value={editedParticular.particulars}
+                          onChange={(e) =>
+                            setEditedParticular({
+                              ...editedParticular,
+                              particulars: e.target.value,
+                            })
+                          }
+                        />
+                      ) : (
+                        detail.particulars
+                      )}
+                    </td>
+                    <td className="px-4 py-2 text-sm text-gray-900 dark:text-gray-200">
+                      {isAuthorized && editingIndex === index ? (
+                        <input
+                          type="number"
+                          className="w-20 p-1 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700"
+                          placeholder="Quantity"
+                          value={editedParticular.quantity}
+                          onChange={(e) =>
+                            setEditedParticular({
+                              ...editedParticular,
+                              quantity: e.target.value,
+                            })
+                          }
+                        />
+                      ) : (
+                        `x${detail.quantity}`
+                      )}
+                    </td>
+                    <td className="px-4 py-2 text-sm text-gray-900 dark:text-gray-200">
+                      {isAuthorized && editingIndex === index ? (
+                        <textarea
+                          className="w-full p-1 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700"
+                          placeholder="Description"
+                          value={editedParticular.description}
+                          onChange={(e) =>
+                            setEditedParticular({
+                              ...editedParticular,
+                              description: e.target.value,
+                            })
+                          }
+                        />
+                      ) : (
+                        detail.description
+                      )}
+                    </td>
                     {isAuthorized && (
-                      <X
-                        size={18}
-                        title="Delete"
-                        onClick={() => handleDetailRemove(index)}
-                        className="cursor-pointer hover:scale-[1.2] hover:text-red-500"
-                      />
+                      <td className="px-4 py-2 text-center text-sm text-gray-900 dark:text-gray-200">
+                        {editingIndex === index ? (
+                          <div className="flex justify-center gap-2">
+                            <button
+                              onClick={() => handleSaveEdit(index)}
+                              title="Save"
+                              className="text-red-500 hover:text-green-500"
+                            >
+                              <FloppyDisk size={18} />
+                            </button>
+                            <button
+                              onClick={() => setEditingIndex(null)}
+                              title="Cancel"
+                              className="text-red-500 hover:text-red-500"
+                            >
+                              <Prohibit size={18} />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex justify-center gap-2">
+                            <button
+                              onClick={() => handleEditClick(index)}
+                              title="Edit"
+                              className="text-blue-500 hover:text-blue-500"
+                            >
+                              <PencilSimpleLine size={18} />
+                            </button>
+                            <button
+                              onClick={() => handleDetailRemove(index)}
+                              title="Delete"
+                              className="text-red-500 hover:text-red-500"
+                            >
+                              <X size={18} />
+                            </button>
+                          </div>
+                        )}
+                      </td>
                     )}
-                  </span>
-                </span>
-                {isAuthorized && editingIndex === index ? (
-                  <textarea
-                    value={editedParticular.description}
-                    className="text-sm p-1 w-full border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-200 mt-1"
-                    placeholder="Description"
-                    onChange={(e) => setEditedParticular({
-                      ...editedParticular,
-                      description: e.target.value,
-                    })}
-                  />
-                ) : (
-                  <p className="text-sm text-gray-900 dark:text-gray-300">{detail.description}</p>
-                )}
-              </div>
-            ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
 
           {isAuthorized && (
             <button
+              className="font-normal text-sm mt-3 flex items-center gap-2 text-green-600  p-2 rounded-lg border border-green-500  hover:bg-green-50 w-fit"
               onClick={handleAddParticular}
-              className="flex items-center gap-1 p-3 border-gray-400 dark:border-gray-600 border rounded-md bg-white dark:bg-gray-800 hover:text-green-500 dark:hover:text-green-400"
             >
+              <Plus size={16} />
               Add Particular
-              <span className="hover:scale-[1.2] ml-auto"><Plus size={18} /></span>
             </button>
           )}
         </div>
@@ -294,26 +371,39 @@ const MainTab = ({ request, setRequest, requestType, fetchRequests, onClose }) =
       )}
 
       {/* Delete Confirmation Modal */}
-      <Dialog open={openDeleteModal} handler={setOpenDeleteModal} size="sm" className="dark:text-gray-100 dark:bg-gray-800">
-        <DialogHeader className="text-gray-900 dark:text-gray-200">Confirm Request Deletion</DialogHeader>
+      <Dialog
+        open={openDeleteModal}
+        handler={setOpenDeleteModal}
+        size="sm"
+        className="dark:text-gray-100 dark:bg-gray-800"
+      >
+        <DialogHeader className="text-gray-900 dark:text-gray-200">
+          Confirm Request Deletion
+        </DialogHeader>
         <DialogBody className="w-full bg-white dark:bg-gray-800">
           <Typography className="font-normal text-sm text-gray-800 dark:text-gray-300">
-            Are you sure you want to delete this request? This action cannot be undone.
+            Are you sure you want to delete this request? This action cannot be
+            undone.
           </Typography>
         </DialogBody>
         <DialogFooter>
-          <Button color="gray" onClick={() => setOpenDeleteModal(false)} className="mr-2 bg-gray-500 dark:bg-gray-700 cursor-pointer">
+          <Button
+            color="gray"
+            onClick={() => setOpenDeleteModal(false)}
+            className="mr-2 bg-gray-500 dark:bg-gray-700 cursor-pointer"
+          >
             Cancel
           </Button>
-          <Button onClick={handleDeleteRequest} className="bg-red-500 dark:bg-red-600 cursor-pointer">
+          <Button
+            onClick={handleDeleteRequest}
+            className="bg-red-500 dark:bg-red-600 cursor-pointer"
+          >
             Confirm Delete
           </Button>
         </DialogFooter>
       </Dialog>
-
     </div>
   );
-
 };
 
 export default MainTab;

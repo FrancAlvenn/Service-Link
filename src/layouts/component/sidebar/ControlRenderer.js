@@ -37,26 +37,26 @@ function ControlRenderer({ selectedControl }) {
       location.pathname.includes("ticket-management/board") ||
       selectedControl === "Ticket Management"
     ) {
-      controlComponent = <TicketManagementControls />;
+      controlComponent = <RequestsManagementControls />;
     }
 
     if (
       location.pathname.includes("asset-management/board") ||
       selectedControl === "Asset Management"
     ) {
-      controlComponent = <AssetManagementControls />;
+      controlComponent = <RequestsManagementControls />;
     }
 
     if (
       location.pathname.includes("employee-management/board") ||
       selectedControl === "Employee Management"
     ) {
-      controlComponent = <EmployeeManagementControls />;
+      controlComponent = <RequestsManagementControls />;
     }
 
     // Add styles before returning the component
     return (
-      <div className="mt-4 px-1  h-full custom-scrollbar whitespace-nowrap">
+      <div className=" px-1  h-full custom-scrollbar whitespace-nowrap">
         {controlComponent}
       </div>
     );

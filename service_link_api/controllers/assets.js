@@ -2,6 +2,7 @@ import sequelize from "../database.js";
 import AssetModel from "../models/AssetsModel.js";
 import { Op } from "sequelize";
 import { createLog } from "./system_logs.js";
+import AssetAssignmentLogModel from "../models/AssetAssignmentLog.js";
 
 // Generate a unique reference number for the asset (e.g., AST-2025-00001)
 function generateAssetReferenceNumber(lastAssetId) {
@@ -209,6 +210,166 @@ export async function getAssetsByStatus(req, res) {
     console.error(error);
     res.status(500).json({
       message: "Error fetching assets by status",
+      error: error.message,
+    });
+  }
+}
+
+// Get Asset Assignment Logs
+export async function getAllAssetAssignmentLogs(req, res) {
+  try {
+    const assetAssignmentLogs = await AssetAssignmentLogModel.findAll();
+    res.status(200).json(assetAssignmentLogs);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Error fetching asset assignment logs",
+      error: error.message,
+    });
+  }
+}
+
+// Get Asset Assignment Log by ID
+export async function getAssetAssignmentLogById(req, res) {
+  try {
+    const assetAssignmentLog = await AssetAssignmentLogModel.findOne({
+      where: { log_id: req.params.log_id },
+    });
+
+    if (!assetAssignmentLog) {
+      return res
+        .status(404)
+        .json({ message: "Asset assignment log not found" });
+    }
+
+    res.status(200).json(assetAssignmentLog);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Error fetching asset assignment log by ID",
+      error: error.message,
+    });
+  }
+}
+
+// Create a new Asset Assignment Log
+export async function createAssetAssignmentLog(req, res) {
+  let transaction;
+  try {
+    transaction = await sequelize.transaction();
+
+    const assetAssignmentLog = await AssetAssignmentLogModel.create(
+      {
+        asset_id: req.body.asset_id,
+        assigned_to: req.body.assigned_to,
+        assigned_by: req.body.assigned_by,
+        location: req.body.location,
+        remarks: req.body.remarks,
+      },
+      { transaction }
+    );
+
+    await transaction.commit();
+
+    createLog({
+      action: "create",
+      target: assetAssignmentLog.log_id,
+      performed_by: req.body.user || "system",
+      title: "Asset Assignment Log Created",
+      details: `Asset assignment log with ID ${assetAssignmentLog.log_id} created successfully.`,
+    });
+
+    res
+      .status(201)
+      .json({ message: "Asset assignment log created successfully!" });
+  } catch (error) {
+    if (transaction) await transaction.rollback();
+    console.error(error);
+    res.status(500).json({
+      message: "Error creating asset assignment log",
+      error: error.message,
+    });
+  }
+}
+
+// Update an Asset Assignment Log
+export async function updateAssetAssignmentLog(req, res) {
+  let transaction;
+  try {
+    transaction = await sequelize.transaction();
+
+    const assetAssignmentLog = await AssetAssignmentLogModel.findOne({
+      where: { log_id: req.params.log_id },
+    });
+
+    if (!assetAssignmentLog) {
+      return res
+        .status(404)
+        .json({ message: "Asset assignment log not found" });
+    }
+
+    await assetAssignmentLog.update(
+      {
+        asset_id: req.body.asset_id,
+        assigned_to: req.body.assigned_to,
+        assigned_by: req.body.assigned_by,
+        location: req.body.location,
+        remarks: req.body.remarks,
+      },
+      { transaction }
+    );
+
+    await transaction.commit();
+
+    createLog({
+      action: "update",
+      target: assetAssignmentLog.log_id,
+      performed_by: req.body.user || "system",
+      title: "Asset Assignment Log Updated",
+      details: `Asset assignment log with ID ${assetAssignmentLog.log_id} updated successfully.`,
+    });
+
+    res
+      .status(200)
+      .json({ message: "Asset assignment log updated successfully!" });
+  } catch (error) {
+    if (transaction) await transaction.rollback();
+    console.error(error);
+    res.status(500).json({
+      message: "Error updating asset assignment log",
+      error: error.message,
+    });
+  }
+}
+
+// Delete an Asset Assignment Log
+export async function deleteAssetAssignmentLog(req, res) {
+  try {
+    const deletedRows = await AssetAssignmentLogModel.destroy({
+      where: { log_id: req.params.log_id },
+    });
+
+    if (deletedRows === 0) {
+      return res
+        .status(404)
+        .json({ message: "Asset assignment log not found" });
+    }
+
+    createLog({
+      action: "delete",
+      target: req.params.log_id,
+      performed_by: req.body.user || "system",
+      title: "Asset Assignment Log Deleted",
+      details: `Asset assignment log with ID ${req.params.log_id} deleted successfully.`,
+    });
+
+    res
+      .status(200)
+      .json({ message: "Asset assignment log deleted successfully!" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Error deleting asset assignment log",
       error: error.message,
     });
   }

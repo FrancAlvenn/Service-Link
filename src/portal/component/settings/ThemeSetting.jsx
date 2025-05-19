@@ -4,6 +4,11 @@ import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../../../features/authentication";
 
+// Utility function to normalize various forms of truthy/falsy values to boolean
+const normalizeBoolean = (value) => {
+  return value === true || value === "true" || value === 1 || value === "1";
+};
+
 function ThemeSetting({ onClose }) {
   const { user } = useContext(AuthContext);
   const [darkMode, setDarkMode] = useState(false);
@@ -11,15 +16,28 @@ function ThemeSetting({ onClose }) {
   useEffect(() => {
     const fetchThemePreference = async () => {
       try {
-        const userPreferences = JSON.parse(localStorage.getItem("userPreference"));
+        const userPreferences = JSON.parse(
+          localStorage.getItem("userPreference")
+        );
 
         if (userPreferences?.theme !== undefined) {
-          setDarkMode(userPreferences.theme);
+          const isDark = normalizeBoolean(userPreferences.theme);
+          setDarkMode(isDark);
         } else {
-          const { data } = await axios.get(`/settings/user_preference/${user.reference_number}`, { withCredentials: true });
+          const { data } = await axios.get(
+            `/settings/user_preference/${user.reference_number}`,
+            { withCredentials: true }
+          );
           if (data?.theme !== undefined) {
-            setDarkMode(data.theme);
-            localStorage.setItem("userPreference", JSON.stringify(data));
+            const isDark = normalizeBoolean(data.theme);
+            setDarkMode(isDark);
+            localStorage.setItem(
+              "userPreference",
+              JSON.stringify({
+                ...data,
+                theme: isDark,
+              })
+            );
           }
         }
       } catch (error) {
@@ -49,10 +67,13 @@ function ThemeSetting({ onClose }) {
         { withCredentials: true }
       );
 
+      const existingPrefs = JSON.parse(
+        localStorage.getItem("userPreference") || "{}"
+      );
       localStorage.setItem(
         "userPreference",
         JSON.stringify({
-          ...JSON.parse(localStorage.getItem("userPreference")),
+          ...existingPrefs,
           theme: newTheme,
         })
       );
@@ -66,7 +87,10 @@ function ThemeSetting({ onClose }) {
       <div className="flex flex-col justify-between items-start mb-6 w-full gap-4">
         {/* Header */}
         <div className="flex items-center justify-between w-full">
-          <div className="p-2 rounded-md bg-gray-500 dark:bg-gray-700 cursor-pointer" onClick={onClose}>
+          <div
+            className="p-2 rounded-md bg-gray-500 dark:bg-gray-700 cursor-pointer"
+            onClick={onClose}
+          >
             <ArrowLeft size={24} color="white" />
           </div>
         </div>
@@ -77,7 +101,11 @@ function ThemeSetting({ onClose }) {
             <Typography className="text-sm font-medium text-gray-900 dark:text-gray-100 py-0">
               Dark Mode
             </Typography>
-            <Switch color="blue" checked={darkMode} onChange={updateThemePreference} />
+            <Switch
+              color="blue"
+              checked={darkMode}
+              onChange={updateThemePreference}
+            />
           </div>
         </div>
       </div>

@@ -25,6 +25,11 @@ import {
   ChartBar,
   CaretDown,
   Archive,
+  ChalkboardTeacher,
+  UserPlus,
+  PlusCircle,
+  Gear,
+  Notebook,
 } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 
@@ -39,6 +44,9 @@ function RequestsManagementControls() {
 
   return (
     <div>
+      <Typography className="text-xs font-semibold text-gray-700 pb-1">
+        Request Management
+      </Typography>
       <Accordion
         open={open === 2}
         className={`rounded-lg ${open === 2 ? "bg-gray-100" : ""}`}
@@ -203,6 +211,86 @@ function RequestsManagementControls() {
         >
           Reporting Dashboard
         </Typography>
+      </ListItem>
+
+      <hr className="my-2 border-t border-gray-300" />
+
+      <Typography className="text-xs font-semibold text-gray-700 pb-1">
+        In-house Management
+      </Typography>
+
+      <ListItem
+        className="text-sm"
+        onClick={() => navigate("/workspace/employee-management/board")}
+      >
+        <ListItemPrefix>
+          <ChalkboardTeacher size={20} />
+        </ListItemPrefix>
+        Board
+      </ListItem>
+
+      <ListItem
+        className="text-sm"
+        onClick={() => navigate("/workspace/employee-management/add-employee")}
+      >
+        <ListItemPrefix>
+          <UserPlus size={20} />
+        </ListItemPrefix>
+        Add Employee
+      </ListItem>
+
+      <hr className="my-2 border-t border-gray-300" />
+
+      <Typography className="text-xs font-semibold text-gray-700 pb-1">
+        Asset Management
+      </Typography>
+
+      <ListItem
+        className="text-sm"
+        onClick={() => navigate("/workspace/asset-management/board")}
+      >
+        <ListItemPrefix>
+          <ChalkboardTeacher size={20} />
+        </ListItemPrefix>
+        Board
+      </ListItem>
+
+      <ListItem
+        className="text-sm"
+        onClick={() =>
+          navigate("/workspace/asset-management/asset-tracking-log")
+        }
+      >
+        <ListItemPrefix>
+          <Notebook size={20} />
+        </ListItemPrefix>
+        Asset Tracking Log
+      </ListItem>
+
+      <ListItem
+        className="text-sm"
+        onClick={() => navigate("/workspace/asset-management/create-asset")}
+      >
+        <ListItemPrefix>
+          <PlusCircle size={20} />
+        </ListItemPrefix>
+        Add Asset
+      </ListItem>
+
+      <hr className="my-2 border-t border-gray-300" />
+
+      <Typography className="text-xs font-semibold text-gray-700 pb-1">
+        Settings
+      </Typography>
+
+      <ListItem
+        className="text-sm"
+        onClick={() => navigate("/workspace/settings")}
+      >
+        <ListItemPrefix>
+          <Gear size={20} />
+        </ListItemPrefix>
+        Settings
       </ListItem>
     </div>
   );

@@ -82,7 +82,7 @@ const requestFieldConfig = {
     { key: "priority", label: "Priority", type: "select" },
     { key: "requester", label: "Requester", type: "text", readOnly: true },
     { key: "department", label: "Department", type: "text", readOnly: true },
-    { key: "vehicle_requested", label: "Vehicle Requested", type: "select" },
+    // { key: "vehicle_requested", label: "Vehicle Requested", type: "select" },
     { key: "date_of_trip", label: "Date of Trip", type: "date" },
     { key: "time_of_departure", label: "Departure Time", type: "time" },
     { key: "time_of_arrival", label: "Arrival Time", type: "time" },
@@ -233,7 +233,7 @@ const DetailsTab = ({
   };
 
   return (
-    <div className="flex flex-col gap-4 p-3 mb-3 border-gray-400 border rounded-md h-[70vh] overflow-y-auto">
+    <div className="flex flex-col gap-4 p-3 mb-3 border-gray-400 border rounded-md h-[55vh] overflow-y-auto">
       <span className="flex gap-1">
         <p className="text-sm font-semibold text-gray-600">Details</p>
       </span>

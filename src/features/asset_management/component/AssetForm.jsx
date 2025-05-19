@@ -4,6 +4,7 @@ import axios from "axios";
 import { AuthContext } from "../../authentication";
 import AssetContext from "../context/AssetContext";
 import ToastNotification from "../../../utils/ToastNotification";
+import Header from "../../../layouts/header";
 
 const defaultDetailsByType = {
   Venue: [{ key: "Capacity", value: "" }],
@@ -116,12 +117,10 @@ const AssetForm = () => {
   return (
     <div className="h-full bg-white rounded-lg w-full px-3 flex flex-col justify-between">
       <div className="py-4 px-5 mb-5 shadow-sm">
-        <Typography color="black" className="text-lg font-bold">
-          Asset Information
-        </Typography>
-        <Typography color="black" className="mt-1 font-normal text-sm">
-          Enter details about the asset below.
-        </Typography>
+        <Header
+          title={"Asset Information"}
+          description={"Enter details about the asset below."}
+        />
       </div>
 
       <div className="flex flex-col gap-4 px-5 pb-4 overflow-y-auto">

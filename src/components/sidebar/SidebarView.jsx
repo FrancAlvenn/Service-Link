@@ -270,7 +270,7 @@ const SidebarView = ({ open, onClose, referenceNumber, requests }) => {
   return (
     <div
       onClick={handleSidebarClick}
-      className={`shadow-lg w-[650px] h-full p-5 bg-white transform transition-transform duration-300 ${
+      className={`shadow-lg w-[650px] border border-gray-200 rounded-sm h-full p-5 bg-white transform transition-transform duration-300 ${
         isOpen ? "translate-x-0" : "hidden"
       }`}
     >

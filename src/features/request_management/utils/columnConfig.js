@@ -1309,28 +1309,28 @@ export const getColumnConfig = (
             />
           ),
         },
-        {
-          key: "vehicle_requested",
-          label: "Vehicle Requested",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              Vehicle Requested
-            </Typography>
-          ),
-          render: (row) => (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              {row.vehicle_requested}
-            </Typography>
-          ),
-        },
+        // {
+        //   key: "vehicle_requested",
+        //   label: "Vehicle Requested",
+        //   header: (
+        //     <Typography
+        //       variant="small"
+        //       color="blue-gray"
+        //       className={normalText}
+        //     >
+        //       Vehicle Requested
+        //     </Typography>
+        //   ),
+        //   render: (row) => (
+        //     <Typography
+        //       variant="small"
+        //       color="blue-gray"
+        //       className={normalText}
+        //     >
+        //       {row.vehicle_requested}
+        //     </Typography>
+        //   ),
+        // },
         {
           key: "date_filled",
           label: "Date Filled",

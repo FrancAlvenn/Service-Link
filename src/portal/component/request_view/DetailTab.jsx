@@ -7,7 +7,13 @@ import { formatDate } from "../../../utils/dateFormatter";
 import DepartmentModal from "../../../utils/departmentModal";
 import { Chip } from "@material-tailwind/react";
 
-const DetailTab = ({ selectedRequest, setSelectedRequest, requestType, fetchRequests, isAuthorized }) => {
+const DetailTab = ({
+  selectedRequest,
+  setSelectedRequest,
+  requestType,
+  fetchRequests,
+  isAuthorized,
+}) => {
   const { getUserByReferenceNumber } = useContext(UserContext);
   const [editedRequest, setEditedRequest] = useState({ ...selectedRequest });
   const [editingField, setEditingField] = useState(null);
@@ -25,7 +31,12 @@ const DetailTab = ({ selectedRequest, setSelectedRequest, requestType, fetchRequ
 
   const requestFieldConfig = {
     job_request: [
-      { key: "reference_number", label: "Reference Number", type: "text", readOnly: true },
+      {
+        key: "reference_number",
+        label: "Reference Number",
+        type: "text",
+        readOnly: true,
+      },
       { key: "title", label: "Title", type: "text" },
       { key: "requester", label: "Requester", type: "text", readOnly: true },
       { key: "department", label: "Department", type: "text", readOnly: true },
@@ -35,9 +46,14 @@ const DetailTab = ({ selectedRequest, setSelectedRequest, requestType, fetchRequ
       { key: "created_at", label: "Created At", type: "date", readOnly: true },
       { key: "updated_at", label: "Updated At", type: "date", readOnly: true },
     ],
-  
+
     purchasing_request: [
-      { key: "reference_number", label: "Reference Number", type: "text", readOnly: true },
+      {
+        key: "reference_number",
+        label: "Reference Number",
+        type: "text",
+        readOnly: true,
+      },
       { key: "title", label: "Title", type: "text" },
       { key: "requester", label: "Requester", type: "text", readOnly: true },
       { key: "supply_category", label: "Supply Category", type: "text" },
@@ -48,9 +64,14 @@ const DetailTab = ({ selectedRequest, setSelectedRequest, requestType, fetchRequ
       { key: "created_at", label: "Created At", type: "date", readOnly: true },
       { key: "updated_at", label: "Updated At", type: "date", readOnly: true },
     ],
-  
+
     venue_request: [
-      { key: "reference_number", label: "Reference Number", type: "text", readOnly: true },
+      {
+        key: "reference_number",
+        label: "Reference Number",
+        type: "text",
+        readOnly: true,
+      },
       { key: "title", label: "Title", type: "text" },
       { key: "requester", label: "Requester", type: "text", readOnly: true },
       { key: "department", label: "Department", type: "text", readOnly: true },
@@ -61,23 +82,36 @@ const DetailTab = ({ selectedRequest, setSelectedRequest, requestType, fetchRequ
       { key: "event_start_time", label: "Start Time", type: "time" },
       { key: "event_end_time", label: "End Time", type: "time" },
       { key: "participants", label: "Participants", type: "text" },
-      { key: "pax_estimation", label: "Estimated Participants", type: "number" },
+      {
+        key: "pax_estimation",
+        label: "Estimated Participants",
+        type: "number",
+      },
       { key: "purpose", label: "Purpose", type: "textarea" },
       { key: "remarks", label: "Remarks", type: "textarea" },
       { key: "created_at", label: "Created At", type: "date", readOnly: true },
       { key: "updated_at", label: "Updated At", type: "date", readOnly: true },
     ],
-  
+
     vehicle_request: [
-      { key: "reference_number", label: "Reference Number", type: "text", readOnly: true },
+      {
+        key: "reference_number",
+        label: "Reference Number",
+        type: "text",
+        readOnly: true,
+      },
       { key: "title", label: "Title", type: "text" },
       { key: "requester", label: "Requester", type: "text", readOnly: true },
       { key: "department", label: "Department", type: "text", readOnly: true },
-      { key: "vehicle_requested", label: "Vehicle Type", type: "text" },
+      // { key: "vehicle_requested", label: "Vehicle Type", type: "text" },
       { key: "date_of_trip", label: "Date of Trip", type: "date" },
       { key: "time_of_departure", label: "Departure Time", type: "time" },
       { key: "time_of_arrival", label: "Arrival Time", type: "time" },
-      { key: "number_of_passengers", label: "Number of Passengers", type: "number" },
+      {
+        key: "number_of_passengers",
+        label: "Number of Passengers",
+        type: "number",
+      },
       { key: "destination", label: "Destination", type: "text" },
       { key: "purpose", label: "Purpose", type: "textarea" },
       { key: "remarks", label: "Remarks", type: "textarea" },
@@ -124,8 +158,10 @@ const DetailTab = ({ selectedRequest, setSelectedRequest, requestType, fetchRequ
 
   return (
     <div className="flex flex-col gap-4 py-3 mb-3">
-      <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">Details</p>
-  
+      <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+        Details
+      </p>
+
       {fields.map(({ key, label, type, readOnly }) => (
         <div key={key} className="flex flex-col gap-1">
           <p className="font-semibold text-sm dark:text-gray-300">{label}</p>
@@ -158,78 +194,127 @@ const DetailTab = ({ selectedRequest, setSelectedRequest, requestType, fetchRequ
                 }`}
                 onClick={() => !readOnly && setEditingField(key)}
               >
-                {["date_required", "created_at", "updated_at", "event_dates", "date_of_trip"].includes(key)
-                  ? formatDate(selectedRequest[key])
-                  : key === "requester"
-                  ? getUserByReferenceNumber(selectedRequest[key]) || <span className="text-gray-400 dark:text-gray-500 italic">Click to edit</span>
-                  : key === "department" ? (
-                      <DepartmentModal
-                        request={selectedRequest}
-                        input={selectedRequest[key]}
-                        referenceNumber={selectedRequest.reference_number}
-                        requestType={requestType}
-                      />
-                    ) : (
-                      selectedRequest[key] || <span className="text-gray-400 dark:text-gray-500 italic">Click to edit</span>
-                    )}
+                {[
+                  "date_required",
+                  "created_at",
+                  "updated_at",
+                  "event_dates",
+                  "date_of_trip",
+                ].includes(key) ? (
+                  formatDate(selectedRequest[key])
+                ) : key === "requester" ? (
+                  getUserByReferenceNumber(selectedRequest[key]) || (
+                    <span className="text-gray-400 dark:text-gray-500 italic">
+                      Click to edit
+                    </span>
+                  )
+                ) : key === "department" ? (
+                  <DepartmentModal
+                    request={selectedRequest}
+                    input={selectedRequest[key]}
+                    referenceNumber={selectedRequest.reference_number}
+                    requestType={requestType}
+                  />
+                ) : (
+                  selectedRequest[key] || (
+                    <span className="text-gray-400 dark:text-gray-500 italic">
+                      Click to edit
+                    </span>
+                  )
+                )}
               </p>
             )
           ) : (
             <p className="text-sm p-2 w-full border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-800 dark:text-white">
-              {["date_required", "created_at", "updated_at", "event_dates", "date_of_trip"].includes(key)
-                ? formatDate(selectedRequest[key])
-                : key === "requester"
-                ? getUserByReferenceNumber(selectedRequest[key]) || <span className="text-gray-400 dark:text-gray-500 italic">N/A</span>
-                : key === "department" ? (
-                    <DepartmentModal
-                      request={selectedRequest}
-                      input={selectedRequest[key]}
-                      referenceNumber={selectedRequest.reference_number}
-                      requestType={requestType}
-                    />
-                  ) : (
-                    selectedRequest[key] || <span className="text-gray-400 dark:text-gray-500 italic">N/A</span>
-                  )}
+              {[
+                "date_required",
+                "created_at",
+                "updated_at",
+                "event_dates",
+                "date_of_trip",
+              ].includes(key) ? (
+                formatDate(selectedRequest[key])
+              ) : key === "requester" ? (
+                getUserByReferenceNumber(selectedRequest[key]) || (
+                  <span className="text-gray-400 dark:text-gray-500 italic">
+                    N/A
+                  </span>
+                )
+              ) : key === "department" ? (
+                <DepartmentModal
+                  request={selectedRequest}
+                  input={selectedRequest[key]}
+                  referenceNumber={selectedRequest.reference_number}
+                  requestType={requestType}
+                />
+              ) : (
+                selectedRequest[key] || (
+                  <span className="text-gray-400 dark:text-gray-500 italic">
+                    N/A
+                  </span>
+                )
+              )}
             </p>
           )}
         </div>
       ))}
-  
+
       {/* Approvers Section */}
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-2">
-          <p className="text-sm font-semibold dark:text-gray-300">Immediate Head Approval</p>
+          <p className="text-sm font-semibold dark:text-gray-300">
+            Immediate Head Approval
+          </p>
           <Chip
             key={selectedRequest.immediate_head_approval}
             size="sm"
             variant="ghost"
             value={selectedRequest.immediate_head_approval}
             className="text-center h-9 cursor-pointer w-full dark:bg-gray-800 dark:text-white"
-            color={statusOptions.find((option) => option.status === selectedRequest.immediate_head_approval)?.color || "gray"}
+            color={
+              statusOptions.find(
+                (option) =>
+                  option.status === selectedRequest.immediate_head_approval
+              )?.color || "gray"
+            }
           />
         </div>
-  
+
         <div className="flex flex-col gap-2">
-          <p className="text-sm font-semibold dark:text-gray-300">GSO Director Approval</p>
+          <p className="text-sm font-semibold dark:text-gray-300">
+            GSO Director Approval
+          </p>
           <Chip
             key={selectedRequest.gso_director_approval}
             size="sm"
             variant="ghost"
             value={selectedRequest.gso_director_approval}
             className="text-center h-9 cursor-pointer w-full dark:bg-gray-800 dark:text-white"
-            color={statusOptions.find((option) => option.status === selectedRequest.gso_director_approval)?.color || "gray"}
+            color={
+              statusOptions.find(
+                (option) =>
+                  option.status === selectedRequest.gso_director_approval
+              )?.color || "gray"
+            }
           />
         </div>
-  
+
         <div className="flex flex-col gap-2">
-          <p className="text-sm font-semibold dark:text-gray-300">Operations Director Approval</p>
+          <p className="text-sm font-semibold dark:text-gray-300">
+            Operations Director Approval
+          </p>
           <Chip
             key={selectedRequest.operations_director_approval}
             size="sm"
             variant="ghost"
             value={selectedRequest.operations_director_approval}
             className="text-center h-9 cursor-pointer w-full dark:bg-gray-800 dark:text-white"
-            color={statusOptions.find((option) => option.status === selectedRequest.operations_director_approval)?.color || "gray"}
+            color={
+              statusOptions.find(
+                (option) =>
+                  option.status === selectedRequest.operations_director_approval
+              )?.color || "gray"
+            }
           />
         </div>
       </div>

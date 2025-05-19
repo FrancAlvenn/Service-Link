@@ -135,7 +135,7 @@ const EmployeeSidebar = ({
       {/* Sidebar Container */}
       <div
         onClick={handleSidebarClick}
-        className={`z-50 shadow-lg w-[650px] h-full p-5 bg-white transform transition-transform duration-300 ${
+        className={`z-50 shadow-lg w-[650px] p-5 bg-white transform transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "hidden"
         }`}
       >

@@ -18,6 +18,7 @@ import { VehicleRequestsContext } from "../../context/VehicleRequestsContext";
 import { VenueRequestsContext } from "../../context/VenueRequestsContext";
 import { PurchasingRequestsContext } from "../../context/PurchasingRequestsContext";
 import { UserContext } from "../../../../context/UserContext";
+import Header from "../../../../layouts/header";
 
 ChartJS.register(
   CategoryScale,
@@ -118,14 +119,7 @@ const Reports = () => {
 
   return (
     <div className="w-full p-6 bg-white dark:bg-gray-900 mt-0 px-3 flex flex-col justify-between transition-colors">
-      <div className="flex flex-col gap-1 mb-4">
-        <Typography color="black" className="text-lg font-bold">
-          Reports
-        </Typography>
-        <Typography color="gray" className="font-normal text-sm">
-          See information about requests
-        </Typography>
-      </div>
+      <Header title={"Reports"} description={"See information about reports"} />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
         {/* 1. Request Type Breakdown */}

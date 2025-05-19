@@ -1,5 +1,15 @@
-import { Card, CardBody, CardHeader, Typography } from "@material-tailwind/react";
-import { ReadCvLogo, ShoppingCart, CalendarCheck, Car } from "@phosphor-icons/react";
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  Typography,
+} from "@material-tailwind/react";
+import {
+  ReadCvLogo,
+  ShoppingCart,
+  CalendarCheck,
+  Car,
+} from "@phosphor-icons/react";
 import React, { useState } from "react";
 import RequestForm from "./RequestForm";
 
@@ -10,7 +20,11 @@ const RaiseRequest = () => {
     <div className="min-h-screen h-full w-full bg-white dark:bg-gray-900 rounded-lg mt-0 px-3 flex flex-col justify-between transition-colors">
       <div className="flex flex-col h-full">
         {/* Header */}
-        <CardHeader floated={false} shadow={false} className="rounded-none min-h-fit pb-4 dark:bg-gray-900">
+        <CardHeader
+          floated={false}
+          shadow={false}
+          className="rounded-none min-h-fit pb-4 dark:bg-gray-900"
+        >
           <div className="mb-1 flex items-center justify-between">
             <div>
               <Typography
@@ -20,7 +34,8 @@ const RaiseRequest = () => {
                 General Service Request
               </Typography>
               <Typography className="mt-1 font-normal text-sm text-gray-600 dark:text-gray-300">
-                Welcome! You can submit a request to the General Services Office for assistance.
+                Welcome! You can submit a request to the General Services Office
+                for assistance.
               </Typography>
             </div>
           </div>
@@ -109,7 +124,10 @@ const RaiseRequest = () => {
             </Card>
           </CardBody>
         ) : (
-          <RequestForm selectedRequest={selectedRequest} setSelectedRequest={setSelectedRequest} />
+          <RequestForm
+            selectedRequest={selectedRequest}
+            setSelectedRequest={setSelectedRequest}
+          />
         )}
       </div>
     </div>

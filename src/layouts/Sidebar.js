@@ -1,36 +1,35 @@
 import React, { useContext, useReducer, useEffect } from "react";
-import {
-  Typography,
-  Menu,
-  MenuHandler,
-  MenuList,
-  MenuItem,
-} from "@material-tailwind/react";
+import { Typography } from "@material-tailwind/react";
 import {
   ClipboardText,
-  Ticket,
   ArchiveBox,
   UsersThree,
-  CaretDown,
   CaretLeft,
   CaretRight,
 } from "@phosphor-icons/react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import ControlRenderer from "./component/sidebar/ControlRenderer";
 import { AuthContext } from "../features/authentication";
+import logo from "../assets/dyci_logo.png";
 
 const options = {
   "Requests Management": <ClipboardText size={20} />,
-  // "Ticket Management": <Ticket size={20} />,
   "Asset Management": <ArchiveBox size={20} />,
   "Employee Management": <UsersThree size={20} />,
 };
 
 const routeMap = {
   "Requests Management": "/workspace/requests-management",
-  "Ticket Management": "/workspace/ticket-management/board",
-  "Asset Management": "/workspace/asset-management/board",
-  "Employee Management": "/workspace/employee-management/board",
+  "Ticket Management": "/workspace/ticket-management",
+  "Asset Management": "/workspace/asset-management",
+  "Employee Management": "/workspace/employee-management",
+};
+
+const pathToControlMap = {
+  "/workspace/requests-management": "Requests Management",
+  "/workspace/ticket-management": "Ticket Management",
+  "/workspace/asset-management": "Asset Management",
+  "/workspace/employee-management": "Employee Management",
 };
 
 function reducer(state, action) {
@@ -45,7 +44,7 @@ function reducer(state, action) {
       localStorage.setItem(
         "sidebarMinimized",
         JSON.stringify(newState.isMinimized)
-      ); // Persist state
+      );
       return newState;
     default:
       return state;
@@ -55,8 +54,11 @@ function reducer(state, action) {
 function Sidebar() {
   const { userPreference } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Get sidebar state from localStorage (or fallback to userPreference)
+  const currentPath = location.pathname;
+  const derivedControl = pathToControlMap[currentPath];
+
   const initialSidebarState = JSON.parse(
     localStorage.getItem("sidebarMinimized")
   );
@@ -66,11 +68,19 @@ function Sidebar() {
 
   const initialState = {
     openDropdown: false,
-    selectedControl: initialControl ?? "Requests Management",
-    isMinimized, // Load from localStorage
+    selectedControl: derivedControl ?? initialControl ?? "Workspace",
+    isMinimized,
   };
 
   const [state, dispatch] = useReducer(reducer, initialState);
+
+  // 🔁 Sync selectedControl with route
+  useEffect(() => {
+    const control = pathToControlMap[location.pathname];
+    if (control && control !== state.selectedControl) {
+      dispatch({ type: "SELECT_CONTROL", payload: control });
+    }
+  }, [location.pathname]);
 
   const handleSelection = (control) => {
     dispatch({ type: "SELECT_CONTROL", payload: control });
@@ -81,7 +91,7 @@ function Sidebar() {
     <div
       className={`bg-white flex flex-col h-full p-4 transition-all ${
         state.isMinimized ? "w-12" : "w-72 justify-center"
-      } shadow-xl shadow-black-900/5 rounded-none `}
+      } shadow-xl shadow-black-900/5 rounded-none`}
     >
       <div
         className={`mt-0 flex items-center ${
@@ -89,12 +99,10 @@ function Sidebar() {
         }`}
       >
         {!state.isMinimized && (
-          <Typography
-            color="black"
-            className="text-md font-bold whitespace-nowrap font-body"
-          >
-            {state.selectedControl}
-          </Typography>
+          <div className="flex items-center gap-3">
+            <img src={logo} alt="DYCI" className="w-10 h-10" />
+            <p>Service Link</p>
+          </div>
         )}
         <button
           className="text-xl"
@@ -111,49 +119,7 @@ function Sidebar() {
       <hr className="my-5 border-gray-400" />
 
       {!state.isMinimized && (
-        <>
-          <Menu
-            className="w-full"
-            open={state.openDropdown}
-            handler={() => dispatch({ type: "TOGGLE_DROPDOWN" })}
-          >
-            <MenuHandler>
-              <button
-                onClick={() => dispatch({ type: "TOGGLE_DROPDOWN" })}
-                className="flex justify-between items-center gap-2 pl-4 pr-3 py-2 text-xs font-bold bg-black-50 border border-gray-400 rounded-lg"
-              >
-                <span className="flex gap-2 items-center whitespace-nowrap">
-                  {options[state.selectedControl]}
-                  {state.selectedControl}
-                </span>
-                <CaretDown
-                  size={12}
-                  strokeWidth={2.5}
-                  className={`h-4 w-4 transition-transform whitespace-nowrap ${
-                    state.openDropdown ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
-            </MenuHandler>
-            <MenuList className="mt-2 border-none w-60 py-3 shadow-md whitespace-nowrap">
-              <span className="py-3 text-xs font-bold text-black ">
-                Workspace
-              </span>
-              <hr className="my-3 h-px text-gray-400" />
-              {Object.keys(options).map((control) => (
-                <MenuItem
-                  key={control}
-                  className="px-3 py-3 text-left text-black text-xs hover:bg-gray-200 whitespace-nowrap"
-                  onClick={() => handleSelection(control)}
-                >
-                  {control}
-                </MenuItem>
-              ))}
-            </MenuList>
-          </Menu>
-
-          <ControlRenderer selectedControl={state.selectedControl} />
-        </>
+        <ControlRenderer selectedControl={state.selectedControl} />
       )}
     </div>
   );

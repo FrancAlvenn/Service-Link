@@ -218,11 +218,12 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
               You selected <strong>{selectedStatus}</strong>. Please enter the
               action taken before proceeding.
             </Typography>
-            <Input
+            <input
               type="text"
               placeholder="Action Taken"
               value={actionTaken}
               onChange={(e) => setActionTaken(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md"
             />
           </div>
         </DialogBody>

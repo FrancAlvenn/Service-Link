@@ -76,6 +76,11 @@ const JobRequest = sequelize.define(
       allowNull: true,
       comment: "Array of assigned employee reference numbers or full objects",
     },
+    assigned_assets: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      comment: "Array of assigned asset reference numbers or full objects",
+    },
   },
   {
     sequelize,

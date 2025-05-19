@@ -9,7 +9,7 @@ import { VehicleRequestsContext } from "../../../context/VehicleRequestsContext"
 const VehicleRequestForm = ({ setSelectedRequest }) => {
   const { user } = useContext(AuthContext);
 
-  const { getUserByReferenceNumber } = useContext(UserContext);
+  const { allUserInfo, getUserByReferenceNumber } = useContext(UserContext);
 
   const { fetchVehicleRequests } = useContext(VehicleRequestsContext);
 
@@ -165,13 +165,39 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
             Requester
           </label>
-          <input
-            type="text"
-            name="requester"
-            value={getUserByReferenceNumber(user.reference_number)}
-            readOnly
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-gray-100 dark:bg-gray-800 dark:text-white"
-          />
+          {user.access_level === "admin" ? (
+            <select
+              name="requester"
+              value={request.requester || ""}
+              onChange={handleChange}
+              className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+              required
+            >
+              <option value="">Select Requester</option>
+              {allUserInfo.map((user) => (
+                <option
+                  key={user.reference_number}
+                  value={user.reference_number}
+                >
+                  {user.first_name} {user.last_name}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <>
+              <input
+                type="text"
+                value={getUserByReferenceNumber(user.reference_number)}
+                readOnly
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+              />
+              <input
+                type="hidden"
+                name="requester"
+                value={user.reference_number}
+              />
+            </>
+          )}
         </div>
 
         <div>
@@ -210,8 +236,8 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
       </div>
 
       {/* Vehicle Requested & Destination */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
+      <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+        {/* <div>
           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
             Vehicle Requested
           </label>
@@ -228,7 +254,7 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
               </option>
             ))}
           </select>
-        </div>
+        </div> */}
 
         <div>
           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -343,7 +369,6 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
         disabled={
           !request.title ||
           !request.department ||
-          !request.vehicle_requested ||
           !request.destination ||
           !request.date_of_trip ||
           !request.time_of_departure ||

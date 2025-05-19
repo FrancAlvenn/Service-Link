@@ -10,194 +10,156 @@ import { AuthContext } from "../../features/authentication";
 
 dayjs.extend(relativeTime);
 
+function getActivityStyle(type, isViewed) {
+  const base = "py-2 px-3 border-l-4 rounded-md shadow-md";
+
+  const styles = {
+    status_change: isViewed
+      ? "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 border-gray-500"
+      : "bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-200 border-blue-500",
+
+    request_access: isViewed
+      ? "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 border-gray-500"
+      : "bg-pink-100 dark:bg-pink-900 text-pink-900 dark:text-pink-100 border-pink-500",
+
+    approval: isViewed
+      ? "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 border-gray-500"
+      : "bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-200 border-green-500",
+  };
+
+  return `${base} ${styles[type] || ""}`;
+}
+
 const ActivityTab = ({ referenceNumber, activeTab }) => {
   const [selectedTab, setSelectedTab] = useState(
-    localStorage.getItem("selected_activity_tab")
+    localStorage.getItem("selected_activity_tab") || "all"
   );
   const [activityType, setActivityType] = useState();
   const [editingActivity, setEditingActivity] = useState(null);
   const [visibility, setVisibility] = useState("");
-
   const [content, setContent] = useState("");
   const [editContent, setEditContent] = useState("");
 
   const { user } = useContext(AuthContext);
-
   const { getUserByReferenceNumber } = useContext(UserContext);
-
   const [activities, setActivities] = useState([]);
-
-  const getRequestActivity = async () => {
-    await axios({
-      method: "GET",
-      url: `/request_activity/${referenceNumber}`,
-      withCredentials: true,
-    })
-      .then((res) => {
-        setActivities(Array.isArray(res.data) ? res.data : []);
-      })
-      .catch((error) => {
-        console.error("Error fetching activities:", error);
-      });
-  };
 
   useEffect(() => {
     getRequestActivity();
   }, [activeTab, referenceNumber]);
 
-  const handleContentChange = (value) => {
-    setContent(value);
+  const getRequestActivity = async () => {
+    try {
+      const res = await axios.get(`/request_activity/${referenceNumber}`, {
+        withCredentials: true,
+      });
+      setActivities(Array.isArray(res.data) ? res.data : []);
+    } catch (error) {
+      console.error("Error fetching activities:", error);
+    }
   };
 
-  function handleTabChange(tab) {
+  const handleContentChange = (value) => setContent(value);
+
+  const handleTabChange = (tab) => {
     setSelectedTab(tab);
     localStorage.setItem("selected_activity_tab", tab);
-  }
+  };
 
   const handleSaveActivity = async () => {
-    if (!content) return;
-    if (content.trim() === "") return;
+    if (!content || content.trim() === "" || content === "<p><br></p>") return;
 
     const newActivity = {
       reference_number: referenceNumber,
       type: "comment",
-      visibility: visibility,
+      visibility,
       action: visibility === "internal" ? "Internal Note" : "Reply to Client",
       details: content,
       performed_by: user.reference_number,
     };
 
     try {
-      await axios({
-        method: "post",
-        url: "/request_activity",
-        data: newActivity,
+      await axios.post("/request_activity", newActivity, {
         withCredentials: true,
-      }).then((res) => {
-        getRequestActivity();
       });
+      getRequestActivity();
+      setContent("");
+      setActivityType(null);
     } catch (error) {
       console.error("Error saving activity:", error);
     }
-
-    setActivities((prevActivities) => [...(prevActivities || []), newActivity]);
-    setContent("");
-    setActivityType(null);
   };
 
-  function handleEditClick(activity) {
+  const handleEditClick = (activity) => {
     setEditingActivity(activity.id);
     setEditContent(activity.details);
-  }
+  };
 
   const handleSaveEdit = async (id) => {
     try {
-      await axios({
-        method: "put",
-        url: `/request_activity/${id}`,
-        data: {
-          details: editContent,
-          performed_by: user.reference_number,
-        },
-        withCredentials: true,
-      });
-
-      // Update the local state
-      setActivities((prevActivities) =>
-        prevActivities.map((activity) =>
-          activity.id === id ? { ...activity, details: editContent } : activity
-        )
+      await axios.put(
+        `/request_activity/${id}`,
+        { details: editContent, performed_by: user.reference_number },
+        { withCredentials: true }
       );
 
+      setActivities((prev) =>
+        prev.map((a) => (a.id === id ? { ...a, details: editContent } : a))
+      );
       setEditingActivity(null);
     } catch (error) {
       console.error("Error updating activity:", error);
     }
   };
 
-  function handleDeleteActivity(id) {
-    axios({
-      method: "DELETE",
-      url: `/request_activity/${id}`,
-      withCredentials: true,
-    })
-      .then(() => {
-        setActivities(activities.filter((activity) => activity.id !== id));
-      })
-      .catch((error) => {
-        console.error("Error deleting activity:", error);
-      });
-  }
+  const handleDeleteActivity = async (id) => {
+    try {
+      await axios.delete(`/request_activity/${id}`, { withCredentials: true });
+      setActivities((prev) => prev.filter((a) => a.id !== id));
+    } catch (error) {
+      console.error("Error deleting activity:", error);
+    }
+  };
 
   return (
-    <div className="flex flex-col gap-2 p-3 mb-3 border-gray-400 border rounded-md h-[70vh] overflow-y-auto">
+    <div className="flex flex-col gap-4 p-3 mb-3 border-gray-400 border rounded-md h-[55vh] overflow-y-auto">
       <span className="flex gap-1">
         <p className="text-sm font-semibold text-gray-600">Activity</p>
       </span>
 
-      {/* Tab Selection */}
+      {/* Tabs */}
       <div className="flex items-center gap-2 mb-3">
         <p className="text-sm font-normal text-gray-500">Show</p>
-        <Button
-          variant="outlined"
-          color={selectedTab === "all" ? "blue" : "gray"}
-          size="sm"
-          className="text-xs py-1 px-2"
-          onClick={() => handleTabChange("all")}
-        >
-          All
-        </Button>
-        <Button
-          variant="outlined"
-          color={selectedTab === "comment" ? "blue" : "gray"}
-          size="sm"
-          className="text-xs py-1 px-2"
-          onClick={() => handleTabChange("comment")}
-        >
-          Comment
-        </Button>
-        <Button
-          variant="outlined"
-          color={selectedTab === "status_change" ? "blue" : "gray"}
-          size="sm"
-          className="text-xs py-1 px-2"
-          onClick={() => handleTabChange("status_change")}
-        >
-          Status Change
-        </Button>
-        <Button
-          variant="outlined"
-          color={selectedTab === "approval" ? "blue" : "gray"}
-          size="sm"
-          className="text-xs py-1 px-2"
-          onClick={() => handleTabChange("approval")}
-        >
-          Approval
-        </Button>
+        {["all", "comment", "status_change", "approval"].map((tab) => (
+          <Button
+            key={tab}
+            variant="outlined"
+            color={selectedTab === tab ? "blue" : "gray"}
+            size="sm"
+            className="text-xs py-1 px-2"
+            onClick={() => handleTabChange(tab)}
+          >
+            {tab.charAt(0).toUpperCase() + tab.slice(1).replace("_", " ")}
+          </Button>
+        ))}
       </div>
 
-      {/*  */}
+      {/* Visibility Toggle */}
       <div className="flex items-center gap-2 px-4 py-2 border-gray-400 border rounded-md">
-        <p
-          className={`text-sm font-semibold cursor-pointer ${
-            visibility === "internal" ? "text-blue-500" : "text-gray-500"
-          }`}
-          onClick={() => setVisibility("internal")}
-        >
-          Add internal note{" "}
-        </p>
-        <p>/</p>
-        <p
-          className={`text-sm font-semibold cursor-pointer ${
-            visibility === "external" ? "text-blue-500" : "text-gray-500"
-          }`}
-          onClick={() => setVisibility("external")}
-        >
-          Reply to client
-        </p>
+        {["internal", "external"].map((v) => (
+          <p
+            key={v}
+            className={`text-sm font-semibold cursor-pointer ${
+              visibility === v ? "text-blue-500" : "text-gray-500"
+            }`}
+            onClick={() => setVisibility(v)}
+          >
+            {v === "internal" ? "Add internal note" : "Reply to client"}
+          </p>
+        ))}
       </div>
 
-      {/* Add Request Activity - Comment when there is visibility */}
+      {/* Editor */}
       {visibility && (
         <div className="flex flex-col gap-10">
           <ReactQuill
@@ -210,10 +172,10 @@ const ActivityTab = ({ referenceNumber, activeTab }) => {
               variant="outlined"
               color="blue"
               className="text-xs py-1 px-2"
+              onClick={handleSaveActivity}
               disabled={
                 !content || content.trim() === "" || content === "<p><br></p>"
               }
-              onClick={() => handleSaveActivity()}
             >
               Save
             </Button>
@@ -229,42 +191,40 @@ const ActivityTab = ({ referenceNumber, activeTab }) => {
         </div>
       )}
 
-      {/* Activity Feed */}
+      {/* Activity List */}
       <div className="mt-4 flex flex-col gap-2 pt-2">
         <div className="flex flex-col gap-3 p-2">
-          {activities?.length > 0 ? (
+          {activities.length > 0 ? (
             activities
               .filter(
-                (activity) =>
-                  (activity.visibility !== "internal" ||
-                    activity.created_by === user.reference_number) &&
-                  (selectedTab === "all" ||
-                    activity.request_type === selectedTab)
+                (a) =>
+                  (a.visibility !== "internal" ||
+                    a.created_by === user.reference_number) &&
+                  (selectedTab === "all" || a.request_type === selectedTab)
               )
               .map((activity) => {
                 const isUser = activity.created_by === user.reference_number;
-                const isViewed = activity.viewed; // Check if activity is viewed
-                const bgColor =
-                  "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 border-gray-500";
-                const statusColor =
-                  "bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-200 border-blue-500";
-                const requestColor =
-                  "bg-pink-100 dark:bg-pink-900 text-pink-900 dark:text-pink-100 border-pink-500";
-                const approvalColor =
-                  "bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-200 border-green-500";
+                const isViewed = activity.viewed;
 
-                if (activity.request_type === "status_change") {
+                if (
+                  ["status_change", "approval", "request_access"].includes(
+                    activity.request_type
+                  )
+                ) {
                   return (
                     <div
                       key={activity.id}
-                      className={`py-2 px-3 ${
-                        isViewed ? bgColor : statusColor
-                      } border-l-4 rounded-md shadow-md`}
+                      className={getActivityStyle(
+                        activity.request_type,
+                        isViewed
+                      )}
                     >
                       <div className="flex items-center justify-between">
                         <div
                           className="dangerous-p dark:text-gray-100 text-xs font-semibold"
-                          dangerouslySetInnerHTML={{ __html: activity.action }}
+                          dangerouslySetInnerHTML={{
+                            __html: activity.action,
+                          }}
                         ></div>
                         <span className="text-xs text-gray-500 dark:text-gray-400">
                           {dayjs(activity.created_at).fromNow()}
@@ -275,50 +235,7 @@ const ActivityTab = ({ referenceNumber, activeTab }) => {
                   );
                 }
 
-                if (activity.request_type === "request_access") {
-                  return (
-                    <div
-                      key={activity.id}
-                      className={`py-2 px-3 ${
-                        isViewed ? bgColor : requestColor
-                      } border-l-4 rounded-md shadow-md cursor-pointer`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div
-                          className="dangerous-p dark:text-gray-100 text-xs font-semibold"
-                          dangerouslySetInnerHTML={{ __html: activity.action }}
-                        ></div>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          {dayjs(activity.created_at).fromNow()}
-                        </span>
-                      </div>
-                      <p className="text-sm">{activity.details}</p>
-                    </div>
-                  );
-                }
-
-                if (activity.request_type === "approval") {
-                  return (
-                    <div
-                      key={activity.id}
-                      className={`py-2 px-3 ${
-                        isViewed ? bgColor : approvalColor
-                      } border-l-4 rounded-md shadow-md`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div
-                          className="dangerous-p dark:text-gray-100 text-xs font-semibold"
-                          dangerouslySetInnerHTML={{ __html: activity.action }}
-                        ></div>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          {dayjs(activity.created_at).fromNow()}
-                        </span>
-                      </div>
-                      <p className="text-sm">{activity.details}</p>
-                    </div>
-                  );
-                }
-
+                // Comments (default)
                 return (
                   <div
                     key={activity.id}
@@ -335,7 +252,7 @@ const ActivityTab = ({ referenceNumber, activeTab }) => {
                         }`}
                       >
                         {editingActivity === activity.id ? (
-                          <div>
+                          <>
                             <ReactQuill
                               theme="snow"
                               value={editContent}
@@ -346,43 +263,43 @@ const ActivityTab = ({ referenceNumber, activeTab }) => {
                               <Button
                                 variant="outlined"
                                 color="blue"
-                                className="text-xs py-1 px-2 dark:border-gray-500 dark:text-gray-300"
+                                className="text-xs py-1 px-2"
+                                onClick={() => handleSaveEdit(activity.id)}
                                 disabled={
                                   !editContent ||
                                   editContent.trim() === "" ||
                                   editContent === "<p><br></p>"
                                 }
-                                onClick={() => handleSaveEdit(activity.id)}
                               >
                                 Save
                               </Button>
                               <Button
                                 variant="outlined"
                                 color="gray"
-                                className="text-xs py-1 px-2 dark:border-gray-500 dark:text-gray-300"
+                                className="text-xs py-1 px-2"
                                 onClick={() => setEditingActivity(null)}
                               >
                                 Cancel
                               </Button>
                             </div>
-                          </div>
+                          </>
                         ) : (
-                          <div>
-                            <span className="flex items-center justify-between gap-10">
+                          <>
+                            <div className="flex justify-between items-center gap-4">
                               <p className="dark:text-gray-100 text-xs font-semibold">
                                 {getUserByReferenceNumber(activity.created_by)}
                               </p>
-                              <span className="text-xs ml-auto text-gray-500 dark:text-gray-400 block">
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
                                 {dayjs(activity.created_at).fromNow()}
                               </span>
-                            </span>
+                            </div>
                             <div
+                              className="dangerous-p dark:text-gray-100 text-sm break-words whitespace-pre-wrap"
                               dangerouslySetInnerHTML={{
                                 __html: activity.details,
                               }}
-                              className="dangerous-p dark:text-gray-100 text-sm break-words whitespace-pre-wrap"
-                            ></div>
-                          </div>
+                            />
+                          </>
                         )}
                       </div>
 

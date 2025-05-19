@@ -24,7 +24,7 @@ import { useNavigate } from "react-router-dom";
 
 dayjs.extend(relativeTime);
 
-const NotificationMenu = () => {
+const NotificationModal = () => {
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState("all");
   const [activities, setActivities] = useState([]);
@@ -121,7 +121,7 @@ const NotificationMenu = () => {
         </MenuHandler>
 
         <MenuList className="w-[420px] max-h-[500px] overflow-auto p-4 dark:bg-gray-900 dark:text-gray-100 z-[9999]">
-          <Typography variant="h6" color="blue-gray" className="mb-3 text-lg">
+          <Typography variant="h6" color="blue-gray" className="mb-3 text-md">
             Activities
           </Typography>
 
@@ -133,7 +133,7 @@ const NotificationMenu = () => {
                 variant={selectedTab === tab ? "filled" : "outlined"}
                 color={selectedTab === tab ? "blue" : "gray"}
                 onClick={() => setSelectedTab(tab)}
-                className="rounded-md text-xs"
+                className="rounded-md text-[10px] py-1 px-4"
               >
                 {tab.replace("_", " ")}
               </Button>
@@ -239,4 +239,4 @@ const NotificationMenu = () => {
   );
 };
 
-export default NotificationMenu;
+export default NotificationModal;

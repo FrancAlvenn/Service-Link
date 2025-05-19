@@ -1,37 +1,34 @@
-/* eslint-disable no-unused-vars */
-import React, { useContext, useEffect, useState } from "react";
-import "react-quill/dist/quill.snow.css";
+// ... [imports remain unchanged]
+import { AuthContext } from "../../../../authentication";
+import { UserContext } from "../../../../../context/UserContext";
+import { VenueRequestsContext } from "../../../context/VenueRequestsContext";
+import ToastNotification from "../../../../../utils/ToastNotification";
+import { useContext, useState, useEffect } from "react";
+import axios from "axios";
 import { Button, Typography } from "@material-tailwind/react";
 import {
-  Plus,
   FloppyDisk,
   PencilSimpleLine,
+  Plus,
   Prohibit,
   X,
 } from "@phosphor-icons/react";
-import { AuthContext } from "../../../../authentication";
-import axios from "axios";
-import { UserContext } from "../../../../../context/UserContext";
-import ToastNotification from "../../../../../utils/ToastNotification";
-import { VenueRequestsContext } from "../../../context/VenueRequestsContext";
 
 const VenueRequestForm = ({ setSelectedRequest }) => {
   const { user } = useContext(AuthContext);
-
-  const { getUserByReferenceNumber } = useContext(UserContext);
-
+  const { allUserInfo, getUserByReferenceNumber } = useContext(UserContext);
   const { fetchVenueRequests } = useContext(VenueRequestsContext);
 
   const [request, setRequest] = useState({
     requester: user.reference_number,
     department: "",
     organization: "",
-    event_title: "",
+    title: "",
     event_dates: "",
     event_start_time: "",
     event_end_time: "",
     event_nature: "",
-    venue_id: "",
+    venue_requested: "",
     participants: "",
     pax_estimation: "",
     purpose: "",
@@ -49,84 +46,80 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
   const [departmentOptions, setDepartmentOptions] = useState([]);
   const [venueOptions, setVenueOptions] = useState([]);
 
-  const [errorMessage, setErrorMessage] = useState("");
+  // New: Individual error states
+  const [timeErrors, setTimeErrors] = useState({
+    date: "",
+    time: "",
+  });
 
   useEffect(() => {
-    axios({
-      method: "GET",
-      url: "/assets/",
-      withCredentials: true,
-    })
-      .then((response) => {
-        const venueAssets = [];
-        response.data.forEach((asset) => {
-          if (asset.asset_type === "Venue") {
-            venueAssets.push(asset);
-          }
-        });
-        setVenueOptions(venueAssets);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    axios.get("/assets/", { withCredentials: true }).then((response) => {
+      const venues = response.data.filter((a) => a.asset_type === "Venue");
+      setVenueOptions(venues);
+    });
   }, []);
 
-  //Check if date and asset has conflict in time with other requests
-  const checkConflict = async () => {};
+  useEffect(() => {
+    axios.get("/settings/department", { withCredentials: true }).then((res) => {
+      if (Array.isArray(res.data.departments)) {
+        setDepartmentOptions(res.data.departments);
+      }
+    });
+  }, []);
 
   const handleChange = (e) => {
-    // Validate Date: Ensure date_required is not in the past
-    if (e.target.name === "event_dates") {
+    const { name, value } = e.target;
+
+    const updatedRequest = { ...request, [name]: value };
+
+    // Time and date validation
+    if (name === "event_dates") {
       const today = new Date();
-      today.setHours(0, 0, 0, 0); // Normalize to start of day for accuracy
-      const selectedDate = new Date(e.target.value);
+      today.setHours(0, 0, 0, 0);
+      const selectedDate = new Date(value);
 
       if (selectedDate < today) {
-        setErrorMessage("Invalid Date");
-        // ToastNotification.error("Invalid Date", "Date cannot be in the past.");
-        return; // Exit without updating state
+        setTimeErrors((prev) => ({
+          ...prev,
+          date: "Event date cannot be in the past.",
+        }));
+      } else {
+        setTimeErrors((prev) => ({ ...prev, date: "" }));
       }
     }
 
-    // Validate Time: Ensure event_start_time is not later than event_end_time and has at least 1-hour difference
-    if (
-      e.target.name === "event_start_time" ||
-      e.target.name === "event_end_time"
-    ) {
-      const { event_start_time, event_end_time } = {
-        ...request,
-        [e.target.name]: e.target.value,
-      };
+    if (name === "event_start_time" || name === "event_end_time") {
+      const start = new Date(`1970-01-01T${updatedRequest.event_start_time}`);
+      const end = new Date(`1970-01-01T${updatedRequest.event_end_time}`);
 
-      if (event_start_time && event_end_time) {
-        const start = new Date(`1970-01-01T${event_start_time}`);
-        const end = new Date(`1970-01-01T${event_end_time}`);
-        const diffInMinutes = (end - start) / (1000 * 60);
-
+      if (updatedRequest.event_start_time && updatedRequest.event_end_time) {
         if (start >= end) {
-          setErrorMessage(
-            "Invalid Time. Start time must be earlier than end time."
-          );
-          // ToastNotification.error("Invalid Time", "Start time must be earlier than end time.");
-          return; // Exit without updating state
-        }
-
-        if (diffInMinutes < 60) {
-          setErrorMessage(
-            "Invalid Time. Event duration must be at least 1 hour."
-          );
-          // ToastNotification.error("Invalid Time", "Event duration must be at least 1 hour.");
-          return; // Exit without updating state
+          setTimeErrors((prev) => ({
+            ...prev,
+            time: "Start time must be earlier than end time.",
+          }));
+        } else if ((end - start) / (1000 * 60) < 60) {
+          setTimeErrors((prev) => ({
+            ...prev,
+            time: "Event duration must be at least 1 hour.",
+          }));
+        } else {
+          setTimeErrors((prev) => ({ ...prev, time: "" }));
         }
       }
     }
 
-    setErrorMessage("");
-    setRequest({ ...request, [e.target.name]: e.target.value });
+    setRequest(updatedRequest);
   };
 
-  const handleQuillChange = (name, value) => {
-    setRequest({ ...request, [name]: value });
+  const handleAddParticular = () => {
+    setRequest({
+      ...request,
+      details: [
+        ...request.details,
+        { particulars: "", quantity: 0, description: "" },
+      ],
+    });
   };
 
   const handleEditClick = (index) => {
@@ -147,39 +140,11 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
     setRequest({ ...request, details: updatedDetails });
   };
 
-  const handleAddParticular = () => {
-    setRequest({
-      ...request,
-      details: [
-        ...request.details,
-        { particulars: "", quantity: 0, description: "" },
-      ],
-    });
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const departmentResponse = await axios.get("/settings/department", {
-          withCredentials: true,
-        });
-        if (Array.isArray(departmentResponse.data.departments)) {
-          setDepartmentOptions(departmentResponse.data.departments);
-        }
-
-        //Add here the fetch for Venue Later
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-    fetchData();
-  }, []);
+  // ... [handlers for Quill, adding/removing/editing details remain unchanged]
 
   const submitVenueRequest = async () => {
     try {
-      const requestData = { ...request };
-
-      const response = await axios.post("/venue_request", requestData, {
+      const response = await axios.post("/venue_request", request, {
         withCredentials: true,
       });
 
@@ -191,12 +156,12 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
           requester: user.reference_number,
           department: "",
           organization: "",
-          event_title: "",
+          title: "",
           event_dates: "",
           event_start_time: "",
           event_end_time: "",
           event_nature: "",
-          venue_id: "",
+          venue_requested: "",
           participants: "",
           pax_estimation: "",
           purpose: "",
@@ -204,70 +169,99 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
           details: [],
         });
       }
-    } catch (error) {
-      console.error("Error submitting venue request:", error);
+    } catch (err) {
+      console.error("Submit error:", err);
     }
   };
 
   return (
     <div className="py-2 text-sm space-y-4 overflow-y-auto">
-      {/* Requester & Department */}
+      {/* Requester, Department, Venue */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Requester */}
         <div>
-          <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
+          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
             Requester
           </label>
-          <input
-            type="text"
-            name="requester"
-            value={getUserByReferenceNumber(user.reference_number)}
-            readOnly
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-gray-100 dark:bg-gray-800 dark:text-gray-200"
-          />
+          {user.access_level === "admin" ? (
+            <select
+              name="requester"
+              value={request.requester || ""}
+              onChange={handleChange}
+              className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+              required
+            >
+              <option value="">Select Requester</option>
+              {allUserInfo.map((user) => (
+                <option
+                  key={user.reference_number}
+                  value={user.reference_number}
+                >
+                  {user.first_name} {user.last_name}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <>
+              <input
+                type="text"
+                value={getUserByReferenceNumber(user.reference_number)}
+                readOnly
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+              />
+              <input
+                type="hidden"
+                name="requester"
+                value={user.reference_number}
+              />
+            </>
+          )}
         </div>
 
+        {/* Department */}
         <div>
           <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
             Department
           </label>
           <select
             name="department"
-            value={request.department || ""}
+            value={request.department}
             onChange={handleChange}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
+            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
             required
           >
             <option value="">Select Department</option>
-            {departmentOptions?.map((dept) => (
-              <option key={dept.id} value={dept.name}>
-                {dept.name}
+            {departmentOptions.map((d) => (
+              <option key={d.id} value={d.name}>
+                {d.name}
               </option>
             ))}
           </select>
         </div>
 
+        {/* Venue */}
         <div>
           <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
             Venue
           </label>
           <select
-            name="venue_id"
-            value={request.venue_id || ""}
+            name="venue_requested"
+            value={request.venue_requested}
             onChange={handleChange}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
+            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
             required
           >
             <option value="">Select Venue</option>
-            {venueOptions?.map((option) => (
-              <option key={option.venue_id} value={option.venue_id}>
-                {option.name}
+            {venueOptions.map((v) => (
+              <option key={v.id} value={v.name}>
+                {v.name}
               </option>
             ))}
           </select>
         </div>
       </div>
 
-      {/* Organization & Event Title */}
+      {/* Organization & Title */}
       <div>
         <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
           Organization
@@ -275,9 +269,9 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
         <input
           type="text"
           name="organization"
-          value={request.organization || ""}
+          value={request.organization}
           onChange={handleChange}
-          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
+          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
         />
       </div>
 
@@ -287,60 +281,13 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
         </label>
         <input
           type="text"
-          name="event_title"
-          value={request.event_title || ""}
+          name="title"
+          value={request.title}
           onChange={handleChange}
-          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
-          required
+          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
         />
       </div>
 
-      {/* Event Details */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
-            Event Date
-          </label>
-          <input
-            type="date"
-            name="event_dates"
-            value={request.event_dates || ""}
-            onChange={handleChange}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
-            Start Time
-          </label>
-          <input
-            type="time"
-            name="event_start_time"
-            value={request.event_start_time || ""}
-            onChange={handleChange}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
-            End Time
-          </label>
-          <input
-            type="time"
-            name="event_end_time"
-            value={request.event_end_time || ""}
-            onChange={handleChange}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
-            required
-          />
-        </div>
-      </div>
-
-      {/* Participants & Venue */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
@@ -349,9 +296,9 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
           <input
             type="text"
             name="participants"
-            value={request.participants || ""}
+            value={request.participants}
             onChange={handleChange}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
+            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
           />
         </div>
 
@@ -362,26 +309,196 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
           <input
             type="number"
             name="pax_estimation"
-            value={request.pax_estimation || ""}
+            value={request.pax_estimation}
             onChange={handleChange}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
+            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
           />
+        </div>
+      </div>
+      {/* Date and Time */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Event Date */}
+        <div>
+          <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
+            Event Date
+          </label>
+          <input
+            type="date"
+            name="event_dates"
+            value={request.event_dates}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
+          />
+          {timeErrors.date && (
+            <p className="text-red-500 text-xs mt-1">{timeErrors.date}</p>
+          )}
+        </div>
+
+        {/* Start Time */}
+        <div>
+          <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
+            Start Time
+          </label>
+          <input
+            type="time"
+            name="event_start_time"
+            value={request.event_start_time}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
+          />
+        </div>
+
+        {/* End Time */}
+        <div>
+          <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
+            End Time
+          </label>
+          <input
+            type="time"
+            name="event_end_time"
+            value={request.event_end_time}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
+          />
+          {timeErrors.time && (
+            <p className="text-red-500 text-xs mt-1">{timeErrors.time}</p>
+          )}
         </div>
       </div>
 
       {/* Purpose */}
       <div>
-        <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
+        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
           Purpose
         </label>
         <textarea
           name="purpose"
           value={request.purpose}
-          onChange={(e) => handleQuillChange("purpose", e.target.value)}
-          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
+          onChange={(e) => handleChange(e)}
+          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-300"
           required
         />
       </div>
+
+      {/* Particulars Section */}
+      <div className="space-y-2">
+        <Typography className="text-xs font-semibold text-gray-600 dark:text-gray-300">
+          Particulars
+        </Typography>
+
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-left text-sm border border-gray-300 dark:border-gray-600 rounded-md overflow-hidden">
+            <thead className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+              <tr>
+                <th className="px-4 py-2 dark:border-gray-600">Item</th>
+                <th className="px-4 py-2 dark:border-gray-600">Quantity</th>
+                <th className="px-4 py-2  dark:border-gray-600">Description</th>
+                <th className="px-4 py-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {request.details.map((detail, index) => (
+                <tr
+                  key={index}
+                  className="border-t border-gray-300 dark:border-gray-600"
+                >
+                  {editingIndex === index ? (
+                    <>
+                      <td className="px-4 py-2">
+                        <input
+                          type="text"
+                          value={editedParticular.particulars}
+                          onChange={(e) =>
+                            setEditedParticular({
+                              ...editedParticular,
+                              particulars: e.target.value,
+                            })
+                          }
+                          className="w-full px-2 py-1 border border-gray-400 rounded-md dark:bg-gray-800 dark:text-white"
+                        />
+                      </td>
+                      <td className="px-4 py-2">
+                        <input
+                          type="number"
+                          value={editedParticular.quantity}
+                          onChange={(e) =>
+                            setEditedParticular({
+                              ...editedParticular,
+                              quantity: e.target.value,
+                            })
+                          }
+                          className="w-full px-2 py-1 border border-gray-400 rounded-md dark:bg-gray-800 dark:text-white"
+                        />
+                      </td>
+                      <td className="px-4 py-2">
+                        <textarea
+                          value={editedParticular.description}
+                          rows={1}
+                          onChange={(e) =>
+                            setEditedParticular({
+                              ...editedParticular,
+                              description: e.target.value,
+                            })
+                          }
+                          className="w-full px-2 py-1 border border-gray-400 rounded-md dark:bg-gray-800 dark:text-white"
+                        />
+                      </td>
+                      <td className="px-4 py-2 space-x-2">
+                        <button
+                          className="text-green-500"
+                          onClick={() => handleSaveEdit(index)}
+                        >
+                          <FloppyDisk size={18} />
+                        </button>
+                        <button
+                          className="text-red-500"
+                          onClick={() => setEditingIndex(null)}
+                        >
+                          <Prohibit size={18} />
+                        </button>
+                      </td>
+                    </>
+                  ) : (
+                    <>
+                      <td className="px-4 py-2">{detail.particulars}</td>
+                      <td className="px-4 py-2">x{detail.quantity}</td>
+                      <td className="px-4 py-2">{detail.description}</td>
+                      <td className="px-4 py-2 space-x-2">
+                        <button
+                          className="text-blue-500"
+                          onClick={() => handleEditClick(index)}
+                        >
+                          <PencilSimpleLine size={18} />
+                        </button>
+                        <button
+                          className="text-red-500"
+                          onClick={() => handleDetailRemove(index)}
+                        >
+                          <X size={18} />
+                        </button>
+                      </td>
+                    </>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Add Particular Button */}
+        <Button
+          color="green"
+          variant="outlined"
+          onClick={handleAddParticular}
+          className="flex items-center gap-1 px-3 py-2 border rounded-md hover:text-green-500 dark:border-gray-600"
+        >
+          <Plus size={18} />
+          <Typography className="text-xs">Add Particular</Typography>
+        </Button>
+      </div>
+
+      {/* The rest of the form (participants, purpose, details, submit) remains unchanged... */}
+      {/* You can copy your previous implementation here as it does not affect the new logic */}
 
       {/* Submit Button */}
       <Button
@@ -390,16 +507,17 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
         onClick={submitVenueRequest}
         disabled={
           !request.department ||
-          !request.venue_id ||
+          !request.venue_requested ||
           !request.organization ||
-          // !request.event_nature ||
-          !request.event_title ||
+          !request.title ||
           !request.event_dates ||
           !request.event_start_time ||
           !request.event_end_time ||
           !request.participants ||
           !request.pax_estimation ||
-          !request.purpose
+          !request.purpose ||
+          timeErrors.date ||
+          timeErrors.time
         }
         className="dark:bg-blue-600 dark:hover:bg-blue-500 w-full md:w-auto"
       >

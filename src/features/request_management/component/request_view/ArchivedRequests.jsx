@@ -21,6 +21,7 @@ import axios from "axios";
 import { PurchasingRequestsContext } from "../../context/PurchasingRequestsContext.js";
 import { VehicleRequestsContext } from "../../context/VehicleRequestsContext.js";
 import { VenueRequestsContext } from "../../context/VenueRequestsContext.js";
+import Header from "../../../../layouts/header.js";
 
 export function ArchivedRequests() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -168,185 +169,158 @@ export function ArchivedRequests() {
   );
 
   return (
-    <div className="flex justify-between h-full bg-white">
-      <div
-        className={`h-full bg-white w-full mt-0 px-3 flex flex-col justify-between transition-[max-width] duration-300 ${
-          sidebarOpen ? "max-w-[55%]" : "w-full"
-        }`}
+    <div className="flex flex-col h-full bg-white">
+      <CardHeader
+        floated={false}
+        shadow={false}
+        className="rounded-none min-h-fit pb-6"
       >
-        <div className="flex flex-col gap-4 h-full">
-          {/* Header Section */}
-          <CardHeader
-            floated={false}
-            shadow={false}
-            className="rounded-none min-h-fit pb-6"
-          >
-            <div className="mb-1 flex items-center justify-between gap-5">
-              <div>
-                <Typography color="black" className="text-lg font-bold">
-                  Archived Requests
-                </Typography>
-                <Typography color="gray" className="mt-1 font-normal text-sm">
-                  See information about requests
-                </Typography>
-              </div>
-              <Button
-                className="flex items-center gap-2 bg-blue-500"
-                size="sm"
-                onClick={fetchArchivedJobRequests}
-              >
-                <ArrowClockwise strokeWidth={2} className="h-4 w-4" />
-                Refresh
-              </Button>
-            </div>
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between px-3 gap-4 mt-2 w-full">
-              {/* Search Bar */}
-              <div className="relative w-full max-w-[230px] min-w-[150px]">
-                <input
-                  className="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md pl-3 pr-28 py-2 focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
-                  placeholder="Search"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
-                />
-                <span className="absolute top-1 right-1 flex items-center rounded py-1.5 px-3 text-black shadow-sm hover:shadow">
-                  <MagnifyingGlass size={16} />
-                </span>
-              </div>
+        <Header
+          title={"Archived Requests"}
+          description={"See information about archived requests"}
+        />
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between px-3 gap-4 mt-2 w-full">
+          {/* Search Bar */}
+          <div className="relative w-full max-w-[230px] min-w-[150px]">
+            <input
+              className="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md pl-3 pr-28 py-2 focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
+              placeholder="Search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
+            />
+            <span className="absolute top-1 right-1 flex items-center rounded py-1.5 px-3 text-black shadow-sm hover:shadow">
+              <MagnifyingGlass size={16} />
+            </span>
+          </div>
 
-              {/* Filter & Menus */}
-              <div className="flex flex-col  lg:flex-row lg:justify-end lg:items-center gap-2 w-full">
-                <div className="w-full">
-                  <RequestFilter
-                    filters={filters}
-                    onFilterChange={setFilters}
+          {/* Filter & Menus */}
+          <div className="flex flex-col  lg:flex-row lg:justify-end lg:items-center gap-2 w-full">
+            <div className="w-full">
+              <RequestFilter filters={filters} onFilterChange={setFilters} />
+            </div>
+            <div className="flex flex-wrap items-center justify-end gap-2 max-w-[230px] w-full">
+              <span className="text-xs font-semibold whitespace-nowrap text-gray-700 text-center sm:text-left">
+                GROUP BY
+              </span>
+
+              {/* Request Type Menu */}
+
+              <Menu placement="bottom-end">
+                <MenuHandler>
+                  <div className="cursor-pointer w-fit">
+                    <Chip
+                      value={requestType
+                        .replace("_", " ")
+                        .replace(/\b\w/g, (l) => l.toUpperCase())}
+                      variant="filled"
+                      color={requestTypeColor[requestType] || "gray"}
+                      className="pointer-events-none" // Prevent Chip's default click
+                    />
+                  </div>
+                </MenuHandler>
+
+                <MenuList className="flex flex-col flex-wrap gap-2 px-3 py-2">
+                  <Chip
+                    value="Job Requests"
+                    onClick={() => setRequestType("job_request")}
+                    variant={requestType === "job_request" ? "filled" : "ghost"}
+                    color={requestType === "job_request" ? "blue" : "gray"}
+                    className="cursor-pointer w-fit"
                   />
-                </div>
-                <div className="flex flex-wrap items-center justify-end gap-2 max-w-[230px] w-full">
-                  <span className="text-xs font-semibold whitespace-nowrap text-gray-700 text-center sm:text-left">
-                    GROUP BY
-                  </span>
-
-                  {/* Request Type Menu */}
-
-                  <Menu placement="bottom-end">
-                    <MenuHandler>
-                      <div className="cursor-pointer w-fit">
-                        <Chip
-                          value={requestType
-                            .replace("_", " ")
-                            .replace(/\b\w/g, (l) => l.toUpperCase())}
-                          variant="filled"
-                          color={requestTypeColor[requestType] || "gray"}
-                          className="pointer-events-none" // Prevent Chip's default click
-                        />
-                      </div>
-                    </MenuHandler>
-
-                    <MenuList className="flex flex-col flex-wrap gap-2 px-3 py-2">
-                      <Chip
-                        value="Job Requests"
-                        onClick={() => setRequestType("job_request")}
-                        variant={
-                          requestType === "job_request" ? "filled" : "ghost"
-                        }
-                        color={requestType === "job_request" ? "blue" : "gray"}
-                        className="cursor-pointer w-fit"
-                      />
-                      <Chip
-                        value="Purchasing Requests"
-                        onClick={() => setRequestType("purchasing_request")}
-                        variant={
-                          requestType === "purchasing_request"
-                            ? "filled"
-                            : "ghost"
-                        }
-                        color={
-                          requestType === "purchasing_request"
-                            ? "green"
-                            : "gray"
-                        }
-                        className="cursor-pointer w-fit"
-                      />
-                      <Chip
-                        value="Vehicle Requests"
-                        onClick={() => setRequestType("vehicle_request")}
-                        variant={
-                          requestType === "vehicle_request" ? "filled" : "ghost"
-                        }
-                        color={
-                          requestType === "vehicle_request" ? "amber" : "gray"
-                        }
-                        className="cursor-pointer w-fit"
-                      />
-                      <Chip
-                        value="Venue Requests"
-                        onClick={() => setRequestType("venue_request")}
-                        variant={
-                          requestType === "venue_request" ? "filled" : "ghost"
-                        }
-                        color={
-                          requestType === "venue_request" ? "purple" : "gray"
-                        }
-                        className="cursor-pointer w-fit"
-                      />
-                    </MenuList>
-                  </Menu>
-                </div>
-              </div>
+                  <Chip
+                    value="Purchasing Requests"
+                    onClick={() => setRequestType("purchasing_request")}
+                    variant={
+                      requestType === "purchasing_request" ? "filled" : "ghost"
+                    }
+                    color={
+                      requestType === "purchasing_request" ? "green" : "gray"
+                    }
+                    className="cursor-pointer w-fit"
+                  />
+                  <Chip
+                    value="Vehicle Requests"
+                    onClick={() => setRequestType("vehicle_request")}
+                    variant={
+                      requestType === "vehicle_request" ? "filled" : "ghost"
+                    }
+                    color={requestType === "vehicle_request" ? "amber" : "gray"}
+                    className="cursor-pointer w-fit"
+                  />
+                  <Chip
+                    value="Venue Requests"
+                    onClick={() => setRequestType("venue_request")}
+                    variant={
+                      requestType === "venue_request" ? "filled" : "ghost"
+                    }
+                    color={requestType === "venue_request" ? "purple" : "gray"}
+                    className="cursor-pointer w-fit"
+                  />
+                </MenuList>
+              </Menu>
             </div>
-          </CardHeader>
-
-          {/* Table Section */}
-          <CardBody className="custom-scrollbar h-full pt-0">
-            <table className="w-full min-w-max table-auto text-left">
-              <thead className="sticky top-0 z-10 border-b border-blue-gray-100">
-                <tr>
-                  {columns.map((col, index) => (
-                    <th
-                      key={index}
-                      className="cursor-pointer bg-white p-4 transition-colors hover:bg-blue-gray-50"
-                    >
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="leading-none opacity-70 capitalize font-semibold"
+          </div>
+        </div>
+      </CardHeader>
+      <div className="flex justify-between h-full bg-white">
+        <div
+          className={`h-full bg-white w-full mt-0 px-3 flex flex-col justify-between transition-[max-width] duration-300 ${
+            sidebarOpen ? "max-w-[55%]" : "w-full"
+          }`}
+        >
+          <div className="flex flex-col gap-4 h-full">
+            {/* Table Section */}
+            <CardBody className="custom-scrollbar h-full pt-0">
+              <table className="w-full min-w-max table-auto text-left">
+                <thead className="sticky top-0 z-10 border-b border-blue-gray-100">
+                  <tr>
+                    {columns.map((col, index) => (
+                      <th
+                        key={index}
+                        className="cursor-pointer bg-white p-4 transition-colors hover:bg-blue-gray-50"
                       >
-                        {col.header}
-                      </Typography>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filteredRows.map((row, rowIndex) => (
-                  <tr key={rowIndex}>
-                    {columns.map((col, colIndex) => (
-                      <td
-                        key={colIndex}
-                        className="px-4 py-5 w-fit font-normal"
-                      >
-                        {col.render(
-                          row,
-                          setSidebarOpen,
-                          setSelectedReferenceNumber
-                        )}
-                      </td>
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className="leading-none opacity-70 capitalize font-semibold"
+                        >
+                          {col.header}
+                        </Typography>
+                      </th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </CardBody>
-        </div>
+                </thead>
+                <tbody>
+                  {filteredRows.map((row, rowIndex) => (
+                    <tr key={rowIndex}>
+                      {columns.map((col, colIndex) => (
+                        <td
+                          key={colIndex}
+                          className="px-4 py-5 w-fit font-normal"
+                        >
+                          {col.render(
+                            row,
+                            setSidebarOpen,
+                            setSelectedReferenceNumber
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </CardBody>
+          </div>
 
-        {/* Sidebar for Request Details */}
+          {/* Sidebar for Request Details */}
+        </div>
+        <SidebarView
+          open={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          referenceNumber={selectedReferenceNumber}
+          requests={allRequests}
+        />
       </div>
-      <SidebarView
-        open={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-        referenceNumber={selectedReferenceNumber}
-        requests={allRequests}
-      />
     </div>
   );
 }

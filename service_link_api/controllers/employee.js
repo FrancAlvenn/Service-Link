@@ -27,12 +27,15 @@ export const createEmployee = async (req, res) => {
     }
 
     // Generate a unique reference number
-    const lastEmployee = await EmployeeModel.findOne({ order: [["employee_id", "DESC"]] });
+    const lastEmployee = await EmployeeModel.findOne({
+      order: [["employee_id", "DESC"]],
+    });
     const referenceNumber = generateEmployeeReferenceNumber(
       lastEmployee ? lastEmployee.employee_id : 0
     );
 
-    const hireDate = req.body.hire_date || new Date().toISOString().split("T")[0];
+    const hireDate =
+      req.body.hire_date || new Date().toISOString().split("T")[0];
 
     const newEmployee = await EmployeeModel.create(
       {
@@ -67,11 +70,15 @@ export const createEmployee = async (req, res) => {
       details: `Employee with reference number ${referenceNumber} created successfully!`,
     });
 
-    res.status(201).json({ message: "Employee created successfully!", newEmployee });
+    res
+      .status(201)
+      .json({ message: "Employee created successfully!", newEmployee });
   } catch (error) {
     if (transaction) await transaction.rollback();
     console.error("Error creating employee:", error);
-    res.status(500).json({ message: "Error creating employee", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error creating employee", error: error.message });
   }
 };
 
@@ -83,13 +90,15 @@ export const getAllEmployees = async (req, res) => {
     });
 
     if (!employees.length) {
-      return res.status(404).json({ message: "No employees found." });
+      return res.status(204).json({ message: "No employees found." });
     }
 
     res.status(200).json(employees);
   } catch (error) {
     console.error("Error fetching employees:", error);
-    res.status(500).json({ message: "Error fetching employees", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching employees", error: error.message });
   }
 };
 
@@ -105,7 +114,9 @@ export const getEmployeeById = async (req, res) => {
     res.status(200).json(employee);
   } catch (error) {
     console.error("Error fetching employee:", error);
-    res.status(500).json({ message: "Error fetching employee", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching employee", error: error.message });
   }
 };
 
@@ -123,7 +134,7 @@ export const updateEmployee = async (req, res) => {
     if (updatedRows === 0) {
       await transaction.rollback();
       return res.status(404).json({ message: "Employee not found." });
-    } 
+    }
 
     await transaction.commit();
 
@@ -139,7 +150,9 @@ export const updateEmployee = async (req, res) => {
   } catch (error) {
     if (transaction) await transaction.rollback();
     console.error("Error updating employee:", error);
-    res.status(500).json({ message: "Error updating employee", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error updating employee", error: error.message });
   }
 };
 
@@ -152,7 +165,9 @@ export const deleteEmployee = async (req, res) => {
     );
 
     if (updatedRows === 0) {
-      return res.status(404).json({ message: "Employee not found or already archived." });
+      return res
+        .status(404)
+        .json({ message: "Employee not found or already archived." });
     }
 
     createLog({
@@ -166,7 +181,9 @@ export const deleteEmployee = async (req, res) => {
     res.status(200).json({ message: "Employee archived successfully!" });
   } catch (error) {
     console.error("Error archiving employee:", error);
-    res.status(500).json({ message: "Error archiving employee", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error archiving employee", error: error.message });
   }
 };
 

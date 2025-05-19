@@ -22,7 +22,7 @@ router.post("/", createVenueRequest);
 router.get("/", getAllVenueRequest);
 
 //Get all archived requests
-router.get("/", getAllArchivedVenueRequest);
+router.get("/archived", getAllArchivedVenueRequest);
 
 //Get Venue Request by Id
 router.get("/:reference_number", getVenueRequestById);

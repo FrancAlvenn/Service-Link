@@ -22,11 +22,11 @@ router.post("/", createVehicleRequest);
 //Get all Vehicle Request
 router.get("/", getAllVehicleRequest);
 
-//Get Vehicle Request by Id
-router.get("/:reference_number", getVehicleRequestById);
-
 //Get All Archived Vehicle Request by Id
 router.get("/archived", getAllArchivedVehicleRequest);
+
+//Get Vehicle Request by Id
+router.get("/:reference_number", getVehicleRequestById);
 
 //Update a Request by its ID
 router.put("/:reference_number", updateVehicleRequest);

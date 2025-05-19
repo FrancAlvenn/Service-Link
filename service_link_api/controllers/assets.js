@@ -75,7 +75,7 @@ export async function getAllAssets(req, res) {
     });
 
     if (!assets.length) {
-      return res.status(404).json({ message: "No assets found." });
+      return res.status(204).json({ message: "No assets found." });
     }
 
     res.status(200).json(assets);
@@ -215,6 +215,8 @@ export async function getAssetsByStatus(req, res) {
   }
 }
 
+// Asset Assignment Logs
+
 // Get Asset Assignment Logs
 export async function getAllAssetAssignmentLogs(req, res) {
   try {
@@ -261,10 +263,11 @@ export async function createAssetAssignmentLog(req, res) {
     const assetAssignmentLog = await AssetAssignmentLogModel.create(
       {
         asset_id: req.body.asset_id,
+        asset_name: req.body.asset_name,
         assigned_to: req.body.assigned_to,
         assigned_by: req.body.assigned_by,
-        location: req.body.location,
-        remarks: req.body.remarks,
+        // location: req.body.location,
+        // remarks: req.body.remarks,
       },
       { transaction }
     );
@@ -308,16 +311,26 @@ export async function updateAssetAssignmentLog(req, res) {
         .json({ message: "Asset assignment log not found" });
     }
 
-    await assetAssignmentLog.update(
-      {
-        asset_id: req.body.asset_id,
-        assigned_to: req.body.assigned_to,
-        assigned_by: req.body.assigned_by,
-        location: req.body.location,
-        remarks: req.body.remarks,
-      },
-      { transaction }
-    );
+    // Build an object of only allowed updatable fields from req.body
+    const allowedFields = [
+      "asset_id",
+      "assigned_to",
+      "assigned_by",
+      "assignment_date",
+      "return_date",
+      "location",
+      "remarks",
+    ];
+
+    const updateData = {};
+    for (const key of allowedFields) {
+      if (key in req.body) {
+        updateData[key] = req.body[key];
+      }
+    }
+
+    // Perform the update with only the fields present
+    await assetAssignmentLog.update(updateData, { transaction });
 
     await transaction.commit();
 
@@ -329,9 +342,10 @@ export async function updateAssetAssignmentLog(req, res) {
       details: `Asset assignment log with ID ${assetAssignmentLog.log_id} updated successfully.`,
     });
 
-    res
-      .status(200)
-      .json({ message: "Asset assignment log updated successfully!" });
+    res.status(200).json({
+      message: "Asset assignment log updated successfully!",
+      data: assetAssignmentLog,
+    });
   } catch (error) {
     if (transaction) await transaction.rollback();
     console.error(error);

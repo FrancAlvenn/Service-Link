@@ -19,6 +19,7 @@ import ToastNotification from "../../utils/ToastNotification";
 import { UserCircle, MagnifyingGlass, HardDrive } from "@phosphor-icons/react";
 import { AuthContext } from "../../features/authentication";
 import AssetContext from "../../features/asset_management/context/AssetContext";
+import AssetAssignmentLogContext from "../../features/asset_management/context/AssetAssignmentLogContext";
 
 const Assignment = ({
   selectedRequest,
@@ -38,6 +39,53 @@ const Assignment = ({
   const [assetToAssign, setAssetToAssign] = useState(null);
   const [quantityInput, setQuantityInput] = useState(1);
 
+  const {
+    assetAssignmentLogs,
+    fetchAssetAssignmentLogs,
+    createAssetAssignment,
+    updateAssetAssignmentLog,
+  } = useContext(AssetAssignmentLogContext);
+
+  const createAssetLog = async () => {
+    const existingLog = assetAssignmentLogs.find(
+      (log) =>
+        log.asset_id === assetToAssign.reference_number &&
+        log.assigned_to === selectedRequest.reference_number &&
+        !log.return_date
+    );
+
+    const logData = {
+      asset_id: assetToAssign.reference_number,
+      asset_name: assetToAssign.name,
+      assigned_to: selectedRequest.reference_number,
+      assigned_by: user.reference_number,
+      assignment_date: new Date(),
+    };
+
+    if (existingLog) {
+      // Update assignment date (optional)
+      await updateAssetAssignmentLog(existingLog.log_id, logData);
+    } else {
+      await createAssetAssignment(logData);
+    }
+  };
+
+  const updateAssetLog = async () => {
+    const assetRef = selectedRequest.assigned_assets[0]?.reference_number;
+    const log = assetAssignmentLogs.find(
+      (log) =>
+        log.asset_id === assetRef &&
+        log.assigned_to === selectedRequest.reference_number &&
+        !log.return_date
+    );
+
+    if (!log) return console.warn("No active log found to update.");
+
+    await updateAssetAssignmentLog(log.log_id, {
+      return_date: new Date(),
+    });
+  };
+
   const getRequestActivity = async () => {
     await axios.get(`/request_activity/${selectedRequest.reference_number}`, {
       withCredentials: true,
@@ -47,6 +95,7 @@ const Assignment = ({
   useEffect(() => {
     fetchEmployees();
     fetchAssets();
+    fetchAssetAssignmentLogs();
   }, []);
 
   useEffect(() => {
@@ -171,6 +220,7 @@ const Assignment = ({
 
       updateAssetAssignment(updated);
       ToastNotification.success("Success", "Asset unassigned.");
+      updateAssetLog();
     } else {
       setAssetToAssign(asset);
       setQuantityInput(1);
@@ -192,6 +242,7 @@ const Assignment = ({
     handleSaveActivity(
       `Assigned ${quantityInput} ${assetToAssign.name}(s) to this request.`
     );
+    createAssetLog();
     await setRequestStatusToInProgress();
   };
 

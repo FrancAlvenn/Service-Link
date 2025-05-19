@@ -32,7 +32,7 @@ export const AssetProvider = ({ children }) => {
     try {
       const { data } = await axios({
         method: "get",
-        url: "/assets/",
+        url: "/assets",
         withCredentials: true,
       });
       setAssets(data);

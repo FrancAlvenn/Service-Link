@@ -11,13 +11,12 @@ const AssetAssignmentLogModel = sequelize.define(
       autoIncrement: true,
     },
     asset_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING(255),
       allowNull: false,
-      references: {
-        model: AssetModel,
-        key: "asset_id",
-      },
-      onDelete: "CASCADE",
+    },
+    asset_name: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
     },
     assigned_to: {
       type: DataTypes.STRING(255), // could be an employee name, department, or user_id
@@ -27,14 +26,14 @@ const AssetAssignmentLogModel = sequelize.define(
       type: DataTypes.STRING(255), // admin who made the assignment
       allowNull: true,
     },
-    location: {
-      type: DataTypes.STRING(255),
-      allowNull: true,
-    },
-    remarks: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
+    // location: {
+    //   type: DataTypes.STRING(255),
+    //   allowNull: true,
+    // },
+    // remarks: {
+    //   type: DataTypes.TEXT,
+    //   allowNull: true,
+    // },
     assignment_date: {
       type: DataTypes.DATE,
       allowNull: false,

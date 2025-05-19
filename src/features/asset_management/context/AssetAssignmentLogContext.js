@@ -32,7 +32,7 @@ export const AssetAssignmentLogProvider = ({ children }) => {
     try {
       const { data } = await axios({
         method: "get",
-        url: "/assets/assignment-logs",
+        url: "/asset_assignment",
         withCredentials: true,
       });
       setAssetAssignmentLogs(data);
@@ -42,12 +42,12 @@ export const AssetAssignmentLogProvider = ({ children }) => {
   };
 
   // Create a new asset
-  const createAsset = async (newAsset) => {
+  const createAssetAssignment = async (newAssetLog) => {
     try {
       const { data } = await axios({
         method: "post",
-        url: "/assets/assignment-logs",
-        data: newAsset,
+        url: "/asset_assignment",
+        data: newAssetLog,
         withCredentials: true,
       });
       setAssetAssignmentLogs((prevAssets) => [...prevAssets, data]);
@@ -57,17 +57,17 @@ export const AssetAssignmentLogProvider = ({ children }) => {
   };
 
   // Update an existing asset
-  const updateAsset = async (assetId, updatedAsset) => {
+  const updateAssetAssignmentLog = async (logId, updatedAsset) => {
     try {
       const { data } = await axios({
         method: "put",
-        url: `/assets/assignment-logs/${assetId}`,
+        url: `/asset_assignment/${logId}`,
         data: updatedAsset,
         withCredentials: true,
       });
       setAssetAssignmentLogs((prevAssets) =>
         prevAssets.map((asset) =>
-          asset.asset_id === assetId ? { ...asset, ...data } : asset
+          asset.log_id === logId ? { ...asset, ...data } : asset
         )
       );
     } catch (error) {
@@ -76,15 +76,15 @@ export const AssetAssignmentLogProvider = ({ children }) => {
   };
 
   // Delete an asset
-  const deleteAsset = async (assetId) => {
+  const deleteAssetAssignment = async (logId) => {
     try {
       await axios({
         method: "delete",
-        url: `/assets/assignment-logs/${assetId}`,
+        url: `/asset_assignment/${logId}`,
         withCredentials: true,
       });
       setAssetAssignmentLogs((prevAssets) =>
-        prevAssets.filter((asset) => asset.log_id !== assetId)
+        prevAssets.filter((asset) => asset.log_id !== logId)
       );
     } catch (error) {
       console.error("Error deleting asset:", error);
@@ -96,9 +96,9 @@ export const AssetAssignmentLogProvider = ({ children }) => {
       value={{
         assetAssignmentLogs,
         fetchAssetAssignmentLogs,
-        createAsset,
-        updateAsset,
-        deleteAsset,
+        createAssetAssignment,
+        updateAssetAssignmentLog,
+        deleteAssetAssignment,
       }}
     >
       {children}

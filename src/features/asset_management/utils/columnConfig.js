@@ -145,3 +145,87 @@ export const getColumnConfig = ({ setIsSidebarOpen, setSelectedAsset }) => [
     ),
   },
 ];
+
+export const getAssignmentLogColumns = (
+  getUserByReferenceNumber,
+  setSidebarOpen,
+  setSelectedReferenceNumber
+) => [
+  {
+    key: "log_id",
+    label: "Log ID",
+    render: (row) => (
+      <div className="flex justify-center">
+        <Chip
+          size="sm"
+          variant="ghost"
+          color="blue"
+          className="text-center font-bold rounded-full w-4 h-4 flex items-center justify-center p-5"
+          value={row.log_id}
+        />
+      </div>
+    ),
+  },
+  {
+    key: "asset_id",
+    label: "Asset ID",
+    render: (row) => (
+      <Typography variant="small" color="blue-gray" className={normalText}>
+        {row.asset_id}
+      </Typography>
+    ),
+  },
+  {
+    key: "asset_name",
+    label: "Asset Name",
+    render: (row) => (
+      <Typography variant="small" color="blue-gray" className={normalText}>
+        {row.asset_name}
+      </Typography>
+    ),
+  },
+  {
+    key: "assigned_to",
+    label: "Assigned To",
+    render: (row) => (
+      <Typography
+        variant="small"
+        color="blue-gray"
+        className="flex items-center justify-center gap-2 text-blue-500 cursor-pointer font-semibold"
+        onClick={() => {
+          setSidebarOpen(true);
+          setSelectedReferenceNumber(row.assigned_to);
+        }}
+      >
+        {row.assigned_to}
+      </Typography>
+    ),
+  },
+  {
+    key: "assigned_by",
+    label: "Assigned By",
+    render: (row) => (
+      <Typography variant="small" color="blue-gray" className={normalText}>
+        {getUserByReferenceNumber(row.assigned_by)}
+      </Typography>
+    ),
+  },
+  {
+    key: "assignment_date",
+    label: "Assignment Date",
+    render: (row) => (
+      <Typography variant="small" color="blue-gray" className={normalText}>
+        {formatDate(row.assignment_date)}
+      </Typography>
+    ),
+  },
+  {
+    key: "return_date",
+    label: "Return Date",
+    render: (row) => (
+      <Typography variant="small" color="blue-gray" className={normalText}>
+        {formatDate(row.return_date)}
+      </Typography>
+    ),
+  },
+];

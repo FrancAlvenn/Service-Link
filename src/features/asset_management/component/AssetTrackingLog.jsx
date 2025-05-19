@@ -3,32 +3,37 @@ import { CardBody, CardHeader, Typography } from "@material-tailwind/react";
 import { MagnifyingGlass } from "@phosphor-icons/react";
 import Header from "../../../layouts/header";
 import { AssetAssignmentLogContext } from "../context/AssetAssignmentLogContext";
+import { getAssignmentLogColumns } from "../utils/columnConfig";
+import { UserContext } from "../../../context/UserContext";
+import SidebarView from "../../../components/sidebar/SidebarView";
 
 const AssetTrackingLog = () => {
   const { assetAssignmentLogs, fetchAssetAssignmentLogs } = useContext(
     AssetAssignmentLogContext
   );
 
+  const { getUserByReferenceNumber } = useContext(UserContext);
+
   const [searchQuery, setSearchQuery] = useState("");
+
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const [selectedReferenceNumber, setSelectedReferenceNumber] = useState("");
 
   useEffect(() => {
     fetchAssetAssignmentLogs();
+    console.log(assetAssignmentLogs);
   }, []);
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
   };
 
-  const columns = [
-    { title: "Log ID", dataIndex: "log_id" },
-    { title: "Asset ID", dataIndex: "asset_id" },
-    { title: "Assigned To", dataIndex: "assigned_to" },
-    { title: "Assigned By", dataIndex: "assigned_by" },
-    { title: "Location", dataIndex: "location" },
-    { title: "Remarks", dataIndex: "remarks" },
-    { title: "Assignment Date", dataIndex: "assignment_date" },
-    { title: "Return Date", dataIndex: "return_date" },
-  ];
+  const columns = getAssignmentLogColumns(
+    getUserByReferenceNumber,
+    setSidebarOpen,
+    setSelectedReferenceNumber
+  );
 
   const filteredLogs = (
     Array.isArray(assetAssignmentLogs) ? assetAssignmentLogs : []
@@ -63,55 +68,72 @@ const AssetTrackingLog = () => {
         </div>
       </CardHeader>
 
-      <div className="h-full bg-white rounded-lg w-full mt-0 px-3 flex justify-between">
-        <div className="flex flex-col gap-4 h-full w-full">
-          <CardBody className="custom-scrollbar h-full pt-0">
-            <table className="w-full min-w-max table-auto text-left">
-              <thead className="sticky top-0 z-10 border-b border-blue-gray-100">
-                <tr>
-                  {columns.map((column, index) => (
-                    <th
-                      key={index}
-                      className="cursor-pointer bg-white p-4 transition-colors hover:bg-blue-gray-50"
-                    >
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="leading-none opacity-70 capitalize font-semibold"
-                      >
-                        {column.title}
-                      </Typography>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filteredLogs.length > 0 ? (
-                  filteredLogs.map((log, rowIndex) => (
-                    <tr key={rowIndex}>
-                      {columns.map((col, colIndex) => (
-                        <td
-                          key={colIndex}
-                          className="px-4 py-5 w-fit font-normal"
-                        >
-                          {log[col.dataIndex] || "N/A"}
-                        </td>
-                      ))}
-                    </tr>
-                  ))
-                ) : (
+      <div className="flex justify-between h-full bg-white">
+        {/* Table Section */}
+        <div
+          className={`h-full bg-white w-full mt-0 px-3 flex flex-col justify-between transition-[max-width] duration-300 ${
+            sidebarOpen ? "max-w-[55%]" : "w-full"
+          }`}
+        >
+          <div className="flex flex-col gap-4 h-full">
+            <CardBody className="custom-scrollbar h-full pt-0">
+              <table className="w-full min-w-max table-auto text-left">
+                <thead className="sticky top-0 z-10 border-b border-blue-gray-100">
                   <tr>
-                    <td colSpan={columns.length} className="text-center py-4">
-                      <Typography variant="small" color="gray">
-                        No logs available.
-                      </Typography>
-                    </td>
+                    {columns.map((column, index) => (
+                      <th
+                        key={index}
+                        className="cursor-pointer bg-white p-4 transition-colors hover:bg-blue-gray-50 text-center"
+                      >
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className="leading-none opacity-70 capitalize font-semibold"
+                        >
+                          {column.label}
+                        </Typography>
+                      </th>
+                    ))}
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </CardBody>
+                </thead>
+                <tbody>
+                  {filteredLogs.length > 0 ? (
+                    filteredLogs.map((log, rowIndex) => (
+                      <tr key={rowIndex}>
+                        {columns.map((col, colIndex) => (
+                          <td
+                            key={colIndex}
+                            className="px-4 py-5 w-fit font-normal text-center"
+                          >
+                            {col.render
+                              ? col.render(log)
+                              : log[col.key] || "N/A"}
+                          </td>
+                        ))}
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={columns.length} className="text-center py-4">
+                        <Typography variant="small" color="gray">
+                          No logs available.
+                        </Typography>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </CardBody>
+          </div>
         </div>
+
+        {/* Sidebar Section */}
+        <SidebarView
+          open={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          referenceNumber={selectedReferenceNumber}
+          requests={assetAssignmentLogs}
+        />
       </div>
     </div>
   );

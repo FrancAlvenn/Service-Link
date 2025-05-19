@@ -69,7 +69,6 @@ export const getColumnConfig = (
               onClick={() => {
                 setSidebarOpen(true);
                 setSelectedReferenceNumber(row.reference_number);
-                console.log(row.reference_number);
               }}
             >
               {row.reference_number}

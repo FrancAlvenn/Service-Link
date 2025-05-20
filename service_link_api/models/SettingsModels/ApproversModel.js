@@ -13,6 +13,10 @@ const Approvers = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     position: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -21,7 +25,7 @@ const Approvers = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    gmail: {
+    email: {
       type: DataTypes.STRING,
       allowNull: false,
     },

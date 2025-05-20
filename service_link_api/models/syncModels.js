@@ -21,6 +21,7 @@ import VehicleRequestModel from "./VehicleRequestModel.js";
 import RequestActivity from "./RequestActivity.js";
 import AssetAssignmentLogModel from "./AssetAssignmentLog.js";
 import UserPreferenceModel from "./SettingsModels/UserPreferenceModel.js";
+import Approvers from "./SettingsModels/ApproversModel.js";
 
 const models = [
   DepartmentsModel,
@@ -43,6 +44,7 @@ const models = [
   UserModel,
   VehicleRequestModel,
   UserPreferenceModel,
+  Approvers,
 ]; // Add all models to this array
 
 const syncModels = async (sequelizeInstance) => {

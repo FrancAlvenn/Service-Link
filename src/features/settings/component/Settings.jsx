@@ -6,6 +6,7 @@ import Department from "./Department";
 import Priority from "./Priority";
 import Status from "./Status";
 import Organization from "./Organizations";
+import Approver from "./Approvers";
 
 const Settings = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -58,6 +59,11 @@ const Settings = () => {
       {/* Organization */}
       <div className="flex flex-col gap-4 p-4">
         <Organization />
+      </div>
+
+      {/* Approvers */}
+      <div className="flex flex-col gap-4 p-4">
+        <Approver />
       </div>
     </div>
   );

@@ -4,9 +4,10 @@ export async function createNewApprover(req, res) {
   try {
     const newApprover = await Approvers.create({
       reference_number: req.body.reference_number,
+      name: req.body.name,
       position: req.body.position,
       department: req.body.department,
-      gmail: req.body.gmail,
+      email: req.body.email,
     });
 
     res.status(201).json({ message: "Approver added successfully!" });
@@ -44,13 +45,26 @@ export async function getApproversById(req, res) {
 
 export async function updateApproversById(req, res) {
   try {
-    const approver = await Approvers.findOne({ where: { id: req.params.id } });
+    const [updatedRows] = await Approvers.update(
+      {
+        name: req.body.name,
+        position: req.body.position,
+        department: req.body.department,
+        email: req.body.email,
+      },
+      {
+        where: {
+          id: req.params.id,
+        },
+      }
+    );
 
-    if (!approver) {
-      return res.status(404).json({ message: "Approver not found" });
+    // If no rows were updated, it means the reference number didn't match any requisition
+    if (updatedRows === 0) {
+      return res
+        .status(404)
+        .json({ message: `No approver found with id ${req.params.id}` });
     }
-
-    await approver.update(req.body); // dynamic update
 
     res.status(200).json({ message: "Approver updated successfully!" });
   } catch (error) {

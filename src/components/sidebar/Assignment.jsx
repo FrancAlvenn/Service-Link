@@ -271,17 +271,23 @@ const Assignment = ({
     return entry?.quantity || 1;
   };
 
-  const filteredEmployees = employees.filter((emp) =>
-    `${emp.first_name} ${emp.last_name}`
-      .toLowerCase()
-      .includes(employeeSearchQuery.toLowerCase())
-  );
+  const filteredEmployees =
+    employees.length > 0
+      ? employees.filter((emp) =>
+          `${emp.first_name} ${emp.last_name}`
+            .toLowerCase()
+            .includes(employeeSearchQuery.toLowerCase())
+        )
+      : [];
 
-  const filteredAssets = assets.filter((asset) =>
-    `${asset.name} ${asset.tag_number}`
-      .toLowerCase()
-      .includes(assetSearchQuery.toLowerCase())
-  );
+  const filteredAssets =
+    assets.length > 0
+      ? assets.filter((asset) =>
+          `${asset.name} ${asset.tag_number}`
+            .toLowerCase()
+            .includes(assetSearchQuery.toLowerCase())
+        )
+      : [];
 
   return (
     <div className="flex flex-col gap-4 h-[55vh] overflow-y-auto">

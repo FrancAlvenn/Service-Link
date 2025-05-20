@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   Menu,
   MenuHandler,
@@ -9,6 +9,7 @@ import {
 } from "@material-tailwind/react";
 import { FunnelSimple } from "@phosphor-icons/react";
 import axios from "axios";
+import { SettingsContext } from "../../settings/context/SettingsContext";
 
 export default function RequestFilter({ filters, onFilterChange }) {
   const [status, setStatus] = useState(filters.status);
@@ -17,44 +18,19 @@ export default function RequestFilter({ filters, onFilterChange }) {
   const [dateFrom, setDateFrom] = useState(filters.dateFrom || "");
   const [dateTo, setDateTo] = useState(filters.dateTo || "");
 
-  const [statusOptions, setStatusOptions] = useState([]);
-  const [departmentOptions, setDepartmentOptions] = useState([]);
-  const priorityOptions = ["Low", "Medium", "High"];
-
-  const priorityBgClass = {
-    Low: "blue",
-    Medium: "orange",
-    High: "red",
-  };
+  const {
+    statuses,
+    departments,
+    priorities,
+    fetchDepartments,
+    fetchPriorities,
+    fetchStatuses,
+  } = useContext(SettingsContext);
 
   useEffect(() => {
-    const getStatus = async () => {
-      try {
-        const res = await axios.get("/settings/status", {
-          withCredentials: true,
-        });
-        if (Array.isArray(res.data.status)) setStatusOptions(res.data.status);
-        else console.error("Invalid response: 'status' is not an array");
-      } catch (err) {
-        console.error("Error fetching status options:", err);
-      }
-    };
-
-    const getDepartments = async () => {
-      try {
-        const res = await axios.get("/settings/department", {
-          withCredentials: true,
-        });
-        if (Array.isArray(res.data.departments))
-          setDepartmentOptions(res.data.departments);
-        else console.error("Invalid response: 'departments' is not an array");
-      } catch (err) {
-        console.error("Error fetching department options:", err);
-      }
-    };
-
-    getStatus();
-    getDepartments();
+    fetchDepartments();
+    fetchPriorities();
+    fetchStatuses();
   }, []);
 
   const handleFilterChange = (key, value) => {
@@ -93,8 +69,7 @@ export default function RequestFilter({ filters, onFilterChange }) {
             variant={status ? "filled" : "ghost"}
             color={
               status
-                ? statusOptions.find((s) => s.status === status)?.color ||
-                  "gray"
+                ? statuses.find((s) => s.status === status)?.color || "gray"
                 : "gray"
             }
             className="cursor-pointer w-fit"
@@ -112,7 +87,7 @@ export default function RequestFilter({ filters, onFilterChange }) {
             color="blue"
             className="cursor-pointer  w-fit"
           />
-          {statusOptions.map((s) => (
+          {statuses.map((s) => (
             <Chip
               key={s.id}
               value={s.status}
@@ -147,7 +122,7 @@ export default function RequestFilter({ filters, onFilterChange }) {
             color="blue"
             className="cursor-pointer  w-fit"
           />
-          {departmentOptions.map((d) => (
+          {departments.map((d) => (
             <Chip
               key={d.id}
               value={d.name}
@@ -166,7 +141,12 @@ export default function RequestFilter({ filters, onFilterChange }) {
           <Chip
             value={priority || "Filter Priority"}
             variant={priority ? "filled" : "ghost"}
-            color={priority ? priorityBgClass[priority] : "gray"}
+            color={
+              priority
+                ? priorities.find((p) => p.priority === priority)?.color ||
+                  "gray"
+                : "gray"
+            }
             className="cursor-pointer w-fit"
             icon={<FunnelSimple size={16} />}
           />
@@ -180,16 +160,16 @@ export default function RequestFilter({ filters, onFilterChange }) {
             onClick={() => handleFilterChange("priority", "")}
             variant={priority === "" ? "filled" : "ghost"}
             color="green"
-            className="cursor-pointer  w-fit"
+            className="cursor-pointer w-fit"
           />
-          {priorityOptions.map((p) => (
+          {priorities.map((p) => (
             <Chip
-              key={p}
-              value={p}
-              onClick={() => handleFilterChange("priority", p)}
-              variant={priority === p ? "filled" : "ghost"}
-              color={priority === p ? priorityBgClass[p] : "gray"}
-              className="cursor-pointer  w-fit"
+              key={p.id}
+              value={p.priority}
+              onClick={() => handleFilterChange("priority", p.priority)}
+              variant={priority === p.priority ? "filled" : "ghost"}
+              color={priority === p.priority ? p.color : "gray"}
+              className="cursor-pointer w-fit"
             />
           ))}
         </MenuList>

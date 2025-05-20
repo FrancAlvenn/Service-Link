@@ -54,6 +54,8 @@ import ArchivedRequests from "./features/request_management/component/request_vi
 import Help from "./pages/Help";
 import AssetTrackingLog from "./features/asset_management/component/AssetTrackingLog";
 import { AssetAssignmentLogProvider } from "./features/asset_management/context/AssetAssignmentLogContext";
+import { SettingsProvider } from "./features/settings/context/SettingsContext";
+import Settings from "./features/settings/component/Settings";
 
 library.add(fas, fab, far); // Add all the icons needed
 
@@ -232,6 +234,14 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      {
+        path: "settings",
+        element: (
+          <ProtectedRoute requiredAccess={"admin"}>
+            <Settings />
+          </ProtectedRoute>
+        ),
+      },
     ],
   },
   {
@@ -301,20 +311,22 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <UserProvider>
-          <TicketProvider>
-            <AssetProvider>
-              <AssetAssignmentLogProvider>
-                <EmployeeProvider>
-                  <RequestsProviderWrapper>
-                    <div className="App font-sans ">
-                      <RouterProvider router={router} />
-                      <CustomToastContainer />
-                    </div>
-                  </RequestsProviderWrapper>
-                </EmployeeProvider>
-              </AssetAssignmentLogProvider>
-            </AssetProvider>
-          </TicketProvider>
+          <SettingsProvider>
+            <TicketProvider>
+              <AssetProvider>
+                <AssetAssignmentLogProvider>
+                  <EmployeeProvider>
+                    <RequestsProviderWrapper>
+                      <div className="App font-sans ">
+                        <RouterProvider router={router} />
+                        <CustomToastContainer />
+                      </div>
+                    </RequestsProviderWrapper>
+                  </EmployeeProvider>
+                </AssetAssignmentLogProvider>
+              </AssetProvider>
+            </TicketProvider>
+          </SettingsProvider>
         </UserProvider>
       </AuthProvider>
     </ThemeProvider>

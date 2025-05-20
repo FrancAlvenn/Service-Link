@@ -265,8 +265,6 @@ const SidebarView = ({ open, onClose, referenceNumber, requests }) => {
     console.log(jobRequests);
   }, [request]);
 
-  console.log(jobRequests);
-  console.log(archivedJobRequests);
   return (
     <div
       onClick={handleSidebarClick}

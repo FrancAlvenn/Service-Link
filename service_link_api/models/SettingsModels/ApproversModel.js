@@ -1,19 +1,27 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../database.js";
 
-const Organization = sequelize.define(
-  "Organization",
+const Approvers = sequelize.define(
+  "Approvers",
   {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
     },
-    name: {
+    reference_number: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    description: {
+    position: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    department: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    gmail: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -24,11 +32,11 @@ const Organization = sequelize.define(
     },
   },
   {
-    tableName: "organizations",
+    tableName: "approvers",
     timestamps: true,
     createdAt: "created_at",
     updatedAt: "updated_at",
   }
 );
 
-export default Organization;
+export default Approvers;

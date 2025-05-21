@@ -7,6 +7,7 @@ import Priority from "./Priority";
 import Status from "./Status";
 import Organization from "./Organizations";
 import Approver from "./Approvers";
+import Position from "./Position";
 
 const Settings = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -21,7 +22,7 @@ const Settings = () => {
       <CardHeader
         floated={false}
         shadow={false}
-        className="rounded-none min-h-fit sticky top-0 z-10 pt-2"
+        className="rounded-none min-h-fit sticky top-0 z-50 pt-2"
       >
         <Header title={"Settings"} description={"Manage system settings"} />
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-3">
@@ -41,29 +42,36 @@ const Settings = () => {
 
       {/* Settings Content */}
 
-      {/* Status */}
-      <div className="flex flex-col gap-4 p-4">
-        <Status />
-      </div>
+      <div className="flex flex-col justify-center items-center gap-4 p-4 w-full">
+        {/* Status */}
+        <div className="flex flex-col gap-4 p-4 w-[calc(100%-300px)]">
+          <Status />
+        </div>
 
-      {/* Priority */}
-      <div className="flex flex-col gap-4 p-4">
-        <Priority />
-      </div>
+        {/* Priority */}
+        <div className="flex flex-col gap-4 p-4 w-[calc(100%-300px)]">
+          <Priority />
+        </div>
 
-      {/* Department */}
-      <div className="flex flex-col gap-4 p-4">
-        <Department />
-      </div>
+        {/* Approvers */}
+        <div className="flex flex-col gap-4 p-4 w-[calc(100%-300px)]">
+          <Approver />
+        </div>
 
-      {/* Organization */}
-      <div className="flex flex-col gap-4 p-4">
-        <Organization />
-      </div>
+        {/* Position */}
+        <div className="flex flex-col gap-4 p-4 w-[calc(100%-300px)]">
+          <Position />
+        </div>
 
-      {/* Approvers */}
-      <div className="flex flex-col gap-4 p-4">
-        <Approver />
+        {/* Department */}
+        <div className="flex flex-col gap-4 p-4 w-[calc(100%-300px)]">
+          <Department />
+        </div>
+
+        {/* Organization */}
+        <div className="flex flex-col gap-4 p-4 w-[calc(100%-300px)]">
+          <Organization />
+        </div>
       </div>
     </div>
   );

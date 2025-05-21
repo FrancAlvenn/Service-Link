@@ -1,40 +1,40 @@
 import sequelize from "../../database.js";
-import DepartmentsModel from "../../models/SettingsModels/DeparmentsModel.js";
+import PositionModel from "../../models/SettingsModels/PositionModel.js";
 import { Op } from "sequelize";
 
-export async function createNewDepartment(req, res) {
+export async function createNewPosition(req, res) {
   try {
-    const newDepartment = await DepartmentsModel.create({
-      name: req.body.name,
-      description: req.body.description,
+    const newPosition = await PositionModel.create({
+      position: req.body.position,
     });
 
-    res.status(201).json({ message: `Department added successfully!` });
+    res.status(201).json({ message: `Position added successfully!` });
   } catch (error) {
     res.status(500).json({ message: `Encountered an internal error ${error}` });
   }
 }
 
-export async function getAllDepartments(req, res) {
+export async function getAllPositions(req, res) {
   try {
-    const departments = await DepartmentsModel.findAll({
+    const positions = await PositionModel.findAll({
       where: {
         archived: {
           [Op.eq]: false, // Get all that is not archived
         },
       },
     });
-    res
-      .status(201)
-      .json({ departments, message: `Department data fetched successfully!` });
+    res.status(201).json({
+      positions,
+      message: `Position data fetched successfully!`,
+    });
   } catch (error) {
     res.status(500).json({ message: `Encountered an internal error ${error}` });
   }
 }
 
-export async function getDepartmentById(req, res) {
+export async function getPositionById(req, res) {
   try {
-    const departments = await DepartmentsModel.findAll({
+    const position = await PositionModel.findAll({
       where: {
         id: req.params.id,
       },
@@ -44,18 +44,17 @@ export async function getDepartmentById(req, res) {
     });
     res
       .status(201)
-      .json({ departments, message: `Department data fetched successfully!` });
+      .json({ position, message: `Position data fetched successfully!` });
   } catch (error) {
     res.status(500).json({ message: `Encountered an internal error ${error}` });
   }
 }
 
-export async function updateDepartment(req, res) {
+export async function updatePosition(req, res) {
   try {
-    const [updatedRows] = await DepartmentsModel.update(
+    const [updatedRows] = await PositionModel.update(
       {
-        name: req.body.name,
-        description: req.body.description,
+        position: req.body.position,
       },
       {
         where: {
@@ -67,7 +66,7 @@ export async function updateDepartment(req, res) {
     // If no rows were updated, it means the reference number didn't match any requisition
     if (updatedRows === 0) {
       return res.status(404).json({
-        message: `No department found with the reference number: ${req.params.id}`,
+        message: `No  n found with the reference number: ${req.params.id}`,
       });
     }
 
@@ -77,9 +76,9 @@ export async function updateDepartment(req, res) {
   }
 }
 
-export async function deleteDepartmentById(req, res) {
+export async function deletePositionById(req, res) {
   try {
-    const deletedRows = await DepartmentsModel.destroy({
+    const deletedRows = await PositionModel.destroy({
       where: {
         id: req.params.id,
       },
@@ -88,12 +87,12 @@ export async function deleteDepartmentById(req, res) {
     // If no rows were deleted, it means the reference number didn't match any requisition
     if (deletedRows === 0) {
       return res.status(404).json({
-        message: `No department found with reference number ${req.params.id}`,
+        message: `No position found with reference number ${req.params.id}`,
       });
     }
 
     res.status(200).json({
-      message: "Department deleted from database!",
+      message: "Position deleted from database!",
     });
   } catch (error) {
     res.status(500).json({
@@ -103,9 +102,9 @@ export async function deleteDepartmentById(req, res) {
   }
 }
 
-export async function archiveDepartmentById(req, res) {
+export async function archivePositionById(req, res) {
   try {
-    const [updatedRows] = await DepartmentsModel.update(
+    const [updatedRows] = await PositionModel.update(
       {
         archived: req.params.archive,
       },

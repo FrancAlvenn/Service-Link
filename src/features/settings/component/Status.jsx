@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { SettingsContext } from "../context/SettingsContext";
 import {
   Card,
@@ -32,6 +32,10 @@ const Status = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [statusToDelete, setStatusToDelete] = useState(null);
 
+  const [selectedRowId, setSelectedRowId] = useState(null);
+
+  const tableRef = useRef(null);
+
   const colorOptions = [
     "red",
     "blue",
@@ -48,6 +52,20 @@ const Status = () => {
 
   useEffect(() => {
     fetchStatuses();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (tableRef.current && !tableRef.current.contains(event.target)) {
+        setSelectedRowId(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   const handleAddStatus = () => {
@@ -140,7 +158,10 @@ const Status = () => {
     return (
       <tr
         key={status.id}
-        className="hover:bg-gray-50 text-sm text-gray-700 border-b border-gray-300"
+        className={`hover:bg-blue-50 text-sm text-gray-700 border-b border-gray-300 cursor-pointer ${
+          selectedRowId === status.id ? "bg-blue-200" : ""
+        }`}
+        onClick={() => setSelectedRowId(status.id)}
       >
         <td className="py-3 px-4">
           <Chip
@@ -200,39 +221,6 @@ const Status = () => {
             </span>
           )}
         </td>
-        <td className="py-3 px-4">
-          {isEditing ? (
-            <div className="flex gap-2 items-center">
-              <button
-                className="text-green-600 hover:underline font-semibold"
-                onClick={() => handleUpdateStatus(status.id)}
-              >
-                Update
-              </button>
-              <button
-                className="text-gray-500 hover:underline font-semibold"
-                onClick={handleCancelEdit}
-              >
-                Cancel
-              </button>
-            </div>
-          ) : (
-            <div className="flex gap-3 items-center">
-              <button
-                className="text-blue-500 hover:underline font-semibold"
-                onClick={() => handleEditStatus(status)}
-              >
-                Edit
-              </button>
-              <button
-                className="text-red-500 hover:underline font-semibold"
-                onClick={() => openDeleteDialog(status.id)}
-              >
-                Delete
-              </button>
-            </div>
-          )}
-        </td>
       </tr>
     );
   };
@@ -254,7 +242,7 @@ const Status = () => {
             </Typography>
           </div>
         </CardHeader>
-        <CardBody className="overflow-x-auto px-4 py-2">
+        <CardBody className="overflow-x-auto px-4 py-2" ref={tableRef}>
           <div className="overflow-y-auto max-h-[300px]">
             <table className="min-w-full text-left border-l border-r border-b border-gray-300 rounded-md ">
               <thead className="sticky top-0 bg-gray-50 z-10">
@@ -263,7 +251,6 @@ const Status = () => {
                   <th className="py-3 px-4 border-b">Status</th>
                   <th className="py-3 px-4 border-b">Description</th>
                   <th className="py-3 px-4 border-b">Color</th>
-                  <th className="py-3 px-4 border-b">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -299,20 +286,6 @@ const Status = () => {
                         }
                       />
                     </td>
-                    <td className="py-3 px-4 flex gap-2">
-                      <button
-                        className="text-green-600 hover:underline"
-                        onClick={() => handleUpdateStatus(null)}
-                      >
-                        Save
-                      </button>
-                      <button
-                        className="text-gray-500 hover:underline"
-                        onClick={handleCancelEdit}
-                      >
-                        Cancel
-                      </button>
-                    </td>
                   </tr>
                 )}
 
@@ -327,15 +300,86 @@ const Status = () => {
             </table>
           </div>
 
-          <Button
-            variant="outlined"
-            color="blue"
-            className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 mt-4 flex items-center gap-2"
-            onClick={handleAddStatus}
-            disabled={editIndex !== null}
-          >
-            <Plus size={16} /> Add Status
-          </Button>
+          <div className="flex justify-between items-center mt-4">
+            <Button
+              variant="outlined"
+              color="blue"
+              className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 flex items-center gap-2"
+              onClick={handleAddStatus}
+              disabled={editIndex !== null}
+            >
+              <Plus size={16} /> Add Status
+            </Button>
+
+            <div className="flex gap-2">
+              {editIndex === "new" && (
+                <>
+                  <Button
+                    color="green"
+                    onClick={() => handleUpdateStatus(null)}
+                    className="py-2 px-4"
+                    disabled={
+                      editValues.name === "" ||
+                      editValues.description === "" ||
+                      editValues.color === ""
+                    }
+                  >
+                    Save
+                  </Button>
+                  <Button
+                    color="red"
+                    onClick={handleCancelEdit}
+                    className="py-2 px-4"
+                  >
+                    Cancel
+                  </Button>
+                </>
+              )}
+
+              {selectedRowId && editIndex !== null && editIndex !== "new" && (
+                <>
+                  <Button
+                    color="green"
+                    onClick={() => handleUpdateStatus(selectedRowId)}
+                    className="py-2 px-4"
+                  >
+                    Update
+                  </Button>
+                  <Button
+                    color="red"
+                    onClick={handleCancelEdit}
+                    className="py-2 px-4"
+                  >
+                    Cancel
+                  </Button>
+                </>
+              )}
+
+              {selectedRowId && editIndex === null && (
+                <>
+                  <Button
+                    color="blue"
+                    onClick={() => {
+                      const selected = statuses.find(
+                        (p) => p.id === selectedRowId
+                      );
+                      handleEditStatus(selected);
+                    }}
+                    className="py-2 px-4"
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    color="red"
+                    onClick={() => openDeleteDialog(selectedRowId)}
+                    className="py-2 px-4"
+                  >
+                    Delete
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
         </CardBody>
       </Card>
 

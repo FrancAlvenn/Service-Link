@@ -79,6 +79,32 @@ export async function updatePriority(req, res) {
   }
 }
 
+export async function deletePriorityById(req, res) {
+  try {
+    const deletedRows = await PriorityModel.destroy({
+      where: {
+        id: req.params.id,
+      },
+    });
+
+    // If no rows were deleted, it means the reference number didn't match any requisition
+    if (deletedRows === 0) {
+      return res.status(404).json({
+        message: `No priority found with reference number ${req.params.id}`,
+      });
+    }
+
+    res.status(200).json({
+      message: "Priority deleted from database!",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: `Encountered an internal error ${error}`,
+      error: error,
+    });
+  }
+}
+
 export async function archivePriorityById(req, res) {
   try {
     const [updatedRows] = await PriorityModel.update(
@@ -94,27 +120,21 @@ export async function archivePriorityById(req, res) {
 
     // If no rows were updated, it means the reference number didn't match any requisition
     if (updatedRows === 0) {
-      return res
-        .status(404)
-        .json({
-          message: `No priority found with reference number ${req.params.id}`,
-        });
+      return res.status(404).json({
+        message: `No priority found with reference number ${req.params.id}`,
+      });
     }
 
-    res
-      .status(200)
-      .json({
-        message:
-          req.params.archive === "0"
-            ? "Priority removed from archive!"
-            : "Priority added to archive!",
-      });
+    res.status(200).json({
+      message:
+        req.params.archive === "0"
+          ? "Priority removed from archive!"
+          : "Priority added to archive!",
+    });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: `Encountered an internal error ${error}`,
-        error: error,
-      });
+    res.status(500).json({
+      message: `Encountered an internal error ${error}`,
+      error: error,
+    });
   }
 }

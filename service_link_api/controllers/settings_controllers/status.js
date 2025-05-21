@@ -79,31 +79,23 @@ export async function updateStatus(req, res) {
   }
 }
 
-export async function archiveStatusById(req, res) {
+export async function deleteStatusById(req, res) {
   try {
-    const [updatedRows] = await StatusModel.update(
-      {
-        archived: req.params.archive,
+    const deletedRows = await StatusModel.destroy({
+      where: {
+        id: req.params.id,
       },
-      {
-        where: {
-          id: req.params.id,
-        },
-      }
-    );
+    });
 
-    // If no rows were updated, it means the reference number didn't match any requisition
-    if (updatedRows === 0) {
+    // If no rows were deleted, it means the reference number didn't match any requisition
+    if (deletedRows === 0) {
       return res.status(404).json({
         message: `No status found with reference number ${req.params.id}`,
       });
     }
 
     res.status(200).json({
-      message:
-        req.params.archive === "0"
-          ? "Status removed from archive!"
-          : "Status added to archive!",
+      message: "Status deleted from database!",
     });
   } catch (error) {
     res.status(500).json({

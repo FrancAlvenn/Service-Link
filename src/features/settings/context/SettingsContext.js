@@ -11,6 +11,7 @@ export const SettingsProvider = ({ children }) => {
   const [userPreferences, setUserPreferences] = useState([]);
   const [organizations, setOrganizations] = useState([]);
   const [approvers, setApprovers] = useState([]);
+  const [positions, setPositions] = useState([]);
 
   useEffect(() => {
     fetchDepartments();
@@ -20,9 +21,8 @@ export const SettingsProvider = ({ children }) => {
     fetchUserPreferences();
     fetchOrganizations();
     fetchApprovers();
+    fetchPositions();
   }, []);
-
-  const apiBase = "/settings";
 
   // === Department ===
   const fetchDepartments = async () => {
@@ -56,7 +56,7 @@ export const SettingsProvider = ({ children }) => {
   };
 
   const deleteDepartment = async (id) => {
-    await axios.delete(`/settings/department/${id}/archive/1`, {
+    await axios.delete(`/settings/department/${id}`, {
       withCredentials: true,
     });
     fetchDepartments();
@@ -92,7 +92,7 @@ export const SettingsProvider = ({ children }) => {
   };
 
   const deletePriority = async (id) => {
-    await axios.delete(`/settings/priority/${id}/archive/1`, {
+    await axios.delete(`/settings/priority/${id}`, {
       withCredentials: true,
     });
     fetchPriorities();
@@ -128,7 +128,7 @@ export const SettingsProvider = ({ children }) => {
   };
 
   const deleteStatus = async (id) => {
-    await axios.delete(`/settings/status/${id}/archive/1`, {
+    await axios.delete(`/settings/status/${id}`, {
       withCredentials: true,
     });
     fetchStatuses();
@@ -161,7 +161,7 @@ export const SettingsProvider = ({ children }) => {
   };
 
   const deleteDesignation = async (id) => {
-    await axios.delete(`/settings/designation/${id}/archive/1`, {
+    await axios.delete(`/settings/designation/${id}`, {
       withCredentials: true,
     });
     fetchDesignations();
@@ -232,7 +232,7 @@ export const SettingsProvider = ({ children }) => {
   };
 
   const deleteOrganization = async (id) => {
-    await axios.delete(`/settings/organization/${id}/archive/1`, {
+    await axios.delete(`/settings/organization/${id}`, {
       withCredentials: true,
     });
     fetchOrganizations();
@@ -241,10 +241,15 @@ export const SettingsProvider = ({ children }) => {
   // === Approvers ===
   const fetchApprovers = async () => {
     try {
-      const { data } = await axios.get(`/settings/approver`, {
+      const response = await axios.get("/settings/approver", {
         withCredentials: true,
       });
-      setApprovers(data);
+
+      if (Array.isArray(response.data.allApprovers)) {
+        setApprovers(response.data.allApprovers);
+      } else {
+        console.error("Invalid response: 'approvers' is not an array");
+      }
     } catch (err) {
       console.error("Error fetching approvers:", err);
     }
@@ -263,10 +268,47 @@ export const SettingsProvider = ({ children }) => {
   };
 
   const deleteApprover = async (id) => {
-    await axios.delete(`/settings/approver/${id}/archive/1`, {
+    await axios.delete(`/settings/approver/${id}`, {
       withCredentials: true,
     });
     fetchApprovers();
+  };
+
+  // === Position ===
+
+  const fetchPositions = async (id) => {
+    try {
+      const response = await axios.get(`/settings/position/${id}`, {
+        withCredentials: true,
+      });
+
+      if (Array.isArray(response.data.positions)) {
+        setPositions(response.data.positions);
+      } else {
+        console.error("Invalid response: 'positions' is not an array");
+      }
+    } catch (err) {
+      console.error("Error fetching positions:", err);
+    }
+  };
+
+  const createPosition = async (payload) => {
+    await axios.post(`/settings/position`, payload, { withCredentials: true });
+    fetchPositions();
+  };
+
+  const updatePosition = async (id, payload) => {
+    await axios.put(`/settings/position/${id}`, payload, {
+      withCredentials: true,
+    });
+    fetchPositions();
+  };
+
+  const deletePosition = async (id) => {
+    await axios.delete(`/settings/position/${id}`, {
+      withCredentials: true,
+    });
+    fetchPositions();
   };
 
   return (
@@ -313,6 +355,12 @@ export const SettingsProvider = ({ children }) => {
         createApprover,
         updateApprover,
         deleteApprover,
+
+        positions,
+        fetchPositions,
+        createPosition,
+        updatePosition,
+        deletePosition,
       }}
     >
       {children}

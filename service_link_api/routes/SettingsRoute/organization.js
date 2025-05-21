@@ -6,6 +6,7 @@ import {
   getOrganizationById,
   updateOrganization,
   archiveOrganizationById,
+  deleteOrganizationById,
 } from "../../controllers/settings_controllers/organization.js";
 
 const organizationRouter = express.Router();
@@ -23,6 +24,9 @@ organizationRouter.get("/:id", getOrganizationById);
 organizationRouter.put("/:id", updateOrganization);
 
 // Delete organization
+organizationRouter.delete("/:id", deleteOrganizationById);
+
+// Archive organization
 organizationRouter.delete("/:id/archive/:archive", archiveOrganizationById);
 
 export default organizationRouter;

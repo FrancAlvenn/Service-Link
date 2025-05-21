@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { SettingsContext } from "../context/SettingsContext";
 import {
   Card,
@@ -18,8 +18,6 @@ import {
 } from "@material-tailwind/react";
 import { FunnelSimple, Plus, UserCircle } from "@phosphor-icons/react";
 import { UserContext } from "../../../context/UserContext";
-import DepartmentSelect from "../../../utils/select/departmentSelect";
-import PositionSelect from "../../../utils/select/positionSelect";
 
 const Approvers = () => {
   const {
@@ -42,26 +40,8 @@ const Approvers = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [approverToDelete, setApproverToDelete] = useState(null);
 
-  const [selectedRowId, setSelectedRowId] = useState(null);
-
-  const tableRef = useRef(null);
-
   useEffect(() => {
     fetchApprovers();
-  }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (tableRef.current && !tableRef.current.contains(event.target)) {
-        setSelectedRowId(null);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
   }, []);
 
   const handleAddApprover = () => {
@@ -91,7 +71,6 @@ const Approvers = () => {
     } else {
       await updateApprover(id, editValues);
     }
-
     resetEditState();
     fetchApprovers();
   };
@@ -137,10 +116,7 @@ const Approvers = () => {
     return (
       <tr
         key={approver.id}
-        className={`hover:bg-blue-50 text-sm text-gray-700 border-b border-gray-300 cursor-pointer ${
-          selectedRowId === approver.id ? "bg-blue-200" : ""
-        }`}
-        onClick={() => setSelectedRowId(approver.id)}
+        className="hover:bg-gray-50 text-sm text-gray-700 border-b border-gray-300"
       >
         <td className="py-3 px-4">
           <Chip
@@ -151,78 +127,68 @@ const Approvers = () => {
         </td>
 
         {/* Ref Number */}
-        <td className="py-3 px-4">
-          {isEditing ? (
-            <input
-              type="text"
-              name="reference_number"
-              value={editValues.reference_number}
-              onChange={handleChange}
-              className="w-fit px-2 py-1 rounded-md border"
-              disabled
-            />
-          ) : (
-            <Chip
-              variant="outlined"
-              value={approver.reference_number}
-              color="blue"
-              className="flex items-center py-2 justify-center text-blue-500 w-fit rounded-full"
-            />
-          )}
-        </td>
+        <td className="py-3 px-4">{approver.reference_number}</td>
 
         {/* Name */}
-        <td className="py-3 px-4 w-fit">
+        <td className="py-3 px-4">
           {isEditing ? (
-            <input
-              type="text"
-              name="name"
-              value={editValues.name}
-              onChange={handleChange}
-              className="w-fit px-2 py-1 rounded-md border"
-              disabled
+            <UserPicker
+              onSelect={(user) =>
+                setEditValues({
+                  reference_number: user.reference_number,
+                  name: `${user.first_name} ${user.last_name}`,
+                  position: user.position,
+                  department: user.department,
+                  email: user.email,
+                })
+              }
             />
           ) : (
-            <span className="w-fit whitespace-nowrap">{approver.name}</span>
+            approver.name
           )}
         </td>
 
-        <td className="py-3 px-4 w-fit">
-          {isEditing ? (
-            <PositionSelect
-              value={editValues.position}
-              onChange={handleChange}
-            />
-          ) : (
-            <span className="w-fit whitespace-nowrap">{approver.position}</span>
-          )}
-        </td>
+        {/* Position */}
+        <td className="py-3 px-4">{approver.position}</td>
 
-        <td className="py-3 px-4 w-fit">
-          {isEditing ? (
-            <DepartmentSelect
-              value={editValues.department}
-              onChange={handleChange}
-            />
-          ) : (
-            <span className="w-fit whitespace-nowrap">
-              {approver.department}
-            </span>
-          )}
-        </td>
+        {/* Department */}
+        <td className="py-3 px-4">{approver.department}</td>
 
-        <td className="py-3 px-4 w-fit">
+        {/* Email */}
+        <td className="py-3 px-4">{approver.email}</td>
+
+        {/* Actions */}
+        <td className="py-3 px-4">
           {isEditing ? (
-            <input
-              type="text"
-              name="email"
-              value={editValues.email}
-              onChange={handleChange}
-              className="w-fit px-2 py-1 rounded-md border"
-              disabled
-            />
+            <div className="flex gap-2 items-center">
+              <button
+                className="text-green-600 hover:underline font-semibold"
+                onClick={() => handleUpdateApprover(approver.id)}
+              >
+                Update
+              </button>
+              <button
+                className="text-gray-500 hover:underline font-semibold"
+                onClick={handleCancelEdit}
+              >
+                Cancel
+              </button>
+            </div>
           ) : (
-            <span className="w-fit whitespace-nowrap">{approver.email}</span>
+            <div className="flex gap-3 items-center">
+              <button
+                className="text-blue-500 hover:underline font-semibold"
+                onClick={() => handleEditApprover(approver)}
+              >
+                Edit
+              </button>
+              <button
+                className="text-red-500 hover:underline font-semibold"
+                onClick={() => openDeleteDialog(approver.id)}
+              >
+                Delete
+              </button>
+            </div>
           )}
         </td>
       </tr>
@@ -347,7 +313,7 @@ const Approvers = () => {
             </MenuList>
           </Menu>
         </CardHeader>
-        <CardBody className="overflow-x-auto px-4 py-2" ref={tableRef}>
+        <CardBody className="overflow-x-auto px-4 py-2">
           <div className="overflow-y-auto max-h-[300px]">
             <table className="min-w-full text-left border-l border-r border-b border-gray-300 rounded-md">
               <thead className="sticky top-0 bg-gray-50 z-10">
@@ -358,6 +324,7 @@ const Approvers = () => {
                   <th className="py-3 px-4 border-b">Position</th>
                   <th className="py-3 px-4 border-b">Department</th>
                   <th className="py-3 px-4 border-b">Email</th>
+                  <th className="py-3 px-4 border-b">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -376,28 +343,29 @@ const Approvers = () => {
                       "email",
                     ].map((field) => (
                       <td key={field} className="py-3 px-4">
-                        {field === "position" ? (
-                          <PositionSelect
-                            value={editValues[field]}
-                            onChange={handleChange}
-                          />
-                        ) : field === "department" ? (
-                          <DepartmentSelect
-                            value={editValues[field]}
-                            onChange={handleChange}
-                          />
-                        ) : (
-                          <input
-                            type="text"
-                            name={field}
-                            value={editValues[field]}
-                            onChange={handleChange}
-                            className="w-fit px-2 py-1 rounded-md border"
-                            disabled
-                          />
-                        )}
+                        <input
+                          type="text"
+                          name={field}
+                          value={editValues[field]}
+                          onChange={handleChange}
+                          className="w-full px-2 py-1 rounded-md border"
+                        />
                       </td>
                     ))}
+                    <td className="py-3 px-4 flex gap-2">
+                      <button
+                        className="text-green-600 hover:underline"
+                        onClick={() => handleUpdateApprover(null)}
+                      >
+                        Save
+                      </button>
+                      <button
+                        className="text-gray-500 hover:underline"
+                        onClick={handleCancelEdit}
+                      >
+                        Cancel
+                      </button>
+                    </td>
                   </tr>
                 )}
 
@@ -412,99 +380,30 @@ const Approvers = () => {
             </table>
           </div>
 
-          <div className="flex justify-between items-center mt-4">
-            <div className="flex gap-2">
-              <Button
-                variant="outlined"
-                color="blue"
-                className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 flex items-center gap-2"
-                onClick={handleAddApprover}
-                disabled={editIndex !== null}
-              >
-                <Plus size={16} /> Add Approver
-              </Button>
+          <div className="flex gap-2 items-center mt-4">
+            <Button
+              variant="outlined"
+              color="blue"
+              className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 flex items-center gap-2"
+              onClick={handleAddApprover}
+              disabled={editIndex !== null}
+            >
+              <Plus size={16} /> Add Approver
+            </Button>
 
-              {(editIndex === "new" || editIndex !== null) && (
-                <UserPicker
-                  onSelect={(user) =>
-                    setEditValues({
-                      reference_number: user.reference_number,
-                      name: `${user.first_name} ${user.last_name}`,
-                      email: user.email,
-                    })
-                  }
-                />
-              )}
-            </div>
-
-            <div className="flex gap-2">
-              {editIndex === "new" && (
-                <>
-                  <Button
-                    color="green"
-                    onClick={() => handleUpdateApprover(null)}
-                    className="py-2 px-4"
-                    disabled={
-                      editValues.name === "" ||
-                      editValues.description === "" ||
-                      editValues.color === ""
-                    }
-                  >
-                    Save
-                  </Button>
-                  <Button
-                    color="red"
-                    onClick={handleCancelEdit}
-                    className="py-2 px-4"
-                  >
-                    Cancel
-                  </Button>
-                </>
-              )}
-
-              {selectedRowId && editIndex !== null && editIndex !== "new" && (
-                <>
-                  <Button
-                    color="green"
-                    onClick={() => handleUpdateApprover(selectedRowId)}
-                    className="py-2 px-4"
-                  >
-                    Update
-                  </Button>
-                  <Button
-                    color="red"
-                    onClick={handleCancelEdit}
-                    className="py-2 px-4"
-                  >
-                    Cancel
-                  </Button>
-                </>
-              )}
-
-              {selectedRowId && editIndex === null && (
-                <>
-                  <Button
-                    color="blue"
-                    onClick={() => {
-                      const selected = approvers.find(
-                        (p) => p.id === selectedRowId
-                      );
-                      handleEditApprover(selected);
-                    }}
-                    className="py-2 px-4"
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    color="red"
-                    onClick={() => openDeleteDialog(selectedRowId)}
-                    className="py-2 px-4"
-                  >
-                    Delete
-                  </Button>
-                </>
-              )}
-            </div>
+            {(editIndex === "new" || editIndex === "edit") && (
+              <UserPicker
+                onSelect={(user) =>
+                  setEditValues({
+                    reference_number: user.reference_number,
+                    name: `${user.first_name} ${user.last_name}`,
+                    position: user.position,
+                    department: user.department,
+                    email: user.email,
+                  })
+                }
+              />
+            )}
           </div>
         </CardBody>
       </Card>

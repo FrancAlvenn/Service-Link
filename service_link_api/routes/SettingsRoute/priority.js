@@ -6,6 +6,7 @@ import {
   getPriorityById,
   updatePriority,
   archivePriorityById,
+  deletePriorityById,
 } from "../../controllers/settings_controllers/priority_level.js";
 
 const priorityRouter = express.Router();
@@ -23,6 +24,9 @@ priorityRouter.get("/:id", getPriorityById);
 priorityRouter.put("/:id", updatePriority);
 
 // Delete priority
+priorityRouter.delete("/:id", deletePriorityById);
+
+// Archive priority
 priorityRouter.delete("/:id/archive/:archive", archivePriorityById);
 
 export default priorityRouter;

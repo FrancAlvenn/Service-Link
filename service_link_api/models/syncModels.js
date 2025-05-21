@@ -187,7 +187,7 @@ const seedStatuses = async () => {
     },
     {
       status: "Pending",
-      color: "amber",
+      color: "yellow  ",
       description: "Request is currently under review",
       archived: false,
     },

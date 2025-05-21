@@ -6,6 +6,7 @@ import {
   getDesignationById,
   updateDesignation,
   archiveDesignationById,
+  deleteDesignationById,
 } from "../../controllers/settings_controllers/designation.js";
 
 const designationRouter = express.Router();
@@ -23,6 +24,9 @@ designationRouter.get("/:id", getDesignationById);
 designationRouter.put("/:id", updateDesignation);
 
 // Delete designation
+designationRouter.delete("/:id", deleteDesignationById);
+
+// Archive designation
 designationRouter.delete("/:id/archive/:archive", archiveDesignationById);
 
 export default designationRouter;

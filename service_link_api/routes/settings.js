@@ -5,6 +5,7 @@ import {
   getDepartmentById,
   updateDepartment,
   archiveDepartmentById,
+  deleteDepartmentById,
 } from "../controllers/settings_controllers/department.js";
 import {
   createNewOrganization,
@@ -12,13 +13,14 @@ import {
   getOrganizationById,
   updateOrganization,
   archiveOrganizationById,
+  deleteOrganizationById,
 } from "../controllers/settings_controllers/organization.js";
 import {
   createNewStatus,
   getAllStatus,
   getStatusById,
   updateStatus,
-  archiveStatusById,
+  deleteStatusById,
 } from "../controllers/settings_controllers/status.js";
 import {
   createNewPriority,
@@ -26,6 +28,7 @@ import {
   getPriorityById,
   updatePriority,
   archivePriorityById,
+  deletePriorityById,
 } from "../controllers/settings_controllers/priority_level.js";
 import {
   createNewDesignation,
@@ -33,6 +36,7 @@ import {
   getDesignationById,
   updateDesignation,
   archiveDesignationById,
+  deleteDesignationById,
 } from "../controllers/settings_controllers/designation.js";
 import {
   createUserPreference,
@@ -46,7 +50,16 @@ import {
   getApproversById,
   updateApproversById,
   archiveApproversById,
+  deleteApproversById,
 } from "../controllers/settings_controllers/approvers.js";
+import {
+  createNewPosition,
+  getAllPositions,
+  getPositionById,
+  updatePosition,
+  archivePositionById,
+  deletePositionById,
+} from "../controllers/settings_controllers/position.js";
 
 const router = express.Router();
 
@@ -65,6 +78,9 @@ router.get("/department/:id", getDepartmentById);
 router.put("/department/:id", updateDepartment);
 
 //Delete a department
+router.delete("/department/:id", deleteDepartmentById);
+
+//Archive a department
 router.delete("/department/:id/archive/:archive", archiveDepartmentById);
 
 //ROUTE FOR ORGANIZATIONS
@@ -82,6 +98,9 @@ router.get("/organization/:id", getOrganizationById);
 router.put("/organization/:id", updateOrganization);
 
 //Delete a organization
+router.delete("/organization/:id", deleteOrganizationById);
+
+//Archive a organization
 router.delete("/organization/:id/archive/:archive", archiveOrganizationById);
 
 //ROUTE FOR STATUS
@@ -99,7 +118,7 @@ router.get("/status/:id", getStatusById);
 router.put("/status/:id", updateStatus);
 
 //Delete a status
-router.delete("/status/:id/archive/:archive", archiveStatusById);
+router.delete("/status/:id", deleteStatusById);
 
 //ROUTE FOR PRIORITY
 
@@ -114,8 +133,11 @@ router.get("/priority/:id", getPriorityById);
 
 //Edit a priority
 router.put("/priority/:id", updatePriority);
-
+router.delete("");
 //Delete a priority
+router.delete("/priority/:id", deletePriorityById);
+
+//Archive a priority
 router.delete("/priority/:id/archive/:archive", archivePriorityById);
 
 //ROUTE FOR DESIGNATION
@@ -133,6 +155,9 @@ router.get("/designation/:id", getDesignationById);
 router.put("/designation/:id", updateDesignation);
 
 //Delete a designation
+router.delete("/designation/:id", deleteDesignationById);
+
+//Archive a designation
 router.delete("/designation/:id/archive/:archive", archiveDesignationById);
 
 //ROUTE FOR USER PREFERENCES
@@ -164,6 +189,29 @@ router.get("/approver/:id", getApproversById);
 router.put("/approver/:id", updateApproversById);
 
 //Delete a approver
+router.delete("/approver/:id", deleteApproversById);
+
+//Archive a approver
 router.delete("/approver/:id/archive/:archive", archiveApproversById);
+
+//ROUTE FOR POSITION
+
+//Create a new position
+router.post("/position", createNewPosition);
+
+//Get all position
+router.get("/position", getAllPositions);
+
+//Get position by ID
+router.get("/position/:id", getPositionById);
+
+//Edit a position
+router.put("/position/:id", updatePosition);
+
+//Delete a position
+router.delete("/position/:id", deletePositionById);
+
+//Archive a position
+router.delete("/position/:id/archive/:archive", archivePositionById);
 
 export default router;

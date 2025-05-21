@@ -5,7 +5,7 @@ import {
   getAllStatus,
   getStatusById,
   updateStatus,
-  archiveStatusById,
+  deleteStatusById,
 } from "../../controllers/settings_controllers/status.js";
 
 const statusRouter = express.Router();
@@ -23,4 +23,4 @@ statusRouter.get("/:id", getStatusById);
 statusRouter.put("/:id", updateStatus);
 
 // Delete status
-statusRouter.delete("/:id/archive/:archive", archiveStatusById);
+statusRouter.delete("/:id", deleteStatusById);

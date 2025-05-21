@@ -6,6 +6,7 @@ import {
   getDepartmentById,
   updateDepartment,
   archiveDepartmentById,
+  deleteDepartmentById,
 } from "../../controllers/settings_controllers/department.js";
 
 const departmentRouter = express.Router();
@@ -23,6 +24,9 @@ departmentRouter.get("/:id", getDepartmentById);
 departmentRouter.put("/:id", updateDepartment);
 
 // Delete department
+departmentRouter.delete("/:id", deleteDepartmentById);
+
+// Archive department
 departmentRouter.delete("/:id/archive/:archive", archiveDepartmentById);
 
 export default departmentRouter;

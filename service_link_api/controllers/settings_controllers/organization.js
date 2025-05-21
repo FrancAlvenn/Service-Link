@@ -25,12 +25,10 @@ export async function getAllOrganizations(req, res) {
         },
       },
     });
-    res
-      .status(201)
-      .json({
-        organizations,
-        message: `Organization data fetched successfully!`,
-      });
+    res.status(201).json({
+      organizations,
+      message: `Organization data fetched successfully!`,
+    });
   } catch (error) {
     res.status(500).json({ message: `Encountered an internal error ${error}` });
   }
@@ -46,12 +44,10 @@ export async function getOrganizationById(req, res) {
         [Op.eq]: false, // Get all that is not archived
       },
     });
-    res
-      .status(201)
-      .json({
-        organizations,
-        message: `Organization data fetched successfully!`,
-      });
+    res.status(201).json({
+      organizations,
+      message: `Organization data fetched successfully!`,
+    });
   } catch (error) {
     res.status(500).json({ message: `Encountered an internal error ${error}` });
   }
@@ -84,6 +80,32 @@ export async function updateOrganization(req, res) {
   }
 }
 
+export async function deleteOrganizationById(req, res) {
+  try {
+    const deletedRows = await OrganizationModel.destroy({
+      where: {
+        id: req.params.id,
+      },
+    });
+
+    // If no rows were deleted, it means the reference number didn't match any requisition
+    if (deletedRows === 0) {
+      return res.status(404).json({
+        message: `No organization found with reference number ${req.params.id}`,
+      });
+    }
+
+    res.status(200).json({
+      message: "Organization deleted from database!",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: `Encountered an internal error ${error}`,
+      error: error,
+    });
+  }
+}
+
 export async function archiveOrganizationById(req, res) {
   try {
     const [updatedRows] = await OrganizationModel.update(
@@ -99,27 +121,21 @@ export async function archiveOrganizationById(req, res) {
 
     // If no rows were updated, it means the reference number didn't match any requisition
     if (updatedRows === 0) {
-      return res
-        .status(404)
-        .json({
-          message: `No organization found with reference number ${req.params.id}`,
-        });
+      return res.status(404).json({
+        message: `No organization found with reference number ${req.params.id}`,
+      });
     }
 
-    res
-      .status(200)
-      .json({
-        message:
-          req.params.archive === "0"
-            ? "Organization removed from archive!"
-            : "Organization added to archive!",
-      });
+    res.status(200).json({
+      message:
+        req.params.archive === "0"
+          ? "Organization removed from archive!"
+          : "Organization added to archive!",
+    });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: `Encountered an internal error ${error}`,
-        error: error,
-      });
+    res.status(500).json({
+      message: `Encountered an internal error ${error}`,
+      error: error,
+    });
   }
 }

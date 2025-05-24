@@ -45,16 +45,6 @@ const VehicleRequest = sequelize.define(
       allowNull: true,
       defaultValue: null,
     },
-    destination: {
-      type: DataTypes.STRING(255),
-      allowNull: true,
-      defaultValue: null,
-    },
-    department: {
-      type: DataTypes.STRING(100),
-      allowNull: true,
-      defaultValue: null,
-    },
     purpose: {
       type: DataTypes.TEXT,
       allowNull: true,
@@ -63,6 +53,10 @@ const VehicleRequest = sequelize.define(
     requester: {
       type: DataTypes.STRING(100),
       allowNull: false,
+      references: {
+        model: "users",
+        key: "reference_number",
+      },
     },
     status: {
       type: DataTypes.STRING(100),

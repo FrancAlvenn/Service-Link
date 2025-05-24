@@ -1,5 +1,7 @@
 import sequelize from "../database.js";
 import { JobRequestModel, JobRequestDetails } from "../models/index.js";
+import User from "../models/UserModel.js";
+
 import { Op } from "sequelize";
 import { createLog } from "./system_logs.js";
 
@@ -29,8 +31,6 @@ export async function createJobRequest(req, res) {
         reference_number: referenceNumber,
         title: req.body.title,
         date_required: req.body.date_required,
-        department: req.body.department,
-        designation: req.body.designation,
         purpose: req.body.purpose,
         requester: req.body.requester,
         status: "Pending",
@@ -92,6 +92,10 @@ export async function getAllJobRequest(req, res) {
           model: JobRequestDetails,
           as: "details",
         },
+        {
+          model: User,
+          as: "requester_details",
+        },
       ],
     });
 
@@ -121,6 +125,10 @@ export async function getAllArchivedJobRequests(req, res) {
           model: JobRequestDetails,
           as: "details",
         },
+        {
+          model: User,
+          as: "requester_details",
+        },
       ],
     });
 
@@ -141,7 +149,16 @@ export async function getJobRequestById(req, res) {
   try {
     const jobRequest = await JobRequestModel.findOne({
       where: { reference_number: req.params.reference_number },
-      include: [{ model: JobRequestDetails, as: "details" }],
+      include: [
+        {
+          model: JobRequestDetails,
+          as: "details",
+        },
+        {
+          model: User,
+          as: "requester_details",
+        },
+      ],
     });
 
     console.log(req.params.reference_number);

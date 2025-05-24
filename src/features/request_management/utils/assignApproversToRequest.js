@@ -1,27 +1,25 @@
 export default function assignApproversToRequest({
+  requestType,
+  requestInformation,
   approvalRulesByDepartment,
   approvalRulesByRequestType,
   approvalRulesByDesignation,
   approvers,
-  department,
-  position,
-  designation,
+  department_id,
+  designation_id,
 }) {
-  const requestType = "Job Request";
+  // const requestType = "Job Request";
 
-  const requestInformation = {
-    approvers: [],
-    authorized_access: [],
-    date_required: null,
-    department_id: 1,
-    designation_id: 1,
-    position_id: 1,
-    details: [],
-    purpose: "",
-    remarks: "",
-    requester: "",
-    title: "",
-  };
+  // const requestInformation = {
+  //   approvers: [],
+  //   authorized_access: [],
+  //   date_required: null,
+  //   details: [],
+  //   purpose: "",
+  //   remarks: "",
+  //   requester: "",
+  //   title: "",
+  // };
 
   const addedPositions = new Set();
 
@@ -67,7 +65,7 @@ export default function assignApproversToRequest({
   // Designation Rule
   // ---------------------
   const desigRules = approvalRulesByDesignation.filter(
-    (rule) => rule.designation_id === 1
+    (rule) => rule.designation_id === designation_id
   );
   if (desigRules.length > 0) {
     appliedDesignationRule = true;
@@ -84,7 +82,7 @@ export default function assignApproversToRequest({
   // Department Rule
   // ---------------------
   const deptRules = approvalRulesByDepartment.filter(
-    (rule) => rule.department_id === 1
+    (rule) => rule.department_id === department_id
   );
   if (deptRules.length > 0) {
     appliedDepartmentRule = true;
@@ -106,11 +104,11 @@ export default function assignApproversToRequest({
     !appliedRequestTypeRule
   ) {
     const fallbackApprovers = approvers.filter(
-      (a) => a.department_id === 1 && a.position_id === 1
+      (a) => a.department_id === department_id
     );
     requestInformation.approvers = fallbackApprovers;
   }
 
-  console.log(requestInformation);
+  console.log(department_id, designation_id);
   return requestInformation;
 }

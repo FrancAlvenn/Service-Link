@@ -1,7 +1,8 @@
 import sequelize from "../database.js";
-import VehicleRequestModel from "../models/VehicleRequestModel.js";
+import { VehicleRequestModel } from "../models/index.js";
 import { Op } from "sequelize";
 import { createLog } from "./system_logs.js";
+import User from "../models/UserModel.js";
 
 // Generate a unique reference number (e.g., DYCI-2024-0001)
 function generateReferenceNumber(lastRequestId) {
@@ -25,8 +26,6 @@ export async function createVehicleRequest(req, res) {
     const newVehicleRequisition = await VehicleRequestModel.create({
       reference_number: referenceNumber,
       title: req.body.title,
-      department: req.body.department,
-      designation: req.body.designation,
       vehicle_requested: req.body.vehicle_requested,
       date_filled: req.body.date_filled,
       date_of_trip: req.body.date_of_trip,
@@ -70,6 +69,12 @@ export async function getAllVehicleRequest(req, res) {
           [Op.eq]: false, // Get all that is not archived
         },
       },
+      include: [
+        {
+          model: User,
+          as: "requester_details",
+        },
+      ],
     });
     if (!requisitions || requisitions.length === 0) {
       res.status(200).json({ message: "No vehicle requests found!" });
@@ -92,6 +97,12 @@ export async function getAllArchivedVehicleRequest(req, res) {
           [Op.eq]: true, // Get all that is not archived
         },
       },
+      include: [
+        {
+          model: User,
+          as: "requester_details",
+        },
+      ],
     });
     if (!requisitions || requisitions.length === 0) {
       res.status(200).json({ message: "No vehicle requests found!" });
@@ -115,6 +126,12 @@ export async function getVehicleRequestById(req, res) {
       archived: {
         [Op.eq]: false, // Get all that is not archived
       },
+      include: [
+        {
+          model: User,
+          as: "requester_details",
+        },
+      ],
     });
     console.log(req.params.reference_number);
     if (requisition === null) {

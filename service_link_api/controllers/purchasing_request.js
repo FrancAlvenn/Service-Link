@@ -5,6 +5,7 @@ import {
 } from "../models/index.js";
 import { Op } from "sequelize";
 import { createLog } from "./system_logs.js";
+import User from "../models/UserModel.js";
 
 // Generate a unique reference number (e.g., PR-2024-0001)
 function generateReferenceNumber(lastRequestId) {
@@ -33,8 +34,6 @@ export async function createPurchasingRequest(req, res) {
         title: req.body.title,
         supply_category: req.body.supply_category,
         date_required: req.body.date_required,
-        department: req.body.department,
-        designation: req.body.designation,
         purpose: req.body.purpose,
         requester: req.body.requester,
         status: "Pending",
@@ -97,6 +96,10 @@ export async function getAllPurchasingRequests(req, res) {
           model: PurchasingRequestDetails,
           as: "details",
         },
+        {
+          model: User,
+          as: "requester_details",
+        },
       ],
     });
 
@@ -127,6 +130,10 @@ export async function getAllArchivedPurchasingRequests(req, res) {
           model: PurchasingRequestDetails,
           as: "details",
         },
+        {
+          model: User,
+          as: "requester_details",
+        },
       ],
     });
 
@@ -147,7 +154,13 @@ export async function getPurchasingRequestById(req, res) {
   try {
     const request = await PurchasingRequestModel.findOne({
       where: { reference_number: req.params.reference_number },
-      include: [{ model: PurchasingRequestDetails, as: "details" }],
+      include: [
+        { model: PurchasingRequestDetails, as: "details" },
+        {
+          model: User,
+          as: "requester_details",
+        },
+      ],
     });
 
     if (!request) {

@@ -26,11 +26,10 @@ const VenueRequest = sequelize.define(
     requester: {
       type: DataTypes.STRING(100),
       allowNull: false,
-    },
-    department: {
-      type: DataTypes.STRING(100),
-      allowNull: true,
-      defaultValue: null,
+      references: {
+        model: "users",
+        key: "reference_number",
+      },
     },
     organization: {
       type: DataTypes.STRING(100),

@@ -13,15 +13,17 @@ import {
   Prohibit,
   X,
 } from "@phosphor-icons/react";
+import { SettingsContext } from "../../../../settings/context/SettingsContext";
+import assignApproversToRequest from "../../../utils/assignApproversToRequest";
 
 const VenueRequestForm = ({ setSelectedRequest }) => {
   const { user } = useContext(AuthContext);
-  const { allUserInfo, getUserByReferenceNumber } = useContext(UserContext);
+  const { allUserInfo, getUserByReferenceNumber, fetchUsers } =
+    useContext(UserContext);
   const { fetchVenueRequests } = useContext(VenueRequestsContext);
 
   const [request, setRequest] = useState({
     requester: user.reference_number,
-    department: user.department || "",
     organization: "",
     title: "",
     event_dates: "",
@@ -34,7 +36,6 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
     purpose: "",
     remarks: "",
     details: [],
-    designation: user.designation || "",
     approvers: [],
   });
 
@@ -56,9 +57,37 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
     time: "",
   });
 
+  const {
+    departments,
+    designations,
+    approvers,
+    approvalRulesByDepartment,
+    approvalRulesByRequestType,
+    approvalRulesByDesignation,
+    fetchDepartments,
+    fetchDesignations,
+    fetchApprovers,
+    fetchApprovalRulesByDepartment,
+    fetchApprovalRulesByRequestType,
+    fetchApprovalRulesByDesignation,
+  } = useContext(SettingsContext);
+
+  useEffect(() => {
+    fetchDepartments();
+    fetchDesignations();
+    fetchApprovers();
+    fetchApprovalRulesByDepartment();
+    fetchApprovalRulesByRequestType();
+    fetchApprovalRulesByDesignation();
+    fetchUsers();
+  }, []);
+
   useEffect(() => {
     axios.get("/assets/", { withCredentials: true }).then((response) => {
-      const venues = response.data.filter((a) => a.asset_type === "Venue");
+      const venues =
+        response.data === null || response.data.length === 0
+          ? []
+          : response.data.filter((a) => a.asset_type === "Venue");
       setVenueOptions(venues);
     });
   }, []);
@@ -148,7 +177,33 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
 
   const submitVenueRequest = async () => {
     try {
-      const response = await axios.post("/venue_request", request, {
+      let requestData = {
+        ...request,
+        authorized_access: Array.from(
+          new Set([
+            ...(request.authorized_access || []),
+            user.reference_number,
+            request.requester,
+          ])
+        ),
+      };
+
+      const requesterId = allUserInfo.find(
+        (user) => user.reference_number === request.requester
+      );
+
+      requestData = assignApproversToRequest({
+        requestType,
+        requestInformation: requestData,
+        approvers,
+        approvalRulesByDepartment,
+        approvalRulesByDesignation,
+        approvalRulesByRequestType,
+        department_id: requesterId?.department_id,
+        designation_id: requesterId?.designation_id,
+      });
+
+      let response = await axios.post("/venue_request", requestData, {
         withCredentials: true,
       });
 
@@ -158,7 +213,6 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
         setSelectedRequest("");
         setRequest({
           requester: user.reference_number,
-          department: "",
           organization: "",
           title: "",
           event_dates: "",
@@ -181,7 +235,7 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
   return (
     <div className="py-2 text-sm space-y-4 overflow-y-auto">
       {/* Requester, Department, Venue */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Requester */}
         <div>
           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -220,27 +274,6 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
               />
             </>
           )}
-        </div>
-
-        {/* Department */}
-        <div>
-          <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
-            Department
-          </label>
-          <select
-            name="department"
-            value={request.department}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
-            required
-          >
-            <option value="">Select Department</option>
-            {departmentOptions.map((d) => (
-              <option key={d.id} value={d.name}>
-                {d.name}
-              </option>
-            ))}
-          </select>
         </div>
 
         {/* Venue */}

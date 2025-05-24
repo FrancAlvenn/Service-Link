@@ -3,7 +3,6 @@ import StatusModal from "../../../utils/statusModal.js";
 import ApprovalStatusModal from "../../../utils/approverStatusModal.js";
 import ArchiveStatusModal from "../../../utils/archiveStatusModal.js";
 import { formatDate, formatTime } from "../../../utils/dateFormatter.js";
-import DepartmentModal from "../../../utils/departmentModal.js";
 
 const normalText =
   "text-center font-semibold rounded-full flex items-center justify-center";
@@ -139,27 +138,7 @@ export const getColumnConfig = (
             </Typography>
           ),
         },
-        {
-          key: "department",
-          label: "Department",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              Department
-            </Typography>
-          ),
-          render: (row) => (
-            <DepartmentModal
-              request={row}
-              input={row.department}
-              referenceNumber={row.reference_number}
-              requestType={requestType}
-            />
-          ),
-        },
+
         {
           key: "purpose",
           label: "Purpose",
@@ -468,27 +447,6 @@ export const getColumnConfig = (
             >
               {formatDate(row.date_required)}
             </Typography>
-          ),
-        },
-        {
-          key: "department",
-          label: "Department",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              Department
-            </Typography>
-          ),
-          render: (row) => (
-            <DepartmentModal
-              request={row}
-              input={row.department}
-              referenceNumber={row.reference_number}
-              requestType={requestType}
-            />
           ),
         },
         {
@@ -843,27 +801,6 @@ export const getColumnConfig = (
             >
               {row.requester}
             </Typography>
-          ),
-        },
-        {
-          key: "department",
-          label: "Department",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              Department
-            </Typography>
-          ),
-          render: (row) => (
-            <DepartmentModal
-              request={row}
-              input={row.department}
-              referenceNumber={row.reference_number}
-              requestType={requestType}
-            />
           ),
         },
         {
@@ -1460,27 +1397,6 @@ export const getColumnConfig = (
             >
               {row.destination}
             </Typography>
-          ),
-        },
-        {
-          key: "department",
-          label: "Department",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              Department
-            </Typography>
-          ),
-          render: (row) => (
-            <DepartmentModal
-              request={row}
-              input={row.department}
-              referenceNumber={row.reference_number}
-              requestType={requestType}
-            />
           ),
         },
         {

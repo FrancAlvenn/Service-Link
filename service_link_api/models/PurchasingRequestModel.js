@@ -26,15 +26,15 @@ const PurchasingRequest = sequelize.define(
     requester: {
       type: DataTypes.STRING(50),
       allowNull: false,
+      references: {
+        model: "users",
+        key: "reference_number",
+      },
     },
     supply_category: {
       type: DataTypes.STRING(255),
       allowNull: true,
       defaultValue: null,
-    },
-    department: {
-      type: DataTypes.STRING(100),
-      allowNull: true,
     },
     purpose: {
       type: DataTypes.TEXT,

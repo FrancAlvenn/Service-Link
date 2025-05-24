@@ -5,11 +5,14 @@ import axios from "axios";
 import { UserContext } from "../../../../../context/UserContext";
 import ToastNotification from "../../../../../utils/ToastNotification";
 import { VehicleRequestsContext } from "../../../context/VehicleRequestsContext";
+import { SettingsContext } from "../../../../settings/context/SettingsContext";
+import assignApproversToRequest from "../../../utils/assignApproversToRequest";
 
 const VehicleRequestForm = ({ setSelectedRequest }) => {
   const { user } = useContext(AuthContext);
 
-  const { allUserInfo, getUserByReferenceNumber } = useContext(UserContext);
+  const { allUserInfo, getUserByReferenceNumber, fetchUsers } =
+    useContext(UserContext);
 
   const { fetchVehicleRequests } = useContext(VehicleRequestsContext);
 
@@ -23,8 +26,6 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
     time_of_arrival: "",
     number_of_passengers: "",
     destination: "",
-    department: user.department || "",
-    designation: user.designation || "",
     purpose: "",
     remarks: "",
     approvers: [],
@@ -35,6 +36,31 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
   const [departmentOptions, setDepartmentOptions] = useState([]);
 
   const [vehicleOptions, setVehicleOptions] = useState([]);
+
+  const {
+    departments,
+    designations,
+    approvers,
+    approvalRulesByDepartment,
+    approvalRulesByRequestType,
+    approvalRulesByDesignation,
+    fetchDepartments,
+    fetchDesignations,
+    fetchApprovers,
+    fetchApprovalRulesByDepartment,
+    fetchApprovalRulesByRequestType,
+    fetchApprovalRulesByDesignation,
+  } = useContext(SettingsContext);
+
+  useEffect(() => {
+    fetchDepartments();
+    fetchDesignations();
+    fetchApprovers();
+    fetchApprovalRulesByDepartment();
+    fetchApprovalRulesByRequestType();
+    fetchApprovalRulesByDesignation();
+    fetchUsers();
+  }, []);
 
   useEffect(() => {
     axios({
@@ -120,13 +146,31 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
 
   const submitVehicleRequest = async () => {
     try {
-      const requestData = {
+      let requestData = {
         ...request,
-        authorized_access: [
-          ...(request.authorized_access || []),
-          user.reference_number,
-        ],
+        authorized_access: Array.from(
+          new Set([
+            ...(request.authorized_access || []),
+            user.reference_number,
+            request.requester,
+          ])
+        ),
       };
+
+      const requesterId = allUserInfo.find(
+        (user) => user.reference_number === request.requester
+      );
+
+      requestData = assignApproversToRequest({
+        requestType,
+        requestInformation: requestData,
+        approvers,
+        approvalRulesByDepartment,
+        approvalRulesByDesignation,
+        approvalRulesByRequestType,
+        department_id: requesterId?.department_id,
+        designation_id: requesterId?.designation_id,
+      });
 
       const response = await axios({
         method: "POST",
@@ -149,8 +193,6 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
           time_of_arrival: "",
           number_of_passengers: "",
           destination: "",
-          department: "",
-          designation: "",
           purpose: "",
           remarks: "",
         });
@@ -162,8 +204,8 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
 
   return (
     <div className="py-2 text-sm space-y-4">
-      {/* Requester & Department */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Requester */}
+      <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
         <div>
           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
             Requester
@@ -201,26 +243,6 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
               />
             </>
           )}
-        </div>
-
-        <div>
-          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Department
-          </label>
-          <select
-            name="department"
-            value={request.department || ""}
-            onChange={handleChange}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-white"
-            required
-          >
-            <option value="">Select Department</option>
-            {departmentOptions?.map((dept) => (
-              <option key={dept.id} value={dept.name}>
-                {dept.name}
-              </option>
-            ))}
-          </select>
         </div>
       </div>
 

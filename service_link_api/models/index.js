@@ -4,7 +4,10 @@ import PurchasingRequestModel from "./PurchasingRequestModel.js";
 import PurchasingRequestDetails from "./PurchasingRequestDetails.js";
 import VenueRequests from "./VenueRequestModel.js";
 import VenueRequestDetail from "./VenueRequestDetails.js";
-
+import DepartmentsModel from "./SettingsModels/DeparmentsModel.js";
+import DesignationModel from "./SettingsModels/DesignationModel.js";
+import UserModel from "./UserModel.js";
+import VehicleRequestModel from "./VehicleRequestModel.js";
 // Define associations
 JobRequestModel.hasMany(JobRequestDetails, {
   foreignKey: "job_request_id",
@@ -12,16 +15,26 @@ JobRequestModel.hasMany(JobRequestDetails, {
   as: "details",
 });
 
+JobRequestModel.belongsTo(UserModel, {
+  foreignKey: "requester",
+  targetKey: "reference_number",
+  as: "requester_details",
+});
+
 JobRequestDetails.belongsTo(JobRequestModel, {
   foreignKey: "job_request_id",
   targetKey: "reference_number",
 });
 
-
 PurchasingRequestDetails.belongsTo(PurchasingRequestModel, {
   foreignKey: "purchasing_request_id",
   targetKey: "reference_number",
+});
 
+PurchasingRequestModel.belongsTo(UserModel, {
+  foreignKey: "requester",
+  targetKey: "reference_number",
+  as: "requester_details",
 });
 
 PurchasingRequestModel.hasMany(PurchasingRequestDetails, {
@@ -36,12 +49,43 @@ VenueRequests.hasMany(VenueRequestDetail, {
   as: "details",
 });
 
+VenueRequests.belongsTo(UserModel, {
+  foreignKey: "requester",
+  targetKey: "reference_number",
+  as: "requester_details",
+});
+
 VenueRequestDetail.belongsTo(VenueRequests, {
   foreignKey: "venue_request_id",
   targetKey: "reference_number",
   as: "request",
 });
 
+VehicleRequestModel.belongsTo(UserModel, {
+  foreignKey: "requester",
+  targetKey: "reference_number",
+  as: "requester_details",
+});
 
+UserModel.belongsTo(DepartmentsModel, {
+  foreignKey: "department_id",
+  targetKey: "id",
+  as: "department",
+});
 
-export { JobRequestModel, JobRequestDetails, PurchasingRequestModel, PurchasingRequestDetails, VenueRequests, VenueRequestDetail };
+UserModel.belongsTo(DesignationModel, {
+  foreignKey: "designation_id",
+  targetKey: "id",
+  as: "designation",
+});
+
+export {
+  JobRequestModel,
+  JobRequestDetails,
+  PurchasingRequestModel,
+  PurchasingRequestDetails,
+  VenueRequests,
+  VenueRequestDetail,
+  VehicleRequestModel,
+  UserModel,
+};

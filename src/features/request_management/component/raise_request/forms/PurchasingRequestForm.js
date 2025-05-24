@@ -14,11 +14,14 @@ import axios from "axios";
 import { UserContext } from "../../../../../context/UserContext";
 import ToastNotification from "../../../../../utils/ToastNotification";
 import { PurchasingRequestsContext } from "../../../context/PurchasingRequestsContext";
+import { SettingsContext } from "../../../../settings/context/SettingsContext";
+import assignApproversToRequest from "../../../utils/assignApproversToRequest";
 
 const PurchasingRequestForm = ({ setSelectedRequest }) => {
   const { user } = useContext(AuthContext);
 
-  const { allUserInfo, getUserByReferenceNumber } = useContext(UserContext);
+  const { allUserInfo, getUserByReferenceNumber, fetchUsers } =
+    useContext(UserContext);
 
   const { fetchPurchasingRequests } = useContext(PurchasingRequestsContext);
 
@@ -26,14 +29,12 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
 
   const [request, setRequest] = useState({
     requester: user.reference_number,
-    department: user.department || "",
     title: "",
     date_required: "",
     supply_category: "",
     purpose: "",
     remarks: "",
     details: [],
-    designation: user.designation || "",
     approvers: [],
   });
 
@@ -56,6 +57,31 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
     { id: 6, name: "Electrical and Maintenance Supply" },
     { id: 7, name: "Miscellaneous" },
   ]);
+
+  const {
+    departments,
+    designations,
+    approvers,
+    approvalRulesByDepartment,
+    approvalRulesByRequestType,
+    approvalRulesByDesignation,
+    fetchDepartments,
+    fetchDesignations,
+    fetchApprovers,
+    fetchApprovalRulesByDepartment,
+    fetchApprovalRulesByRequestType,
+    fetchApprovalRulesByDesignation,
+  } = useContext(SettingsContext);
+
+  useEffect(() => {
+    fetchDepartments();
+    fetchDesignations();
+    fetchApprovers();
+    fetchApprovalRulesByDepartment();
+    fetchApprovalRulesByRequestType();
+    fetchApprovalRulesByDesignation();
+    fetchUsers();
+  }, []);
 
   const handleChange = (e) => {
     // Validate Date: Ensure date_required is not in the past
@@ -129,14 +155,32 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
       const formattedDate = request.date_required
         ? new Date(request.date_required).toISOString().split("T")[0]
         : null;
-      const requestData = {
+      let requestData = {
         ...request,
         date_required: formattedDate,
-        authorized_access: [
-          ...(request.authorized_access || []),
-          user.reference_number,
-        ],
+        authorized_access: Array.from(
+          new Set([
+            ...(request.authorized_access || []),
+            user.reference_number,
+            request.requester,
+          ])
+        ),
       };
+
+      const requesterId = allUserInfo.find(
+        (user) => user.reference_number === request.requester
+      );
+
+      requestData = assignApproversToRequest({
+        requestType,
+        requestInformation: requestData,
+        approvers,
+        approvalRulesByDepartment,
+        approvalRulesByDesignation,
+        approvalRulesByRequestType,
+        department_id: requesterId?.department_id,
+        designation_id: requesterId?.designation_id,
+      });
 
       const response = await axios({
         method: "POST",
@@ -168,7 +212,7 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
   return (
     <div className="py-2 text-sm space-y-4 overflow-y-auto">
       {/* Requester & Department */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-1 gap-4">
         <div>
           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
             Requester
@@ -206,26 +250,6 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
               />
             </>
           )}
-        </div>
-
-        <div>
-          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Department
-          </label>
-          <select
-            name="department"
-            value={request.department || ""}
-            onChange={handleChange}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-300"
-            required
-          >
-            <option value="">Select Department</option>
-            {departmentOptions?.map((dept) => (
-              <option key={dept.id} value={dept.name}>
-                {dept.name}
-              </option>
-            ))}
-          </select>
         </div>
       </div>
 
@@ -433,7 +457,6 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
         color="blue"
         onClick={submitPurchasingRequest}
         disabled={
-          !request.department ||
           !request.title ||
           !request.date_required ||
           !request.supply_category ||

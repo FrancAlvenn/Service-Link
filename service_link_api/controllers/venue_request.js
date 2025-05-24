@@ -3,6 +3,7 @@ import VenueRequestModel from "../models/VenueRequestModel.js";
 import { Op } from "sequelize";
 import { createLog } from "./system_logs.js";
 import VenueRequestDetails from "../models/VenueRequestDetails.js";
+import User from "../models/UserModel.js";
 
 // Generate a unique reference number (e.g., DYCI-2024-0001)
 function generateReferenceNumber(lastRequestId) {
@@ -28,8 +29,6 @@ export async function createVenueRequest(req, res) {
       title: req.body.title,
       venue_requested: req.body.venue_requested,
       requester: req.body.requester,
-      department: req.body.department || null,
-      designation: req.body.designation || null,
       organization: req.body.organization || null,
       event_title: req.body.event_title,
       purpose: req.body.purpose,
@@ -84,6 +83,10 @@ export async function getAllVenueRequest(req, res) {
           model: VenueRequestDetails,
           as: "details",
         },
+        {
+          model: User,
+          as: "requester_details",
+        },
       ],
     });
     if (!requisitions || requisitions.length === 0) {
@@ -108,6 +111,10 @@ export async function getAllArchivedVenueRequest(req, res) {
           model: VenueRequestDetails,
           as: "details",
         },
+        {
+          model: User,
+          as: "requester_details",
+        },
       ],
     });
     if (!requisitions || requisitions.length === 0) {
@@ -131,6 +138,10 @@ export async function getVenueRequestById(req, res) {
         {
           model: VenueRequestDetails,
           as: "details",
+        },
+        {
+          model: User,
+          as: "requester_details",
         },
       ],
     });

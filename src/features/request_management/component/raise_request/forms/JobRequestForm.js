@@ -14,11 +14,14 @@ import axios from "axios";
 import { UserContext } from "../../../../../context/UserContext";
 import ToastNotification from "../../../../../utils/ToastNotification";
 import { JobRequestsContext } from "../../../context/JobRequestsContext";
+import { SettingsContext } from "../../../../settings/context/SettingsContext";
+import assignApproversToRequest from "../../../utils/assignApproversToRequest";
 
 const JobRequestForm = ({ setSelectedRequest }) => {
   const { user } = useContext(AuthContext);
 
-  const { allUserInfo, getUserByReferenceNumber } = useContext(UserContext);
+  const { allUserInfo, getUserByReferenceNumber, fetchUsers } =
+    useContext(UserContext);
 
   const { fetchJobRequests } = useContext(JobRequestsContext);
 
@@ -26,13 +29,11 @@ const JobRequestForm = ({ setSelectedRequest }) => {
 
   const [request, setRequest] = useState({
     requester: user.reference_number,
-    department: user.department || "",
     title: "",
     date_required: "",
     purpose: "",
     remarks: "",
     details: [],
-    designation: user.designation || "",
     approvers: [],
   });
 
@@ -46,6 +47,31 @@ const JobRequestForm = ({ setSelectedRequest }) => {
   });
 
   const [departmentOptions, setDepartmentOptions] = useState([]);
+
+  const {
+    departments,
+    designations,
+    approvers,
+    approvalRulesByDepartment,
+    approvalRulesByRequestType,
+    approvalRulesByDesignation,
+    fetchDepartments,
+    fetchDesignations,
+    fetchApprovers,
+    fetchApprovalRulesByDepartment,
+    fetchApprovalRulesByRequestType,
+    fetchApprovalRulesByDesignation,
+  } = useContext(SettingsContext);
+
+  useEffect(() => {
+    fetchDepartments();
+    fetchDesignations();
+    fetchApprovers();
+    fetchApprovalRulesByDepartment();
+    fetchApprovalRulesByRequestType();
+    fetchApprovalRulesByDesignation();
+    fetchUsers();
+  }, []);
 
   const handleChange = (e) => {
     // Validate Date: Ensure date_required is not in the past
@@ -127,14 +153,34 @@ const JobRequestForm = ({ setSelectedRequest }) => {
         : null;
 
       // Prepare request payload with correctly formatted date
-      const requestData = {
+      let requestData = {
         ...request,
         date_required: formattedDate,
-        authorized_access: [
-          ...(request.authorized_access || []),
-          user.reference_number,
-        ],
+        authorized_access: Array.from(
+          new Set([
+            ...(request.authorized_access || []),
+            user.reference_number,
+            request.requester,
+          ])
+        ),
       };
+
+      const requesterId = allUserInfo.find(
+        (user) => user.reference_number === request.requester
+      );
+
+      requestData = assignApproversToRequest({
+        requestType,
+        requestInformation: requestData,
+        approvers,
+        approvalRulesByDepartment,
+        approvalRulesByDesignation,
+        approvalRulesByRequestType,
+        department_id: requesterId?.department_id,
+        designation_id: requesterId?.designation_id,
+      });
+
+      console.log(requestData);
 
       const response = await axios({
         method: "POST",
@@ -167,7 +213,7 @@ const JobRequestForm = ({ setSelectedRequest }) => {
   return (
     <div className="py-2 text-sm space-y-4 overflow-y-auto">
       {/* Requester & Department */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-1 gap-4">
         <div>
           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
             Requester
@@ -205,26 +251,6 @@ const JobRequestForm = ({ setSelectedRequest }) => {
               />
             </>
           )}
-        </div>
-
-        <div>
-          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Department
-          </label>
-          <select
-            name="department"
-            value={request.department || ""}
-            onChange={handleChange}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-            required
-          >
-            <option value="">Select Department</option>
-            {departmentOptions?.map((dept) => (
-              <option key={dept.id} value={dept.name}>
-                {dept.name}
-              </option>
-            ))}
-          </select>
         </div>
       </div>
 
@@ -411,12 +437,7 @@ const JobRequestForm = ({ setSelectedRequest }) => {
       <Button
         color="blue"
         onClick={() => submitJobRequest()}
-        disabled={
-          !request.department ||
-          !request.title ||
-          !request.date_required ||
-          !request.purpose
-        }
+        disabled={!request.title || !request.date_required || !request.purpose}
         className="dark:bg-blue-600 dark:hover:bg-blue-500 w-full md:w-auto"
       >
         Submit Job Request

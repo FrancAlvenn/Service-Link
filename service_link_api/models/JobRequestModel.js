@@ -44,6 +44,10 @@ const JobRequest = sequelize.define(
     requester: {
       type: DataTypes.STRING(255),
       allowNull: false,
+      references: {
+        model: "users",
+        key: "reference_number",
+      },
     },
     immediate_head_approval: {
       type: DataTypes.STRING(255),

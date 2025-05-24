@@ -13,11 +13,11 @@ import {
   PurchasingRequestDetails,
   VenueRequests,
   VenueRequestDetail,
+  VehicleRequestModel,
+  UserModel,
 } from "./index.js";
 import SystemLogsModel from "./SystemLogs.js";
 import Ticket from "./TicketModel.js";
-import UserModel from "./UserModel.js";
-import VehicleRequestModel from "./VehicleRequestModel.js";
 import RequestActivity from "./RequestActivity.js";
 import AssetAssignmentLogModel from "./AssetAssignmentLog.js";
 import UserPreferenceModel from "./SettingsModels/UserPreferenceModel.js";
@@ -29,8 +29,10 @@ import {
   Approvers,
 } from "./SettingsModels/index.js";
 import Position from "./SettingsModels/PositionModel.js";
+import EmployeeModel from "./EmployeeModel.js";
 
 const models = [
+  EmployeeModel,
   DepartmentsModel,
   Designation,
   Organization,
@@ -61,10 +63,48 @@ const models = [
 
 const syncModels = async (sequelizeInstance) => {
   try {
-    await sequelizeInstance.sync({ force: true }); // Safely update schema
+    // 1. Sync independent models first
+    await DepartmentsModel.sync({ force: true });
+    await Designation.sync({ force: true });
+    await Organization.sync({ force: true });
+    await Position.sync({ force: true });
+    await Priority.sync({ force: true });
+    await Status.sync({ force: true });
+    await EmployeeModel.sync({ force: true });
+
+    // 2. Then sync models that depend on those
+    await UserModel.sync({ force: true }); // if it references department, designation, etc.
+    await Approvers.sync({ force: true });
+
+    // 3. Then sync JobRequest and others
+    await JobRequestModel.sync({ force: true });
+    await JobRequestDetails.sync({ force: true });
+
+    await PurchasingRequestModel.sync({ force: true });
+    await PurchasingRequestDetails.sync({ force: true });
+
+    await AssetsModel.sync({ force: true });
+    await AssetAssignmentLogModel.sync({ force: true });
+
+    await VenueRequests.sync({ force: true });
+    await VenueRequestDetail.sync({ force: true });
+
+    await VehicleRequestModel.sync({ force: true });
+    await Ticket.sync({ force: true });
+
+    await RequestActivity.sync({ force: true });
+    await ImageModel.sync({ force: true });
+    await UserPreferenceModel.sync({ force: true });
+    await SystemLogsModel.sync({ force: true });
+
+    await ManualApprovalRule.sync({ force: true });
+    await ApprovalRuleByDepartment.sync({ force: true });
+    await ApprovalRuleByRequestType.sync({ force: true });
+    await ApprovalRuleByDesignation.sync({ force: true });
+
     console.log("✅ All models synchronized successfully.");
 
-    // Seed default values
+    // Optional: Seed after sync
     await seedData();
   } catch (error) {
     console.error("❌ Error synchronizing models:", error);
@@ -73,10 +113,10 @@ const syncModels = async (sequelizeInstance) => {
 
 // Function to seed default data (if not already present)
 const seedData = async () => {
-  await seedUsers();
   await seedStatuses();
   await seedPriorities();
   await seedDepartments();
+  await seedUsers();
   await seedJobRequests();
   await seedPurchasingRequests();
   await seedVenueRequests();
@@ -117,8 +157,8 @@ const seedUsers = async () => {
       status: "active",
       immediate_head: "",
       organization: "",
-      department: "",
-      designation: "",
+      department_id: 1,
+      designation_id: null,
       archived: false,
       created_at: new Date("2025-05-17T19:48:00"),
       updated_at: new Date("2025-05-17T19:48:00"),
@@ -371,13 +411,13 @@ const seedJobRequests = async () => {
       date_required: "2024-12-10",
       department: "College of Business Administration",
       purpose: "Replace defective projector bulbs",
-      requester: "DYCI-2025-00004",
+      requester: "DYCI-2025-00002",
       status: "Pending",
       immediate_head_approval: "Pending",
       gso_director_approval: "Pending",
       operations_director_approval: "Pending",
       archived: false,
-      authorized_access: ["DYCI-2025-00004"],
+      authorized_access: ["DYCI-2025-00002"],
       details: [
         {
           quantity: "3",
@@ -416,7 +456,7 @@ const seedPurchasingRequests = async () => {
       supply_category: "Office Supplies",
       purpose: "Purchase office supplies",
       department: "College of Engineering",
-      requester: "DYCI-2024-00001",
+      requester: "DYCI-2025-00002",
       status: "Pending",
       immediate_head_approval: "Pending",
       gso_director_approval: "Pending",
@@ -476,14 +516,14 @@ const seedPurchasingRequests = async () => {
       supply_category: "IT Equipment",
       purpose: "Upgrade and replacement of accessories",
       department: "College of Engineering",
-      requester: "DYCI-2025-00003",
+      requester: "DYCI-2025-00002",
       status: "Pending",
       immediate_head_approval: "Pending",
       gso_director_approval: "Pending",
       operations_director_approval: "Pending",
       archived: false,
       remarks: "",
-      authorized_access: ["DYCI-2025-00003"],
+      authorized_access: ["DYCI-2025-00002"],
       details: [
         {
           quantity: 3,
@@ -592,7 +632,7 @@ const seedVenueRequests = async () => {
       reference_number: "VR-2025-00003",
       venue_requested: "Elida Court",
       title: "Cultural Night Venue Request",
-      requester: "DYCI-2025-00003",
+      requester: "DYCI-2025-00002",
       department: "College of Arts and Sciences",
       organization: "Cultural Arts Society",
       event_title: "Cultural Night",
@@ -609,7 +649,7 @@ const seedVenueRequests = async () => {
       immediate_head_approval: "Pending",
       gso_director_approval: "Pending",
       operations_director_approval: "Pending",
-      authorized_access: ["DYCI-2025-00003"],
+      authorized_access: ["DYCI-2025-00002"],
       details: [
         {
           quantity: "4",
@@ -700,7 +740,7 @@ const seedVehicleRequests = async () => {
       destination: "Tagaytay",
       department: "College of Arts and Sciences",
       purpose: "University representatives attending cultural event",
-      requester: "DYCI-2025-00003",
+      requester: "DYCI-2025-00002",
       designation: "Admin Staff",
       status: "Pending",
       vehicle_id: 3,
@@ -708,7 +748,7 @@ const seedVehicleRequests = async () => {
       immediate_head_approval: "Pending",
       gso_director_approval: "Pending",
       operations_director_approval: "Pending",
-      authorized_access: ["DYCI-2025-00003"],
+      authorized_access: ["DYCI-2025-00002"],
       created_at: "2024-12-01T08:30:00.000Z",
       updated_at: "2024-12-01T08:30:00.000Z",
     },

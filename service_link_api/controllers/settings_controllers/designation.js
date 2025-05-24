@@ -6,6 +6,7 @@ export async function createNewDesignation(req, res) {
   try {
     const newDesignation = await DesignationModel.create({
       designation: req.body.designation,
+      description: req.body.description,
     });
 
     res.status(201).json({ message: `Designation added successfully!` });
@@ -23,12 +24,10 @@ export async function getAllDesignation(req, res) {
         },
       },
     });
-    res
-      .status(201)
-      .json({
-        designations,
-        message: `Designation data fetched successfully!`,
-      });
+    res.status(201).json({
+      designations,
+      message: `Designation data fetched successfully!`,
+    });
   } catch (error) {
     res.status(500).json({ message: `Encountered an internal error ${error}` });
   }
@@ -57,6 +56,7 @@ export async function updateDesignation(req, res) {
     const [updatedRows] = await DesignationModel.update(
       {
         designation: req.body.designation,
+        description: req.body.description,
       },
       {
         where: {
@@ -67,11 +67,9 @@ export async function updateDesignation(req, res) {
 
     // If no rows were updated, it means the reference number didn't match any requisition
     if (updatedRows === 0) {
-      return res
-        .status(404)
-        .json({
-          message: `No  n found with the reference number: ${req.params.id}`,
-        });
+      return res.status(404).json({
+        message: `No  n found with the reference number: ${req.params.id}`,
+      });
     }
 
     res.status(200).json({ message: `Request updated successfully!` });
@@ -121,27 +119,21 @@ export async function archiveDesignationById(req, res) {
 
     // If no rows were updated, it means the reference number didn't match any requisition
     if (updatedRows === 0) {
-      return res
-        .status(404)
-        .json({
-          message: `No requisition found with reference number ${req.params.id}`,
-        });
+      return res.status(404).json({
+        message: `No requisition found with reference number ${req.params.id}`,
+      });
     }
 
-    res
-      .status(200)
-      .json({
-        message:
-          req.params.archive === "0"
-            ? "Request removed from archive!"
-            : "Request added to archive!",
-      });
+    res.status(200).json({
+      message:
+        req.params.archive === "0"
+          ? "Request removed from archive!"
+          : "Request added to archive!",
+    });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: `Encountered an internal error ${error}`,
-        error: error,
-      });
+    res.status(500).json({
+      message: `Encountered an internal error ${error}`,
+      error: error,
+    });
   }
 }

@@ -228,11 +228,7 @@ const Status = () => {
   return (
     <>
       <Card className="shadow-none">
-        <CardHeader
-          floated={false}
-          shadow={false}
-          className="rounded-none pb-2 border-b"
-        >
+        <CardHeader floated={false} shadow={false} className="rounded-none ">
           <div>
             <Typography color="black" className="text-md font-bold">
               Manage Statuses

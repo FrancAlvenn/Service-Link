@@ -26,14 +26,18 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
 
   const [request, setRequest] = useState({
     requester: user.reference_number,
-    department: "",
+    department: user.department || "",
     title: "",
     date_required: "",
     supply_category: "",
     purpose: "",
     remarks: "",
     details: [],
+    designation: user.designation || "",
+    approvers: [],
   });
+
+  const requestType = "Purchasing Request";
 
   const [editingIndex, setEditingIndex] = useState(null);
   const [editedParticular, setEditedParticular] = useState({

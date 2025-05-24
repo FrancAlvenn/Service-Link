@@ -34,6 +34,7 @@ export async function createPurchasingRequest(req, res) {
         supply_category: req.body.supply_category,
         date_required: req.body.date_required,
         department: req.body.department,
+        designation: req.body.designation,
         purpose: req.body.purpose,
         requester: req.body.requester,
         status: "Pending",
@@ -43,6 +44,7 @@ export async function createPurchasingRequest(req, res) {
         archived: req.body.archived || false,
         remarks: req.body.remarks || null,
         authorized_access: [req.body.requester],
+        approvers: [req.body.approvers],
       },
       { transaction }
     );
@@ -74,12 +76,10 @@ export async function createPurchasingRequest(req, res) {
     // Rollback the transaction in case of error
     if (transaction) await transaction.rollback();
     console.error(error);
-    res
-      .status(500)
-      .json({
-        message: "Error creating purchasing request",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Error creating purchasing request",
+      error: error.message,
+    });
   }
 }
 
@@ -178,11 +178,9 @@ export async function updatePurchasingRequest(req, res) {
 
     if (updatedRows === 0) {
       await transaction.rollback();
-      return res
-        .status(404)
-        .json({
-          message: `No purchasing request found with reference number ${req.params.reference_number}`,
-        });
+      return res.status(404).json({
+        message: `No purchasing request found with reference number ${req.params.reference_number}`,
+      });
     }
 
     if (details && Array.isArray(details)) {
@@ -316,14 +314,12 @@ export async function archivePurchasingRequest(req, res) {
       details: `Purchasing Request ${req.params.reference_number} archived successfully!`,
     });
 
-    res
-      .status(200)
-      .json({
-        message:
-          req.params.archive === "0"
-            ? "Request removed from archive!"
-            : "Request added to archive!",
-      });
+    res.status(200).json({
+      message:
+        req.params.archive === "0"
+          ? "Request removed from archive!"
+          : "Request added to archive!",
+    });
   } catch (error) {
     res
       .status(500)
@@ -346,11 +342,9 @@ export async function immediateHeadApproval(req, res) {
 
     // If no rows were updated, it means the reference number didn't match any requisition
     if (updatedRow === 0) {
-      return res
-        .status(404)
-        .json({
-          message: `No requisition found with reference number ${req.body.reference_number}`,
-        });
+      return res.status(404).json({
+        message: `No requisition found with reference number ${req.body.reference_number}`,
+      });
     }
 
     console.log(req.body.vehicle_requested);
@@ -387,11 +381,9 @@ export async function gsoDirectorApproval(req, res) {
 
     // If no rows were updated, it means the reference number didn't match any requisition
     if (updatedRow === 0) {
-      return res
-        .status(404)
-        .json({
-          message: `No requisition found with reference number ${req.body.reference_number}`,
-        });
+      return res.status(404).json({
+        message: `No requisition found with reference number ${req.body.reference_number}`,
+      });
     }
 
     console.log(req.body.vehicle_requested);
@@ -428,11 +420,9 @@ export async function operationsDirectorApproval(req, res) {
 
     // If no rows were updated, it means the reference number didn't match any requisition
     if (updatedRow === 0) {
-      return res
-        .status(404)
-        .json({
-          message: `No requisition found with reference number ${req.body.reference_number}`,
-        });
+      return res.status(404).json({
+        message: `No requisition found with reference number ${req.body.reference_number}`,
+      });
     }
 
     console.log(req.body.vehicle_requested);
@@ -466,11 +456,9 @@ export async function getAllPurchasingRequestByStatus(req, res) {
     });
     console.log(req.params.status);
     if (requisitions === null) {
-      res
-        .status(404)
-        .json({
-          message: `No request with the status - ${req.params.status}!`,
-        });
+      res.status(404).json({
+        message: `No request with the status - ${req.params.status}!`,
+      });
     } else {
       res.status(200).json({ message: requisitions });
     }

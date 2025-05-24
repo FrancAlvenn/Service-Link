@@ -30,6 +30,7 @@ export async function createJobRequest(req, res) {
         title: req.body.title,
         date_required: req.body.date_required,
         department: req.body.department,
+        designation: req.body.designation,
         purpose: req.body.purpose,
         requester: req.body.requester,
         status: "Pending",
@@ -39,6 +40,7 @@ export async function createJobRequest(req, res) {
         archived: req.body.archived || false,
         remarks: req.body.remarks || null,
         authorized_access: [req.body.requester],
+        approvers: [req.body.approvers],
       },
       { transaction }
     );

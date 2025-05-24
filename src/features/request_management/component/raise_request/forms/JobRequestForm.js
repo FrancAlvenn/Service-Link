@@ -26,13 +26,17 @@ const JobRequestForm = ({ setSelectedRequest }) => {
 
   const [request, setRequest] = useState({
     requester: user.reference_number,
-    department: "",
+    department: user.department || "",
     title: "",
     date_required: "",
     purpose: "",
     remarks: "",
     details: [],
+    designation: user.designation || "",
+    approvers: [],
   });
+
+  const requestType = "Job Request";
 
   const [editingIndex, setEditingIndex] = useState(null);
   const [editedParticular, setEditedParticular] = useState({

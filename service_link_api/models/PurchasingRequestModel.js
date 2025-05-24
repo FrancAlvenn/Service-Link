@@ -85,6 +85,11 @@ const PurchasingRequest = sequelize.define(
       allowNull: true,
       comment: "Array of assigned asset reference numbers or full objects",
     },
+    approvers: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      comment: "Array of approvers reference numbers or full objects",
+    },
   },
   {
     modelName: "PurchasingRequest",

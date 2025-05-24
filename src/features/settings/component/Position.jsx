@@ -24,7 +24,11 @@ const Position = () => {
   } = useContext(SettingsContext);
 
   const [editIndex, setEditIndex] = useState(null);
-  const [editValues, setEditValues] = useState({ name: "", description: "" });
+  const [editValues, setEditValues] = useState({
+    position: "",
+    description: "",
+    approval_level: "",
+  });
   const [addingNew, setAddingNew] = useState(false);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -54,13 +58,17 @@ const Position = () => {
 
   const handleAddPosition = () => {
     setEditIndex("new");
-    setEditValues({ name: "", description: "" });
+    setEditValues({ position: "", description: "", approval_level: "" });
     setAddingNew(true);
   };
 
   const handleEditPosition = (position) => {
     setEditIndex(position.id);
-    setEditValues({ name: position.name, description: position.description });
+    setEditValues({
+      position: position.position,
+      description: position.description,
+      approval_level: position.approval_level,
+    });
   };
 
   const handleChange = (e) => {
@@ -83,7 +91,7 @@ const Position = () => {
 
   const resetEditState = () => {
     setEditIndex(null);
-    setEditValues({ name: "", description: "" });
+    setEditValues({ position: "", description: "", approval_level: "" });
     setAddingNew(false);
   };
 
@@ -128,14 +136,14 @@ const Position = () => {
           {isEditing ? (
             <input
               type="text"
-              name="name"
-              value={editValues.name}
+              name="position"
+              value={editValues.position}
               onChange={handleChange}
               className="w-full px-2 py-1 rounded-md border"
             />
           ) : (
             <Chip
-              value={position.name}
+              value={position.position}
               color="cyan"
               className="text-white w-fit"
             />
@@ -154,6 +162,23 @@ const Position = () => {
             position.description
           )}
         </td>
+        <td className="py-3 px-4">
+          {isEditing ? (
+            <input
+              type="number"
+              name="approval_level"
+              value={editValues.approval_level}
+              onChange={handleChange}
+              className="w-full px-2 py-1 rounded-md border"
+            />
+          ) : (
+            <Chip
+              value={position.approval_level}
+              color="teal"
+              className="flex items-center py-2 justify-center text-white w-fit rounded-full"
+            />
+          )}
+        </td>
       </tr>
     );
   };
@@ -161,11 +186,7 @@ const Position = () => {
   return (
     <>
       <Card className="shadow-none">
-        <CardHeader
-          floated={false}
-          shadow={false}
-          className="rounded-none pb-2 border-b"
-        >
+        <CardHeader floated={false} shadow={false} className="rounded-none ">
           <div>
             <Typography color="black" className="text-md font-bold">
               Manage Positions
@@ -183,6 +204,7 @@ const Position = () => {
                   <th className="py-3 px-4 border-b">ID</th>
                   <th className="py-3 px-4 border-b">Name</th>
                   <th className="py-3 px-4 border-b">Description</th>
+                  <th className="py-3 px-4 border-b">Approval Level</th>
                 </tr>
               </thead>
               <tbody>
@@ -195,8 +217,8 @@ const Position = () => {
                     <td className="py-3 px-4">
                       <input
                         type="text"
-                        name="name"
-                        value={editValues.name}
+                        name="position"
+                        value={editValues.position}
                         onChange={handleChange}
                         className="w-full px-2 py-1 rounded-md border"
                       />
@@ -206,6 +228,15 @@ const Position = () => {
                         type="text"
                         name="description"
                         value={editValues.description}
+                        onChange={handleChange}
+                        className="w-full px-2 py-1 rounded-md border"
+                      />
+                    </td>
+                    <td className="py-3 px-4">
+                      <input
+                        type="number"
+                        name="approval_level"
+                        value={editValues.approval_level}
                         onChange={handleChange}
                         className="w-full px-2 py-1 rounded-md border"
                       />
@@ -243,7 +274,9 @@ const Position = () => {
                     onClick={() => handleUpdatePosition(null)}
                     className="py-2 px-4"
                     disabled={
-                      editValues.name === "" || editValues.description === ""
+                      editValues.position === "" ||
+                      editValues.description === "" ||
+                      editValues.approval_level === ""
                     }
                   >
                     Save
@@ -271,6 +304,11 @@ const Position = () => {
                     color="red"
                     onClick={handleCancelEdit}
                     className="py-2 px-4"
+                    disabled={
+                      editValues.position === "" ||
+                      editValues.description === "" ||
+                      editValues.approval_level === ""
+                    }
                   >
                     Cancel
                   </Button>

@@ -59,17 +59,64 @@ export const UserProvider = ({ children }) => {
   const getUserByReferenceNumber = (referenceNumber) => {
     if (!allUserInfo) return referenceNumber; // If no user info available, return the reference number
 
-    const user = allUserInfo.find((user) => user.reference_number === referenceNumber);
+    const user = allUserInfo.find(
+      (user) => user.reference_number === referenceNumber
+    );
     return user ? `${user.first_name} ${user.last_name}` : referenceNumber;
   };
-
 
   //Get user email by reference number
   const getUserEmailByReferenceNumber = (referenceNumber) => {
     if (!allUserInfo) return referenceNumber; // If no user info available, return the email
 
-    const user = allUserInfo.find((user) => user.reference_number === referenceNumber);
+    const user = allUserInfo.find(
+      (user) => user.reference_number === referenceNumber
+    );
     return user ? user.email : referenceNumber;
+  };
+
+  //Create user
+  const createUser = async (userData) => {
+    try {
+      const { data } = await axios({
+        method: "post",
+        url: "/users", // This is the endpoint that creates a new user
+        data: userData,
+        withCredentials: true,
+      });
+      setAllUserInfo(data);
+    } catch (error) {
+      console.error("Error creating user:", error);
+    }
+  };
+
+  //Update user by ID
+  const updateUser = async (referenceNumber, updatedData) => {
+    try {
+      const { data } = await axios({
+        method: "put",
+        url: `/users/${referenceNumber}`, // This is the endpoint that updates user data by reference number
+        data: updatedData,
+        withCredentials: true,
+      });
+      setAllUserInfo(data);
+    } catch (error) {
+      console.error("Error updating user data:", error);
+    }
+  };
+
+  //Archive user by ID
+  const archiveUser = async (referenceNumber) => {
+    try {
+      const { data } = await axios({
+        method: "delete",
+        url: `/users/${referenceNumber}`, // This is the endpoint that archives user data by reference number
+        withCredentials: true,
+      });
+      setAllUserInfo(data);
+    } catch (error) {
+      console.error("Error archiving user data:", error);
+    }
   };
 
   return (
@@ -80,6 +127,9 @@ export const UserProvider = ({ children }) => {
         fetchUserInfo,
         getUserByReferenceNumber,
         getUserEmailByReferenceNumber,
+        updateUser,
+        archiveUser,
+        createUser,
       }}
     >
       {children}

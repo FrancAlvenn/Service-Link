@@ -15,6 +15,7 @@ import { JobRequestsContext } from "../features/request_management/context/JobRe
 import { PurchasingRequestsContext } from "../features/request_management/context/PurchasingRequestsContext";
 import { VehicleRequestsContext } from "../features/request_management/context/VehicleRequestsContext";
 import { VenueRequestsContext } from "../features/request_management/context/VenueRequestsContext";
+import { useNavigate } from "react-router-dom";
 
 function DepartmentModal({
   request,
@@ -23,6 +24,8 @@ function DepartmentModal({
   requestType,
   onDepartmentUpdate,
 }) {
+  const navigate = useNavigate();
+
   const [departmentOptions, setDepartmentOptions] = useState([]);
   const [currentDepartment, setCurrentDepartment] = useState(input);
 
@@ -160,6 +163,7 @@ function DepartmentModal({
                   <Typography
                     color="blue-gray"
                     className="flex items-center gap-2 font-semibold text-sm text-gray-500 dark:text-gray-300 cursor-pointer"
+                    onClick={() => navigate("/workspace/settings")}
                   >
                     <PlusCircle size={18} className="cursor-pointer" />
                     Add new department

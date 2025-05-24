@@ -29,6 +29,7 @@ export async function createVenueRequest(req, res) {
       venue_requested: req.body.venue_requested,
       requester: req.body.requester,
       department: req.body.department || null,
+      designation: req.body.designation || null,
       organization: req.body.organization || null,
       event_title: req.body.event_title,
       purpose: req.body.purpose,
@@ -45,6 +46,7 @@ export async function createVenueRequest(req, res) {
       operations_director_approval: "Pending",
       archived: req.body.archived || false,
       authorized_access: [req.body.requester],
+      approvers: [req.body.approvers],
     });
 
     const detailsData = req.body.details.map((detail) => ({
@@ -155,11 +157,9 @@ export async function updateVenueRequest(req, res) {
     });
 
     if (updatedRows === 0) {
-      return res
-        .status(404)
-        .json({
-          message: `No requisition found with reference number ${req.params.reference_number}`,
-        });
+      return res.status(404).json({
+        message: `No requisition found with reference number ${req.params.reference_number}`,
+      });
     }
 
     if (details && Array.isArray(details)) {
@@ -258,22 +258,18 @@ export async function archiveById(req, res) {
 
     // If no rows were updated, it means the reference number didn't match any requisition
     if (updatedRows === 0) {
-      return res
-        .status(404)
-        .json({
-          message: `No requisition found with reference number ${req.body.reference_number}`,
-        });
+      return res.status(404).json({
+        message: `No requisition found with reference number ${req.body.reference_number}`,
+      });
     }
 
     console.log(req.body.venue_requested);
-    res
-      .status(200)
-      .json({
-        message:
-          req.params.archive === "0"
-            ? "Request removed from archive!"
-            : "Request added to archive!",
-      });
+    res.status(200).json({
+      message:
+        req.params.archive === "0"
+          ? "Request removed from archive!"
+          : "Request added to archive!",
+    });
 
     //Log the request
     createLog({
@@ -284,12 +280,10 @@ export async function archiveById(req, res) {
       details: `Venue Requisition ${req.params.reference_number} archived successfully!`,
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: `Encountered an internal error ${error}`,
-        error: error,
-      });
+    res.status(500).json({
+      message: `Encountered an internal error ${error}`,
+      error: error,
+    });
   }
 }
 
@@ -309,11 +303,9 @@ export async function immediateHeadApproval(req, res) {
 
     // If no rows were updated, it means the reference number didn't match any requisition
     if (updatedRow === 0) {
-      return res
-        .status(404)
-        .json({
-          message: `No requisition found with reference number ${req.params.reference_number}`,
-        });
+      return res.status(404).json({
+        message: `No requisition found with reference number ${req.params.reference_number}`,
+      });
     }
 
     res.status(200).json({ message: `Request updated successfully!!` });
@@ -349,11 +341,9 @@ export async function gsoDirectorApproval(req, res) {
 
     // If no rows were updated, it means the reference number didn't match any requisition
     if (updatedRow === 0) {
-      return res
-        .status(404)
-        .json({
-          message: `No requisition found with reference number ${req.body.reference_number}`,
-        });
+      return res.status(404).json({
+        message: `No requisition found with reference number ${req.body.reference_number}`,
+      });
     }
 
     console.log(req.body.venue_requested);
@@ -390,11 +380,9 @@ export async function operationsDirectorApproval(req, res) {
 
     // If no rows were updated, it means the reference number didn't match any requisition
     if (updatedRow === 0) {
-      return res
-        .status(404)
-        .json({
-          message: `No requisition found with reference number ${req.body.reference_number}`,
-        });
+      return res.status(404).json({
+        message: `No requisition found with reference number ${req.body.reference_number}`,
+      });
     }
 
     console.log(req.body.venue_requested);
@@ -428,11 +416,9 @@ export async function getAllVenueRequestByStatus(req, res) {
     });
     console.log(req.params.status);
     if (requisitions === null) {
-      res
-        .status(404)
-        .json({
-          message: `No request with the status - ${req.params.status}!`,
-        });
+      res.status(404).json({
+        message: `No request with the status - ${req.params.status}!`,
+      });
     } else {
       res.status(200).json({ message: requisitions });
     }

@@ -26,6 +26,7 @@ export async function createVehicleRequest(req, res) {
       reference_number: referenceNumber,
       title: req.body.title,
       department: req.body.department,
+      designation: req.body.designation,
       vehicle_requested: req.body.vehicle_requested,
       date_filled: req.body.date_filled,
       date_of_trip: req.body.date_of_trip,
@@ -42,6 +43,7 @@ export async function createVehicleRequest(req, res) {
       gso_director_approval: "Pending",
       operations_director_approval: "Pending",
       authorized_access: [req.body.requester],
+      approvers: [req.body.approvers],
     });
 
     res.status(201).json({ message: `Request created successfully!` });
@@ -145,11 +147,9 @@ export async function updateVehicleRequest(req, res) {
     // If no rows were updated, return 404
     if (updatedRows === 0) {
       await transaction.rollback();
-      return res
-        .status(404)
-        .json({
-          message: `No requisition found with reference number ${reference_number}`,
-        });
+      return res.status(404).json({
+        message: `No requisition found with reference number ${reference_number}`,
+      });
     }
 
     await transaction.commit();
@@ -235,22 +235,18 @@ export async function archiveById(req, res) {
 
     // If no rows were updated, it means the reference number didn't match any requisition
     if (updatedRows === 0) {
-      return res
-        .status(404)
-        .json({
-          message: `No requisition found with reference number ${req.body.reference_number}`,
-        });
+      return res.status(404).json({
+        message: `No requisition found with reference number ${req.body.reference_number}`,
+      });
     }
 
     console.log(req.body.vehicle_requested);
-    res
-      .status(200)
-      .json({
-        message:
-          req.params.archive === "0"
-            ? "Request removed from archive!"
-            : "Request added to archive!",
-      });
+    res.status(200).json({
+      message:
+        req.params.archive === "0"
+          ? "Request removed from archive!"
+          : "Request added to archive!",
+    });
 
     //Log the request
     createLog({
@@ -261,12 +257,10 @@ export async function archiveById(req, res) {
       details: `Vehicle Requisition ${req.params.reference_number} archived successfully!`,
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: `Encountered an internal error ${error}`,
-        error: error,
-      });
+    res.status(500).json({
+      message: `Encountered an internal error ${error}`,
+      error: error,
+    });
   }
 }
 
@@ -286,11 +280,9 @@ export async function immediateHeadApproval(req, res) {
 
     // If no rows were updated, it means the reference number didn't match any requisition
     if (updatedRow === 0) {
-      return res
-        .status(404)
-        .json({
-          message: `No requisition found with reference number ${req.body.reference_number}`,
-        });
+      return res.status(404).json({
+        message: `No requisition found with reference number ${req.body.reference_number}`,
+      });
     }
 
     console.log(req.body.vehicle_requested);
@@ -327,11 +319,9 @@ export async function gsoDirectorApproval(req, res) {
 
     // If no rows were updated, it means the reference number didn't match any requisition
     if (updatedRow === 0) {
-      return res
-        .status(404)
-        .json({
-          message: `No requisition found with reference number ${req.body.reference_number}`,
-        });
+      return res.status(404).json({
+        message: `No requisition found with reference number ${req.body.reference_number}`,
+      });
     }
 
     console.log(req.body.vehicle_requested);
@@ -368,11 +358,9 @@ export async function operationsDirectorApproval(req, res) {
 
     // If no rows were updated, it means the reference number didn't match any requisition
     if (updatedRow === 0) {
-      return res
-        .status(404)
-        .json({
-          message: `No requisition found with reference number ${req.body.reference_number}`,
-        });
+      return res.status(404).json({
+        message: `No requisition found with reference number ${req.body.reference_number}`,
+      });
     }
 
     console.log(req.body.vehicle_requested);
@@ -406,11 +394,9 @@ export async function getAllVehicleRequestByStatus(req, res) {
     });
     console.log(req.params.status);
     if (requisitions === null) {
-      res
-        .status(404)
-        .json({
-          message: `No request with the status - ${req.params.status}!`,
-        });
+      res.status(404).json({
+        message: `No request with the status - ${req.params.status}!`,
+      });
     } else {
       res.status(200).json({ message: requisitions });
     }

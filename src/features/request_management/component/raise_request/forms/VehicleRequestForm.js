@@ -23,11 +23,14 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
     time_of_arrival: "",
     number_of_passengers: "",
     destination: "",
-    department: "",
-    designation: "",
+    department: user.department || "",
+    designation: user.designation || "",
     purpose: "",
     remarks: "",
+    approvers: [],
   });
+
+  const requestType = "Vehicle Request";
 
   const [departmentOptions, setDepartmentOptions] = useState([]);
 

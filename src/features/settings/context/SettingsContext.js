@@ -12,6 +12,16 @@ export const SettingsProvider = ({ children }) => {
   const [organizations, setOrganizations] = useState([]);
   const [approvers, setApprovers] = useState([]);
   const [positions, setPositions] = useState([]);
+  const [approvalRulesByDepartment, setApprovalRulesByDepartment] = useState(
+    []
+  );
+  const [approvalRulesByRequestType, setApprovalRulesByRequestType] = useState(
+    []
+  );
+  const [approvalRulesByDesignation, setApprovalRulesByDesignation] = useState(
+    []
+  );
+  const [manualApprovalRules, setManualApprovalRules] = useState([]);
 
   useEffect(() => {
     fetchDepartments();
@@ -22,6 +32,10 @@ export const SettingsProvider = ({ children }) => {
     fetchOrganizations();
     fetchApprovers();
     fetchPositions();
+    fetchApprovalRulesByDepartment();
+    fetchApprovalRulesByRequestType();
+    fetchApprovalRulesByDesignation();
+    fetchManualApprovalRules();
   }, []);
 
   // === Department ===
@@ -137,10 +151,15 @@ export const SettingsProvider = ({ children }) => {
   // === Designation ===
   const fetchDesignations = async () => {
     try {
-      const { data } = await axios.get(`/settings/designation`, {
+      const response = await axios.get("/settings/designation", {
         withCredentials: true,
       });
-      setDesignations(data);
+
+      if (Array.isArray(response.data.designations)) {
+        setDesignations(response.data.designations);
+      } else {
+        console.error("Invalid response: 'designations' is not an array");
+      }
     } catch (err) {
       console.error("Error fetching designations:", err);
     }
@@ -276,9 +295,9 @@ export const SettingsProvider = ({ children }) => {
 
   // === Position ===
 
-  const fetchPositions = async (id) => {
+  const fetchPositions = async () => {
     try {
-      const response = await axios.get(`/settings/position/${id}`, {
+      const response = await axios.get(`/settings/position`, {
         withCredentials: true,
       });
 
@@ -309,6 +328,173 @@ export const SettingsProvider = ({ children }) => {
       withCredentials: true,
     });
     fetchPositions();
+  };
+
+  // === Approval Rules By Department ===
+
+  const fetchApprovalRulesByDepartment = async () => {
+    try {
+      const response = await axios.get(
+        `/settings/approval_rule_by_department`,
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (Array.isArray(response.data.allApprovalRules)) {
+        setApprovalRulesByDepartment(response.data.allApprovalRules);
+      } else {
+        console.error("Invalid response: 'allApprovalRules' is not an array");
+      }
+    } catch (err) {
+      console.error("Error fetching approval rules:", err);
+    }
+  };
+
+  const createApprovalRuleByDepartment = async (payload) => {
+    await axios.post(`/settings/approval_rule_by_department`, payload, {
+      withCredentials: true,
+    });
+    fetchApprovalRulesByDepartment();
+  };
+
+  const updateApprovalRuleByDepartment = async (id, payload) => {
+    await axios.put(`/settings/approval_rule_by_department/${id}`, payload, {
+      withCredentials: true,
+    });
+    fetchApprovalRulesByDepartment();
+  };
+
+  const deleteApprovalRuleByDepartment = async (id) => {
+    await axios.delete(`/settings/approval_rule_by_department/${id}`, {
+      withCredentials: true,
+    });
+    fetchApprovalRulesByDepartment();
+  };
+
+  // === Approval Rules By Designation ===
+
+  const fetchApprovalRulesByDesignation = async () => {
+    try {
+      const response = await axios.get(
+        `/settings/approval_rule_by_designation`,
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (Array.isArray(response.data.allApprovalRules)) {
+        setApprovalRulesByDesignation(response.data.allApprovalRules);
+      } else {
+        console.error("Invalid response: 'allApprovalRules' is not an array");
+      }
+    } catch (err) {
+      console.error("Error fetching approval rules:", err);
+    }
+  };
+
+  const createApprovalRuleByDesignation = async (payload) => {
+    await axios.post(`/settings/approval_rule_by_designation`, payload, {
+      withCredentials: true,
+    });
+    fetchApprovalRulesByDesignation();
+  };
+
+  const updateApprovalRuleByDesignation = async (id, payload) => {
+    await axios.put(`/settings/approval_rule_by_designation/${id}`, payload, {
+      withCredentials: true,
+    });
+    fetchApprovalRulesByDesignation();
+  };
+
+  const deleteApprovalRuleByDesignation = async (id) => {
+    await axios.delete(`/settings/approval_rule_by_designation/${id}`, {
+      withCredentials: true,
+    });
+    fetchApprovalRulesByDesignation();
+  };
+
+  // === Approval Rules by Request Type ===
+
+  const fetchApprovalRulesByRequestType = async () => {
+    try {
+      const response = await axios.get(
+        `/settings/approval_rule_by_request_type`,
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (Array.isArray(response.data.allApprovalRules)) {
+        setApprovalRulesByRequestType(response.data.allApprovalRules);
+      } else {
+        console.error("Invalid response: 'allApprovalRules' is not an array");
+      }
+    } catch (err) {
+      console.error("Error fetching approval rules:", err);
+    }
+  };
+
+  const createApprovalRuleByRequestType = async (payload) => {
+    await axios.post(`/settings/approval_rule_by_request_type`, payload, {
+      withCredentials: true,
+    });
+    fetchApprovalRulesByRequestType();
+  };
+
+  const updateApprovalRuleByRequestType = async (id, payload) => {
+    await axios.put(`/settings/approval_rule_by_request_type/${id}`, payload, {
+      withCredentials: true,
+    });
+    fetchApprovalRulesByRequestType();
+  };
+
+  const deleteApprovalRuleByRequestType = async (id) => {
+    await axios.delete(`/settings/approval_rule_by_request_type/${id}`, {
+      withCredentials: true,
+    });
+    fetchApprovalRulesByRequestType();
+  };
+
+  // === Manual Approval Rules ===
+
+  const fetchManualApprovalRules = async () => {
+    try {
+      const response = await axios.get(`/settings/manual_approval_rule`, {
+        withCredentials: true,
+      });
+
+      if (Array.isArray(response.data.allManualApprovalRules)) {
+        setManualApprovalRules(response.data.allManualApprovalRules);
+      } else {
+        console.error(
+          "Invalid response: 'allManualApprovalRules' is not an array"
+        );
+      }
+    } catch (err) {
+      console.error("Error fetching approval rules:", err);
+    }
+  };
+
+  const createManualApprovalRule = async (payload) => {
+    await axios.post(`/settings/manual_approval_rule`, payload, {
+      withCredentials: true,
+    });
+    fetchManualApprovalRules();
+  };
+
+  const updateManualApprovalRule = async (id, payload) => {
+    await axios.put(`/settings/manual_approval_rule/${id}`, payload, {
+      withCredentials: true,
+    });
+    fetchManualApprovalRules();
+  };
+
+  const deleteManualApprovalRule = async (id) => {
+    await axios.delete(`/settings/manual_approval_rule/${id}`, {
+      withCredentials: true,
+    });
+    fetchManualApprovalRules();
   };
 
   return (
@@ -361,6 +547,30 @@ export const SettingsProvider = ({ children }) => {
         createPosition,
         updatePosition,
         deletePosition,
+
+        approvalRulesByDepartment,
+        fetchApprovalRulesByDepartment,
+        createApprovalRuleByDepartment,
+        updateApprovalRuleByDepartment,
+        deleteApprovalRuleByDepartment,
+
+        approvalRulesByDesignation,
+        fetchApprovalRulesByDesignation,
+        createApprovalRuleByDesignation,
+        updateApprovalRuleByDesignation,
+        deleteApprovalRuleByDesignation,
+
+        approvalRulesByRequestType,
+        fetchApprovalRulesByRequestType,
+        createApprovalRuleByRequestType,
+        updateApprovalRuleByRequestType,
+        deleteApprovalRuleByRequestType,
+
+        manualApprovalRules,
+        fetchManualApprovalRules,
+        createManualApprovalRule,
+        updateManualApprovalRule,
+        deleteManualApprovalRule,
       }}
     >
       {children}

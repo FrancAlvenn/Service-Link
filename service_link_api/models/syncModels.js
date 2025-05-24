@@ -21,12 +21,20 @@ import VehicleRequestModel from "./VehicleRequestModel.js";
 import RequestActivity from "./RequestActivity.js";
 import AssetAssignmentLogModel from "./AssetAssignmentLog.js";
 import UserPreferenceModel from "./SettingsModels/UserPreferenceModel.js";
-import Approvers from "./SettingsModels/ApproversModel.js";
+import ManualApprovalRule from "./SettingsModels/ManualApprovalRuleModel.js";
+import {
+  ApprovalRuleByDepartment,
+  ApprovalRuleByDesignation,
+  ApprovalRuleByRequestType,
+  Approvers,
+} from "./SettingsModels/index.js";
+import Position from "./SettingsModels/PositionModel.js";
 
 const models = [
   DepartmentsModel,
   Designation,
   Organization,
+  Position,
   Priority,
   Status,
   AssetsModel,
@@ -45,6 +53,10 @@ const models = [
   VehicleRequestModel,
   UserPreferenceModel,
   Approvers,
+  ManualApprovalRule,
+  ApprovalRuleByDepartment,
+  ApprovalRuleByRequestType,
+  ApprovalRuleByDesignation,
 ]; // Add all models to this array
 
 const syncModels = async (sequelizeInstance) => {

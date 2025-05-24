@@ -21,7 +21,7 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
 
   const [request, setRequest] = useState({
     requester: user.reference_number,
-    department: "",
+    department: user.department || "",
     organization: "",
     title: "",
     event_dates: "",
@@ -34,7 +34,11 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
     purpose: "",
     remarks: "",
     details: [],
+    designation: user.designation || "",
+    approvers: [],
   });
+
+  const requestType = "Venue Request";
 
   const [editingIndex, setEditingIndex] = useState(null);
   const [editedParticular, setEditedParticular] = useState({

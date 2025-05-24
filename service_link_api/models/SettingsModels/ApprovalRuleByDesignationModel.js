@@ -1,41 +1,34 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../database.js";
 
-const Approvers = sequelize.define(
-  "Approvers",
+const ApprovalRuleByDesignation = sequelize.define(
+  "ApprovalRuleByDesignation",
   {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
     },
-    reference_number: {
-      type: DataTypes.STRING,
+    designation_id: {
+      type: DataTypes.INTEGER,
       allowNull: false,
-    },
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      references: {
+        model: "designation",
+        key: "id",
+      },
     },
     position_id: {
       type: DataTypes.INTEGER,
-      allowNull: true,
+      allowNull: false,
       references: {
         model: "position",
         key: "id",
       },
     },
-    department_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: "departments",
-        key: "id",
-      },
-    },
-    email: {
-      type: DataTypes.STRING,
+    required: {
+      type: DataTypes.BOOLEAN,
       allowNull: false,
+      defaultValue: true,
     },
     archived: {
       type: DataTypes.BOOLEAN,
@@ -44,11 +37,11 @@ const Approvers = sequelize.define(
     },
   },
   {
-    tableName: "approvers",
+    tableName: "approval_rules_by_designation",
     timestamps: true,
     createdAt: "created_at",
     updatedAt: "updated_at",
   }
 );
 
-export default Approvers;
+export default ApprovalRuleByDesignation;

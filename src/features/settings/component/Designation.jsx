@@ -10,53 +10,35 @@ import {
   DialogHeader,
   DialogBody,
   DialogFooter,
-  Menu,
-  MenuHandler,
-  MenuList,
-  MenuItem,
   Chip,
 } from "@material-tailwind/react";
 import { Plus } from "@phosphor-icons/react";
 
-const Priority = () => {
+const Designation = () => {
   const {
-    priorities,
-    fetchPriorities,
-    createPriority,
-    updatePriority,
-    deletePriority,
+    designations,
+    fetchDesignations,
+    createDesignation,
+    updateDesignation,
+    deleteDesignation,
   } = useContext(SettingsContext);
 
   const [editIndex, setEditIndex] = useState(null);
   const [editValues, setEditValues] = useState({
-    priority: "",
+    designation: "",
     description: "",
-    color: "",
   });
   const [addingNew, setAddingNew] = useState(false);
+
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [priorityToDelete, setPriorityToDelete] = useState(null);
+  const [deptToDelete, setDeptToDelete] = useState(null);
 
   const [selectedRowId, setSelectedRowId] = useState(null);
 
   const tableRef = useRef(null);
 
-  const colorOptions = [
-    "red",
-    "blue",
-    "green",
-    "yellow",
-    "pink",
-    "orange",
-    "purple",
-    "gray",
-    "teal",
-    "indigo",
-    "cyan",
-  ];
-
   useEffect(() => {
-    fetchPriorities();
+    fetchDesignations();
   }, []);
 
   useEffect(() => {
@@ -73,33 +55,30 @@ const Priority = () => {
     };
   }, []);
 
-  const handleAddPriority = () => {
+  const handleAddDepartment = () => {
     setEditIndex("new");
-    setEditValues({ priority: "", description: "" });
+    setEditValues({ designation: "", description: "" });
     setAddingNew(true);
   };
 
-  const handleEditPriority = (priority) => {
-    setEditIndex(priority.id);
-    setEditValues({
-      priority: priority.priority,
-      description: priority.description,
-      color: priority.color || "",
-    });
+  const handleEditDepartment = (dept) => {
+    setEditIndex(dept.id);
+    setEditValues({ name: dept.name, description: dept.description });
   };
 
   const handleChange = (e) => {
     setEditValues({ ...editValues, [e.target.name]: e.target.value });
+    console.log(editValues);
   };
 
-  const handleUpdatePriority = async (id) => {
+  const handleUpdateDepartment = async (id) => {
     if (addingNew) {
-      await createPriority(editValues);
+      await createDesignation(editValues);
     } else {
-      await updatePriority(id, editValues);
+      await updateDesignation(id, editValues);
     }
     resetEditState();
-    fetchPriorities();
+    fetchDesignations();
   };
 
   const handleCancelEdit = () => {
@@ -108,65 +87,39 @@ const Priority = () => {
 
   const resetEditState = () => {
     setEditIndex(null);
-    setEditValues({ priority: "", description: "" });
+    setEditValues({ name: "", description: "" });
     setAddingNew(false);
   };
 
   const openDeleteDialog = (id) => {
-    setPriorityToDelete(id);
+    setDeptToDelete(id);
     setDeleteDialogOpen(true);
   };
 
-  const confirmDeletePriority = async () => {
-    if (priorityToDelete !== null) {
-      await deletePriority(priorityToDelete);
-      fetchPriorities();
+  const confirmDeleteDepartment = async () => {
+    if (deptToDelete !== null) {
+      await deleteDesignation(deptToDelete);
+      fetchDesignations();
     }
     setDeleteDialogOpen(false);
-    setPriorityToDelete(null);
+    setDeptToDelete(null);
   };
 
   const cancelDelete = () => {
     setDeleteDialogOpen(false);
-    setPriorityToDelete(null);
+    setDeptToDelete(null);
   };
 
-  const ColorPickerMenu = ({ selectedColor, onSelect }) => (
-    <Menu placement="bottom-start">
-      <MenuHandler>
-        <button
-          className="w-6 h-6 rounded-full border border-gray-400"
-          style={{ backgroundColor: selectedColor || "transparent" }}
-          title={selectedColor || "Select color"}
-        />
-      </MenuHandler>
-      <MenuList className="grid grid-cols-2 gap-2 p-2">
-        {colorOptions.map((color) => (
-          <MenuItem key={color} onClick={() => onSelect(color)} className="p-0">
-            <div className="flex items-center gap-2">
-              <div
-                className={`w-6 h-6 rounded-full border border-gray-300 hover:scale-110 transition-transform`}
-                style={{ backgroundColor: color }}
-                title={color.charAt(0).toUpperCase() + color.slice(1)}
-              ></div>
-              {color.charAt(0).toUpperCase() + color.slice(1)}
-            </div>
-          </MenuItem>
-        ))}
-      </MenuList>
-    </Menu>
-  );
-
-  const renderRow = (priority, index) => {
-    const isEditing = editIndex === priority.id;
+  const renderRow = (dept, index) => {
+    const isEditing = editIndex === dept.id;
 
     return (
       <tr
-        key={priority.id}
+        key={dept.id}
         className={`hover:bg-blue-50 text-sm text-gray-700 border-b border-gray-300 cursor-pointer ${
-          selectedRowId === priority.id ? "bg-blue-200" : ""
+          selectedRowId === dept.id ? "bg-blue-200" : ""
         }`}
-        onClick={() => setSelectedRowId(priority.id)}
+        onClick={() => setSelectedRowId(dept.id)}
       >
         <td className="py-3 px-4">
           <Chip
@@ -179,15 +132,15 @@ const Priority = () => {
           {isEditing ? (
             <input
               type="text"
-              name="priority"
-              value={editValues.priority}
+              name="designation"
+              value={editValues.designation}
               onChange={handleChange}
               className="w-full px-2 py-1 rounded-md border"
             />
           ) : (
             <Chip
-              value={priority.priority}
-              color={priority.color}
+              value={dept.designation}
+              color="cyan"
               className="mr-2 text-white w-fit"
             />
           )}
@@ -202,29 +155,7 @@ const Priority = () => {
               className="w-full px-2 py-1 rounded-md border"
             />
           ) : (
-            priority.description
-          )}
-        </td>
-        <td className="py-3 px-4">
-          {isEditing ? (
-            <ColorPickerMenu
-              selectedColor={editValues.color}
-              onSelect={(color) => setEditValues({ ...editValues, color })}
-            />
-          ) : (
-            <span className="flex items-center gap-2">
-              <span
-                className="w-4 h-4 inline-block rounded-full"
-                style={{ backgroundColor: priority.color }}
-              ></span>
-              <span
-                className="text-xs font-semibold"
-                style={{ color: priority.color }}
-              >
-                {priority.color.charAt(0).toUpperCase() +
-                  priority.color.slice(1)}
-              </span>
-            </span>
+            dept.description
           )}
         </td>
       </tr>
@@ -237,10 +168,10 @@ const Priority = () => {
         <CardHeader floated={false} shadow={false} className="rounded-none ">
           <div>
             <Typography color="black" className="text-md font-bold">
-              Manage Priorities
+              Manage Designations
             </Typography>
             <Typography color="gray" className="mt-1 font-normal text-sm">
-              View and manage the priorities in your system.
+              View and manage the designations in your system.
             </Typography>
           </div>
         </CardHeader>
@@ -250,23 +181,22 @@ const Priority = () => {
               <thead className="sticky top-0 bg-gray-50 z-10">
                 <tr className="bg-gray-50 text-sm font-semibold text-gray-600">
                   <th className="py-3 px-4 border-b">ID</th>
-                  <th className="py-3 px-4 border-b">Priority</th>
+                  <th className="py-3 px-4 border-b">Designation</th>
                   <th className="py-3 px-4 border-b">Description</th>
-                  <th className="py-3 px-4 border-b">Color</th>
                 </tr>
               </thead>
               <tbody>
-                {priorities.length > 0 &&
-                  priorities.map((priority, idx) => renderRow(priority, idx))}
+                {designations.length > 0 &&
+                  designations.map((dept, idx) => renderRow(dept, idx))}
 
                 {editIndex === "new" && (
                   <tr className="hover:bg-gray-50 text-sm text-gray-700 border-b border-gray-300">
-                    <td className="py-3 px-4">{priorities.length + 1}</td>
+                    <td className="py-3 px-4">{designations.length + 1}</td>
                     <td className="py-3 px-4">
                       <input
                         type="text"
-                        name="priority"
-                        value={editValues.priority}
+                        name="designation"
+                        value={editValues.designation}
                         onChange={handleChange}
                         className="w-full px-2 py-1 rounded-md border"
                       />
@@ -280,21 +210,13 @@ const Priority = () => {
                         className="w-full px-2 py-1 rounded-md border"
                       />
                     </td>
-                    <td className="py-3 px-4">
-                      <ColorPickerMenu
-                        selectedColor={editValues.color}
-                        onSelect={(color) =>
-                          setEditValues({ ...editValues, color })
-                        }
-                      />
-                    </td>
                   </tr>
                 )}
 
-                {priorities.length === 0 && editIndex !== "new" && (
+                {designations.length === 0 && editIndex !== "new" && (
                   <tr>
                     <td colSpan="4" className="py-4 text-center text-gray-400">
-                      No priorities found.
+                      No designations found.
                     </td>
                   </tr>
                 )}
@@ -307,10 +229,10 @@ const Priority = () => {
               variant="outlined"
               color="blue"
               className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 flex items-center gap-2"
-              onClick={handleAddPriority}
+              onClick={handleAddDepartment}
               disabled={editIndex !== null}
             >
-              <Plus size={16} /> Add Priority
+              <Plus size={16} /> Add Designation
             </Button>
 
             <div className="flex gap-2">
@@ -318,12 +240,11 @@ const Priority = () => {
                 <>
                   <Button
                     color="green"
-                    onClick={() => handleUpdatePriority(null)}
+                    onClick={() => handleUpdateDepartment(null)}
                     className="py-2 px-4"
                     disabled={
-                      editValues.priority === "" ||
-                      editValues.description === "" ||
-                      editValues.color === ""
+                      editValues.designation === "" ||
+                      editValues.description === ""
                     }
                   >
                     Save
@@ -342,7 +263,7 @@ const Priority = () => {
                 <>
                   <Button
                     color="green"
-                    onClick={() => handleUpdatePriority(selectedRowId)}
+                    onClick={() => handleUpdateDepartment(selectedRowId)}
                     className="py-2 px-4"
                   >
                     Update
@@ -362,10 +283,10 @@ const Priority = () => {
                   <Button
                     color="blue"
                     onClick={() => {
-                      const selected = priorities.find(
+                      const selected = designations.find(
                         (p) => p.id === selectedRowId
                       );
-                      handleEditPriority(selected);
+                      handleEditDepartment(selected);
                     }}
                     className="py-2 px-4"
                   >
@@ -389,14 +310,18 @@ const Priority = () => {
       <Dialog open={deleteDialogOpen} handler={cancelDelete}>
         <DialogHeader>Confirm Deletion</DialogHeader>
         <DialogBody>
-          Are you sure you want to delete this priority? This action cannot be
-          undone.
+          Are you sure you want to delete this designation? This action cannot
+          be undone.
         </DialogBody>
-        <DialogFooter>
+        <DialogFooter className="flex gap-2">
           <Button variant="text" color="gray" onClick={cancelDelete}>
             Cancel
           </Button>
-          <Button variant="filled" color="red" onClick={confirmDeletePriority}>
+          <Button
+            variant="filled"
+            color="red"
+            onClick={confirmDeleteDepartment}
+          >
             Delete
           </Button>
         </DialogFooter>
@@ -405,4 +330,4 @@ const Priority = () => {
   );
 };
 
-export default Priority;
+export default Designation;

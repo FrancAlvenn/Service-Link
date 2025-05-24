@@ -60,6 +60,38 @@ import {
   archivePositionById,
   deletePositionById,
 } from "../controllers/settings_controllers/position.js";
+import {
+  createNewApprovalRuleByDepartment,
+  getAllApprovalRulesByDepartment,
+  getApprovalRuleByIdByDepartment,
+  updateApprovalRuleByDepartment,
+  archiveApprovalRuleByIdByDepartment,
+  deleteApprovalRuleByIdByDepartment,
+} from "../controllers/settings_controllers/approval_rules_by_department.js";
+import {
+  createNewManualApprovalRule,
+  getAllManualApprovalRules,
+  getManualApprovalRuleById,
+  updateManualApprovalRule,
+  archiveManualApprovalRuleById,
+  deleteManualApprovalRuleById,
+} from "../controllers/settings_controllers/manual_approval_rules.js";
+import {
+  createNewApprovalRuleByRequestType,
+  getAllApprovalRulesByRequestType,
+  getApprovalRuleByIdByRequestType,
+  updateApprovalRuleByRequestType,
+  archiveApprovalRuleByIdByRequestType,
+  deleteApprovalRuleByIdByRequestType,
+} from "../controllers/settings_controllers/approval_rules_by_request_type.js";
+import {
+  createNewApprovalRuleByDesignation,
+  getAllApprovalRulesByDesignation,
+  getApprovalRuleByIdByDesignation,
+  updateApprovalRuleByDesignation,
+  archiveApprovalRuleByIdByDesignation,
+  deleteApprovalRuleByIdByDesignation,
+} from "../controllers/settings_controllers/approval_rules_by_designation.js";
 
 const router = express.Router();
 
@@ -213,5 +245,124 @@ router.delete("/position/:id", deletePositionById);
 
 //Archive a position
 router.delete("/position/:id/archive/:archive", archivePositionById);
+
+//ROUTE FOR APPROVAL RULE
+
+//Create a new approval rule
+router.post("/approval_rule_by_department", createNewApprovalRuleByDepartment);
+
+//Get all approval rule
+router.get("/approval_rule_by_department", getAllApprovalRulesByDepartment);
+
+//Get approval rule by ID
+router.get("/approval_rule_by_department/:id", getApprovalRuleByIdByDepartment);
+
+//Edit a approval rule
+router.put("/approval_rule_by_department/:id", updateApprovalRuleByDepartment);
+
+//Delete a approval rule
+router.delete(
+  "/approval_rule_by_department/:id",
+  deleteApprovalRuleByIdByDepartment
+);
+
+//Archive a approval rule
+router.delete(
+  "/approval_rule_by_department/:id/archive/:archive",
+  archiveApprovalRuleByIdByDepartment
+);
+
+//ROUTE FOR MANUAL APPROVAL RULE
+
+//Create a new manual approval rule
+router.post("/manual_approval_rule", createNewManualApprovalRule);
+
+//Get all manual approval rule
+router.get("/manual_approval_rule", getAllManualApprovalRules);
+
+//Get manual approval rule by ID
+router.get("/manual_approval_rule/:id", getManualApprovalRuleById);
+
+//Edit a manual approval rule
+router.put("/manual_approval_rule/:id", updateManualApprovalRule);
+
+//Delete a manual approval rule
+router.delete("/manual_approval_rule/:id", deleteManualApprovalRuleById);
+
+//Archive a manual approval rule
+router.delete(
+  "/manual_approval_rule/:id/archive/:archive",
+  archiveManualApprovalRuleById
+);
+
+//ROUTE FOR APPROVAL RULE BY REQUEST TYPE
+
+//Create a new approval rule by request type
+router.post(
+  "/approval_rule_by_request_type",
+  createNewApprovalRuleByRequestType
+);
+
+//Get all approval rule by request type
+router.get("/approval_rule_by_request_type", getAllApprovalRulesByRequestType);
+
+//Get approval rule by ID
+router.get(
+  "/approval_rule_by_request_type/:id",
+  getApprovalRuleByIdByRequestType
+);
+
+//Edit a approval rule by request type
+router.put(
+  "/approval_rule_by_request_type/:id",
+  updateApprovalRuleByRequestType
+);
+
+//Delete a approval rule by request type
+router.delete(
+  "/approval_rule_by_request_type/:id",
+  deleteApprovalRuleByIdByRequestType
+);
+
+//Archive a approval rule by request type
+router.delete(
+  "/approval_rule_by_request_type/:id/archive/:archive",
+  archiveApprovalRuleByIdByRequestType
+);
+
+//ROUTE FOR APPROVAL RULE BY DESIGNATION
+
+//Create a new approval rule by designation
+router.post(
+  "/approval_rule_by_designation",
+  createNewApprovalRuleByDesignation
+);
+
+//Get all approval rule by designation
+router.get("/approval_rule_by_designation", getAllApprovalRulesByDesignation);
+
+//Get approval rule by ID
+router.get(
+  "/approval_rule_by_designation/:id",
+  getApprovalRuleByIdByDesignation
+);
+
+//Edit a approval rule by designation
+router.put(
+  "/approval_rule_by_designation/:id",
+  updateApprovalRuleByDesignation
+);
+
+//Delete a approval rule by designation
+router.delete(
+  "/approval_rule_by_designation/:id",
+  deleteApprovalRuleByIdByDesignation
+);
+
+//Archive a approval rule by designation
+router.delete(
+  "/approval_rule_by_designation/:id/archive/:archive",
+  archiveApprovalRuleByIdByDesignation
+);
 
 export default router;

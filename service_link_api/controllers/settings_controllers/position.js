@@ -6,6 +6,8 @@ export async function createNewPosition(req, res) {
   try {
     const newPosition = await PositionModel.create({
       position: req.body.position,
+      description: req.body.description,
+      approval_level: req.body.approval_level,
     });
 
     res.status(201).json({ message: `Position added successfully!` });
@@ -55,6 +57,8 @@ export async function updatePosition(req, res) {
     const [updatedRows] = await PositionModel.update(
       {
         position: req.body.position,
+        description: req.body.description,
+        approval_level: req.body.approval_level,
       },
       {
         where: {

@@ -1,13 +1,15 @@
 import { Op } from "sequelize";
 import Approvers from "../../models/SettingsModels/ApproversModel.js";
+import PositionModel from "../../models/SettingsModels/PositionModel.js";
+import Department from "../../models/SettingsModels/DeparmentsModel.js";
 
 export async function createNewApprover(req, res) {
   try {
     const newApprover = await Approvers.create({
       reference_number: req.body.reference_number,
       name: req.body.name,
-      position: req.body.position,
-      department: req.body.department,
+      position_id: req.body.position_id,
+      department_id: req.body.department_id,
       email: req.body.email,
     });
 
@@ -25,6 +27,16 @@ export async function getAllApprovers(req, res) {
           [Op.eq]: false, // Get all that is not archived
         },
       },
+      include: [
+        {
+          model: PositionModel,
+          as: "position",
+        },
+        {
+          model: Department,
+          as: "department",
+        },
+      ],
     });
     res
       .status(201)
@@ -56,8 +68,8 @@ export async function updateApproversById(req, res) {
       {
         reference_number: req.body.reference_number,
         name: req.body.name,
-        position: req.body.position,
-        department: req.body.department,
+        position_id: req.body.position_id,
+        department_id: req.body.department_id,
         email: req.body.email,
       },
       {

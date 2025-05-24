@@ -21,8 +21,10 @@ import { JobRequestsContext } from "../features/request_management/context/JobRe
 import { PurchasingRequestsContext } from "../features/request_management/context/PurchasingRequestsContext";
 import { VehicleRequestsContext } from "../features/request_management/context/VehicleRequestsContext";
 import { VenueRequestsContext } from "../features/request_management/context/VenueRequestsContext";
+import { useNavigate } from "react-router-dom";
 
 function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
+  const navigate = useNavigate();
   const [statusOptions, setStatusOptions] = useState([]);
   const [currentStatus, setCurrentStatus] = useState(input);
   const [selectedStatus, setSelectedStatus] = useState(null); // Status clicked
@@ -190,6 +192,7 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
                 <Typography
                   color="blue-gray"
                   className="flex items-center gap-2 font-semibold text-sm text-gray-500 cursor-pointer"
+                  onClick={() => navigate("/workspace/settings")}
                 >
                   <PlusCircle size={18} className="cursor-pointer" />
                   Add new status

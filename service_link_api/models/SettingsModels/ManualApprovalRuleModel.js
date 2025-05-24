@@ -1,24 +1,32 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../database.js";
 
-const Position = sequelize.define(
-  "Position",
+const ManualApprovalRule = sequelize.define(
+  "ManualApprovalRule",
   {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
     },
+    department: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     position: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    description: {
+    reference_number: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: false,
     },
-    approval_level: {
-      type: DataTypes.INTEGER,
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    email: {
+      type: DataTypes.STRING,
       allowNull: false,
     },
     archived: {
@@ -28,11 +36,11 @@ const Position = sequelize.define(
     },
   },
   {
-    tableName: "position",
+    tableName: "manual_approval_rules",
     timestamps: true,
     createdAt: "created_at",
     updatedAt: "updated_at",
   }
 );
 
-export default Position;
+export default ManualApprovalRule;

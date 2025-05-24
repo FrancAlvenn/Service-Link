@@ -1,53 +1,52 @@
-import { useContext, useEffect, useRef, useState } from "react";
-import { SettingsContext } from "../context/SettingsContext";
 import {
-  Card,
-  CardHeader,
-  CardBody,
-  Typography,
   Button,
+  Card,
+  CardBody,
+  CardHeader,
   Dialog,
-  DialogHeader,
   DialogBody,
   DialogFooter,
-  Chip,
-  Menu,
-  MenuHandler,
-  MenuList,
+  DialogHeader,
   MenuItem,
+  Typography,
 } from "@material-tailwind/react";
+import { Menu, MenuHandler, MenuList } from "@material-tailwind/react";
 import { FunnelSimple, Plus, UserCircle } from "@phosphor-icons/react";
+import { Chip } from "@material-tailwind/react";
+import { useContext, useEffect, useRef, useState } from "react";
+import { SettingsContext } from "../context/SettingsContext";
 import { UserContext } from "../../../context/UserContext";
-import DepartmentSelect from "../../../utils/select/departmentSelect";
 import PositionSelect from "../../../utils/select/positionSelect";
+import DepartmentSelect from "../../../utils/select/departmentSelect";
 
-const Approvers = () => {
+const ManualApprovalRule = () => {
   const {
-    approvers,
-    fetchApprovers,
-    createApprover,
-    updateApprover,
-    deleteApprover,
+    manualApprovalRules,
+    fetchManualApprovalRules,
+    createManualApprovalRule,
+    updateManualApprovalRule,
+    deleteManualApprovalRule,
   } = useContext(SettingsContext);
 
   const [editIndex, setEditIndex] = useState(null);
   const [editValues, setEditValues] = useState({
     reference_number: "",
     name: "",
-    position_id: "",
-    department_id: "",
+    position: "",
+    department: "",
     email: "",
   });
   const [addingNew, setAddingNew] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [approverToDelete, setApproverToDelete] = useState(null);
+  const [manualApprovalRuleToDelete, setManualApprovalRuleToDelete] =
+    useState(null);
 
   const [selectedRowId, setSelectedRowId] = useState(null);
 
   const tableRef = useRef(null);
 
   useEffect(() => {
-    fetchApprovers();
+    fetchManualApprovalRules();
   }, []);
 
   useEffect(() => {
@@ -64,36 +63,36 @@ const Approvers = () => {
     };
   }, []);
 
-  const handleAddApprover = () => {
+  const handleAddManualApprovalRule = () => {
     setEditIndex("new");
     setEditValues({
       reference_number: "",
       name: "",
-      position_id: "",
-      department_id: "",
+      position: "",
+      department: "",
       email: "",
     });
     setAddingNew(true);
   };
 
-  const handleEditApprover = (approver) => {
-    setEditIndex(approver.id);
-    setEditValues({ ...approver });
+  const handleEditManualApprovalRule = (manualApprovalRule) => {
+    setEditIndex(manualApprovalRule.id);
+    setEditValues({ ...manualApprovalRule });
   };
 
   const handleChange = (e) => {
     setEditValues({ ...editValues, [e.target.name]: e.target.value });
   };
 
-  const handleUpdateApprover = async (id) => {
+  const handleUpdateManualApprovalRule = async (id) => {
     if (addingNew) {
-      await createApprover(editValues);
+      await createManualApprovalRule(editValues);
     } else {
-      await updateApprover(id, editValues);
+      await updateManualApprovalRule(id, editValues);
     }
 
     resetEditState();
-    fetchApprovers();
+    fetchManualApprovalRules();
   };
 
   const resetEditState = () => {
@@ -101,8 +100,8 @@ const Approvers = () => {
     setEditValues({
       reference_number: "",
       name: "",
-      position_id: "",
-      department_id: "",
+      position: "",
+      department: "",
       email: "",
     });
     setAddingNew(false);
@@ -113,34 +112,34 @@ const Approvers = () => {
   };
 
   const openDeleteDialog = (id) => {
-    setApproverToDelete(id);
+    setManualApprovalRuleToDelete(id);
     setDeleteDialogOpen(true);
   };
 
-  const confirmDeleteApprover = async () => {
-    if (approverToDelete !== null) {
-      await deleteApprover(approverToDelete);
-      fetchApprovers();
+  const confirmDeleteApprovalRule = async () => {
+    if (manualApprovalRuleToDelete !== null) {
+      await deleteManualApprovalRule(manualApprovalRuleToDelete);
+      fetchManualApprovalRules();
     }
     setDeleteDialogOpen(false);
-    setApproverToDelete(null);
+    setManualApprovalRuleToDelete(null);
   };
 
   const cancelDelete = () => {
     setDeleteDialogOpen(false);
-    setApproverToDelete(null);
+    setManualApprovalRuleToDelete(null);
   };
 
-  const renderRow = (approver, index) => {
-    const isEditing = editIndex === approver.id;
+  const renderRow = (manualApprovalRule, index) => {
+    const isEditing = editIndex === manualApprovalRule.id;
 
     return (
       <tr
-        key={approver.id}
+        key={manualApprovalRule.id}
         className={`hover:bg-blue-50 text-sm text-gray-700 border-b border-gray-300 cursor-pointer ${
-          selectedRowId === approver.id ? "bg-blue-200" : ""
+          selectedRowId === manualApprovalRule.id ? "bg-blue-200" : ""
         }`}
-        onClick={() => setSelectedRowId(approver.id)}
+        onClick={() => setSelectedRowId(manualApprovalRule.id)}
       >
         <td className="py-3 px-4">
           <Chip
@@ -150,8 +149,7 @@ const Approvers = () => {
           />
         </td>
 
-        {/* Ref Number */}
-        <td className="py-3 px-4">
+        <td className="py-3 px-4 w-fit">
           {isEditing ? (
             <input
               type="text"
@@ -159,19 +157,14 @@ const Approvers = () => {
               value={editValues.reference_number}
               onChange={handleChange}
               className="w-fit px-2 py-1 rounded-md border"
-              disabled
             />
           ) : (
-            <Chip
-              variant="outlined"
-              value={approver.reference_number}
-              color="blue"
-              className="flex items-center py-2 justify-center text-blue-500 w-fit rounded-full"
-            />
+            <span className="w-fit whitespace-nowrap">
+              {manualApprovalRule.reference_number}
+            </span>
           )}
         </td>
 
-        {/* Name */}
         <td className="py-3 px-4 w-fit">
           {isEditing ? (
             <input
@@ -180,22 +173,10 @@ const Approvers = () => {
               value={editValues.name}
               onChange={handleChange}
               className="w-fit px-2 py-1 rounded-md border"
-              disabled
-            />
-          ) : (
-            <span className="w-fit whitespace-nowrap">{approver.name}</span>
-          )}
-        </td>
-
-        <td className="py-3 px-4 w-fit">
-          {isEditing ? (
-            <PositionSelect
-              value={editValues.position_id}
-              onChange={handleChange}
             />
           ) : (
             <span className="w-fit whitespace-nowrap">
-              {approver.position.position}
+              {manualApprovalRule.name}
             </span>
           )}
         </td>
@@ -203,12 +184,25 @@ const Approvers = () => {
         <td className="py-3 px-4 w-fit">
           {isEditing ? (
             <DepartmentSelect
-              value={editValues.department_id}
+              value={editValues.department}
               onChange={handleChange}
             />
           ) : (
             <span className="w-fit whitespace-nowrap">
-              {approver.department.name}
+              {manualApprovalRule.department}
+            </span>
+          )}
+        </td>
+
+        <td className="py-3 px-4 w-fit">
+          {isEditing ? (
+            <PositionSelect
+              value={editValues.position}
+              onChange={handleChange}
+            />
+          ) : (
+            <span className="w-fit whitespace-nowrap">
+              {manualApprovalRule.position}
             </span>
           )}
         </td>
@@ -221,10 +215,11 @@ const Approvers = () => {
               value={editValues.email}
               onChange={handleChange}
               className="w-fit px-2 py-1 rounded-md border"
-              disabled
             />
           ) : (
-            <span className="w-fit whitespace-nowrap">{approver.email}</span>
+            <span className="w-fit whitespace-nowrap">
+              {manualApprovalRule.email}
+            </span>
           )}
         </td>
       </tr>
@@ -232,10 +227,10 @@ const Approvers = () => {
   };
 
   const UserPicker = ({ onSelect }) => {
-    const { allUserInfo } = useContext(UserContext);
+    const { approvers } = useContext(SettingsContext);
     const [searchQuery, setSearchQuery] = useState("");
 
-    const filtered = allUserInfo.filter((user) =>
+    const filtered = approvers.filter((user) =>
       `${user.first_name} ${user.last_name}`
         .toLowerCase()
         .includes(searchQuery.toLowerCase())
@@ -245,13 +240,13 @@ const Approvers = () => {
       <Menu placement="bottom-start" dismiss={{ itemPress: false }}>
         <MenuHandler>
           <Button variant="outlined" size="sm" className="w-fit text-left py-2">
-            Select User
+            Select Approver
           </Button>
         </MenuHandler>
         <MenuList className="max-h-64 overflow-y-auto w-full max-w-[440px] p-2">
           <input
             className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 mb-2 text-sm"
-            placeholder="Search employee..."
+            placeholder="Search approver..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -263,28 +258,28 @@ const Approvers = () => {
                 className="flex items-center justify-between"
               >
                 <span className="flex items-center gap-2">
-                  <UserCircle size={20} /> {user.first_name} {user.last_name}
+                  <UserCircle size={20} /> {user.name}
                 </span>
               </MenuItem>
             ))
           ) : (
-            <MenuItem disabled>No matching users</MenuItem>
+            <MenuItem disabled>No matching approvers</MenuItem>
           )}
         </MenuList>
       </Menu>
     );
   };
 
-  const [department_id, setDepartment_id] = useState("");
-  const [position_id, setPosition_id] = useState("");
+  const [department, setDepartment] = useState("");
+  const [position, setPosition] = useState("");
 
   const { departments, fetchDepartments } = useContext(SettingsContext);
   const { positions, fetchPositions } = useContext(SettingsContext);
 
-  const filteredApprovers = approvers.filter(
+  const filteredManualApprovalRule = manualApprovalRules.filter(
     (a) =>
-      (!department_id || a.department_id === department_id) &&
-      (!position_id || a.position_id === position_id)
+      (!department || a.department === department) &&
+      (!position || a.position === position)
   );
 
   useEffect(() => {
@@ -295,24 +290,23 @@ const Approvers = () => {
   const handleFilterChange = (key, value) => {
     // const updatedFilters = { ...filters, [key]: value };
 
-    if (key === "department_id") setDepartment_id(value);
-    if (key === "position_id") setPosition_id(value);
+    if (key === "department") setDepartment(value);
+    if (key === "position") setPosition(value);
   };
 
   const handleReset = () => {
-    setDepartment_id("");
-    setPosition_id("");
+    setDepartment("");
+    setPosition("");
   };
 
-  const isValidApprover = () => {
-    const { reference_number, name, email, position_id, department_id } =
-      editValues;
+  const isValidApprovalRule = () => {
+    const { reference_number, name, email, position, department } = editValues;
     return (
       reference_number.trim() !== "" &&
       name.trim() !== "" &&
       email.trim() !== "" &&
-      position_id.trim() !== "" &&
-      department_id.trim() !== ""
+      position.trim() !== "" &&
+      department.trim() !== ""
     );
   };
 
@@ -326,10 +320,10 @@ const Approvers = () => {
         >
           <div>
             <Typography color="black" className="text-md font-bold">
-              Manage Approvers Directory
+              Manual Approval Rule
             </Typography>
             <Typography color="gray" className="mt-1 font-normal text-sm">
-              View and manage approval personnel.
+              View and manage manual approval rule.
             </Typography>
           </div>
 
@@ -338,12 +332,9 @@ const Approvers = () => {
             <Menu placement="bottom-start">
               <MenuHandler>
                 <Chip
-                  value={
-                    positions.find((p) => p.id === position_id)?.position ||
-                    "Filter Position"
-                  }
-                  variant={position_id ? "filled" : "ghost"}
-                  color={position_id ? "blue" : "gray"}
+                  value={position || "Filter Position"}
+                  variant={position ? "filled" : "ghost"}
+                  color={position ? "blue" : "gray"}
                   className="cursor-pointer w-fit"
                   icon={<FunnelSimple size={16} />}
                 />
@@ -354,8 +345,8 @@ const Approvers = () => {
                 </Typography>
                 <Chip
                   value="All"
-                  onClick={() => handleFilterChange("position_id", "")}
-                  variant={position_id === "" ? "filled" : "ghost"}
+                  onClick={() => handleFilterChange("position", "")}
+                  variant={position === "" ? "filled" : "ghost"}
                   color="blue"
                   className="cursor-pointer  w-fit"
                 />
@@ -363,9 +354,9 @@ const Approvers = () => {
                   <Chip
                     key={p.id}
                     value={p.position}
-                    onClick={() => handleFilterChange("position_id", p.id)}
-                    variant={position_id === p.id ? "filled" : "ghost"}
-                    color={position_id === p.id ? "blue" : "gray"}
+                    onClick={() => handleFilterChange("position", p.position)}
+                    variant={position === p.id ? "filled" : "ghost"}
+                    color={position === p.id ? "blue" : "gray"}
                     className="cursor-pointer  w-fit"
                   />
                 ))}
@@ -376,12 +367,9 @@ const Approvers = () => {
             <Menu placement="bottom-start">
               <MenuHandler>
                 <Chip
-                  value={
-                    departments.find((d) => d.id === department_id)?.name ||
-                    "Filter Department"
-                  }
-                  variant={department_id ? "filled" : "ghost"}
-                  color={department_id ? "blue" : "gray"}
+                  value={department || "Filter Department"}
+                  variant={department ? "filled" : "ghost"}
+                  color={department ? "blue" : "gray"}
                   className="cursor-pointer w-fit"
                   icon={<FunnelSimple size={16} />}
                 />
@@ -392,8 +380,8 @@ const Approvers = () => {
                 </Typography>
                 <Chip
                   value="All"
-                  onClick={() => handleFilterChange("department_id", "")}
-                  variant={department_id === "" ? "filled" : "ghost"}
+                  onClick={() => handleFilterChange("department", "")}
+                  variant={department === "" ? "filled" : "ghost"}
                   color="blue"
                   className="cursor-pointer  w-fit"
                 />
@@ -401,9 +389,9 @@ const Approvers = () => {
                   <Chip
                     key={d.id}
                     value={d.name}
-                    onClick={() => handleFilterChange("department_id", d.id)}
-                    variant={department_id === d.id ? "filled" : "ghost"}
-                    color={department_id === d.id ? "blue" : "gray"}
+                    onClick={() => handleFilterChange("department", d.name)}
+                    variant={department === d.name ? "filled" : "ghost"}
+                    color={department === d.name ? "blue" : "gray"}
                     className="cursor-pointer  w-fit"
                   />
                 ))}
@@ -417,58 +405,66 @@ const Approvers = () => {
               <thead className="sticky top-0 bg-gray-50 z-10">
                 <tr className="bg-gray-50 text-sm font-semibold text-gray-600">
                   <th className="py-3 px-4 border-b">ID</th>
-                  <th className="py-3 px-4 border-b">Ref. Number</th>
+                  <th className="py-3 px-4 border-b">Reference Number</th>
                   <th className="py-3 px-4 border-b">Name</th>
-                  <th className="py-3 px-4 border-b">Position</th>
                   <th className="py-3 px-4 border-b">Department</th>
+                  <th className="py-3 px-4 border-b">Position</th>
                   <th className="py-3 px-4 border-b">Email</th>
                 </tr>
               </thead>
               <tbody>
-                {approvers.length > 0 &&
-                  filteredApprovers.map((approver, idx) =>
-                    renderRow(approver, idx)
+                {manualApprovalRules.length > 0 &&
+                  filteredManualApprovalRule.map((manualApprovalRule, idx) =>
+                    renderRow(manualApprovalRule, idx)
                   )}
                 {editIndex === "new" && (
                   <tr className="hover:bg-gray-50 text-sm text-gray-700 border-b border-gray-300">
-                    <td className="py-3 px-4">{approvers.length + 1}</td>
-                    {[
-                      "reference_number",
-                      "name",
-                      "position_id",
-                      "department_id",
-                      "email",
-                    ].map((field) => (
-                      <td key={field} className="py-3 px-4">
-                        {field === "position_id" ? (
-                          <PositionSelect
-                            value={editValues[field]}
-                            onChange={handleChange}
-                          />
-                        ) : field === "department_id" ? (
-                          <DepartmentSelect
-                            value={editValues[field]}
-                            onChange={handleChange}
-                          />
-                        ) : (
-                          <input
-                            type="text"
-                            name={field}
-                            value={editValues[field]}
-                            onChange={handleChange}
-                            className="w-fit px-2 py-1 rounded-md border"
-                            disabled
-                          />
-                        )}
-                      </td>
-                    ))}
+                    <td className="py-3 px-4">
+                      {manualApprovalRules.length + 1}
+                    </td>
+                    {["reference_number", "name", "department", "position"].map(
+                      (field) => (
+                        <td key={field} className="py-3 px-4">
+                          {field === "position" ? (
+                            <PositionSelect
+                              value={editValues.position}
+                              onChange={handleChange}
+                            />
+                          ) : field === "department" ? (
+                            <DepartmentSelect
+                              value={editValues.department}
+                              onChange={handleChange}
+                            />
+                          ) : (
+                            <input
+                              type="text"
+                              name={field}
+                              value={editValues[field]}
+                              onChange={handleChange}
+                              className="w-fit px-2 py-1 rounded-md border"
+                              disabled
+                            />
+                          )}
+                        </td>
+                      )
+                    )}
+                    <td className="py-3 px-4">
+                      <input
+                        type="email"
+                        name="email"
+                        value={editValues.email}
+                        onChange={handleChange}
+                        className="w-fit px-2 py-1 rounded-md border"
+                        disabled
+                      />
+                    </td>
                   </tr>
                 )}
 
-                {filteredApprovers.length === 0 && editIndex !== "new" && (
+                {manualApprovalRules.length === 0 && editIndex !== "new" && (
                   <tr>
                     <td colSpan="7" className="py-4 text-center text-gray-400">
-                      No approvers found.
+                      No approval rule found.
                     </td>
                   </tr>
                 )}
@@ -482,10 +478,10 @@ const Approvers = () => {
                 variant="outlined"
                 color="blue"
                 className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 flex items-center gap-2"
-                onClick={handleAddApprover}
+                onClick={handleAddManualApprovalRule}
                 disabled={editIndex !== null}
               >
-                <Plus size={16} /> Add Approver
+                <Plus size={16} /> Add Approval Rule
               </Button>
 
               {(editIndex === "new" || editIndex !== null) && (
@@ -493,10 +489,10 @@ const Approvers = () => {
                   onSelect={(user) =>
                     setEditValues({
                       reference_number: user.reference_number,
-                      name: `${user.first_name} ${user.last_name}`,
+                      name: user.name,
                       email: user.email,
-                      position_id: "",
-                      department_id: "",
+                      position: user.position,
+                      department: user.department,
                     })
                   }
                 />
@@ -508,13 +504,10 @@ const Approvers = () => {
                 <>
                   <Button
                     color="green"
-                    onClick={() => handleUpdateApprover(null)}
+                    onClick={() => handleUpdateManualApprovalRule(null)}
                     className="py-2 px-4"
                     disabled={
-                      editValues.name === "" ||
-                      editValues.position_id === "" ||
-                      editValues.department_id === "" ||
-                      editValues.email === ""
+                      editValues.position === "" || editValues.department === ""
                     }
                   >
                     Save
@@ -533,13 +526,12 @@ const Approvers = () => {
                 <>
                   <Button
                     color="green"
-                    onClick={() => handleUpdateApprover(selectedRowId)}
+                    onClick={() =>
+                      handleUpdateManualApprovalRule(selectedRowId)
+                    }
                     className="py-2 px-4"
                     disabled={
-                      editValues.name === "" ||
-                      editValues.position_id === "" ||
-                      editValues.department_id === "" ||
-                      editValues.email === ""
+                      editValues.position === "" || editValues.department === ""
                     }
                   >
                     Update
@@ -559,10 +551,10 @@ const Approvers = () => {
                   <Button
                     color="blue"
                     onClick={() => {
-                      const selected = approvers.find(
+                      const selected = manualApprovalRules.find(
                         (p) => p.id === selectedRowId
                       );
-                      handleEditApprover(selected);
+                      handleEditManualApprovalRule(selected);
                     }}
                     className="py-2 px-4"
                   >
@@ -593,7 +585,11 @@ const Approvers = () => {
           <Button variant="text" color="gray" onClick={cancelDelete}>
             Cancel
           </Button>
-          <Button variant="filled" color="red" onClick={confirmDeleteApprover}>
+          <Button
+            variant="filled"
+            color="red"
+            onClick={confirmDeleteApprovalRule}
+          >
             Delete
           </Button>
         </DialogFooter>
@@ -602,4 +598,4 @@ const Approvers = () => {
   );
 };
 
-export default Approvers;
+export default ManualApprovalRule;

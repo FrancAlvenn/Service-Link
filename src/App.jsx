@@ -56,6 +56,8 @@ import AssetTrackingLog from "./features/asset_management/component/AssetTrackin
 import { AssetAssignmentLogProvider } from "./features/asset_management/context/AssetAssignmentLogContext";
 import { SettingsProvider } from "./features/settings/context/SettingsContext";
 import Settings from "./features/settings/component/Settings";
+import PendingApprovalsTab from "./portal/component/dashboard/PendingApprovalsTab";
+import UserManagement from "./features/user_management/component/UserManagement";
 
 library.add(fas, fab, far); // Add all the icons needed
 
@@ -242,6 +244,14 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      {
+        path: "user-management/board",
+        element: (
+          <ProtectedRoute requiredAccess={"admin"}>
+            <UserManagement />
+          </ProtectedRoute>
+        ),
+      },
     ],
   },
   {
@@ -257,6 +267,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute requiredAccess={"user"}>
             <PortalDashboard />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "pending-approvals",
+        element: (
+          <ProtectedRoute requiredAccess={"user"}>
+            <PendingApprovalsTab />
           </ProtectedRoute>
         ),
       },

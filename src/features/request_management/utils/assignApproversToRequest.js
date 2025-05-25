@@ -27,7 +27,10 @@ export default function assignApproversToRequest({
     const matches = approvers.filter((a) => a.position_id === positionId);
     matches.forEach((a) => {
       if (!requestInformation.approvers.find((ap) => ap.id === a.id)) {
-        requestInformation.approvers.push(a);
+        requestInformation.approvers.push({
+          ...a,
+          status: "pending",
+        });
         addedPositions.add(positionId);
       }
     });
@@ -109,6 +112,7 @@ export default function assignApproversToRequest({
     requestInformation.approvers = fallbackApprovers;
   }
 
+  console.log(requestInformation);
   console.log(department_id, designation_id);
   return requestInformation;
 }

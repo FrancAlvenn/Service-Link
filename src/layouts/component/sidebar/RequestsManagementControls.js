@@ -280,6 +280,22 @@ function RequestsManagementControls() {
       <hr className="my-2 border-t border-gray-300" />
 
       <Typography className="text-xs font-semibold text-gray-700 pb-1">
+        Directory
+      </Typography>
+
+      <ListItem
+        className="text-sm"
+        onClick={() => navigate("/workspace/user-management/board")}
+      >
+        <ListItemPrefix>
+          <ChalkboardTeacher size={20} />
+        </ListItemPrefix>
+        Board
+      </ListItem>
+
+      <hr className="my-2 border-t border-gray-300" />
+
+      <Typography className="text-xs font-semibold text-gray-700 pb-1">
         Settings
       </Typography>
 

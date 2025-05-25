@@ -1,33 +1,37 @@
-import React, { useContext, useState, useEffect } from 'react';
-import { JobRequestsContext } from '../../../features/request_management/context/JobRequestsContext';
-import { PurchasingRequestsContext } from '../../../features/request_management/context/PurchasingRequestsContext';
-import { VenueRequestsContext } from '../../../features/request_management/context/VenueRequestsContext';
-import { VehicleRequestsContext } from '../../../features/request_management/context/VehicleRequestsContext';
-import { Typography, Button } from '@material-tailwind/react';
-import MainTab from './MainTab';
-import ActivityTab from './ActivityTab';
-import DetailTab from './DetailTab';
-import { X } from '@phosphor-icons/react';
-import axios from 'axios';
-import { AuthContext } from '../../../features/authentication';
-import ToastNotification from '../../../utils/ToastNotification';
-import RequestAccess from './RequestAccess';
+import React, { useContext, useState, useEffect } from "react";
+import { JobRequestsContext } from "../../../features/request_management/context/JobRequestsContext";
+import { PurchasingRequestsContext } from "../../../features/request_management/context/PurchasingRequestsContext";
+import { VenueRequestsContext } from "../../../features/request_management/context/VenueRequestsContext";
+import { VehicleRequestsContext } from "../../../features/request_management/context/VehicleRequestsContext";
+import { Typography, Button } from "@material-tailwind/react";
+import MainTab from "./MainTab";
+import ActivityTab from "./ActivityTab";
+import DetailTab from "./DetailTab";
+import { X } from "@phosphor-icons/react";
+import axios from "axios";
+import { AuthContext } from "../../../features/authentication";
+import ToastNotification from "../../../utils/ToastNotification";
+import RequestAccess from "./RequestAccess";
 
-
-function RequestDetailsPage({ referenceNumber, onClose }) {
+function RequestDetailsPage({ referenceNumber, onClose, isApprover }) {
   const { jobRequests, fetchJobRequests } = useContext(JobRequestsContext);
-  const { purchasingRequests, fetchPurchasingRequests } = useContext(PurchasingRequestsContext);
-  const { venueRequests, fetchVenueRequests } = useContext(VenueRequestsContext);
-  const { vehicleRequests, fetchVehicleRequests } = useContext(VehicleRequestsContext);
+  const { purchasingRequests, fetchPurchasingRequests } = useContext(
+    PurchasingRequestsContext
+  );
+  const { venueRequests, fetchVenueRequests } =
+    useContext(VenueRequestsContext);
+  const { vehicleRequests, fetchVehicleRequests } = useContext(
+    VehicleRequestsContext
+  );
   const { user } = useContext(AuthContext);
 
-  const [activeTab, setActiveTab] = useState('Summary');
+  const [activeTab, setActiveTab] = useState("Summary");
   const [request, setRequest] = useState(null);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [editedTitle, setEditedTitle] = useState('');
+  const [editedTitle, setEditedTitle] = useState("");
   const [isAuthorized, setIsAuthorized] = useState(false);
 
-  const [requestType, setRequestType] = useState('');
+  const [requestType, setRequestType] = useState("");
 
   // Find request by referenceNumber
   useEffect(() => {
@@ -37,34 +41,45 @@ function RequestDetailsPage({ referenceNumber, onClose }) {
       ...venueRequests,
       ...vehicleRequests,
     ];
-    const foundRequest = allRequests.find(req => req.reference_number === referenceNumber);
+    const foundRequest = allRequests.find(
+      (req) => req.reference_number === referenceNumber
+    );
 
     //change the request type based on the reference number
     let typeName;
     switch (referenceNumber.slice(0, 2)) {
-      case 'JR':
-        typeName = 'job_request';
+      case "JR":
+        typeName = "job_request";
         break;
-      case 'PR':
-        typeName = 'purchasing_request';
+      case "PR":
+        typeName = "purchasing_request";
         break;
-      case 'VR':
-        typeName = 'venue_request';
+      case "VR":
+        typeName = "venue_request";
         break;
-      case 'SV':
-        typeName = 'vehicle_request';
+      case "SV":
+        typeName = "vehicle_request";
         break;
       default:
-        console.warn('Unknown request type:', referenceNumber);
+        console.warn("Unknown request type:", referenceNumber);
     }
     setRequestType(typeName);
 
     setRequest(foundRequest || null);
 
     if (foundRequest) {
-      setIsAuthorized(foundRequest?.authorized_access?.includes(user.reference_number));
+      setIsAuthorized(
+        foundRequest?.authorized_access?.includes(user.reference_number)
+      );
     }
-  }, [jobRequests, purchasingRequests, venueRequests, vehicleRequests, referenceNumber, user]);
+  }, [
+    jobRequests,
+    purchasingRequests,
+    venueRequests,
+    vehicleRequests,
+    referenceNumber,
+    user,
+  ]);
 
   // Handle Edit Title
   const handleEditTitle = () => {
@@ -78,30 +93,36 @@ function RequestDetailsPage({ referenceNumber, onClose }) {
       return;
     }
     try {
-      await axios.put(`/${request.request_type}/${request.reference_number}`, {
-        ...request,
-        title: editedTitle,
-        requester: user.reference_number,
-      }, { withCredentials: true });
+      await axios.put(
+        `/${request.request_type}/${request.reference_number}`,
+        {
+          ...request,
+          title: editedTitle,
+          requester: user.reference_number,
+        },
+        { withCredentials: true }
+      );
 
-      setRequest(prev => ({ ...prev, title: editedTitle }));
+      setRequest((prev) => ({ ...prev, title: editedTitle }));
       setIsEditingTitle(false);
-      setEditedTitle('');
+      setEditedTitle("");
     } catch (error) {
-      console.error('Error updating title:', error);
-      ToastNotification.error('Error', 'Failed to update title.');
+      console.error("Error updating title:", error);
+      ToastNotification.error("Error", "Failed to update title.");
     }
   };
 
   const handleTitleKeyDown = (e) => {
-    if (e.key === 'Enter') handleSaveTitle();
-    if (e.key === 'Escape') setIsEditingTitle(false);
+    if (e.key === "Enter") handleSaveTitle();
+    if (e.key === "Escape") setIsEditingTitle(false);
   };
 
   if (!request) {
     return (
       <div className="h-full flex items-center justify-center">
-        <Typography variant="h6" className="text-gray-600">Request not found.</Typography>
+        <Typography variant="h6" className="text-gray-600">
+          Request not found.
+        </Typography>
       </div>
     );
   }
@@ -117,13 +138,13 @@ function RequestDetailsPage({ referenceNumber, onClose }) {
   return (
     <div className="fixed top-0 right-0 w-full max-w-[750px] h-full bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200 z-100 p-6 overflow-y-auto">
       <div className="flex flex-col justify-between items-start mb-6">
-        <div className='flex items-center justify-between w-full  mb-3'>
+        <div className="flex items-center justify-between w-full  mb-3">
           <div className="p-1 rounded-md bg-red-500">
             <X color="white" onClick={onClose} className="cursor-pointer" />
           </div>
           <RequestAccess selectedRequest={request} requestType={requestType} />
         </div>
-  
+
         {/* Editable Title */}
         {isAuthorized ? (
           isEditingTitle ? (
@@ -142,43 +163,47 @@ function RequestDetailsPage({ referenceNumber, onClose }) {
               className="text-gray-800 dark:text-gray-200 font-bold text-xl cursor-pointer"
               onClick={handleEditTitle}
             >
-              {request.title || 'Request Details'}
+              {request.title || "Request Details"}
             </Typography>
           )
         ) : (
-          <Typography variant="h5" className="text-gray-800 dark:text-gray-200 font-bold text-xl">
-            {request.title || 'Request Details'}
+          <Typography
+            variant="h5"
+            className="text-gray-800 dark:text-gray-200 font-bold text-xl"
+          >
+            {request.title || "Request Details"}
           </Typography>
         )}
       </div>
-  
+
       {/* Tab Navigation */}
       <div className="flex gap-4 mb-6 items-center justify-between bg-gray-100 dark:bg-gray-800 shadow-sm rounded-lg w-full max-w-full">
-        {['Summary', 'Details', 'Activity'].map(tab => (
+        {["Summary", "Details", "Activity"].map((tab) => (
           <Button
             key={tab}
             size="sm"
             className="w-full dark:text-gray-300"
-            variant={activeTab === tab ? 'filled' : 'text'}
-            color={activeTab === tab ? 'blue' : 'black'}
+            variant={activeTab === tab ? "filled" : "text"}
+            color={activeTab === tab ? "blue" : "black"}
             onClick={() => setActiveTab(tab)}
           >
             {tab}
           </Button>
         ))}
       </div>
-  
+
       {/* Render Active Tab */}
-      {activeTab === 'Summary' && (
+      {activeTab === "Summary" && (
         <MainTab
           request={request}
           setRequest={setRequest}
           requestType={requestType}
           fetchRequests={fetchAllRequests}
           onClose={onClose}
+          isApprover={isApprover}
         />
       )}
-      {activeTab === 'Details' && (
+      {activeTab === "Details" && (
         <DetailTab
           selectedRequest={request}
           setSelectedRequest={setRequest}
@@ -187,10 +212,11 @@ function RequestDetailsPage({ referenceNumber, onClose }) {
           isAuthorized={isAuthorized}
         />
       )}
-      {activeTab === 'Activity' && <ActivityTab referenceNumber={request.reference_number} />}
+      {activeTab === "Activity" && (
+        <ActivityTab referenceNumber={request.reference_number} />
+      )}
     </div>
   );
-  
 }
 
 export default RequestDetailsPage;

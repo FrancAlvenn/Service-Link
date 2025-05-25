@@ -3,7 +3,15 @@ import { JobRequestsContext } from "../../../features/request_management/context
 import { PurchasingRequestsContext } from "../../../features/request_management/context/PurchasingRequestsContext";
 import { VenueRequestsContext } from "../../../features/request_management/context/VenueRequestsContext";
 import { VehicleRequestsContext } from "../../../features/request_management/context/VehicleRequestsContext";
-import { Typography, Chip, Button } from "@material-tailwind/react";
+import {
+  Typography,
+  Chip,
+  Button,
+  Menu,
+  MenuHandler,
+  MenuList,
+  MenuItem,
+} from "@material-tailwind/react";
 import { AuthContext } from "../../../features/authentication";
 import axios from "axios";
 import {
@@ -33,6 +41,24 @@ function PortalDashboard() {
   const { searchQuery } = useOutletContext();
 
   const [pendingApprovals, setPendingApprovals] = useState([]);
+
+  const [selectedStatus, setSelectedStatus] = useState("All");
+
+  const getRequestType = (referenceNumber) => {
+    const firstTwoLetters = referenceNumber.slice(0, 2);
+    switch (firstTwoLetters) {
+      case "JR":
+        return "Job Request";
+      case "PR":
+        return "Purchasing Request";
+      case "VR":
+        return "Venue Request";
+      case "SV":
+        return "Vehicle Request";
+      default:
+        return "Unknown";
+    }
+  };
 
   // Icon mapping for request types
   const typeIcons = {
@@ -67,7 +93,7 @@ function PortalDashboard() {
     })),
     ...venueRequests.map((req) => ({ ...req, type: "Venue Request" })),
     ...vehicleRequests.map((req) => ({ ...req, type: "Vehicle Request" })),
-  ].filter((req) => req.requester === user?.reference_number);
+  ];
 
   // Filter requests by selected type
   const filteredRequests =
@@ -111,15 +137,20 @@ function PortalDashboard() {
     navigate(path);
   };
 
-  // Apply search filter
-  const searchedRequests = filteredRequests.filter((request) => {
-    const query = searchQuery.toLowerCase();
-    return (
-      request.title?.toLowerCase().includes(query) ||
-      request.purpose?.toLowerCase().includes(query) ||
-      request.reference_number?.toLowerCase().includes(query)
-    );
-  });
+  // Apply search filter on pending approvals instead of all requests
+  const searchedRequests = pendingApprovals
+    .filter((request) => {
+      const type = getRequestType(request.reference_number);
+      return selectedType === "All" || type === selectedType;
+    })
+    .filter((request) => {
+      const query = searchQuery.toLowerCase();
+      return (
+        request.title?.toLowerCase().includes(query) ||
+        request.purpose?.toLowerCase().includes(query) ||
+        request.reference_number?.toLowerCase().includes(query)
+      );
+    });
 
   // You may need to fetch all request types from a context or API
   useEffect(() => {
@@ -145,17 +176,9 @@ function PortalDashboard() {
 
   return (
     <div className="min-h-screen h-full bg-white dark:bg-gray-900 rounded-lg w-full mt-0 px-1 py-4 flex flex-col  gap-4 pb-24">
-      <div className="flex justify-between items-center">
-        <Typography variant="h5" className="text-gray-800 dark:text-gray-200">
-          My Requests
-        </Typography>
-        <Typography
-          className="text-blue-500 dark:text-blue-800 text-xs font-semibold cursor-pointer hover:underline"
-          onClick={() => handleNavigation("/portal/pending-approvals")}
-        >
-          Show Pending Approvals
-        </Typography>
-      </div>
+      <Typography variant="h5" className="text-gray-800 dark:text-gray-200">
+        Pending Requests
+      </Typography>
 
       {/* Filter Buttons */}
       <div className="flex flex-wrap gap-1 overflow-x-auto md:justify-start justify-start">
@@ -178,18 +201,6 @@ function PortalDashboard() {
           </Button>
         ))}
       </div>
-
-      {pendingApprovals.length > 0 && (
-        <button
-          className=" bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg transition"
-          onClick={() => handleNavigation("/portal/pending-approvals")}
-          aria-label="View Pending Approvals"
-        >
-          <Typography variant="small" className="font-bold">
-            Pending Approvals ({pendingApprovals.length})
-          </Typography>
-        </button>
-      )}
 
       {/* Scrollable Container */}
       <div className="flex flex-wrap gap-4 overflow-y-auto">
@@ -218,7 +229,7 @@ function PortalDashboard() {
             >
               <div className="flex flex-col justify-between items-start gap-2">
                 <div className="flex items-center gap-2 w-full mb-1">
-                  {typeIcons[request.type]}
+                  {typeIcons[getRequestType(request.reference_number)]}
                   <div className="flex flex-col w-full">
                     <div className="flex justify-between w-full items-center gap-2">
                       <Typography
@@ -294,6 +305,7 @@ function PortalDashboard() {
               <RequestDetailsPage
                 referenceNumber={selectedRequest.reference_number}
                 onClose={closeRequestDetails}
+                isApprover={true}
               />
             </motion.div>
           </>

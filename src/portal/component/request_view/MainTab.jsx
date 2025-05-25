@@ -28,6 +28,7 @@ const MainTab = ({
   requestType,
   fetchRequests,
   onClose,
+  isApprover,
 }) => {
   const { user } = useContext(AuthContext);
   const { getUserByReferenceNumber } = useContext(UserContext);
@@ -43,6 +44,10 @@ const MainTab = ({
     quantity: "",
     description: "",
   });
+
+  const [openApprovalDialog, setOpenApprovalDialog] = useState(false);
+  const [approvalStatus, setApprovalStatus] = useState(""); // "approved" or "rejected"
+  const [actionComment, setActionComment] = useState("");
 
   useEffect(() => {
     if (request) {
@@ -174,6 +179,67 @@ const MainTab = ({
       ToastNotification.error("Error!", "Failed to delete the request.");
     } finally {
       setOpenDeleteModal(false);
+    }
+  };
+
+  const handleRequestApproveStatus = async (status, comment = "") => {
+    try {
+      const flattened = request.approvers.flat();
+      const currentApprover = flattened.find(
+        (approver) => approver.reference_number === user.reference_number
+      );
+
+      console.log(flattened);
+
+      if (!currentApprover) {
+        ToastNotification.error("Error", "You are not listed as an approver.");
+        return;
+      }
+
+      const currentPositionId = currentApprover.position.id;
+
+      const updatedApprovers = flattened.map((approver) => {
+        if (approver.position.id === currentPositionId) {
+          return { ...approver, status: status };
+        }
+        return approver;
+      });
+
+      const res = await axios.put(
+        `/${requestType}/${request.reference_number}`,
+        {
+          approvers: updatedApprovers,
+          requester: user.reference_number,
+        },
+        { withCredentials: true }
+      );
+
+      if (res.status === 200) {
+        ToastNotification.success("Approved", "Request has been approved.");
+        fetchRequests();
+        onClose();
+
+        // Format action text for log
+        const capitalizedStatus =
+          status.charAt(0).toUpperCase() + status.slice(1);
+        const actionText = `Request has been ${capitalizedStatus} by ${currentApprover.position.position}`;
+
+        await axios.post(
+          "/request_activity",
+          {
+            reference_number: request.reference_number,
+            visibility: "external",
+            type: "status_change",
+            action: actionText,
+            details: comment,
+            performed_by: user.reference_number,
+          },
+          { withCredentials: true }
+        );
+      }
+    } catch (error) {
+      console.error("Approval error:", error);
+      ToastNotification.error("Error", "Failed to approve request.");
     }
   };
 
@@ -358,6 +424,38 @@ const MainTab = ({
         </div>
       )}
 
+      <div className="flex justify-center gap-2 w-full">
+        {/* Approval Button */}
+        {isApprover && (
+          <div className="mt-4 w-full">
+            <button
+              onClick={() => {
+                setApprovalStatus("approved");
+                setOpenApprovalDialog(true);
+              }}
+              className="w-full p-2 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
+            >
+              Approve Request
+            </button>
+          </div>
+        )}
+
+        {/* Approval Button */}
+        {isApprover && (
+          <div className="mt-4 w-full">
+            <button
+              onClick={() => {
+                setApprovalStatus("rejected");
+                setOpenApprovalDialog(true);
+              }}
+              className="w-full p-2 text-sm text-white bg-red-500 rounded-md hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700"
+            >
+              Reject Request
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* Delete Request Button with Confirmation */}
       {isAuthorized && (
         <div className="mt-4">
@@ -369,6 +467,52 @@ const MainTab = ({
           </button>
         </div>
       )}
+
+      <Dialog open={openApprovalDialog} handler={setOpenApprovalDialog}>
+        <DialogHeader>
+          {approvalStatus === "approved" ? "Approve Request" : "Reject Request"}
+        </DialogHeader>
+        <DialogBody>
+          <Typography
+            variant="small"
+            className="mb-2 text-gray-700 dark:text-gray-300"
+          >
+            Please provide a reason or comment for this action:
+          </Typography>
+          <textarea
+            className="w-full p-2 border border-gray-300 rounded-md dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600"
+            rows={4}
+            placeholder="Enter your reason here..."
+            value={actionComment}
+            onChange={(e) => setActionComment(e.target.value)}
+          />
+        </DialogBody>
+        <DialogFooter className="flex gap-2">
+          <Button
+            variant="outlined"
+            color="red"
+            onClick={() => {
+              setOpenApprovalDialog(false);
+              setActionComment("");
+              setApprovalStatus("");
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="gradient"
+            color="green"
+            onClick={() => {
+              setOpenApprovalDialog(false);
+              handleRequestApproveStatus(approvalStatus, actionComment);
+              setActionComment("");
+              setApprovalStatus("");
+            }}
+          >
+            Confirm
+          </Button>
+        </DialogFooter>
+      </Dialog>
 
       {/* Delete Confirmation Modal */}
       <Dialog

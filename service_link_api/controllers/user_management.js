@@ -217,8 +217,8 @@ export async function updateUserById(req, res) {
         email: req.body.email || user.email,
         contact_number: req.body.contact_number || user.contact_number,
         organization: req.body.organization || user.organization,
-        department: req.body.department || user.department,
-        designation: req.body.designation || user.designation,
+        department_id: req.body.department_id || user.department_id,
+        designation_id: req.body.designation_id || user.designation_id,
         access_level: req.body.access_level || user.access_level,
         immediate_head: req.body.immediate_head || user.immediate_head,
       };

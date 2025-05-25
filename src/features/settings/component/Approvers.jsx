@@ -208,7 +208,7 @@ const Approvers = () => {
             />
           ) : (
             <span className="w-fit whitespace-nowrap">
-              {approver.department.name}
+              {approver.department?.name || ""}
             </span>
           )}
         </td>

@@ -10,6 +10,11 @@ import {
   Plus,
 } from "@phosphor-icons/react";
 import { UserContext } from "../../context/UserContext";
+import { JobRequestsContext } from "../../features/request_management/context/JobRequestsContext";
+import { PurchasingRequestsContext } from "../../features/request_management/context/PurchasingRequestsContext";
+import { VenueRequestsContext } from "../../features/request_management/context/VenueRequestsContext";
+import { VehicleRequestsContext } from "../../features/request_management/context/VehicleRequestsContext";
+import { AuthContext } from "../../features/authentication";
 
 function Portal() {
   const [isSearching, setIsSearching] = useState(false);
@@ -17,8 +22,6 @@ function Portal() {
   const navigate = useNavigate();
   const location = useLocation();
   const currentTab = location.pathname.split("/")[2]; // Extracts the current section
-
-  const { fetchUsers } = useContext(UserContext);
 
   const handleSearchToggle = () => {
     setIsSearching((prev) => !prev);
@@ -51,9 +54,6 @@ function Portal() {
     };
 
     fetchThemePreference();
-
-    // Uncomment if you actually have a fetchUsers function defined
-    // fetchUsers();
   }, []);
 
   useEffect(() => {
@@ -93,7 +93,8 @@ function Portal() {
           )}
 
           {/* Search Toggle Button */}
-          {currentTab === "dashboard" && (
+          {(currentTab === "dashboard" ||
+            currentTab === "pending-approvals") && (
             <button
               className="rounded-md bg-gray-200 dark:bg-gray-700 p-1 hover:bg-gray-300 dark:hover:bg-gray-600 transition ml-3 cursor-pointer"
               aria-label="Toggle Search"

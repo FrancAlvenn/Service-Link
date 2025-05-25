@@ -39,7 +39,6 @@ const DetailTab = ({
       },
       { key: "title", label: "Title", type: "text" },
       { key: "requester", label: "Requester", type: "text", readOnly: true },
-      { key: "department", label: "Department", type: "text", readOnly: true },
       { key: "date_required", label: "Date Required", type: "date" },
       { key: "purpose", label: "Purpose", type: "textarea" },
       { key: "remarks", label: "Remarks", type: "textarea" },
@@ -57,7 +56,6 @@ const DetailTab = ({
       { key: "title", label: "Title", type: "text" },
       { key: "requester", label: "Requester", type: "text", readOnly: true },
       { key: "supply_category", label: "Supply Category", type: "text" },
-      { key: "department", label: "Department", type: "text", readOnly: true },
       { key: "date_required", label: "Date Required", type: "date" },
       { key: "purpose", label: "Purpose", type: "textarea" },
       { key: "remarks", label: "Remarks", type: "textarea" },
@@ -74,7 +72,6 @@ const DetailTab = ({
       },
       { key: "title", label: "Title", type: "text" },
       { key: "requester", label: "Requester", type: "text", readOnly: true },
-      { key: "department", label: "Department", type: "text", readOnly: true },
       { key: "organization", label: "Organization", type: "text" },
       { key: "event_title", label: "Event Title", type: "text" },
       { key: "event_nature", label: "Event Nature", type: "text" },
@@ -102,7 +99,7 @@ const DetailTab = ({
       },
       { key: "title", label: "Title", type: "text" },
       { key: "requester", label: "Requester", type: "text", readOnly: true },
-      { key: "department", label: "Department", type: "text", readOnly: true },
+
       // { key: "vehicle_requested", label: "Vehicle Type", type: "text" },
       { key: "date_of_trip", label: "Date of Trip", type: "date" },
       { key: "time_of_departure", label: "Departure Time", type: "time" },
@@ -260,63 +257,60 @@ const DetailTab = ({
       ))}
 
       {/* Approvers Section */}
+      {/* Dynamic Approvers Section */}
       <div className="flex flex-col gap-2">
-        <div className="flex flex-col gap-2">
-          <p className="text-sm font-semibold dark:text-gray-300">
-            Immediate Head Approval
-          </p>
-          <Chip
-            key={selectedRequest.immediate_head_approval}
-            size="sm"
-            variant="ghost"
-            value={selectedRequest.immediate_head_approval}
-            className="text-center h-9 cursor-pointer w-full dark:bg-gray-800 dark:text-white"
-            color={
-              statusOptions.find(
-                (option) =>
-                  option.status === selectedRequest.immediate_head_approval
-              )?.color || "gray"
-            }
-          />
-        </div>
+        <p className="text-sm font-semibold dark:text-gray-300">
+          Approver Statuses
+        </p>
+        {(() => {
+          if (!selectedRequest?.approvers) return null;
 
-        <div className="flex flex-col gap-2">
-          <p className="text-sm font-semibold dark:text-gray-300">
-            GSO Director Approval
-          </p>
-          <Chip
-            key={selectedRequest.gso_director_approval}
-            size="sm"
-            variant="ghost"
-            value={selectedRequest.gso_director_approval}
-            className="text-center h-9 cursor-pointer w-full dark:bg-gray-800 dark:text-white"
-            color={
-              statusOptions.find(
-                (option) =>
-                  option.status === selectedRequest.gso_director_approval
-              )?.color || "gray"
+          // Flatten and group by position
+          const groupedByPosition = {};
+          selectedRequest.approvers.flat().forEach((approver) => {
+            const position = approver.position?.position || "Unknown Position";
+            if (!groupedByPosition[position]) {
+              groupedByPosition[position] = [];
             }
-          />
-        </div>
+            groupedByPosition[position].push(approver);
+          });
 
-        <div className="flex flex-col gap-2">
-          <p className="text-sm font-semibold dark:text-gray-300">
-            Operations Director Approval
-          </p>
-          <Chip
-            key={selectedRequest.operations_director_approval}
-            size="sm"
-            variant="ghost"
-            value={selectedRequest.operations_director_approval}
-            className="text-center h-9 cursor-pointer w-full dark:bg-gray-800 dark:text-white"
-            color={
-              statusOptions.find(
-                (option) =>
-                  option.status === selectedRequest.operations_director_approval
-              )?.color || "gray"
+          return Object.entries(groupedByPosition).map(
+            ([positionName, approversInPosition]) => {
+              // Determine the current status for this position
+              const status =
+                approversInPosition.find((a) => a.status === "approved")
+                  ?.status ||
+                approversInPosition.find((a) => a.status === "rejected")
+                  ?.status ||
+                approversInPosition.find((a) => a.status === "in-review")
+                  ?.status ||
+                "Pending";
+
+              const chipColor =
+                statusOptions.find(
+                  (option) =>
+                    option.status.toLowerCase() === status.toLowerCase()
+                )?.color || "gray";
+
+              return (
+                <div key={positionName} className="flex flex-col gap-1">
+                  <p className="text-sm font-semibold dark:text-gray-300">
+                    {positionName} Approval
+                  </p>
+                  <Chip
+                    key={status}
+                    size="sm"
+                    variant="ghost"
+                    value={status}
+                    className="text-center h-9 cursor-pointer w-full dark:bg-gray-800 dark:text-white"
+                    color={chipColor}
+                  />
+                </div>
+              );
             }
-          />
-        </div>
+          );
+        })()}
       </div>
     </div>
   );

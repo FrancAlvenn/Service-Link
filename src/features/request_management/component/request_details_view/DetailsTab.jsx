@@ -1,11 +1,11 @@
 import { CaretDown, Pencil } from "@phosphor-icons/react";
 import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
-import ToastNotification from "../../utils/ToastNotification";
-import { UserContext } from "../../context/UserContext";
-import { formatDate } from "../../utils/dateFormatter";
-import DepartmentModal from "../../utils/departmentModal";
-import PriorityModal from "../../utils/priorityModal";
+import { UserContext } from "../../../../context/UserContext";
+import ToastNotification from "../../../../utils/ToastNotification";
+import PriorityModal from "../../../../utils/priorityModal";
+import { formatDate } from "../../../../utils/dateFormatter";
+import DepartmentModal from "../../../../utils/departmentModal";
 
 const requestFieldConfig = {
   job_request: [

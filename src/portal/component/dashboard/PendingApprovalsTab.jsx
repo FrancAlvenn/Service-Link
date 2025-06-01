@@ -86,13 +86,21 @@ function PortalDashboard() {
 
   // Combine all requests and filter by user's reference number
   const allRequests = [
-    ...jobRequests.map((req) => ({ ...req, type: "Job Request" })),
-    ...purchasingRequests.map((req) => ({
-      ...req,
-      type: "Purchasing Request",
-    })),
-    ...venueRequests.map((req) => ({ ...req, type: "Venue Request" })),
-    ...vehicleRequests.map((req) => ({ ...req, type: "Vehicle Request" })),
+    ...(jobRequests?.length
+      ? jobRequests.map((req) => ({ ...req, type: "Job Request" }))
+      : []),
+    ...(purchasingRequests?.length
+      ? purchasingRequests.map((req) => ({
+          ...req,
+          type: "Purchasing Request",
+        }))
+      : []),
+    ...(venueRequests?.length
+      ? venueRequests.map((req) => ({ ...req, type: "Venue Request" }))
+      : []),
+    ...(vehicleRequests?.length
+      ? vehicleRequests.map((req) => ({ ...req, type: "Vehicle Request" }))
+      : []),
   ];
 
   // Filter requests by selected type
@@ -155,10 +163,10 @@ function PortalDashboard() {
   // You may need to fetch all request types from a context or API
   useEffect(() => {
     const allRequests = [
-      ...jobRequests,
-      ...purchasingRequests,
-      ...venueRequests,
-      ...vehicleRequests,
+      ...Object.values(jobRequests),
+      ...Object.values(purchasingRequests),
+      ...Object.values(venueRequests),
+      ...Object.values(vehicleRequests),
     ];
 
     const filtered = allRequests.filter((req) => {

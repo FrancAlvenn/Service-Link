@@ -177,7 +177,7 @@ export const login = async (req, res) => {
       .cookie("access_token", token, {
         httpOnly: true,
         sameSite: "none",
-        secure: false,
+        secure: true,
       })
       .status(200)
       .json({ response, userPreference });
@@ -298,7 +298,7 @@ export const googleAuth = async (req, res) => {
       username: req.body.email,
       google_id: req.body.google_id,
       profile_image_id: null,
-      access_level: "admin", // change later
+      access_level: "user", // change later
       status: "active", // change later
       archived: false,
       password: hash, // only if storing it

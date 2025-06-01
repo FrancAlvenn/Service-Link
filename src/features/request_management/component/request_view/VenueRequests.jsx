@@ -26,6 +26,7 @@ import { getColumnConfig } from "../../utils/columnConfig.js";
 import RequestFilter from "../../utils/requestFilter.js";
 import { useLocation } from "react-router-dom";
 import Header from "../../../../layouts/header.js";
+import ModalView from "../request_details_view/ModalView.jsx";
 
 export function VenueRequests() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -169,14 +170,25 @@ export function VenueRequests() {
             </CardBody>
           </div>
         </div>
-
-        {/* Sidebar for Request Details */}
-        <SidebarView
-          open={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-          referenceNumber={selectedReferenceNumber}
-        />
       </div>
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+          onClick={() => setSidebarOpen(false)}
+        >
+          <div
+            className="bg-white dark:bg-gray-900 w-full h-full lg:max-w-[80vw] lg:max-h-[90vh] overflow-y-auto rounded-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ModalView
+              open={sidebarOpen}
+              onClose={() => setSidebarOpen(false)}
+              referenceNumber={selectedReferenceNumber}
+              asModal={true}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

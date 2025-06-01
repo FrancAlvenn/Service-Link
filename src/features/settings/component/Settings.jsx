@@ -71,7 +71,7 @@ const Settings = () => {
             >
               Workflow Settings
             </Typography>
-            <button
+            {/* <button
               onClick={() =>
                 assignApproversToRequest({
                   approvers,
@@ -82,11 +82,12 @@ const Settings = () => {
                   department,
                   position,
                   designation,
-                })
+                  
+                  
               }
             >
               Click Me
-            </button>
+            </button> */}
             <div className="flex flex-col gap-4">
               <ApprovalRuleByRequestType />
               <ApprovalRuleByDesignation />

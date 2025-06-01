@@ -33,6 +33,7 @@ import { throttle } from "lodash";
 import axios from "axios";
 import ToastNotification from "../../../../utils/ToastNotification";
 import Header from "../../../../layouts/header";
+import ModalView from "../request_details_view/ModalView";
 
 const CalendarView = () => {
   const [status, setStatus] = useState([]);
@@ -482,12 +483,24 @@ const CalendarView = () => {
         </div>
 
         {/* Sidebar for details view */}
-        <SidebarView
-          open={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-          referenceNumber={selectedReferenceNumber}
-          className="!h-full"
-        />
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+            onClick={() => setSidebarOpen(false)}
+          >
+            <div
+              className="bg-white dark:bg-gray-900 w-full h-full lg:max-w-[80vw] lg:max-h-[90vh] overflow-y-auto rounded-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ModalView
+                open={sidebarOpen}
+                onClose={() => setSidebarOpen(false)}
+                referenceNumber={selectedReferenceNumber}
+                asModal={true}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

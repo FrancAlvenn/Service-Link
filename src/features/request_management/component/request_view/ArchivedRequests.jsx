@@ -22,6 +22,7 @@ import { PurchasingRequestsContext } from "../../context/PurchasingRequestsConte
 import { VehicleRequestsContext } from "../../context/VehicleRequestsContext.js";
 import { VenueRequestsContext } from "../../context/VenueRequestsContext.js";
 import Header from "../../../../layouts/header.js";
+import ModalView from "../request_details_view/ModalView.jsx";
 
 export function ArchivedRequests() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -314,12 +315,24 @@ export function ArchivedRequests() {
 
           {/* Sidebar for Request Details */}
         </div>
-        <SidebarView
-          open={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-          referenceNumber={selectedReferenceNumber}
-          requests={allRequests}
-        />
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+            onClick={() => setSidebarOpen(false)}
+          >
+            <div
+              className="bg-white dark:bg-gray-900 w-full h-full lg:max-w-[80vw] lg:max-h-[90vh] overflow-y-auto rounded-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ModalView
+                open={sidebarOpen}
+                onClose={() => setSidebarOpen(false)}
+                referenceNumber={selectedReferenceNumber}
+                asModal={true}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

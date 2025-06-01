@@ -6,6 +6,7 @@ import {
   MenuItem,
   Typography,
   Chip,
+  Spinner,
 } from "@material-tailwind/react";
 import { PlusCircle } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
@@ -25,9 +26,12 @@ function UserDesignationModal({
   const { user } = useContext(AuthContext);
   const [isAuthorized, setIsAuthorized] = useState(false);
 
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     const getDesignations = async () => {
       try {
+        setLoading(true);
         const response = await fetch("/settings/designation", {
           credentials: "include",
         });
@@ -40,6 +44,8 @@ function UserDesignationModal({
         }
       } catch (error) {
         console.error("Error fetching designation options:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -92,16 +98,28 @@ function UserDesignationModal({
     <div className="flex flex-col gap-2">
       <Menu placement="bottom-start">
         <MenuHandler>
-          <Chip
-            size="sm"
-            variant="ghost"
-            value={selectedDesignation?.name || "Select Designation"}
-            className={`text-center w-fit ${
-              isAuthorized ? "cursor-pointer" : "cursor-not-allowed"
-            } dark:bg-gray-800 dark:text-gray-200`}
-            color={selectedDesignation?.color || "gray"}
-          />
+          {loading ? (
+            <Chip
+              size="sm"
+              variant="ghost"
+              value="Loading..."
+              className="text-center w-fit dark:bg-gray-800 dark:text-gray-200 cursor-wait flex items-center gap-2"
+              color="cyan"
+              icon={<Spinner className="h-3 w-3" />}
+            />
+          ) : (
+            <Chip
+              size="sm"
+              variant="ghost"
+              value={selectedDesignation?.designation || "Select Designation"}
+              className={`text-center w-fit ${
+                isAuthorized ? "cursor-pointer" : "cursor-not-allowed"
+              } dark:bg-gray-800 dark:text-gray-200`}
+              color={selectedDesignation?.color || "cyan"}
+            />
+          )}
         </MenuHandler>
+
         {isAuthorized && (
           <MenuList className="mt-2 divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-900 shadow-lg ring-2 ring-black/5 dark:ring-gray-700 border-none">
             {designationOptions.length > 0 ? (
@@ -116,11 +134,11 @@ function UserDesignationModal({
                       <Chip
                         size="sm"
                         variant="ghost"
-                        value={option.name}
+                        value={option.designation}
                         className="text-center w-fit cursor-pointer dark:bg-gray-700 dark:text-gray-300"
                         color={option.color}
                       >
-                        {option.name}
+                        {option.designation}
                       </Chip>
                     </MenuItem>
                   ))}

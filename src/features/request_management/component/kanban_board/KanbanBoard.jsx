@@ -28,6 +28,7 @@ import ToastNotification from "../../../../utils/ToastNotification";
 import SidebarView from "../../../../components/sidebar/SidebarView";
 import RequestFilter from "../../utils/requestFilter";
 import Header from "../../../../layouts/header";
+import ModalView from "../request_details_view/ModalView";
 
 export function KanbanBoard() {
   const [columns, setColumns] = useState([]);
@@ -400,11 +401,24 @@ export function KanbanBoard() {
             </CardBody>
           </div>
         </div>
-        <SidebarView
-          open={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-          referenceNumber={selectedReferenceNumber}
-        />
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+            onClick={() => setSidebarOpen(false)}
+          >
+            <div
+              className="bg-white dark:bg-gray-900 w-full h-full lg:max-w-[80vw] lg:max-h-[90vh] overflow-y-auto rounded-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ModalView
+                open={sidebarOpen}
+                onClose={() => setSidebarOpen(false)}
+                referenceNumber={selectedReferenceNumber}
+                asModal={true}
+              />
+            </div>
+          </div>
+        )}
         <Dialog
           open={openModal}
           handler={setOpenModal}

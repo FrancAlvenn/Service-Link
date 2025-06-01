@@ -214,6 +214,7 @@ export async function updateUserById(req, res) {
         first_name: req.body.first_name || user.first_name,
         last_name: req.body.last_name || user.last_name,
         username: req.body.username || user.username,
+        password: req.body.password || user.password,
         email: req.body.email || user.email,
         contact_number: req.body.contact_number || user.contact_number,
         organization: req.body.organization || user.organization,

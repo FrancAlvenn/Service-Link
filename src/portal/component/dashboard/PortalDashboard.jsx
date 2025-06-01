@@ -60,13 +60,22 @@ function PortalDashboard() {
 
   // Combine all requests and filter by user's reference number
   const allRequests = [
-    ...jobRequests.map((req) => ({ ...req, type: "Job Request" })),
-    ...purchasingRequests.map((req) => ({
+    ...Object.values(jobRequests).map((req) => ({
+      ...req,
+      type: "Job Request",
+    })),
+    ...Object.values(purchasingRequests).map((req) => ({
       ...req,
       type: "Purchasing Request",
     })),
-    ...venueRequests.map((req) => ({ ...req, type: "Venue Request" })),
-    ...vehicleRequests.map((req) => ({ ...req, type: "Vehicle Request" })),
+    ...Object.values(venueRequests).map((req) => ({
+      ...req,
+      type: "Venue Request",
+    })),
+    ...Object.values(vehicleRequests).map((req) => ({
+      ...req,
+      type: "Vehicle Request",
+    })),
   ].filter((req) => req.requester === user?.reference_number);
 
   // Filter requests by selected type
@@ -124,10 +133,10 @@ function PortalDashboard() {
   // You may need to fetch all request types from a context or API
   useEffect(() => {
     const allRequests = [
-      ...jobRequests,
-      ...purchasingRequests,
-      ...venueRequests,
-      ...vehicleRequests,
+      ...Object.values(jobRequests),
+      ...Object.values(purchasingRequests),
+      ...Object.values(venueRequests),
+      ...Object.values(vehicleRequests),
     ];
 
     const filtered = allRequests.filter((req) => {
@@ -136,7 +145,9 @@ function PortalDashboard() {
       const flattened = req.approvers.flat(); // flatten any nested arrays
 
       return flattened.some(
-        (approver) => approver.status?.toLowerCase() === "pending"
+        (approver) =>
+          approver.status?.toLowerCase() === "pending" &&
+          approver.reference_number.includes(user.reference_number)
       );
     });
 

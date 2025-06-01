@@ -6,6 +6,7 @@ import {
   MenuItem,
   Typography,
   Chip,
+  Spinner,
 } from "@material-tailwind/react";
 import { PlusCircle } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
@@ -21,17 +22,18 @@ function UserDepartmentModal({
   const [departmentOptions, setDepartmentOptions] = useState([]);
   const [selectedDepartmentId, setSelectedDepartmentId] =
     useState(currentDepartmentId);
+  const [loading, setLoading] = useState(true); // NEW
 
   const { user } = useContext(AuthContext);
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
     const getDepartments = async () => {
+      setLoading(true); // START loading
       try {
         const response = await fetch("/settings/department", {
           credentials: "include",
         });
-
         const data = await response.json();
         if (Array.isArray(data.departments)) {
           setDepartmentOptions(data.departments);
@@ -40,6 +42,8 @@ function UserDepartmentModal({
         }
       } catch (error) {
         console.error("Error fetching department options:", error);
+      } finally {
+        setLoading(false); // END loading
       }
     };
 
@@ -92,19 +96,35 @@ function UserDepartmentModal({
     <div className="flex flex-col gap-2">
       <Menu placement="bottom-start">
         <MenuHandler>
-          <Chip
-            size="sm"
-            variant="ghost"
-            value={selectedDepartment?.name || "Select Department"}
-            className={`text-center w-fit ${
-              isAuthorized ? "cursor-pointer" : "cursor-not-allowed"
-            } dark:bg-gray-800 dark:text-gray-200`}
-            color={selectedDepartment?.color || "gray"}
-          />
+          {loading ? (
+            <Chip
+              size="sm"
+              variant="ghost"
+              value="Loading..."
+              className="text-center w-fit dark:bg-gray-800 dark:text-gray-200 cursor-wait flex items-center gap-2"
+              color="cyan"
+              icon={<Spinner className="h-3 w-3" />}
+            />
+          ) : (
+            <Chip
+              size="sm"
+              variant="ghost"
+              value={selectedDepartment?.name || "Select Department"}
+              className={`text-center w-fit ${
+                isAuthorized ? "cursor-pointer" : "cursor-not-allowed"
+              } dark:bg-gray-800 dark:text-gray-200`}
+              color={selectedDepartment?.color || "cyan"}
+            />
+          )}
         </MenuHandler>
+
         {isAuthorized && (
           <MenuList className="mt-2 divide-y divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-900 shadow-lg ring-2 ring-black/5 dark:ring-gray-700 border-none">
-            {departmentOptions.length > 0 ? (
+            {loading ? (
+              <MenuItem className="flex items-center justify-center text-xs text-gray-500 dark:text-gray-400">
+                <Spinner className="h-4 w-4 mr-2" /> Loading...
+              </MenuItem>
+            ) : departmentOptions.length > 0 ? (
               <div className="flex flex-col">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[300px] overflow-y-auto">
                   {departmentOptions.map((option) => (
@@ -138,7 +158,7 @@ function UserDepartmentModal({
               </div>
             ) : (
               <MenuItem className="flex items-center justify-center text-xs text-gray-500 dark:text-gray-400">
-                Loading department options...
+                No departments available.
               </MenuItem>
             )}
           </MenuList>

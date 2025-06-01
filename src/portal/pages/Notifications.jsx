@@ -35,13 +35,22 @@ const NotificationPage = () => {
 
   // Combine and filter requests by user reference number
   const allRequests = [
-    ...jobRequests.map((req) => ({ ...req, type: "Job Request" })),
-    ...purchasingRequests.map((req) => ({
+    ...Object.values(jobRequests).map((req) => ({
+      ...req,
+      type: "Job Request",
+    })),
+    ...Object.values(purchasingRequests).map((req) => ({
       ...req,
       type: "Purchasing Request",
     })),
-    ...venueRequests.map((req) => ({ ...req, type: "Venue Request" })),
-    ...vehicleRequests.map((req) => ({ ...req, type: "Vehicle Request" })),
+    ...Object.values(venueRequests).map((req) => ({
+      ...req,
+      type: "Venue Request",
+    })),
+    ...Object.values(vehicleRequests).map((req) => ({
+      ...req,
+      type: "Vehicle Request",
+    })),
   ].filter((req) => req.requester === user?.reference_number);
 
   const getRequestActivity = async () => {

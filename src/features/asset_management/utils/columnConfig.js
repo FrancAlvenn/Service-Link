@@ -21,7 +21,7 @@ export const getColumnConfig = ({ setIsSidebarOpen, setSelectedAsset }) => [
         <Chip
           size="sm"
           variant="ghost"
-          color="red"
+          color="blue"
           className="text-center font-bold rounded-full w-4 h-4 flex items-center justify-center p-5"
           value={row.asset_id}
         />
@@ -100,6 +100,15 @@ export const getColumnConfig = ({ setIsSidebarOpen, setSelectedAsset }) => [
         Status
       </Typography>
     ),
+    render: (row) => (
+      <Chip
+        size="sm"
+        variant="ghost"
+        color="blue"
+        className="text-center font-bold flex items-center justify-center rounded-full"
+        value={row.status}
+      />
+    ),
     // render: (row) => <StatusModal input={row.status} referenceNumber={row.reference_number} requestType={requestType} />,
   },
   {
@@ -117,7 +126,7 @@ export const getColumnConfig = ({ setIsSidebarOpen, setSelectedAsset }) => [
     ),
   },
   {
-    key: "created_at",
+    key: "createdAt",
     label: "Created At",
     header: (
       <Typography variant="small" color="blue-gray" className={normalText}>
@@ -126,12 +135,12 @@ export const getColumnConfig = ({ setIsSidebarOpen, setSelectedAsset }) => [
     ),
     render: (row) => (
       <Typography variant="small" color="blue-gray" className={normalText}>
-        {formatDate(row.created_at)}
+        {formatDate(row.createdAt)}
       </Typography>
     ),
   },
   {
-    key: "updated_at",
+    key: "updatedAt",
     label: "Updated At",
     header: (
       <Typography variant="small" color="blue-gray" className={normalText}>
@@ -140,7 +149,7 @@ export const getColumnConfig = ({ setIsSidebarOpen, setSelectedAsset }) => [
     ),
     render: (row) => (
       <Typography variant="small" color="blue-gray" className={normalText}>
-        {formatDate(row.updated_at)}
+        {formatDate(row.updatedAt)}
       </Typography>
     ),
   },

@@ -391,16 +391,16 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
         color="blue"
         type="submit"
         onClick={submitVehicleRequest}
-        disabled={
-          !request.title ||
-          !request.department ||
-          !request.destination ||
-          !request.date_of_trip ||
-          !request.time_of_departure ||
-          !request.time_of_arrival ||
-          !request.number_of_passengers ||
-          !request.purpose
-        }
+        // disabled={
+        //   !request.title ||
+        //   !request.department ||
+        //   !request.destination ||
+        //   !request.date_of_trip ||
+        //   !request.time_of_departure ||
+        //   !request.time_of_arrival ||
+        //   !request.number_of_passengers ||
+        //   !request.purpose
+        // }
         className="dark:bg-blue-600 dark:hover:bg-blue-500 w-full md:w-auto"
       >
         Submit Request

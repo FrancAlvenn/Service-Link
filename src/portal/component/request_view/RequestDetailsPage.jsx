@@ -36,10 +36,10 @@ function RequestDetailsPage({ referenceNumber, onClose, isApprover }) {
   // Find request by referenceNumber
   useEffect(() => {
     const allRequests = [
-      ...jobRequests,
-      ...purchasingRequests,
-      ...venueRequests,
-      ...vehicleRequests,
+      ...Object.values(jobRequests),
+      ...Object.values(purchasingRequests),
+      ...Object.values(venueRequests),
+      ...Object.values(vehicleRequests),
     ];
     const foundRequest = allRequests.find(
       (req) => req.reference_number === referenceNumber

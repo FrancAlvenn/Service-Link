@@ -125,7 +125,7 @@ function Profile() {
         ))}
       </div>
 
-      <div className="flex flex-col p-5 border border-gray-200 dark:border-gray-700 rounded-lg w-full">
+      {/* <div className="flex flex-col p-5 border border-gray-200 dark:border-gray-700 rounded-lg w-full">
         <Typography className="text-sm font-semibold dark:text-white">
           Support and Feedback
         </Typography>
@@ -178,7 +178,7 @@ function Profile() {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
 
       <div className="mt-3">
         <Typography

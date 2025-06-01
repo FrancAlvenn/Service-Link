@@ -6,9 +6,9 @@ import {
   X,
 } from "@phosphor-icons/react";
 import { useState } from "react";
-import ToastNotification from "../../utils/ToastNotification";
 import axios from "axios";
 import { Button, Typography } from "@material-tailwind/react";
+import ToastNotification from "../../../../utils/ToastNotification";
 
 const ParticularsTab = ({
   request,

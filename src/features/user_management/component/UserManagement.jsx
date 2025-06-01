@@ -42,10 +42,10 @@ const UserManagement = () => {
     useContext(UserContext);
 
   const allRequests = [
-    ...jobRequests,
-    ...purchasingRequests,
-    ...vehicleRequests,
-    ...venueRequests,
+    ...Object.values(jobRequests),
+    ...Object.values(purchasingRequests),
+    ...Object.values(vehicleRequests),
+    ...Object.values(venueRequests),
   ];
 
   const [editingUserId, setEditingUserId] = useState(null);

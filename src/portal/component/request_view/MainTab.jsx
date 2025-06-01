@@ -209,7 +209,6 @@ const MainTab = ({
         `/${requestType}/${request.reference_number}`,
         {
           approvers: updatedApprovers,
-          requester: user.reference_number,
         },
         { withCredentials: true }
       );

@@ -4,9 +4,9 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { UserContext } from "../../context/UserContext";
 import axios from "axios";
-import { AuthContext } from "../../features/authentication";
+import { AuthContext } from "../../../authentication";
+import { UserContext } from "../../../../context/UserContext";
 
 dayjs.extend(relativeTime);
 

@@ -3,6 +3,7 @@ import {
   Typography,
   Button,
   CardBody,
+  Dialog,
 } from "@material-tailwind/react";
 
 import { ArrowClockwise, MagnifyingGlass } from "@phosphor-icons/react";
@@ -17,18 +18,17 @@ import { useLocation } from "react-router-dom";
 import ProfileModal from "../../../../layouts/component/navbar/ProfileModal.js";
 import NotificationModal from "../../../../layouts/component/navbar/NotificationModal";
 import Header from "../../../../layouts/header.js";
+import ModalView from "../request_details_view/ModalView";
 
 export function JobRequests() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const [selectedReferenceNumber, setSelectedReferenceNumber] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
   const { jobRequests, fetchJobRequests } = useContext(JobRequestsContext);
   const { getUserByReferenceNumber } = useContext(UserContext);
 
-  const handleSearch = (e) => {
-    setSearchQuery(e.target.value);
-  };
+  const handleSearch = (e) => setSearchQuery(e.target.value);
 
   const [filters, setFilters] = useState({
     status: "",
@@ -45,11 +45,10 @@ export function JobRequests() {
   useEffect(() => {
     if (preSelectedReference) {
       setSelectedReferenceNumber(preSelectedReference);
-      setSidebarOpen(true);
+      setModalOpen(true);
     }
   }, [preSelectedReference]);
 
-  // Filter data based on search query
   const filteredRows = (Array.isArray(jobRequests) ? jobRequests : []).filter(
     (row) => {
       const rowString = Object.entries(row)
@@ -59,7 +58,6 @@ export function JobRequests() {
         .toLowerCase();
 
       const matchesSearch = rowString.includes(searchQuery.toLowerCase());
-
       const matchesStatus = !filters.status || row.status === filters.status;
       const matchesDepartment =
         !filters.department || row.department === filters.department;
@@ -72,18 +70,17 @@ export function JobRequests() {
     }
   );
 
-  const requestType = "job_request"; // Can be set dynamically based on the page or user input
+  const requestType = "job_request";
 
   const columns = getColumnConfig(
     requestType,
-    setSidebarOpen,
+    () => setModalOpen(true),
     setSelectedReferenceNumber,
     getUserByReferenceNumber
   );
 
   return (
     <div className="flex flex-col h-full bg-white">
-      {/* Header */}
       <CardHeader
         floated={false}
         shadow={false}
@@ -109,68 +106,70 @@ export function JobRequests() {
         </div>
       </CardHeader>
 
-      {/* Table */}
-      <div className="flex  justify-between h-full bg-white">
-        <div
-          className={`h-full bg-white w-full mt-0 px-3 flex flex-col justify-between transition-[max-width] duration-300 ${
-            sidebarOpen ? "max-w-[55%]" : "w-full"
-          }`}
-        >
-          <div className="flex flex-col gap-4 h-full">
-            {/* Header Section */}
-
-            {/* Table Section */}
-            <CardBody className="custom-scrollbar h-full pt-0">
-              <table className="w-full min-w-max table-auto text-left">
-                <thead className="sticky top-0 z-10 border-b border-blue-gray-100">
-                  <tr>
-                    {columns.map((col, index) => (
-                      <th
-                        key={index}
-                        className="cursor-pointer bg-white p-4 transition-colors hover:bg-blue-gray-50"
+      <div className="flex justify-between h-full bg-white">
+        <div className="w-full px-3 flex flex-col justify-between transition-all duration-300">
+          <CardBody className="custom-scrollbar h-full pt-0">
+            <table className="w-full min-w-max table-auto text-left">
+              <thead className="sticky top-0 z-10 border-b border-blue-gray-100">
+                <tr>
+                  {columns.map((col, index) => (
+                    <th
+                      key={index}
+                      className="cursor-pointer bg-white p-4 transition-colors hover:bg-blue-gray-50"
+                    >
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="leading-none opacity-70 capitalize font-semibold"
                       >
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="leading-none opacity-70 capitalize font-semibold"
-                        >
-                          {col.header}
-                        </Typography>
-                      </th>
+                        {col.header}
+                      </Typography>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredRows.map((row, rowIndex) => (
+                  <tr key={rowIndex}>
+                    {columns.map((col, colIndex) => (
+                      <td
+                        key={colIndex}
+                        className="px-4 py-5 w-fit font-normal"
+                      >
+                        {col.render(
+                          row,
+                          () => setModalOpen(true),
+                          setSelectedReferenceNumber
+                        )}
+                      </td>
                     ))}
                   </tr>
-                </thead>
-                <tbody>
-                  {filteredRows.map((row, rowIndex) => (
-                    <tr key={rowIndex}>
-                      {columns.map((col, colIndex) => (
-                        <td
-                          key={colIndex}
-                          className="px-4 py-5 w-fit font-normal"
-                        >
-                          {col.render(
-                            row,
-                            setSidebarOpen,
-                            setSelectedReferenceNumber
-                          )}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </CardBody>
-          </div>
-
-          {/* Sidebar for Request Details */}
+                ))}
+              </tbody>
+            </table>
+          </CardBody>
         </div>
-        <SidebarView
-          open={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-          referenceNumber={selectedReferenceNumber}
-          requests={jobRequests}
-        />
       </div>
+
+      {modalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+          style={{ alignItems: "center", justifyContent: "center" }}
+          onClick={() => setModalOpen(false)} // close on backdrop click
+        >
+          <div
+            className="bg-white dark:bg-gray-900 w-full h-full lg:max-w-[80vw] lg:max-h-[90vh] overflow-y-auto rounded-xl"
+            onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside modal
+          >
+            <ModalView
+              open={modalOpen}
+              onClose={() => setModalOpen(false)}
+              referenceNumber={selectedReferenceNumber}
+              asModal={true}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

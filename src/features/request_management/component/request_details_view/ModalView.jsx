@@ -5,25 +5,25 @@ import {
   CaretRight,
   CaretLeft,
 } from "@phosphor-icons/react";
-import ToastNotification from "../../utils/ToastNotification";
-import axios from "axios";
 import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../../features/authentication";
-import { VenueRequestsContext } from "../../features/request_management/context/VenueRequestsContext";
-import { VehicleRequestsContext } from "../../features/request_management/context/VehicleRequestsContext";
-import { PurchasingRequestsContext } from "../../features/request_management/context/PurchasingRequestsContext";
-import { JobRequestsContext } from "../../features/request_management/context/JobRequestsContext";
-import DetailsTab from "./DetailsTab";
-import ParticularsTab from "./ParticularsTab";
-import { UserContext } from "../../context/UserContext";
-import StatusModal from "../../utils/statusModal";
-import ApprovalStatusModal from "../../utils/approverStatusModal";
-import RequestAccess from "./RequestAccess";
-import ActivityTab from "./ActivityTab";
-import Assignment from "./Assignment";
+import { JobRequestsContext } from "../../context/JobRequestsContext";
+import { PurchasingRequestsContext } from "../../context/PurchasingRequestsContext";
+import { VehicleRequestsContext } from "../../context/VehicleRequestsContext";
+import { VenueRequestsContext } from "../../context/VenueRequestsContext";
+import { AuthContext } from "../../../authentication/index";
+import { UserContext } from "../../../../context/UserContext";
+import axios from "axios";
+import ToastNotification from "../../../../utils/ToastNotification";
 import { Chip, Typography } from "@material-tailwind/react";
+import ParticularsTab from "./ParticularsTab";
+import ActivityTab from "./ActivityTab";
 
-const SidebarView = ({ open, onClose, referenceNumber, asModal = false }) => {
+import RequestAccess from "./RequestAccess";
+import DetailsTab from "./DetailsTab";
+import Assignment from "./Assignment";
+import StatusModal from "../../../../utils/statusModal";
+
+const ModalView = ({ open, onClose, referenceNumber, asModal = false }) => {
   const [isOpen, setIsOpen] = useState(open);
 
   const {
@@ -494,4 +494,4 @@ const SidebarView = ({ open, onClose, referenceNumber, asModal = false }) => {
   );
 };
 
-export default SidebarView;
+export default ModalView;

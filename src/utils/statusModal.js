@@ -153,7 +153,7 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 z-50">
       <Menu placement="bottom-start">
         <MenuHandler>
           <Chip

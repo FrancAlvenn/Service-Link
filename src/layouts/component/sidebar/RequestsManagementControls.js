@@ -30,6 +30,7 @@ import {
   PlusCircle,
   Gear,
   Notebook,
+  UsersThree,
 } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 
@@ -288,9 +289,9 @@ function RequestsManagementControls() {
         onClick={() => navigate("/workspace/user-management/board")}
       >
         <ListItemPrefix>
-          <ChalkboardTeacher size={20} />
+          <UsersThree size={20} />
         </ListItemPrefix>
-        Board
+        Directory
       </ListItem>
 
       <hr className="my-2 border-t border-gray-300" />

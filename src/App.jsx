@@ -58,6 +58,7 @@ import { SettingsProvider } from "./features/settings/context/SettingsContext";
 import Settings from "./features/settings/component/Settings";
 import PendingApprovalsTab from "./portal/component/dashboard/PendingApprovalsTab";
 import UserManagement from "./features/user_management/component/UserManagement";
+import SidebarView from "./components/sidebar/SidebarView";
 
 library.add(fas, fab, far); // Add all the icons needed
 
@@ -113,6 +114,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute requiredAccess={"admin"}>
             <JobRequests />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "requests-management/queues/job-requests/view/:id",
+        element: (
+          <ProtectedRoute requiredAccess={"admin"}>
+            <SidebarView />
           </ProtectedRoute>
         ),
       },

@@ -39,10 +39,19 @@ const Reports = () => {
   const { purchasingRequests } = useContext(PurchasingRequestsContext);
 
   const allRequests = [
-    ...jobRequests.map((r) => ({ ...r, request_type: "Job" })),
-    ...vehicleRequests.map((r) => ({ ...r, request_type: "Vehicle" })),
-    ...venueRequests.map((r) => ({ ...r, request_type: "Venue" })),
-    ...purchasingRequests.map((r) => ({ ...r, request_type: "Purchasing" })),
+    ...Object.values(jobRequests).map((r) => ({ ...r, request_type: "Job" })),
+    ...Object.values(vehicleRequests).map((r) => ({
+      ...r,
+      request_type: "Vehicle",
+    })),
+    ...Object.values(venueRequests).map((r) => ({
+      ...r,
+      request_type: "Venue",
+    })),
+    ...Object.values(purchasingRequests).map((r) => ({
+      ...r,
+      request_type: "Purchasing",
+    })),
   ];
 
   const { allUserInfo } = useContext(UserContext);

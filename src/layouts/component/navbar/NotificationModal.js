@@ -48,13 +48,22 @@ const NotificationModal = () => {
   };
 
   const allRequests = [
-    ...jobRequests.map((req) => ({ ...req, type: "Job Request" })),
-    ...purchasingRequests.map((req) => ({
+    ...Object.values(jobRequests).map((req) => ({
+      ...req,
+      type: "Job Request",
+    })),
+    ...Object.values(purchasingRequests).map((req) => ({
       ...req,
       type: "Purchasing Request",
     })),
-    ...venueRequests.map((req) => ({ ...req, type: "Venue Request" })),
-    ...vehicleRequests.map((req) => ({ ...req, type: "Vehicle Request" })),
+    ...Object.values(venueRequests).map((req) => ({
+      ...req,
+      type: "Venue Request",
+    })),
+    ...Object.values(vehicleRequests).map((req) => ({
+      ...req,
+      type: "Vehicle Request",
+    })),
   ];
 
   const getRequestActivity = async () => {

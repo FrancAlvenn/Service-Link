@@ -1,17 +1,13 @@
 import {
   Card,
   CardHeader,
-  Input,
   Typography,
-  Button,
   CardBody,
-  Chip,
 } from "@material-tailwind/react";
 
-import { ArrowClockwise, MagnifyingGlass } from "@phosphor-icons/react";
+import { MagnifyingGlass } from "@phosphor-icons/react";
 import { useContext, useEffect, useState } from "react";
 import { VehicleRequestsContext } from "../../context/VehicleRequestsContext.js";
-import { formatDate } from "../../../../utils/dateFormatter.js";
 import {
   getApprovalColor,
   getArchivedColor,
@@ -26,11 +22,16 @@ import { getColumnConfig } from "../../utils/columnConfig.js";
 import RequestFilter from "../../utils/requestFilter.js";
 import { useLocation } from "react-router-dom";
 import Header from "../../../../layouts/header.js";
+import ModalView from "../request_details_view/ModalView.jsx";
 
 export function VehicleRequests() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedReferenceNumber, setSelectedReferenceNumber] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState({
+    status: "",
+    department: "",
+  });
 
   const { vehicleRequests, fetchVehicleRequests } = useContext(
     VehicleRequestsContext
@@ -55,12 +56,6 @@ export function VehicleRequests() {
     setSearchQuery(e.target.value);
   };
 
-  const [filters, setFilters] = useState({
-    status: "",
-    department: "",
-  });
-
-  // Filter data based on search query
   const filteredRows = (
     Array.isArray(vehicleRequests) ? vehicleRequests : []
   ).filter((row) => {
@@ -71,7 +66,6 @@ export function VehicleRequests() {
       .toLowerCase();
 
     const matchesSearch = rowString.includes(searchQuery.toLowerCase());
-
     const matchesStatus = !filters.status || row.status === filters.status;
     const matchesDepartment =
       !filters.department || row.department === filters.department;
@@ -83,11 +77,11 @@ export function VehicleRequests() {
     );
   });
 
-  const requestType = "vehicle_request"; // Can be set dynamically based on the page or user input
+  const requestType = "vehicle_request";
 
   const columns = getColumnConfig(
     requestType,
-    setSidebarOpen,
+    () => setSidebarOpen(true),
     setSelectedReferenceNumber,
     getUserByReferenceNumber
   );
@@ -118,65 +112,73 @@ export function VehicleRequests() {
           </div>
         </div>
       </CardHeader>
-      <div className="flex justify-between h-full bg-white">
+
+      <div className="flex h-full bg-white">
         <div
-          className={`h-full bg-white w-full mt-0 px-3 flex flex-col justify-between transition-[max-width] duration-300 ${
+          className={`h-full bg-white px-3 flex flex-col justify-between transition-[max-width] duration-300 ${
             sidebarOpen ? "max-w-[55%]" : "w-full"
           }`}
         >
-          <div className="flex flex-col gap-4 h-full">
-            {/* Table Section */}
-            <CardBody className="custom-scrollbar h-full pt-0">
-              <table className="w-full min-w-max table-auto text-left">
-                <thead className="sticky top-0 z-10 border-b border-blue-gray-100">
-                  <tr>
-                    {columns.map((col, index) => (
-                      <th
-                        key={index}
-                        className="cursor-pointer bg-white p-4 transition-colors hover:bg-blue-gray-50"
+          <CardBody className="custom-scrollbar h-full pt-0">
+            <table className="w-full min-w-max table-auto text-left">
+              <thead className="sticky top-0 z-10 border-b border-blue-gray-100">
+                <tr>
+                  {columns.map((col, index) => (
+                    <th
+                      key={index}
+                      className="cursor-pointer bg-white p-4 transition-colors hover:bg-blue-gray-50"
+                    >
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="leading-none opacity-70 capitalize font-semibold"
                       >
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="leading-none opacity-70 capitalize font-semibold"
-                        >
-                          {col.header}
-                        </Typography>
-                      </th>
+                        {col.header}
+                      </Typography>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredRows.map((row, rowIndex) => (
+                  <tr key={rowIndex}>
+                    {columns.map((col, colIndex) => (
+                      <td
+                        key={colIndex}
+                        className="px-4 py-5 w-fit font-normal"
+                      >
+                        {col.render(
+                          row,
+                          setSidebarOpen,
+                          setSelectedReferenceNumber
+                        )}
+                      </td>
                     ))}
                   </tr>
-                </thead>
-                <tbody>
-                  {filteredRows.map((row, rowIndex) => (
-                    <tr key={rowIndex}>
-                      {columns.map((col, colIndex) => (
-                        <td
-                          key={colIndex}
-                          className="px-4 py-5 w-fit font-normal"
-                        >
-                          {col.render(
-                            row,
-                            setSidebarOpen,
-                            setSelectedReferenceNumber
-                          )}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </CardBody>
+                ))}
+              </tbody>
+            </table>
+          </CardBody>
+        </div>
+      </div>
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+          onClick={() => setSidebarOpen(false)}
+        >
+          <div
+            className="bg-white dark:bg-gray-900 w-full h-full lg:max-w-[80vw] lg:max-h-[90vh] overflow-y-auto rounded-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ModalView
+              open={sidebarOpen}
+              onClose={() => setSidebarOpen(false)}
+              referenceNumber={selectedReferenceNumber}
+              asModal={true}
+            />
           </div>
         </div>
-
-        {/* Sidebar for Request Details */}
-        <SidebarView
-          open={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-          referenceNumber={selectedReferenceNumber}
-          requests={vehicleRequests}
-        />
-      </div>
+      )}
     </div>
   );
 }

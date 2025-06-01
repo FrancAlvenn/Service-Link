@@ -117,10 +117,10 @@ const seedData = async () => {
   await seedPriorities();
   await seedDepartments();
   await seedUsers();
-  await seedJobRequests();
-  await seedPurchasingRequests();
-  await seedVenueRequests();
-  await seedVehicleRequests();
+  // await seedJobRequests();
+  // await seedPurchasingRequests();
+  // await seedVenueRequests();
+  // await seedVehicleRequests();
   await seedUserPreferences();
   console.log("✅ Default data seeded.");
 };
@@ -132,9 +132,9 @@ const seedUsers = async () => {
       google_id: "",
       first_name: "Admin",
       last_name: "0",
-      username: "admin@dyci.edu.ph",
+      username: "support.servicelink@dyci.edu.ph",
       password: "$2a$10$6cl.36kDK/EV/EJ64qn3/uLj35PnIGMEzWyGah.hx6UYfGHDLVub.", // hashed
-      email: "admin@dyci.edu.ph",
+      email: "support.servicelink@dyci.edu.ph",
       access_level: "admin",
       status: "active",
       immediate_head: "",

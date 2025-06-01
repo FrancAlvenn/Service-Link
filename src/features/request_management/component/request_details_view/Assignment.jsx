@@ -14,12 +14,13 @@ import {
   DialogHeader,
   DialogFooter,
 } from "@material-tailwind/react";
-import EmployeeContext from "../../features/employee_management/context/EmployeeContext";
-import ToastNotification from "../../utils/ToastNotification";
-import { UserCircle, MagnifyingGlass, HardDrive } from "@phosphor-icons/react";
-import { AuthContext } from "../../features/authentication";
-import AssetContext from "../../features/asset_management/context/AssetContext";
-import AssetAssignmentLogContext from "../../features/asset_management/context/AssetAssignmentLogContext";
+import EmployeeContext from "../../../employee_management/context/EmployeeContext";
+import AssetContext from "../../../asset_management/context/AssetContext";
+import { AuthContext } from "../../../authentication";
+import AssetAssignmentLogContext from "../../../asset_management/context/AssetAssignmentLogContext";
+import ToastNotification from "../../../../utils/ToastNotification";
+import { UserCircle } from "@phosphor-icons/react";
+import { HardDrive } from "react-feather";
 
 const Assignment = ({
   selectedRequest,

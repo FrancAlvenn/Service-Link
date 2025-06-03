@@ -160,7 +160,7 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
             size="sm"
             variant="ghost"
             value={currentStatus || "Select Status"}
-            className="text-center w-fit cursor-pointer"
+            className="text-center w-fit cursor-pointe px-4 py-2"
             color={
               statusOptions.find((option) => option.status === currentStatus)
                 ?.color || "gray"
@@ -181,7 +181,7 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
                       size="sm"
                       variant="ghost"
                       value={option.status}
-                      className="text-center w-fit"
+                      className="text-center w-fit px-4 py-2"
                       color={option.color}
                     />
                   </MenuItem>

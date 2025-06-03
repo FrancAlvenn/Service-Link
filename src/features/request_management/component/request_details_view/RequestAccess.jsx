@@ -56,13 +56,15 @@ const RequestAccess = ({ selectedRequest }) => {
   return (
     <Menu placement="bottom-end" dismiss={{ itemPress: false }}>
       <MenuHandler>
-        <Button
-          variant="outlined"
-          color="blue"
-          className="flex items-center font-bold  py-2 px-4"
-        >
-          Request Access
-        </Button>
+        <div title="Request Access" className="flex items-center">
+          <Button
+            variant="outlined"
+            color="blue"
+            className="flex items-center font-bold  py-2 px-4"
+          >
+            Request Access
+          </Button>
+        </div>
       </MenuHandler>
       <MenuList
         className="w-full max-w-[300px] flex flex-col"

@@ -128,7 +128,7 @@ function DepartmentModal({
             value={currentDepartment || "Select Department"}
             className={`text-center w-fit ${
               isAuthorized ? "cursor-pointer" : "cursor-not-allowed"
-            } dark:bg-gray-800 dark:text-gray-200`}
+            } dark:bg-gray-800 dark:text-gray-200 px-4 py-2`}
             color={
               departmentOptions.find(
                 (option) => option.name === currentDepartment
@@ -151,7 +151,7 @@ function DepartmentModal({
                         size="sm"
                         variant="ghost"
                         value={option.name}
-                        className="text-center w-fit cursor-pointer dark:bg-gray-700 dark:text-gray-300"
+                        className="text-center w-fit cursor-pointer dark:bg-gray-700 dark:text-gray-300 px-4 py-2"
                         color={option.color}
                       >
                         {option.name}

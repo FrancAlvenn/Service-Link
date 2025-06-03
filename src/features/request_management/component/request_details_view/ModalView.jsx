@@ -22,6 +22,7 @@ import RequestAccess from "./RequestAccess";
 import DetailsTab from "./DetailsTab";
 import Assignment from "./Assignment";
 import StatusModal from "../../../../utils/statusModal";
+import PrintableRequestForm from "../reporting_dashboard/PrintableRequestForm";
 
 const ModalView = ({ open, onClose, referenceNumber, asModal = false }) => {
   const [isOpen, setIsOpen] = useState(open);
@@ -329,7 +330,7 @@ const ModalView = ({ open, onClose, referenceNumber, asModal = false }) => {
               {/* Status & Approvals */}
               <div className="flex items-center gap-3 mb-5">
                 {/* Dynamic Approvers Section */}
-                <div className="flex flex-col gap-2">
+                <div className="flex gap-2">
                   {/* <p className="text-sm font-semibold dark:text-gray-300">
                     Approver Statuses
                   </p> */}
@@ -454,13 +455,21 @@ const ModalView = ({ open, onClose, referenceNumber, asModal = false }) => {
             <div className="w-full lg:w-1/3 flex flex-col lg:border-l lg:h-[80vh] overflow-y-auto p-4 space-y-4 border-t lg:border-t-0 border-gray-300">
               {/* Request Access (Top) */}
               <div className="flex justify-between items-center ">
-                <StatusModal
-                  input={request.status}
-                  referenceNumber={request.reference_number}
-                  requestType={requestType}
-                  title="Status"
-                />
-                <RequestAccess selectedRequest={request} />
+                <div title="Request Status" className="flex items-center">
+                  <StatusModal
+                    input={request.status}
+                    referenceNumber={request.reference_number}
+                    requestType={requestType}
+                    title="Status"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <RequestAccess selectedRequest={request} />
+                  <PrintableRequestForm
+                    requestType={requestType}
+                    requestData={request}
+                  />
+                </div>
               </div>
 
               <div className="flex flex-col lg:h-[70vh] overflow-y-auto">

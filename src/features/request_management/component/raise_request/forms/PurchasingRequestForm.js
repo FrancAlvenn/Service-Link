@@ -50,12 +50,14 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
   const [departmentOptions, setDepartmentOptions] = useState([]);
   const [supplyCategories, setSupplyCategories] = useState([
     { id: 1, name: "Office Supplies" },
-    { id: 2, name: "Cleaning Supplies" },
-    { id: 3, name: "Classroom Supplies" },
-    { id: 4, name: "Furniture and Fixtures" },
-    { id: 5, name: "IT and Computer Supplies" },
-    { id: 6, name: "Electrical and Maintenance Supply" },
-    { id: 7, name: "Miscellaneous" },
+    { id: 2, name: "Computer Parts / Peripherals" },
+    { id: 3, name: "Electrical Supplies" },
+    { id: 4, name: "Office Equipment" },
+    { id: 5, name: "Tools / Equipment" },
+    { id: 6, name: "Other Consumables" },
+    { id: 7, name: "Machineries / Parts" },
+    { id: 8, name: "Publications" },
+    { id: 9, name: "Others" },
   ]);
 
   const {

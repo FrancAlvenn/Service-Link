@@ -542,20 +542,19 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
         color="blue"
         type="submit"
         onClick={submitVenueRequest}
-        // disabled={
-        //   !request.department ||
-        //   !request.venue_requested ||
-        //   !request.organization ||
-        //   !request.title ||
-        //   !request.event_dates ||
-        //   !request.event_start_time ||
-        //   !request.event_end_time ||
-        //   !request.participants ||
-        //   !request.pax_estimation ||
-        //   !request.purpose ||
-        //   timeErrors.date ||
-        //   timeErrors.time
-        // }
+        disabled={
+          !request.venue_requested ||
+          !request.organization ||
+          !request.title ||
+          !request.event_dates ||
+          !request.event_start_time ||
+          !request.event_end_time ||
+          !request.participants ||
+          !request.pax_estimation ||
+          !request.purpose ||
+          timeErrors.date ||
+          timeErrors.time
+        }
         className="dark:bg-blue-600 dark:hover:bg-blue-500 w-full md:w-auto"
       >
         Submit Request

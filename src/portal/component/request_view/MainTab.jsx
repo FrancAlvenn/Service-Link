@@ -189,8 +189,6 @@ const MainTab = ({
         (approver) => approver.reference_number === user.reference_number
       );
 
-      console.log(flattened);
-
       if (!currentApprover) {
         ToastNotification.error("Error", "You are not listed as an approver.");
         return;
@@ -228,7 +226,7 @@ const MainTab = ({
           {
             reference_number: request.reference_number,
             visibility: "external",
-            type: "status_change",
+            type: "approval",
             action: actionText,
             details: comment,
             performed_by: user.reference_number,

@@ -232,7 +232,11 @@ export const googleAuth = async (req, res) => {
       });
 
       return res
-        .cookie("access_token", token, { httpOnly: true })
+        .cookie("access_token", token, {
+          httpOnly: true,
+          sameSite: "none",
+          secure: true,
+        })
         .status(200)
         .json({ response, userPreference });
     }
@@ -271,7 +275,7 @@ export const googleAuth = async (req, res) => {
         .cookie("access_token", token, {
           httpOnly: true,
           sameSite: "none",
-          secure: false,
+          secure: true,
         })
         .status(200)
         .json({ response });
@@ -330,7 +334,7 @@ export const googleAuth = async (req, res) => {
       .cookie("access_token", token, {
         httpOnly: true,
         sameSite: "none",
-        secure: false,
+        secure: true,
       })
       .status(201)
       .json({ response, userPreference, temporary_password: tempPassword });

@@ -101,132 +101,145 @@ const ParticularsTab = ({
 
       <table className="table-auto rounded-lg  -gray-300 w-full text-sm">
         <thead>
-          <tr className="bg-gray-100 text-left">
-            <th className="p-2">Item</th>
-            <th className="p-2">Quantity</th>
-            <th className="p-2">Description</th>
-            {isAuthorized && <th className=" p-2">Actions</th>}
-          </tr>
+          {request.details.length > 0 && (
+            <tr className="bg-gray-100 text-left">
+              <th className="p-2">Item</th>
+              <th className="p-2">Quantity</th>
+              <th className="p-2">Description</th>
+              {isAuthorized && <th className=" p-2">Actions</th>}
+            </tr>
+          )}
         </thead>
         <tbody>
-          {request.details.map((detail, index) => (
-            <tr key={index} className="-t">
-              {/* Particulars */}
-              <td className=" p-3">
-                {isAuthorized && editingIndex === index ? (
-                  <input
-                    type="text"
-                    className="w-full p-1  -gray-300 rounded font-normal"
-                    value={editedParticular.particulars}
-                    onChange={(e) =>
-                      setEditedParticular({
-                        ...editedParticular,
-                        particulars: e.target.value,
-                      })
-                    }
-                  />
-                ) : (
-                  <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="font-normal"
-                  >
-                    {detail.particulars}
-                  </Typography>
-                )}
+          {request.details.length === 0 ? (
+            <tr>
+              <td
+                colSpan={isAuthorized ? 4 : 3}
+                className="text-center py-4 text-gray-500 italic"
+              >
+                No Particulars
               </td>
-
-              {/* Quantity */}
-              <td className=" p-3">
-                {isAuthorized && editingIndex === index ? (
-                  <input
-                    type="number"
-                    className="w-full p-1  -gray-300 rounded"
-                    value={editedParticular.quantity}
-                    onChange={(e) =>
-                      setEditedParticular({
-                        ...editedParticular,
-                        quantity: e.target.value,
-                      })
-                    }
-                  />
-                ) : (
-                  <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="font-normal"
-                  >
-                    {detail.quantity}
-                  </Typography>
-                )}
-              </td>
-
-              {/* Description */}
-              <td className=" p-3">
-                {isAuthorized && editingIndex === index ? (
-                  <textarea
-                    className="w-full p-1  -gray-300 rounded"
-                    value={editedParticular.description}
-                    onChange={(e) =>
-                      setEditedParticular({
-                        ...editedParticular,
-                        description: e.target.value,
-                      })
-                    }
-                  />
-                ) : (
-                  <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="font-normal"
-                  >
-                    {detail.description}
-                  </Typography>
-                )}
-              </td>
-
-              {/* Actions */}
-              {isAuthorized && (
-                <td className=" p-2">
-                  {editingIndex === index ? (
-                    <div className="flex gap-2 justify-center">
-                      <button
-                        className="text-green-600 hover:scale-110"
-                        title="Save"
-                        onClick={() => handleSaveEdit(index)}
-                      >
-                        <FloppyDisk size={18} />
-                      </button>
-                      <button
-                        className="text-red-500 hover:scale-110"
-                        title="Cancel"
-                        onClick={() => setEditingIndex(null)}
-                      >
-                        <Prohibit size={18} />
-                      </button>
-                    </div>
+            </tr>
+          ) : (
+            request.details.map((detail, index) => (
+              <tr key={index} className="-t">
+                {/* Particulars */}
+                <td className="p-3">
+                  {isAuthorized && editingIndex === index ? (
+                    <input
+                      type="text"
+                      className="w-full p-1 -gray-300 rounded font-normal"
+                      value={editedParticular.particulars}
+                      onChange={(e) =>
+                        setEditedParticular({
+                          ...editedParticular,
+                          particulars: e.target.value,
+                        })
+                      }
+                    />
                   ) : (
-                    <div className="flex gap-2 justify-center">
-                      <button
-                        className="text-blue-500 hover:scale-110"
-                        title="Edit"
-                        onClick={() => handleEditClick(index)}
-                      >
-                        <PencilSimpleLine size={18} />
-                      </button>
-                      <button
-                        className="text-red-500 hover:scale-110"
-                        title="Delete"
-                        onClick={() => handleDetailRemove(index)}
-                      >
-                        <X size={18} />
-                      </button>
-                    </div>
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-normal"
+                    >
+                      {detail.particulars}
+                    </Typography>
                   )}
                 </td>
-              )}
-            </tr>
-          ))}
+
+                {/* Quantity */}
+                <td className="p-3">
+                  {isAuthorized && editingIndex === index ? (
+                    <input
+                      type="number"
+                      className="w-full p-1 -gray-300 rounded"
+                      value={editedParticular.quantity}
+                      onChange={(e) =>
+                        setEditedParticular({
+                          ...editedParticular,
+                          quantity: e.target.value,
+                        })
+                      }
+                    />
+                  ) : (
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-normal"
+                    >
+                      {detail.quantity}
+                    </Typography>
+                  )}
+                </td>
+
+                {/* Description */}
+                <td className="p-3">
+                  {isAuthorized && editingIndex === index ? (
+                    <textarea
+                      className="w-full p-1 -gray-300 rounded"
+                      value={editedParticular.description}
+                      onChange={(e) =>
+                        setEditedParticular({
+                          ...editedParticular,
+                          description: e.target.value,
+                        })
+                      }
+                    />
+                  ) : (
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-normal"
+                    >
+                      {detail.description}
+                    </Typography>
+                  )}
+                </td>
+
+                {/* Actions */}
+                {isAuthorized && (
+                  <td className="p-2">
+                    {editingIndex === index ? (
+                      <div className="flex gap-2 justify-center">
+                        <button
+                          className="text-green-600 hover:scale-110"
+                          title="Save"
+                          onClick={() => handleSaveEdit(index)}
+                        >
+                          <FloppyDisk size={18} />
+                        </button>
+                        <button
+                          className="text-red-500 hover:scale-110"
+                          title="Cancel"
+                          onClick={() => setEditingIndex(null)}
+                        >
+                          <Prohibit size={18} />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2 justify-center">
+                        <button
+                          className="text-blue-500 hover:scale-110"
+                          title="Edit"
+                          onClick={() => handleEditClick(index)}
+                        >
+                          <PencilSimpleLine size={18} />
+                        </button>
+                        <button
+                          className="text-red-500 hover:scale-110"
+                          title="Delete"
+                          onClick={() => handleDetailRemove(index)}
+                        >
+                          <X size={18} />
+                        </button>
+                      </div>
+                    )}
+                  </td>
+                )}
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
 

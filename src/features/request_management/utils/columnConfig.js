@@ -183,69 +183,6 @@ export const getColumnConfig = (
           ),
         },
         {
-          key: "immediate_head_approval",
-          label: "Immediate Head Approval",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              Immediate Head Approval
-            </Typography>
-          ),
-          render: (row) => (
-            <ApprovalStatusModal
-              input={row.immediate_head_approval}
-              referenceNumber={row.reference_number}
-              approvingPosition="immediate_head_approval"
-              requestType={requestType}
-            />
-          ),
-        },
-        {
-          key: "gso_director_approval",
-          label: "GSO Director Approval",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              GSO Director Approval
-            </Typography>
-          ),
-          render: (row) => (
-            <ApprovalStatusModal
-              input={row.gso_director_approval}
-              referenceNumber={row.reference_number}
-              approvingPosition="gso_director_approval"
-              requestType={requestType}
-            />
-          ),
-        },
-        {
-          key: "operations_director_approval",
-          label: "Operations Director Approval",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              Operations Director Approval
-            </Typography>
-          ),
-          render: (row) => (
-            <ApprovalStatusModal
-              input={row.operations_director_approval}
-              referenceNumber={row.reference_number}
-              approvingPosition="operations_director_approval"
-              requestType={requestType}
-            />
-          ),
-        },
-        {
           key: "archived",
           label: "Archived",
           header: (
@@ -512,69 +449,6 @@ export const getColumnConfig = (
             >
               {row.supply_category}
             </Typography>
-          ),
-        },
-        {
-          key: "immediate_head_approval",
-          label: "Immediate Head Approval",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              Immediate Head Approval
-            </Typography>
-          ),
-          render: (row) => (
-            <ApprovalStatusModal
-              input={row.immediate_head_approval}
-              referenceNumber={row.reference_number}
-              approvingPosition="immediate_head_approval"
-              requestType={requestType}
-            />
-          ),
-        },
-        {
-          key: "gso_director_approval",
-          label: "GSO Director Approval",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              GSO Director Approval
-            </Typography>
-          ),
-          render: (row) => (
-            <ApprovalStatusModal
-              input={row.gso_director_approval}
-              referenceNumber={row.reference_number}
-              approvingPosition="gso_director_approval"
-              requestType={requestType}
-            />
-          ),
-        },
-        {
-          key: "operations_director_approval",
-          label: "Operations Director Approval",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              Operations Director Approval
-            </Typography>
-          ),
-          render: (row) => (
-            <ApprovalStatusModal
-              input={row.operations_director_approval}
-              referenceNumber={row.reference_number}
-              approvingPosition="operations_director_approval"
-              requestType={requestType}
-            />
           ),
         },
         {
@@ -1001,69 +875,6 @@ export const getColumnConfig = (
           ),
         },
         {
-          key: "immediate_head_approval",
-          label: "Immediate Head Approval",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              Immediate Head Approval
-            </Typography>
-          ),
-          render: (row) => (
-            <ApprovalStatusModal
-              input={row.immediate_head_approval}
-              referenceNumber={row.reference_number}
-              approvingPosition="immediate_head_approval"
-              requestType={requestType}
-            />
-          ),
-        },
-        {
-          key: "gso_director_approval",
-          label: "GSO Director Approval",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              GSO Director Approval
-            </Typography>
-          ),
-          render: (row) => (
-            <ApprovalStatusModal
-              input={row.gso_director_approval}
-              referenceNumber={row.reference_number}
-              approvingPosition="gso_director_approval"
-              requestType={requestType}
-            />
-          ),
-        },
-        {
-          key: "operations_director_approval",
-          label: "Operations Director Approval",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              Operations Director Approval
-            </Typography>
-          ),
-          render: (row) => (
-            <ApprovalStatusModal
-              input={row.operations_director_approval}
-              referenceNumber={row.reference_number}
-              approvingPosition="operations_director_approval"
-              requestType={requestType}
-            />
-          ),
-        },
-        {
           key: "archived",
           label: "Archived",
           header: (
@@ -1440,69 +1251,6 @@ export const getColumnConfig = (
             >
               {getUserByReferenceNumber(row.requester)}
             </Typography>
-          ),
-        },
-        {
-          key: "immediate_head_approval",
-          label: "Immediate Head Approval",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              Immediate Head Approval
-            </Typography>
-          ),
-          render: (row) => (
-            <ApprovalStatusModal
-              input={row.immediate_head_approval}
-              referenceNumber={row.reference_number}
-              approvingPosition="immediate_head_approval"
-              requestType={requestType}
-            />
-          ),
-        },
-        {
-          key: "gso_director_approval",
-          label: "GSO Director Approval",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              GSO Director Approval
-            </Typography>
-          ),
-          render: (row) => (
-            <ApprovalStatusModal
-              input={row.gso_director_approval}
-              referenceNumber={row.reference_number}
-              approvingPosition="gso_director_approval"
-              requestType={requestType}
-            />
-          ),
-        },
-        {
-          key: "operations_director_approval",
-          label: "Operations Director Approval",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              Operations Director Approval
-            </Typography>
-          ),
-          render: (row) => (
-            <ApprovalStatusModal
-              input={row.operations_director_approval}
-              referenceNumber={row.reference_number}
-              approvingPosition="operations_director_approval"
-              requestType={requestType}
-            />
           ),
         },
         {

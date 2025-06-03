@@ -109,7 +109,7 @@ function PriorityModal({ input, referenceNumber, requestType }) {
             size="sm"
             variant="ghost"
             value={currentPriority || "Select Priority"}
-            className="text-center w-fit cursor-pointer ml-auto"
+            className="text-center w-fit cursor-pointer ml-auto px-4 py-2"
             color={
               priorityOptions.find(
                 (option) => option.priority === currentPriority
@@ -131,7 +131,7 @@ function PriorityModal({ input, referenceNumber, requestType }) {
                       size="sm"
                       variant="ghost"
                       value={option.priority}
-                      className="text-center w-fit"
+                      className="text-center w-fit px-4 py-2"
                       color={option.color} // Apply the color directly
                     />
                   </MenuItem>

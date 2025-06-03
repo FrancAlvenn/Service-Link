@@ -69,3 +69,14 @@
 .fc-col-header {
   @apply sticky top-12 bg-white z-10 shadow-md; /* Adjust `top` if toolbar height differs */
 }
+
+@media print {
+  .no-print {
+    display: none;
+  }
+
+  @page {
+    margin: 7mm;
+    size: auto;
+  }
+}

@@ -4,23 +4,21 @@ import {
   MenuList,
   Button,
   Typography,
+  Switch,
 } from "@material-tailwind/react";
-import React, { useContext, useEffect, useState } from "react";
-import axios from "axios";
-
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { ArrowClockwise, Bell } from "@phosphor-icons/react";
+import { useNavigate } from "react-router-dom";
+import email from "../../../assets/email_img.png";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { Chip } from "@material-tailwind/react";
+
 import { AuthContext } from "../../../features/authentication";
 import { JobRequestsContext } from "../../../features/request_management/context/JobRequestsContext";
 import { PurchasingRequestsContext } from "../../../features/request_management/context/PurchasingRequestsContext";
 import { VenueRequestsContext } from "../../../features/request_management/context/VenueRequestsContext";
 import { VehicleRequestsContext } from "../../../features/request_management/context/VehicleRequestsContext";
-import { Bell } from "@phosphor-icons/react";
-
-import email from "../../../assets/email_img.png";
-import SidebarView from "../../../components/sidebar/SidebarView";
-import { useNavigate } from "react-router-dom";
+import { useRequestActivity } from "../../../context/RequestActivityContext";
 import NotificationActivityRender from "../../../utils/request_activity/NotificationActivityRender";
 
 dayjs.extend(relativeTime);
@@ -28,169 +26,197 @@ dayjs.extend(relativeTime);
 const NotificationModal = () => {
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState("all");
+  const [showOnlyUnread, setShowOnlyUnread] = useState(false);
   const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const { user } = useContext(AuthContext);
+  const { fetchMultipleActivities, markRequestViewed } = useRequestActivity();
+
   const { jobRequests } = useContext(JobRequestsContext);
   const { purchasingRequests } = useContext(PurchasingRequestsContext);
   const { venueRequests } = useContext(VenueRequestsContext);
   const { vehicleRequests } = useContext(VehicleRequestsContext);
 
   const navigate = useNavigate();
+  const hasLoadedActivities = useRef(false);
 
-  const handleNotificationClick = (requestType, referenceNumber) => {
-    // Close the menu
+  // Combine all requests (admin sees all)
+  const allRequests = [
+    ...Object.values(jobRequests),
+    ...Object.values(purchasingRequests),
+    ...Object.values(venueRequests),
+    ...Object.values(vehicleRequests),
+  ];
+
+  useEffect(() => {
+    if (allRequests.length > 0 && !hasLoadedActivities.current) {
+      loadActivities();
+      hasLoadedActivities.current = true;
+    }
+  }, [allRequests]);
+
+  const loadActivities = async () => {
+    try {
+      setLoading(true);
+      const userActivities = await fetchMultipleActivities(allRequests);
+      setActivities(userActivities || []);
+    } catch (error) {
+      console.error("Error loading activities:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleNotificationClick = async (requestID, activityID) => {
+    const type = getRequestType(requestID);
+
+    try {
+      await markRequestViewed(activityID);
+      setActivities((prev) =>
+        prev.map((a) => (a.id === activityID ? { ...a, viewed: true } : a))
+      );
+    } catch (err) {
+      console.error("Failed to mark as viewed", err);
+    }
+
     setOpen(false);
-
-    // Navigate to target with referenceNumber in query
     navigate(
-      `/workspace/requests-management/queues/${requestType}?referenceNumber=${referenceNumber}`
+      `/workspace/requests-management/queues/${type}?referenceNumber=${requestID}`
     );
   };
 
-  const allRequests = [
-    ...Object.values(jobRequests).map((req) => ({
-      ...req,
-      type: "Job Request",
-    })),
-    ...Object.values(purchasingRequests).map((req) => ({
-      ...req,
-      type: "Purchasing Request",
-    })),
-    ...Object.values(venueRequests).map((req) => ({
-      ...req,
-      type: "Venue Request",
-    })),
-    ...Object.values(vehicleRequests).map((req) => ({
-      ...req,
-      type: "Vehicle Request",
-    })),
-  ];
-
-  const getRequestActivity = async () => {
-    try {
-      const responses = await Promise.all(
-        allRequests.map((req) =>
-          axios.get(`/request_activity/${req.reference_number}`, {
-            withCredentials: true,
-          })
-        )
-      );
-
-      const combinedActivities = responses
-        .flatMap((res) => res.data || [])
-        .filter((activity) => !activity.message);
-
-      setActivities(combinedActivities);
-    } catch (error) {
-      console.error("Error fetching activities:", error);
-    }
-  };
-
-  //Get Request Type based on reference_number if the reference number has JR, VR, PR, or VR
   const getRequestType = (referenceNumber) => {
-    if (referenceNumber.startsWith("JR")) {
-      return "job-requests";
-    } else if (referenceNumber.startsWith("VR")) {
-      return "venue-requests";
-    } else if (referenceNumber.startsWith("PR")) {
-      return "purchasing-requests";
-    } else if (referenceNumber.startsWith("SV")) {
-      return "vehicle-requests";
-    }
+    if (referenceNumber.startsWith("JR")) return "job-requests";
+    if (referenceNumber.startsWith("VR")) return "venue-requests";
+    if (referenceNumber.startsWith("PR")) return "purchasing-requests";
+    if (referenceNumber.startsWith("SV")) return "vehicle-requests";
     return "";
   };
 
-  useEffect(() => {
-    if (allRequests.length > 0) {
-      getRequestActivity();
-    }
-  }, [allRequests.length]);
-
+  // Filter activities based on selected tab and visibility
   const filteredActivities = activities.filter(
     (activity) =>
       activity.visibility !== "internal" &&
-      (selectedTab === "all" || activity.request_type === selectedTab)
+      (selectedTab === "all" || activity.request_type === selectedTab) &&
+      (!showOnlyUnread || !activity.viewed)
   );
 
   return (
-    <>
-      <Menu
-        open={open}
-        handler={setOpen}
-        placement="bottom-end"
-        dismiss={{ itemPress: false }}
-      >
-        <MenuHandler>
-          <Button
-            variant="text"
-            className="flex items-center px-3 py-3 gap-x-3"
-          >
-            <Bell size={24} className="cursor-pointer " />
-          </Button>
-        </MenuHandler>
+    <Menu
+      open={open}
+      handler={setOpen}
+      placement="bottom-end"
+      dismiss={{ itemPress: false }}
+    >
+      <MenuHandler>
+        <Button variant="text" className="flex items-center px-3 py-3 gap-x-3">
+          <Bell size={24} className="cursor-pointer" />
+        </Button>
+      </MenuHandler>
 
-        <MenuList className="w-[420px] max-h-[500px] overflow-auto p-4 dark:bg-gray-900 dark:text-gray-100 z-[9999]">
-          <Typography variant="h6" color="blue-gray" className="mb-3 text-md">
-            Activities
+      <MenuList className="w-[420px] max-h-[500px] overflow-auto p-4 dark:bg-gray-900 dark:text-gray-100 z-[9999]">
+        <div className="flex justify-between items-center mb-3">
+          <Typography variant="h6" color="blue-gray" className="text-lg ">
+            Notifications
           </Typography>
-
-          <div className="flex gap-2 mb-4 flex-wrap">
-            {[
-              "all",
-              "comment",
-              "approval",
-              "status_change",
-              "request_access",
-            ].map((tab) => (
-              <Button
-                key={tab}
-                size="sm"
-                variant={selectedTab === tab ? "filled" : "outlined"}
-                color={selectedTab === tab ? "blue" : "gray"}
-                onClick={() => setSelectedTab(tab)}
-                className="rounded-md text-[10px] py-1 px-4"
+          <div className="flex items-center gap-2">
+            <div
+              className="flex items-center gap-2"
+              title="Toggle to show only unread notifications"
+            >
+              <label
+                htmlFor="unread-toggle"
+                className="flex items-center gap-2 cursor-pointer text-xs font-semibold"
               >
-                {tab.replace("_", " ")}
+                Show only unread
+                <Switch
+                  id="unread-toggle"
+                  checked={showOnlyUnread}
+                  onChange={() => setShowOnlyUnread((prev) => !prev)}
+                  className="text-xs font-semibold"
+                  crossOrigin={undefined}
+                  color="blue"
+                />
+              </label>
+            </div>
+            <div title="Refresh">
+              <Button
+                variant="text"
+                color="blue"
+                className="rounded-md text-[10px] py-1 px-1"
+                onClick={loadActivities}
+                disabled={loading}
+              >
+                <ArrowClockwise size={20} />
               </Button>
-            ))}
+            </div>
           </div>
+        </div>
 
-          {/* Activity Feed */}
-          <div className="flex flex-col max-h-[500px] overflow-auto">
-            <div className="flex flex-col gap-3">
-              {filteredActivities.length > 0 ? (
-                filteredActivities.map((activity) => (
+        <div className="flex gap-2 mb-4 flex-wrap">
+          {[
+            "all",
+            "comment",
+            "approval",
+            "status_change",
+            "request_access",
+          ].map((tab) => (
+            <Button
+              key={tab}
+              size="sm"
+              variant={selectedTab === tab ? "filled" : "outlined"}
+              color={selectedTab === tab ? "blue" : "gray"}
+              onClick={() => setSelectedTab(tab)}
+              className="rounded-md text-[10px] py-1 px-4"
+            >
+              {tab.replace("_", " ")}
+            </Button>
+          ))}
+        </div>
+
+        {/* Activity Feed */}
+        <div
+          className="flex flex-col max-h-[310px] overflow-auto"
+          style={{ scrollbarGutter: "stable" }}
+        >
+          <div className="flex flex-col gap-3">
+            {loading ? (
+              <div className="text-center py-4">
+                <Typography color="gray" className="animate-pulse">
+                  Loading activities...
+                </Typography>
+              </div>
+            ) : filteredActivities.length > 0 ? (
+              filteredActivities
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                .map((activity) => (
                   <NotificationActivityRender
                     key={activity.id}
                     activity={activity}
                     user={user}
-                    onClick={(requestId, activityId) => {
-                      const type = getRequestType(requestId);
-                      handleNotificationClick(type, requestId);
-                    }}
+                    onClick={handleNotificationClick}
                   />
                 ))
-              ) : (
-                <div className="text-gray-500 dark:text-gray-400 w-full text-sm text-center py-5 flex flex-col gap-4 items-center justify-center">
-                  <img
-                    src={email}
-                    alt="No activity"
-                    className="w-full h-auto max-w-sm sm:max-w-md"
-                  />
-                  <Typography
-                    variant="h6"
-                    className="text-gray-500 dark:text-gray-300"
-                  >
-                    Looks like it's a bit quiet around here!
-                  </Typography>
-                </div>
-              )}
-            </div>
+            ) : (
+              <div className="text-gray-500 dark:text-gray-400 w-full text-sm text-center py-5 flex flex-col gap-4 items-center justify-center">
+                <img
+                  src={email}
+                  alt="No activity"
+                  className="w-full h-auto max-w-sm sm:max-w-md"
+                />
+                <Typography
+                  variant="h6"
+                  className="text-gray-500 dark:text-gray-300"
+                >
+                  Looks like it's a bit quiet around here!
+                </Typography>
+              </div>
+            )}
           </div>
-        </MenuList>
-      </Menu>
-    </>
+        </div>
+      </MenuList>
+    </Menu>
   );
 };
 

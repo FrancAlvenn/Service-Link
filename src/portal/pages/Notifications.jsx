@@ -1,22 +1,17 @@
-// Updated NotificationPage.jsx
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Button, Typography } from "@material-tailwind/react";
-import React, { useContext, useEffect, useState } from "react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
-
-// Context imports
+import { AuthContext } from "../../features/authentication";
+import RequestDetailsPage from "../component/request_view/RequestDetailsPage";
+import email from "../../assets/email_img.png";
+import { useRequestActivity } from "../../context/RequestActivityContext";
+import NotificationActivityRender from "../../utils/request_activity/NotificationActivityRender";
 import { JobRequestsContext } from "../../features/request_management/context/JobRequestsContext";
 import { PurchasingRequestsContext } from "../../features/request_management/context/PurchasingRequestsContext";
 import { VenueRequestsContext } from "../../features/request_management/context/VenueRequestsContext";
 import { VehicleRequestsContext } from "../../features/request_management/context/VehicleRequestsContext";
-import { AuthContext } from "../../features/authentication";
-import RequestDetailsPage from "../component/request_view/RequestDetailsPage";
-import { UserContext } from "../../context/UserContext";
-
-import email from "../../assets/email_img.png";
-import NotificationActivityRender from "../../utils/request_activity/NotificationActivityRender";
 
 dayjs.extend(relativeTime);
 
@@ -24,8 +19,11 @@ const NotificationPage = () => {
   const [selectedTab, setSelectedTab] = useState("all");
   const [activities, setActivities] = useState([]);
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const { user } = useContext(AuthContext);
+  const { fetchMultipleActivities, markRequestViewed } = useRequestActivity();
+
   const { jobRequests } = useContext(JobRequestsContext);
   const { purchasingRequests } = useContext(PurchasingRequestsContext);
   const { venueRequests } = useContext(VenueRequestsContext);
@@ -51,77 +49,76 @@ const NotificationPage = () => {
     })),
   ].filter((req) => req.requester === user?.reference_number);
 
-  const getRequestActivity = async () => {
-    try {
-      const responses = await Promise.all(
-        allRequests.map((req) =>
-          axios.get(`/request_activity/${req.reference_number}`, {
-            withCredentials: true,
-          })
-        )
-      );
-
-      const combinedActivities = responses
-        .flatMap((res) => res.data || [])
-        .filter((activity) => !activity.message); // Exclude "message" type activities
-
-      setActivities(combinedActivities);
-    } catch (error) {
-      console.error("Error fetching activities:", error);
-    }
-  };
+  const hasLoadedActivities = useRef(false);
 
   useEffect(() => {
-    if (allRequests.length > 0) {
-      getRequestActivity(); // Fetch immediately
-
-      const interval = setInterval(() => {
-        getRequestActivity(); // Fetch every 60 seconds
-      }, 60000);
-
-      return () => clearInterval(interval); // Cleanup interval on unmount
+    if (allRequests.length > 0 && !hasLoadedActivities.current) {
+      loadActivities();
+      hasLoadedActivities.current = true;
     }
-  }, [allRequests.length]);
+  }, [allRequests]);
 
   const handleTabChange = (tab) => {
     setSelectedTab(tab);
   };
 
-  const openRequestDetails = (requestID, ID) => {
-    const request = allRequests.find(
-      (req) => req.reference_number === requestID
-    );
-    if (request) setSelectedRequest(request);
+  const openRequestDetails = async (requestID, activityID) => {
+    try {
+      // Mark activity as viewed
+      await markRequestViewed(activityID);
 
-    // Mark the activity as viewed
-    axios({
-      method: "PUT",
-      url: `/request_activity/${ID}`,
-      data: { viewed: true },
-      withCredentials: true,
-    })
-      .then(() => {
-        // Update activities state
-        setActivities((prevActivities) =>
-          prevActivities.map((activity) =>
-            activity.id === ID ? { ...activity, viewed: true } : activity
-          )
-        );
-      })
-      .catch((error) => {
-        console.error("Error marking activity as viewed:", error);
-      });
+      // Update local state
+      setActivities((prev) =>
+        prev.map((activity) =>
+          activity.id === activityID ? { ...activity, viewed: true } : activity
+        )
+      );
+
+      // Set selected request
+      setSelectedRequest({ reference_number: requestID });
+    } catch (error) {
+      console.error("Error marking activity as viewed:", error);
+    }
   };
 
   const closeRequestDetails = () => {
     setSelectedRequest(null);
   };
 
+  const loadActivities = async () => {
+    try {
+      setLoading(true);
+      const userActivities = await fetchMultipleActivities(allRequests);
+      setActivities(userActivities || []);
+    } catch (error) {
+      console.error("Error loading activities:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Filter activities based on selected tab
+  const filteredActivities = activities.filter(
+    (activity) =>
+      activity.visibility !== "internal" &&
+      (selectedTab === "all" || activity.request_type === selectedTab)
+  );
+
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 rounded-lg w-full mt-0 px-3 py-4 flex flex-col gap-6 pb-24">
-      <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
-        Notifications
-      </h2>
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
+          Notifications
+        </h2>
+        <Button
+          size="sm"
+          color="blue"
+          onClick={loadActivities}
+          disabled={loading}
+        >
+          Refresh
+        </Button>
+      </div>
 
       {/* Tab Filters */}
       <div className="flex flex-wrap gap-3 mb-4">
@@ -142,15 +139,14 @@ const NotificationPage = () => {
       {/* Activity Feed */}
       <div className="flex flex-col max-h-[500px] overflow-auto">
         <div className="flex flex-col gap-3">
-          {activities?.length > 0 ? (
-            activities
-              .filter(
-                (activity) =>
-                  (activity.visibility !== "internal" ||
-                    activity.created_by === user.reference_number) &&
-                  (selectedTab === "all" ||
-                    activity.request_type === selectedTab)
-              )
+          {loading ? (
+            <div className="text-center py-8">
+              <Typography color="gray" className="animate-pulse">
+                Loading activities...
+              </Typography>
+            </div>
+          ) : filteredActivities.length > 0 ? (
+            filteredActivities
               .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
               .map((activity) => (
                 <NotificationActivityRender
@@ -164,7 +160,7 @@ const NotificationPage = () => {
             <div className="text-gray-500 dark:text-gray-400 w-full text-sm text-center py-5 flex flex-col gap-4 items-center justify-center">
               <img
                 src={email}
-                alt="No act"
+                alt="No activity"
                 className="w-full h-auto max-w-sm sm:max-w-md md:max-w-md lg:max-w-md xl:max-w-md"
               />
 

@@ -54,6 +54,30 @@ export const RequestActivityProvider = ({ children }) => {
     }
   };
 
+  // Fetch multiple activities
+  const fetchMultipleActivities = async (allRequests) => {
+    try {
+      const responses = await Promise.all(
+        allRequests.map((req) =>
+          axios.get(`/request_activity/${req.reference_number}`, {
+            withCredentials: true,
+          })
+        )
+      );
+
+      const combinedActivities = responses
+        .flatMap((res) => res.data || [])
+        .filter((activity) => !activity.message);
+
+      return combinedActivities;
+    } catch (err) {
+      console.error("Error fetching multiple activities:", err);
+      setError(err.response?.data?.message || "Failed to fetch activities");
+      setIsLoading(false);
+      throw err;
+    }
+  };
+
   // Update existing activity
   const updateActivity = async (id, updateData) => {
     setIsLoading(true);
@@ -74,6 +98,32 @@ export const RequestActivityProvider = ({ children }) => {
     } catch (err) {
       console.error("Error updating activity:", err);
       setError(err.response?.data?.message || "Failed to update activity");
+      setIsLoading(false);
+      throw err;
+    }
+  };
+
+  // Mark Request as viewed
+  const markRequestViewed = async (id) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await axios.put(
+        `/request_activity/${id}`,
+        {
+          viewed: true,
+        },
+        { withCredentials: true }
+      );
+
+      setIsLoading(false);
+      return response.data;
+    } catch (err) {
+      console.error("Error marking request as viewed:", err);
+      setError(
+        err.response?.data?.message || "Failed to mark request as viewed"
+      );
       setIsLoading(false);
       throw err;
     }
@@ -143,17 +193,31 @@ export const RequestActivityProvider = ({ children }) => {
     });
   };
 
+  //Helper to log assign approver
+  const logAssignApprover = async (referenceNumber, approver) => {
+    return addActivity({
+      reference_number: referenceNumber,
+      visibility: "external",
+      type: "assignment",
+      action: `Assigned to ${approver}`,
+      details: "Request approver assignment",
+    });
+  };
+
   const value = {
     isLoading,
     error,
     addActivity,
     fetchActivities,
+    fetchMultipleActivities,
     updateActivity,
     deleteActivity,
+    markRequestViewed,
     logStatusChange,
     logInternalNote,
     logClientReply,
     logAssignment,
+    logAssignApprover,
   };
 
   return (

@@ -21,6 +21,7 @@ import AssetAssignmentLogContext from "../../../asset_management/context/AssetAs
 import ToastNotification from "../../../../utils/ToastNotification";
 import { UserCircle } from "@phosphor-icons/react";
 import { HardDrive } from "react-feather";
+import { useRequestActivity } from "../../../../context/RequestActivityContext";
 
 const Assignment = ({
   selectedRequest,
@@ -46,6 +47,8 @@ const Assignment = ({
     createAssetAssignment,
     updateAssetAssignmentLog,
   } = useContext(AssetAssignmentLogContext);
+
+  const { addActivity } = useRequestActivity();
 
   const createAssetLog = async () => {
     const existingLog = assetAssignmentLogs.find(
@@ -133,9 +136,7 @@ const Assignment = ({
     };
 
     try {
-      await axios.post("/request_activity", newActivity, {
-        withCredentials: true,
-      });
+      await addActivity(newActivity);
       getRequestActivity();
     } catch (error) {
       console.error("Error saving activity:", error);

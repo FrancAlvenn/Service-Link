@@ -21,10 +21,10 @@ const NotificationActivityRender = ({ activity, onClick, user }) => {
         return `${base} bg-pink-100 dark:bg-pink-900 text-pink-900 dark:text-pink-100 border-pink-500`;
       case "approval":
         return `${base} bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-100 border-green-500`;
-      case "add_approver":
+      case "assign_approver":
         return `${base} bg-teal-100 dark:bg-teal-900 text-teal-900 dark:text-teal-100 border-teal-500`;
       default:
-        return `${base} bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200 border-gray-500 dark:border-gray-700`;
+        return `${base} bg-fuchsia-100 dark:bg-fuchsia-900 text-fuchsia-900 dark:text-fuchsia-100 border-fuchsia-500`;
     }
   };
 
@@ -35,7 +35,7 @@ const NotificationActivityRender = ({ activity, onClick, user }) => {
     >
       <div className="flex items-center justify-between">
         <div
-          className="dangerous-p dark:text-gray-100 text-xs font-semibold"
+          className="dangerous-p dark:text-gray-100 text-xs font-semibold whitespace-normal text-wrap"
           dangerouslySetInnerHTML={{ __html: activity.action }}
         />
         <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -44,10 +44,19 @@ const NotificationActivityRender = ({ activity, onClick, user }) => {
       </div>
 
       <div className="flex items-center justify-between pt-1">
-        <p className="text-sm">{activity.details}</p>
+        <div
+          className="text-sm whitespace-normal text-wrap overflow-hidden"
+          style={{
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+          title={activity.details}
+          dangerouslySetInnerHTML={{ __html: activity.details }}
+        />
         <Chip
           size="sm"
-          className="rounded dark:bg-gray-700 dark:text-gray-100"
+          className="rounded dark:bg-gray-700 dark:text-gray-100 ml-1"
           variant="outlined"
           color="black"
           value={activity.request_id}

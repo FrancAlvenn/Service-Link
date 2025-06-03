@@ -100,7 +100,7 @@ function ArchiveStatusModal({ input, referenceNumber, requestType }) {
                   </MenuItem>
                 ))}
               </div>
-              <div className="flex items-center mt-2 py-2 justify-center text-xs rounded-lg bg-gray-100 ">
+              {/* <div className="flex items-center mt-2 py-2 justify-center text-xs rounded-lg bg-gray-100 ">
                 <Typography
                   color="blue-gray"
                   className="flex items-center gap-2 font-semibold text-sm text-gray-500 cursor-pointer "
@@ -108,7 +108,7 @@ function ArchiveStatusModal({ input, referenceNumber, requestType }) {
                   <PlusCircle size={18} className="cursor-pointer" />
                   Add new status
                 </Typography>
-              </div>
+              </div> */}
             </div>
           ) : (
             <MenuItem className="flex items-center justify-center text-xs text-gray-500">

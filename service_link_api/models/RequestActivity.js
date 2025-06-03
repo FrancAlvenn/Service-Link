@@ -20,7 +20,7 @@ const RequestActivityModel = sequelize.define(
     viewed: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: false
+      defaultValue: false,
     },
     request_type: {
       type: DataTypes.STRING(50),
@@ -37,7 +37,7 @@ const RequestActivityModel = sequelize.define(
     created_by: {
       type: DataTypes.STRING(255),
       allowNull: false,
-    }
+    },
   },
   {
     sequelize,

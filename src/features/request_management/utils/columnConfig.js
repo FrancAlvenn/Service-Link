@@ -634,15 +634,15 @@ export const getColumnConfig = (
           ),
         },
         {
-          key: "venue_id",
-          label: "Venue",
+          key: "venue_requested",
+          label: "Venue Requested",
           header: (
             <Typography
               variant="small"
               color="blue-gray"
               className={normalText}
             >
-              Venue
+              Venue Requested
             </Typography>
           ),
           render: (row) => (
@@ -651,7 +651,7 @@ export const getColumnConfig = (
               color="blue-gray"
               className={normalText}
             >
-              {row.venue_id}
+              {row.venue_requested}
             </Typography>
           ),
         },
@@ -696,28 +696,6 @@ export const getColumnConfig = (
               className={normalText}
             >
               {row.organization}
-            </Typography>
-          ),
-        },
-        {
-          key: "event_title",
-          label: "Event Title",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              Event Title
-            </Typography>
-          ),
-          render: (row) => (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              {row.event_title}
             </Typography>
           ),
         },

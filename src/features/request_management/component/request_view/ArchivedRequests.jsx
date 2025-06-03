@@ -10,7 +10,7 @@ import {
 } from "@material-tailwind/react";
 
 import { ArrowClockwise, MagnifyingGlass } from "@phosphor-icons/react";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { JobRequestsContext } from "../../context/JobRequestsContext.js";
 import SidebarView from "../../../../components/sidebar/SidebarView.jsx";
 import { UserContext } from "../../../../context/UserContext.js";
@@ -112,27 +112,35 @@ export function ArchivedRequests() {
   } = getRequestData() || {};
 
   // Filter data based on search query
-  const filteredRows = (Array.isArray(requests) ? requests : []).filter(
-    (row) => {
-      const rowString = Object.entries(row)
-        .filter(([key]) => key !== "details")
-        .map(([_, value]) => value)
-        .join(" ")
-        .toLowerCase();
+  const filteredRows = useMemo(() => {
+    return (Array.isArray(requests) ? requests : [])
+      .filter((row) => {
+        const rowString = Object.entries(row)
+          .filter(([key]) => key !== "details")
+          .map(([_, value]) => value)
+          .join(" ")
+          .toLowerCase();
 
-      const matchesSearch = rowString.includes(searchQuery.toLowerCase());
+        const matchesSearch = rowString.includes(searchQuery.toLowerCase());
+        const matchesStatus = !filters.status || row.status === filters.status;
+        const matchesDepartment =
+          !filters.department || row.department === filters.department;
+        const matchesPriority =
+          !filters.priority || row.priority === filters.priority;
 
-      const matchesStatus = !filters.status || row.status === filters.status;
-      const matchesDepartment =
-        !filters.department || row.department === filters.department;
-      const matchesPriority =
-        !filters.priority || row.priority === filters.priority;
+        return (
+          matchesSearch && matchesStatus && matchesDepartment && matchesPriority
+        );
+      })
+      .sort((a, b) => {
+        // Sort descending by created_at (latest first)
+        // Adjust 'created_at' to your actual date field
+        const dateA = new Date(a.created_at);
+        const dateB = new Date(b.created_at);
 
-      return (
-        matchesSearch && matchesStatus && matchesDepartment && matchesPriority
-      );
-    }
-  );
+        return dateB - dateA; // descending order
+      });
+  }, [requests, searchQuery, filters]);
 
   const fetchData = async () => {
     try {

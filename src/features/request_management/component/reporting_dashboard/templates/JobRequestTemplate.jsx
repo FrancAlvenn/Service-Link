@@ -62,7 +62,7 @@ const JobRequestTemplate = forwardRef(
           <div className="flex items-center gap-2 w-2/3">
             <p className="whitespace-nowrap">Area/Department:</p>
             <div className="border-b border-black w-full text-sm">
-              {requesterUser.department.name || ""}
+              {requesterUser?.department?.name || ""}
             </div>
           </div>
 
@@ -149,7 +149,7 @@ const JobRequestTemplate = forwardRef(
           <div className="w-1/3 flex gap-2">
             <p className="font-semibold">Position:</p>
             <span className="underline">
-              {requesterUser.designation.designation}
+              {requesterUser?.designation?.designation || ""}
             </span>
           </div>
         </div>

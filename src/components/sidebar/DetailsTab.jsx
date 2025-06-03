@@ -54,7 +54,6 @@ const requestFieldConfig = {
     { key: "priority", label: "Priority", type: "select" },
     { key: "requester", label: "Requester", type: "text", readOnly: true },
     { key: "organization", label: "Organization", type: "text" },
-    { key: "event_title", label: "Event Title", type: "text" },
     { key: "event_nature", label: "Event Nature", type: "text" },
     { key: "venue_requested", label: "Venue Requested", type: "select" },
     { key: "event_dates", label: "Event Date", type: "date" },

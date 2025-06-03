@@ -49,26 +49,28 @@ export function JobRequests() {
     }
   }, [preSelectedReference]);
 
-  const filteredRows = (Array.isArray(jobRequests) ? jobRequests : []).filter(
-    (row) => {
-      const rowString = Object.entries(row)
-        .filter(([key]) => key !== "details")
-        .map(([_, value]) => value)
-        .join(" ")
-        .toLowerCase();
+  const sortedJobRequests = [
+    ...(Array.isArray(jobRequests) ? jobRequests : []),
+  ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-      const matchesSearch = rowString.includes(searchQuery.toLowerCase());
-      const matchesStatus = !filters.status || row.status === filters.status;
-      const matchesDepartment =
-        !filters.department || row.department === filters.department;
-      const matchesPriority =
-        !filters.priority || row.priority === filters.priority;
+  const filteredRows = sortedJobRequests.filter((row) => {
+    const rowString = Object.entries(row)
+      .filter(([key]) => key !== "details")
+      .map(([_, value]) => value)
+      .join(" ")
+      .toLowerCase();
 
-      return (
-        matchesSearch && matchesStatus && matchesDepartment && matchesPriority
-      );
-    }
-  );
+    const matchesSearch = rowString.includes(searchQuery.toLowerCase());
+    const matchesStatus = !filters.status || row.status === filters.status;
+    const matchesDepartment =
+      !filters.department || row.department === filters.department;
+    const matchesPriority =
+      !filters.priority || row.priority === filters.priority;
+
+    return (
+      matchesSearch && matchesStatus && matchesDepartment && matchesPriority
+    );
+  });
 
   const requestType = "job_request";
 

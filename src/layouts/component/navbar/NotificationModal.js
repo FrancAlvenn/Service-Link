@@ -21,6 +21,7 @@ import { Bell } from "@phosphor-icons/react";
 import email from "../../../assets/email_img.png";
 import SidebarView from "../../../components/sidebar/SidebarView";
 import { useNavigate } from "react-router-dom";
+import NotificationActivityRender from "../../../utils/request_activity/NotificationActivityRender";
 
 dayjs.extend(relativeTime);
 
@@ -135,7 +136,13 @@ const NotificationModal = () => {
           </Typography>
 
           <div className="flex gap-2 mb-4 flex-wrap">
-            {["all", "comment", "approval", "status_change"].map((tab) => (
+            {[
+              "all",
+              "comment",
+              "approval",
+              "status_change",
+              "request_access",
+            ].map((tab) => (
               <Button
                 key={tab}
                 size="sm"
@@ -152,79 +159,18 @@ const NotificationModal = () => {
           {/* Activity Feed */}
           <div className="flex flex-col max-h-[500px] overflow-auto">
             <div className="flex flex-col gap-3">
-              {activities?.length > 0 ? (
-                activities
-                  .filter(
-                    (activity) =>
-                      (activity.visibility !== "internal" ||
-                        activity.created_by === user.reference_number) &&
-                      (selectedTab === "all" ||
-                        activity.request_type === selectedTab)
-                  )
-                  .map((activity) => {
-                    const isUser =
-                      activity.created_by === user.reference_number;
-                    const isViewed = activity.viewed;
-
-                    // Determine card color
-                    const colorMap = {
-                      status_change:
-                        "bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 border-blue-500",
-                      request_access:
-                        "bg-pink-100 dark:bg-pink-900 text-pink-900 dark:text-pink-100 border-pink-500",
-                      approval:
-                        "bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-100 border-green-500",
-                    };
-
-                    const defaultColor =
-                      "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200 border-gray-500 dark:border-gray-700";
-                    const viewedColor =
-                      "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 border-gray-500";
-                    const cardColor = isViewed
-                      ? viewedColor
-                      : colorMap[activity.request_type] || defaultColor;
-
-                    return (
-                      <div
-                        key={activity.id}
-                        className={`py-2 px-3 ${cardColor} border-l-4 rounded-md shadow-md cursor-pointer`}
-                        onClick={() =>
-                          handleNotificationClick(
-                            getRequestType(activity.request_id),
-                            activity.request_id
-                          )
-                        }
-                      >
-                        <div className="flex items-center justify-between">
-                          <div
-                            className="dangerous-p text-xs font-semibold dark:text-gray-100"
-                            dangerouslySetInnerHTML={{
-                              __html: activity.action,
-                            }}
-                          />
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
-                            {dayjs(activity.created_at).fromNow()}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center justify-between pt-1">
-                          <div
-                            className="text-sm dark:text-gray-100"
-                            dangerouslySetInnerHTML={{
-                              __html: activity.details,
-                            }}
-                          />
-                          <Chip
-                            size="sm"
-                            className="rounded dark:bg-gray-700 dark:text-gray-100"
-                            variant="outlined"
-                            color="black"
-                            value={activity.request_id}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })
+              {filteredActivities.length > 0 ? (
+                filteredActivities.map((activity) => (
+                  <NotificationActivityRender
+                    key={activity.id}
+                    activity={activity}
+                    user={user}
+                    onClick={(requestId, activityId) => {
+                      const type = getRequestType(requestId);
+                      handleNotificationClick(type, requestId);
+                    }}
+                  />
+                ))
               ) : (
                 <div className="text-gray-500 dark:text-gray-400 w-full text-sm text-center py-5 flex flex-col gap-4 items-center justify-center">
                   <img

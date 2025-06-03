@@ -18,6 +18,28 @@ const DetailTab = ({
   const [editedRequest, setEditedRequest] = useState({ ...selectedRequest });
   const [editingField, setEditingField] = useState(null);
 
+  const [venueOptions, setVenueOptions] = useState([]);
+
+  useEffect(() => {
+    axios({
+      method: "GET",
+      url: "/assets/",
+      withCredentials: true,
+    })
+      .then((response) => {
+        const venueAssets = [];
+        response.data.forEach((asset) => {
+          if (asset.asset_type === "Venue") {
+            venueAssets.push(asset);
+          }
+        });
+        setVenueOptions(venueAssets);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
+
   if (!selectedRequest) {
     return <p className="text-gray-500">Select a request to view details.</p>;
   }
@@ -73,7 +95,7 @@ const DetailTab = ({
       { key: "title", label: "Title", type: "text" },
       { key: "requester", label: "Requester", type: "text", readOnly: true },
       { key: "organization", label: "Organization", type: "text" },
-      { key: "event_title", label: "Event Title", type: "text" },
+      { key: "venue_requested", label: "Venue Requested", type: "select" },
       { key: "event_nature", label: "Event Nature", type: "text" },
       { key: "event_dates", label: "Event Date", type: "date" },
       { key: "event_start_time", label: "Start Time", type: "time" },
@@ -173,6 +195,21 @@ const DetailTab = ({
                   onKeyDown={(e) => handleKeyDown(e, key)}
                   autoFocus
                 />
+              ) : type === "select" ? (
+                <select
+                  className="text-sm p-2 w-full border border-gray-300 rounded-md dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                  value={editedRequest[key]}
+                  onChange={(e) => handleChange(key, e.target.value)}
+                  onBlur={() => handleBlur(key)}
+                  autoFocus
+                >
+                  <option value="">Select a venue</option>
+                  {venueOptions.map((venue) => (
+                    <option key={venue.id} value={venue.name}>
+                      {venue.name}
+                    </option>
+                  ))}
+                </select>
               ) : (
                 <input
                   type={type}

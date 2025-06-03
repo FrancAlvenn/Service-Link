@@ -26,10 +26,11 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
     requester: user.reference_number,
     organization: "",
     title: "",
+    event_nature: "",
+    event_nature_other: "",
     event_dates: "",
     event_start_time: "",
     event_end_time: "",
-    event_nature: "",
     venue_requested: "",
     participants: "",
     pax_estimation: "",
@@ -173,8 +174,6 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
     setRequest({ ...request, details: updatedDetails });
   };
 
-  // ... [handlers for Quill, adding/removing/editing details remain unchanged]
-
   const submitVenueRequest = async () => {
     try {
       let requestData = {
@@ -192,6 +191,14 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
         (user) => user.reference_number === request.requester
       );
 
+      if (
+        request.event_nature === "others" &&
+        !request.event_nature_other.trim()
+      ) {
+        ToastNotification.error("Please specify the event nature.");
+        return;
+      }
+
       requestData = assignApproversToRequest({
         requestType,
         requestInformation: requestData,
@@ -202,6 +209,10 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
         department_id: requesterId?.department_id,
         designation_id: requesterId?.designation_id,
       });
+
+      if (request.event_nature === "others") {
+        requestData.event_nature = request.event_nature_other.trim();
+      }
 
       let response = await axios.post("/venue_request", requestData, {
         withCredentials: true,
@@ -215,10 +226,10 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
           requester: user.reference_number,
           organization: "",
           title: "",
+          event_nature: "",
           event_dates: "",
           event_start_time: "",
           event_end_time: "",
-          event_nature: "",
           venue_requested: "",
           participants: "",
           pax_estimation: "",
@@ -323,6 +334,40 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
           onChange={handleChange}
           className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
         />
+      </div>
+
+      {/* Event Nature */}
+      <div>
+        <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
+          Event Nature
+        </label>
+        <select
+          name="event_nature"
+          value={request.event_nature}
+          onChange={handleChange}
+          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
+          required
+        >
+          <option value="">Select Event Nature</option>
+          <option value="curricular">Curricular</option>
+          <option value="non-curricular">Non-Curricular</option>
+          <option value="others">Others</option>
+        </select>
+        {request.event_nature === "others" && (
+          <div className="mt-2">
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
+              Please Specify
+            </label>
+            <input
+              type="text"
+              name="event_nature_other"
+              value={request.event_nature_other}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
+              required
+            />
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -546,6 +591,8 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
           !request.venue_requested ||
           !request.organization ||
           !request.title ||
+          !request.event_nature ||
+          (request.event_nature === "others" && !request.event_nature_other) ||
           !request.event_dates ||
           !request.event_start_time ||
           !request.event_end_time ||

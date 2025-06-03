@@ -85,7 +85,7 @@ const VenueRequestTemplate = forwardRef(({ request, users }, ref) => {
             Name of Department/Yr. & Section/Organization:
           </p>
           <div className="border-b border-black flex-1 ml-2">
-            {request.organization}
+            {request?.organization || ""}
           </div>
         </div>
 

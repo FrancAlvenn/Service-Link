@@ -199,7 +199,7 @@ const ParticularsTab = ({
 
                 {/* Actions */}
                 {isAuthorized && (
-                  <td className="p-2">
+                  <td className="p-3 w-full flex items-center">
                     {editingIndex === index ? (
                       <div className="flex gap-2 justify-center">
                         <button

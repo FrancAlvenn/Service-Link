@@ -33,6 +33,7 @@ import {
   VenueRequests,
 } from "./features/request_management/";
 import { UserContext, UserProvider } from "./context/UserContext";
+import { RequestActivityProvider } from "./context/RequestActivityContext";
 import RaiseRequest from "./features/request_management/component/raise_request/RaiseRequest";
 import AssetTable from "./features/asset_management/component/AssetTable";
 import { AssetProvider } from "./features/asset_management/context/AssetContext";
@@ -338,22 +339,24 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <UserProvider>
-          <SettingsProvider>
-            <TicketProvider>
-              <AssetProvider>
-                <AssetAssignmentLogProvider>
-                  <EmployeeProvider>
-                    <RequestsProviderWrapper>
-                      <div className="App font-sans ">
-                        <RouterProvider router={router} />
-                        <CustomToastContainer />
-                      </div>
-                    </RequestsProviderWrapper>
-                  </EmployeeProvider>
-                </AssetAssignmentLogProvider>
-              </AssetProvider>
-            </TicketProvider>
-          </SettingsProvider>
+          <RequestActivityProvider>
+            <SettingsProvider>
+              <TicketProvider>
+                <AssetProvider>
+                  <AssetAssignmentLogProvider>
+                    <EmployeeProvider>
+                      <RequestsProviderWrapper>
+                        <div className="App font-sans ">
+                          <RouterProvider router={router} />
+                          <CustomToastContainer />
+                        </div>
+                      </RequestsProviderWrapper>
+                    </EmployeeProvider>
+                  </AssetAssignmentLogProvider>
+                </AssetProvider>
+              </TicketProvider>
+            </SettingsProvider>
+          </RequestActivityProvider>
         </UserProvider>
       </AuthProvider>
     </ThemeProvider>

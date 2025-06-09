@@ -9,7 +9,7 @@ const Organization = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    name: {
+    organization: {
       type: DataTypes.STRING,
       allowNull: false,
     },

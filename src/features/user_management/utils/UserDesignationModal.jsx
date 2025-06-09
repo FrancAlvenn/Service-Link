@@ -12,6 +12,9 @@ import { PlusCircle } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../authentication";
 import ToastNotification from "../../../utils/ToastNotification";
+import shouldAccountBeActive from "./accountStatusChecker";
+import { UserContext } from "../../../context/UserContext";
+import { refetchAndValidateAccount } from "./refetchAndValidateAccount";
 
 function UserDesignationModal({
   currentDesignationId,
@@ -27,6 +30,8 @@ function UserDesignationModal({
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   const [loading, setLoading] = useState(true);
+
+  const { allUserInfo, fetchUsers } = useContext(UserContext);
 
   useEffect(() => {
     const getDesignations = async () => {
@@ -67,9 +72,7 @@ function UserDesignationModal({
       const response = await fetch(`/users/${userId}`, {
         method: "PUT",
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ designation_id: designationId }),
       });
 
@@ -81,6 +84,8 @@ function UserDesignationModal({
           data.message || "Designation updated."
         );
         onDesignationUpdate?.(designationId);
+        await refetchAndValidateAccount(userId);
+        fetchUsers();
       } else {
         throw new Error(data.message || "Update failed.");
       }
@@ -89,6 +94,7 @@ function UserDesignationModal({
       console.error("User designation update failed:", error);
     }
   };
+  // If the chosen designation is "Not Student", then the users account will automatically be activated
 
   const selectedDesignation = designationOptions.find(
     (option) => option.id === selectedDesignationId

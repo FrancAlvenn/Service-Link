@@ -1,8 +1,8 @@
 import { Button, Chip } from "@material-tailwind/react";
-import JobRequestTemplate from "./templates/JobRequestTemplate";
-import PurchasingRequestTemplate from "./templates/PurchasingRequestTemplate";
-import VehicleRequestTemplate from "./templates/VehicleRequestTemplate";
-import VenueRequestTemplate from "./templates/VenueRequestTemplate";
+import JobRequestTemplate from "./report_templates/JobRequestTemplate";
+import PurchasingRequestTemplate from "./report_templates/PurchasingRequestTemplate";
+import VehicleRequestTemplate from "./report_templates/VehicleRequestTemplate";
+import VenueRequestTemplate from "./report_templates/VenueRequestTemplate";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Printer } from "@phosphor-icons/react";
 import { useContext } from "react";

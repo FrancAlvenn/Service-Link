@@ -2,6 +2,7 @@ import { Typography, Chip, Button } from "@material-tailwind/react";
 import { UserCircle } from "@phosphor-icons/react";
 import UserDepartmentModal from "./UserDepartmentModal";
 import UserDesignationModal from "./UserDesignationModal";
+import UserOrganizationModal from "./UserOrganizationModal";
 
 const normalText =
   "text-center font-semibold rounded-full flex items-center justify-center";
@@ -41,6 +42,21 @@ export const getUserColumnConfig = ({
     ),
   },
   {
+    key: "designation",
+    label: "Designation",
+    header: (
+      <Typography variant="small" color="blue-gray" className={normalText}>
+        Designation
+      </Typography>
+    ),
+    render: (row) => (
+      <UserDesignationModal
+        currentDesignationId={row.designation_id}
+        userId={row.reference_number}
+      />
+    ),
+  },
+  {
     key: "department",
     label: "Department",
     header: (
@@ -56,16 +72,16 @@ export const getUserColumnConfig = ({
     ),
   },
   {
-    key: "designation",
-    label: "Designation",
+    key: "organization",
+    label: "Organization",
     header: (
       <Typography variant="small" color="blue-gray" className={normalText}>
-        Designation
+        Organization
       </Typography>
     ),
     render: (row) => (
-      <UserDesignationModal
-        currentDesignationId={row.designation_id}
+      <UserOrganizationModal
+        currentOrganizationId={row.organization_id}
         userId={row.reference_number}
       />
     ),
@@ -129,6 +145,8 @@ export const getUserColumnConfig = ({
           ? "green"
           : row.status === "invited"
           ? "blue"
+          : row.status === "inactive"
+          ? "red"
           : "gray";
 
       return (

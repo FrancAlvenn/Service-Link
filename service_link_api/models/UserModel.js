@@ -49,9 +49,13 @@ const User = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true,
     },
-    organization: {
-      type: DataTypes.STRING,
+    organization_id: {
+      type: DataTypes.INTEGER,
       allowNull: true,
+      references: {
+        model: "organizations",
+        key: "id",
+      },
     },
     department_id: {
       type: DataTypes.INTEGER,

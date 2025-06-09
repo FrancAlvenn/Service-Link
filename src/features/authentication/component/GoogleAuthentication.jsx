@@ -92,6 +92,14 @@ function GoogleAuthLogin() {
           return;
         }
 
+        if (response.status === 202) {
+          ToastNotification.info(
+            "Account not activated!",
+            "Please contact GSO office for account activation."
+          );
+          return;
+        }
+
         if (response.status === 200) {
           const userData = response.data.response.dataValues;
 

@@ -209,7 +209,12 @@ export const googleAuth = async (req, res) => {
     });
 
     // Check if the user is active
-    //  if (existingUser && existingUser.status !== 'active') return res.status(201).json("Account not activated, Please contact GSO office for account activation.");
+    if (existingUser && existingUser.status !== "active")
+      return res
+        .status(202)
+        .json(
+          "Account not activated, Please contact GSO office for account activation."
+        );
 
     // Check if the user already has a google_id in the database
     if (existingUser) {
@@ -303,7 +308,7 @@ export const googleAuth = async (req, res) => {
       google_id: req.body.google_id,
       profile_image_id: null,
       access_level: "user", // change later
-      status: "active", // change later
+      status: "inactive", // change later
       archived: false,
       password: hash, // only if storing it
     });

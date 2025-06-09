@@ -8,6 +8,7 @@ import DepartmentsModel from "./SettingsModels/DeparmentsModel.js";
 import DesignationModel from "./SettingsModels/DesignationModel.js";
 import UserModel from "./UserModel.js";
 import VehicleRequestModel from "./VehicleRequestModel.js";
+import Organization from "./SettingsModels/OrganizationModel.js";
 // Define associations
 JobRequestModel.hasMany(JobRequestDetails, {
   foreignKey: "job_request_id",
@@ -77,6 +78,12 @@ UserModel.belongsTo(DesignationModel, {
   foreignKey: "designation_id",
   targetKey: "id",
   as: "designation",
+});
+
+UserModel.belongsTo(Organization, {
+  foreignKey: "organization_id",
+  targetKey: "id",
+  as: "organization",
 });
 
 export {

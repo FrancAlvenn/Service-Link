@@ -33,6 +33,7 @@ export async function createVehicleRequest(req, res) {
       time_of_arrival: req.body.time_of_arrival,
       number_of_passengers: req.body.number_of_passengers,
       destination: req.body.destination,
+      destination_coordinates: req.body.destination_coordinates,
       purpose: req.body.purpose,
       requester: req.body.requester,
       status: "Pending",

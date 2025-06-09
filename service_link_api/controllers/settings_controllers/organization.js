@@ -5,7 +5,7 @@ import { Op } from "sequelize";
 export async function createNewOrganization(req, res) {
   try {
     const newOrganization = await OrganizationModel.create({
-      name: req.body.name,
+      organization: req.body.organization,
       description: req.body.description,
       archived: false,
     });
@@ -57,7 +57,7 @@ export async function updateOrganization(req, res) {
   try {
     const [updatedRows] = await OrganizationModel.update(
       {
-        name: req.body.name,
+        organization: req.body.organization,
         description: req.body.description,
       },
       {

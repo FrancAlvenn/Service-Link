@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Button } from "@material-tailwind/react";
 import { AuthContext } from "../../../../authentication";
 import axios from "axios";
@@ -7,8 +7,13 @@ import ToastNotification from "../../../../../utils/ToastNotification";
 import { VehicleRequestsContext } from "../../../context/VehicleRequestsContext";
 import { SettingsContext } from "../../../../settings/context/SettingsContext";
 import assignApproversToRequest from "../../../utils/assignApproversToRequest";
+import MapboxAddressPicker from "../../../../../components/map_address_picker/MapboxAddressPicker";
 
 const VehicleRequestForm = ({ setSelectedRequest }) => {
+  const mapboxAddressPickerRef = useRef();
+
+  const [selectedLocation, setSelectedLocation] = useState(null);
+
   const { user } = useContext(AuthContext);
 
   const { allUserInfo, getUserByReferenceNumber, fetchUsers } =
@@ -26,6 +31,7 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
     time_of_arrival: "",
     number_of_passengers: "",
     destination: "",
+    destination_coordinates: "",
     purpose: "",
     remarks: "",
     approvers: [],
@@ -129,6 +135,15 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
 
     setFormErrors(newErrors);
     setRequest((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handle destination selection
+  const handleDestinationSelect = (place) => {
+    setRequest((prev) => ({
+      ...prev,
+      destination: place.place_name,
+      destination_coordinates: place.coordinates,
+    }));
   };
 
   useEffect(() => {
@@ -287,7 +302,7 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
           </select>
         </div> */}
 
-        <div>
+        {/* <div>
           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
             Destination
           </label>
@@ -298,6 +313,35 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
             onChange={handleChange}
             className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-white"
           />
+        </div> */}
+        <div>
+          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Destination
+          </label>
+          <MapboxAddressPicker
+            ref={mapboxAddressPickerRef}
+            onSelect={handleDestinationSelect}
+            token={
+              "pk.eyJ1IjoiZnJsYXZlbiIsImEiOiJjbWJvaDBmdWoxbmp2Mm1xd3ljbHRiZjNjIn0.fehjAYZ5XQ-62DcWUq-hjQ"
+            }
+          />
+
+          {/* Add hidden field for coordinates if needed */}
+          <input
+            type="hidden"
+            name="destination_coordinates"
+            value={
+              request.destination_coordinates
+                ? JSON.stringify(request.destination_coordinates)
+                : ""
+            }
+          />
+
+          {!request.destination && formErrors.destination && (
+            <p className="text-xs text-red-500 mt-1">
+              {formErrors.destination}
+            </p>
+          )}
         </div>
       </div>
 

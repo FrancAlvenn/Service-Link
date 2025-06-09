@@ -24,6 +24,16 @@ const VehicleRequest = sequelize.define(
       allowNull: true,
       defaultValue: null,
     },
+    destination: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      defaultValue: null,
+    },
+    destination_coordinates: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      defaultValue: null,
+    },
     date_filled: {
       type: DataTypes.DATE,
       allowNull: false,

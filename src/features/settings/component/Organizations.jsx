@@ -24,7 +24,10 @@ const Organization = () => {
   } = useContext(SettingsContext);
 
   const [editIndex, setEditIndex] = useState(null);
-  const [editValues, setEditValues] = useState({ name: "", description: "" });
+  const [editValues, setEditValues] = useState({
+    organization: "",
+    description: "",
+  });
   const [addingNew, setAddingNew] = useState(false);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -54,13 +57,16 @@ const Organization = () => {
 
   const handleAddOrganization = () => {
     setEditIndex("new");
-    setEditValues({ name: "", description: "" });
+    setEditValues({ organization: "", description: "" });
     setAddingNew(true);
   };
 
   const handleEditOrganization = (org) => {
     setEditIndex(org.id);
-    setEditValues({ name: org.name, description: org.description });
+    setEditValues({
+      organization: org.organization,
+      description: org.description,
+    });
   };
 
   const handleChange = (e) => {
@@ -83,7 +89,7 @@ const Organization = () => {
 
   const resetEditState = () => {
     setEditIndex(null);
-    setEditValues({ name: "", description: "" });
+    setEditValues({ organization: "", description: "" });
     setAddingNew(false);
   };
 
@@ -128,13 +134,17 @@ const Organization = () => {
           {isEditing ? (
             <input
               type="text"
-              name="name"
-              value={editValues.name}
+              name="organization"
+              value={editValues.organization}
               onChange={handleChange}
               className="w-full px-2 py-1 rounded-md border"
             />
           ) : (
-            <Chip value={org.name} color="cyan" className="text-white w-fit" />
+            <Chip
+              value={org.organization}
+              color="cyan"
+              className="text-white w-fit"
+            />
           )}
         </td>
         <td className="py-3 px-4">
@@ -187,8 +197,8 @@ const Organization = () => {
                     <td className="py-3 px-4">
                       <input
                         type="text"
-                        name="name"
-                        value={editValues.name}
+                        name="organization"
+                        value={editValues.organization}
                         onChange={handleChange}
                         className="w-full px-2 py-1 rounded-md border"
                       />
@@ -235,9 +245,8 @@ const Organization = () => {
                     onClick={() => handleUpdateOrganization(null)}
                     className="py-2 px-4"
                     disabled={
-                      editValues.name === "" ||
-                      editValues.description === "" ||
-                      editValues.color === ""
+                      editValues.organization === "" ||
+                      editValues.description === ""
                     }
                   >
                     Save

@@ -116,6 +116,9 @@ const seedData = async () => {
   await seedStatuses();
   await seedPriorities();
   await seedDepartments();
+  await seedDesignation();
+  await seedOrganization();
+  await seedPosition();
   await seedUsers();
   // await seedJobRequests();
   // await seedPurchasingRequests();
@@ -130,8 +133,8 @@ const seedUsers = async () => {
     {
       reference_number: "DYCI-2025-00001",
       google_id: "",
-      first_name: "Admin",
-      last_name: "0",
+      first_name: "ServiceLink",
+      last_name: "Support",
       username: "support.servicelink@dyci.edu.ph",
       password: "$2a$10$6cl.36kDK/EV/EJ64qn3/uLj35PnIGMEzWyGah.hx6UYfGHDLVub.", // hashed
       email: "support.servicelink@dyci.edu.ph",
@@ -293,6 +296,31 @@ const seedPriorities = async () => {
   }
 };
 
+//Seed Position: Immediate Head, College Dean, GSO Officer, Finance
+const seedPosition = async () => {
+  const defaultPositions = [
+    {
+      position: "Immediate Head",
+      approval_level: 1,
+      description: "Immediate Head",
+    },
+    {
+      position: "College Dean",
+      approval_level: 2,
+      description: "College Dean",
+    },
+    { position: "GSO Officer", approval_level: 3, description: "GSO Officer" },
+    { position: "Finance", approval_level: 4, description: "Finance" },
+  ];
+
+  for (const position of defaultPositions) {
+    await Position.findOrCreate({
+      where: { position: position.position },
+      defaults: position,
+    });
+  }
+};
+
 // Seed Departments
 const seedDepartments = async () => {
   const defaultDepartments = [
@@ -342,6 +370,94 @@ const seedDepartments = async () => {
     await DepartmentsModel.findOrCreate({
       where: { name: department.name },
       defaults: department,
+    });
+  }
+};
+
+//Seed Designation: Student, Faculty, Dean
+const seedDesignation = async () => {
+  const defaultDesignation = [
+    { designation: "Student", description: "Student" },
+    { designation: "Faculty", description: "Faculty" },
+    { designation: "Dean", description: "Dean" },
+  ];
+
+  for (const designation of defaultDesignation) {
+    await Designation.findOrCreate({
+      where: { designation: designation.designation },
+      defaults: designation,
+    });
+  }
+};
+
+//Seed Organization DYCI - Faculty
+const seedOrganization = async () => {
+  const defaultOrganization = [
+    {
+      organization: "Alliance of Liberal Arts Students",
+      description: "CAS - Student Government",
+    },
+    {
+      organization:
+        "Young Managers Professional Alliance for Corporate Triumph",
+      description: "CBA - Student Government",
+    },
+    {
+      organization: "Erudites of the Nightingale Society",
+      description: "CHS - Student Government",
+    },
+    {
+      organization: "Association of Hospitality and Restaurant Management",
+      description: "CHMT - Student Government",
+    },
+    {
+      organization: "League of Young Tourism Students",
+      description: "CHMT - Student Government",
+    },
+    {
+      organization: "Association of Computer Enthusiast Students",
+      description: "CCS - Student Government",
+    },
+    {
+      organization: "Junior Philippine Institute of Accountants",
+      description: "COA - Student Government",
+    },
+    {
+      organization: "College of Education Student Organization",
+      description: "COED - Student Government",
+    },
+    {
+      organization: "Council of Psyche",
+      description: "SOP - Student Government",
+    },
+    {
+      organization: "Pambansang Samahan ng Inhinyerong Mekanikal",
+      description: "SME - Student Government",
+    },
+    {
+      organization: "Maritime Council Officer",
+      description: "CME - Student Government",
+    },
+    {
+      organization: "Corps of Midshipman",
+      description: "CME - Student Government",
+    },
+    {
+      organization: "College Peer Facilitator's Circle",
+      description: "DYCI - Student Government",
+    },
+    { organization: "Vox Nostra", description: "DYCI - Student Government" },
+    { organization: "Himig DYCIan", description: "DYCI - Student Government" },
+    {
+      organization: "MATTEmaticians",
+      description: "DYCI - Student Government",
+    },
+  ];
+
+  for (const organization of defaultOrganization) {
+    await Organization.findOrCreate({
+      where: { organization: organization.organization },
+      defaults: organization,
     });
   }
 };

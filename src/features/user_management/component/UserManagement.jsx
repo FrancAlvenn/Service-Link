@@ -197,14 +197,14 @@ const UserManagement = () => {
                 </Typography>
                 <Typography variant="small" color="gray" className="mb-3">
                   User will receive an invitation email if they haven’t already
-                  been added to a project on this site.
+                  been added to Service Link.
                 </Typography>
                 <input
                   type="email"
                   value={emailToAdd}
                   onChange={(e) => setEmailToAdd(e.target.value)}
                   className="w-full mb-2 border border-slate-200 rounded-md px-3 py-2 focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
-                  placeholder="User email"
+                  placeholder="Email Address (@dyci.edu.ph)"
                 />
                 {errorMessage && (
                   <Typography

@@ -8,6 +8,7 @@ import jwt from "jsonwebtoken";
 import multer from "multer";
 import DepartmentsModel from "../models/SettingsModels/DeparmentsModel.js";
 import Designation from "../models/SettingsModels/DesignationModel.js";
+import Organization from "../models/SettingsModels/OrganizationModel.js";
 // Set up storage for uploaded files
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -45,6 +46,10 @@ export async function getAllUsers(req, res) {
           model: Designation,
           as: "designation",
         },
+        {
+          model: Organization,
+          as: "organization",
+        },
       ],
     });
     res.status(200).json(users);
@@ -77,8 +82,6 @@ export async function getUserById(req, res) {
     //Check is user exists in the database
     if (user === null) {
       res.status(404).json({ message: "Request not found!" });
-    } else {
-      res.status(200).json({ user });
     }
     res.status(200).json(user);
   } catch (error) {
@@ -129,12 +132,13 @@ export async function createUser(req, res) {
         email: req.body.email,
         password: hash,
         contact_number: req.body.contact_number,
-        organization: req.body.organization,
-        department: req.body.department,
-        designation: req.body.designation,
+        department_id: req.body.department_id,
+        designation_id: req.body.designation_id,
+        organization_id: req.body.organization_id,
         access_level: req.body.access_level || "user", //change this later to 'user' -- 'admin' will be used for development
         immediate_head: req.body.immediate_head,
         profile_image_id: null, // Set profile image ID to null initially
+        status: req.body.status || "inactive", // Set status to active by default
       });
 
       // If an image was uploaded, save its path to the Image table
@@ -217,11 +221,12 @@ export async function updateUserById(req, res) {
         password: req.body.password || user.password,
         email: req.body.email || user.email,
         contact_number: req.body.contact_number || user.contact_number,
-        organization: req.body.organization || user.organization,
+        organization_id: req.body.organization_id || user.organization_id,
         department_id: req.body.department_id || user.department_id,
         designation_id: req.body.designation_id || user.designation_id,
         access_level: req.body.access_level || user.access_level,
         immediate_head: req.body.immediate_head || user.immediate_head,
+        status: req.body.status || user.status,
       };
 
       // Check if a new password is provided; if so, hash it

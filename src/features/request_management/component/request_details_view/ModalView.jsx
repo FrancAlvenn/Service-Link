@@ -316,7 +316,7 @@ const ModalView = ({ open, onClose, referenceNumber, asModal = false }) => {
                     />
                   ) : (
                     <p
-                      onClick={handleEditTitle}
+                      // onClick={handleEditTitle}
                       className="w-full cursor-pointer"
                     >
                       {request.title}
@@ -417,7 +417,7 @@ const ModalView = ({ open, onClose, referenceNumber, asModal = false }) => {
                       />
                     ) : (
                       <p
-                        onClick={handleEditPurpose}
+                        // onClick={handleEditPurpose}
                         className="text-sm cursor-pointer"
                       >
                         {request.purpose}
@@ -464,7 +464,7 @@ const ModalView = ({ open, onClose, referenceNumber, asModal = false }) => {
                   />
                 </div>
                 <div className="flex gap-2">
-                  <RequestAccess selectedRequest={request} />
+                  {/* <RequestAccess selectedRequest={request} /> */}
                   <PrintableRequestForm
                     requestType={requestType}
                     requestData={request}

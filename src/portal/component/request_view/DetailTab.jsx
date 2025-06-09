@@ -64,8 +64,8 @@ const DetailTab = ({
       { key: "date_required", label: "Date Required", type: "date" },
       { key: "purpose", label: "Purpose", type: "textarea" },
       { key: "remarks", label: "Remarks", type: "textarea" },
-      { key: "created_at", label: "Created At", type: "date", readOnly: true },
-      { key: "updated_at", label: "Updated At", type: "date", readOnly: true },
+      // { key: "created_at", label: "Created At", type: "date", readOnly: true },
+      // { key: "updated_at", label: "Updated At", type: "date", readOnly: true },
     ],
 
     purchasing_request: [
@@ -81,8 +81,8 @@ const DetailTab = ({
       { key: "date_required", label: "Date Required", type: "date" },
       { key: "purpose", label: "Purpose", type: "textarea" },
       { key: "remarks", label: "Remarks", type: "textarea" },
-      { key: "created_at", label: "Created At", type: "date", readOnly: true },
-      { key: "updated_at", label: "Updated At", type: "date", readOnly: true },
+      // { key: "created_at", label: "Created At", type: "date", readOnly: true },
+      // { key: "updated_at", label: "Updated At", type: "date", readOnly: true },
     ],
 
     venue_request: [
@@ -108,8 +108,8 @@ const DetailTab = ({
       },
       { key: "purpose", label: "Purpose", type: "textarea" },
       { key: "remarks", label: "Remarks", type: "textarea" },
-      { key: "created_at", label: "Created At", type: "date", readOnly: true },
-      { key: "updated_at", label: "Updated At", type: "date", readOnly: true },
+      // { key: "created_at", label: "Created At", type: "date", readOnly: true },
+      // { key: "updated_at", label: "Updated At", type: "date", readOnly: true },
     ],
 
     vehicle_request: [
@@ -134,8 +134,8 @@ const DetailTab = ({
       { key: "destination", label: "Destination", type: "text" },
       { key: "purpose", label: "Purpose", type: "textarea" },
       { key: "remarks", label: "Remarks", type: "textarea" },
-      { key: "created_at", label: "Created At", type: "date", readOnly: true },
-      { key: "updated_at", label: "Updated At", type: "date", readOnly: true },
+      // { key: "created_at", label: "Created At", type: "date", readOnly: true },
+      // { key: "updated_at", label: "Updated At", type: "date", readOnly: true },
     ],
   };
 
@@ -226,7 +226,7 @@ const DetailTab = ({
                 className={`text-sm p-2 w-full border border-gray-300 rounded-md cursor-pointer dark:border-gray-600 dark:bg-gray-800 dark:text-white ${
                   readOnly ? "text-gray-500 dark:text-gray-500" : ""
                 }`}
-                onClick={() => !readOnly && setEditingField(key)}
+                // onClick={() => !readOnly && setEditingField(key)}
               >
                 {[
                   "date_required",
@@ -239,7 +239,7 @@ const DetailTab = ({
                 ) : key === "requester" ? (
                   getUserByReferenceNumber(selectedRequest[key]) || (
                     <span className="text-gray-400 dark:text-gray-500 italic">
-                      Click to edit
+                      {/* Click to edit */}
                     </span>
                   )
                 ) : key === "department" ? (
@@ -252,7 +252,7 @@ const DetailTab = ({
                 ) : (
                   selectedRequest[key] || (
                     <span className="text-gray-400 dark:text-gray-500 italic">
-                      Click to edit
+                      {/* Click to edit */}
                     </span>
                   )
                 )}

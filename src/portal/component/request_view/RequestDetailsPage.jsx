@@ -142,7 +142,7 @@ function RequestDetailsPage({ referenceNumber, onClose, isApprover }) {
           <div className="p-1 rounded-md bg-red-500">
             <X color="white" onClick={onClose} className="cursor-pointer" />
           </div>
-          <RequestAccess selectedRequest={request} requestType={requestType} />
+          {/* <RequestAccess selectedRequest={request} requestType={requestType} /> */}
         </div>
 
         {/* Editable Title */}
@@ -161,7 +161,7 @@ function RequestDetailsPage({ referenceNumber, onClose, isApprover }) {
             <Typography
               variant="h5"
               className="text-gray-800 dark:text-gray-200 font-bold text-xl cursor-pointer"
-              onClick={handleEditTitle}
+              // onClick={handleEditTitle}
             >
               {request.title || "Request Details"}
             </Typography>

@@ -82,47 +82,53 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
       });
   }, []);
 
-  const [errorMessage, setErrorMessage] = useState("");
+  const [formErrors, setFormErrors] = useState({});
 
   const handleChange = (e) => {
-    // Validate Date: Ensure date_required is not in the past
-    if (e.target.name === "date_of_trip") {
+    const { name, value } = e.target;
+    let newErrors = { ...formErrors };
+
+    // Date validation
+    if (name === "date_of_trip") {
       const today = new Date();
-      today.setHours(0, 0, 0, 0); // Normalize to start of day for accuracy
-      const selectedDate = new Date(e.target.value);
+      today.setHours(0, 0, 0, 0);
+      const selectedDate = new Date(value);
 
       if (selectedDate < today) {
-        setErrorMessage("Invalid Date");
-        // ToastNotification.error("Invalid Date", "Date cannot be in the past.");
-        return; // Exit without updating state
+        newErrors.date_of_trip = "Date cannot be in the past.";
+      } else if (user.access_level === "user") {
+        const oneWeekFromToday = new Date(today);
+        oneWeekFromToday.setDate(today.getDate() + 7);
+
+        if (selectedDate < oneWeekFromToday) {
+          newErrors.date_of_trip =
+            "Requests should be at least one week prior. For urgent requests, contact GSO.";
+        } else {
+          delete newErrors.date_of_trip;
+        }
+      } else {
+        delete newErrors.date_of_trip;
       }
     }
 
-    // Validate Time: Ensure event_start_time is not later than event_end_time
-    if (
-      e.target.name === "time_of_departure" ||
-      e.target.name === "time_of_arrival"
-    ) {
-      const { time_of_departure, time_of_arrival } = {
-        ...request,
-        [e.target.name]: e.target.value,
-      };
+    // Time validation
+    if (name === "time_of_departure" || name === "time_of_arrival") {
+      const tempRequest = { ...request, [name]: value };
+      const { time_of_departure, time_of_arrival } = tempRequest;
 
       if (
         time_of_departure &&
         time_of_arrival &&
         time_of_departure >= time_of_arrival
       ) {
-        setErrorMessage(
-          "Invalid Time. Departure time must be earlier than arrival time."
-        );
-        // ToastNotification.error("Invalid Time", "Departure time must be earlier than arrival time.");
-        return; // Exit without updating state
+        newErrors.time = "Departure time must be earlier than arrival time.";
+      } else {
+        delete newErrors.time;
       }
     }
 
-    setErrorMessage("");
-    setRequest({ ...request, [e.target.name]: e.target.value });
+    setFormErrors(newErrors);
+    setRequest((prev) => ({ ...prev, [name]: value }));
   };
 
   useEffect(() => {
@@ -309,8 +315,8 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
             className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-white"
             required
           />
-          {errorMessage === "Invalid Date" && (
-            <p className="text-xs text-red-500">{errorMessage}</p>
+          {formErrors.date_of_trip && (
+            <p className="text-xs text-red-500">{formErrors.date_of_trip}</p>
           )}
         </div>
         <div>
@@ -325,9 +331,8 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
             className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-white"
             required
           />
-          {errorMessage ===
-            "Invalid Time. Departure time must be earlier than arrival time." && (
-            <p className="text-xs text-red-500">{errorMessage}</p>
+          {formErrors.time && (
+            <p className="text-xs text-red-500 col-span-3">{formErrors.time}</p>
           )}
         </div>
         <div>

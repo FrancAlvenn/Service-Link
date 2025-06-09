@@ -15,14 +15,17 @@ const requestFieldConfig = {
       type: "text",
       readOnly: true,
     },
-    { key: "title", label: "Title", type: "text" },
-    { key: "priority", label: "Priority", type: "select" },
+    { key: "title", label: "Title", type: "text", readOnly: true },
+    { key: "priority", label: "Priority", type: "select", readOnly: true },
     { key: "requester", label: "Requester", type: "text", readOnly: true },
-    { key: "date_required", label: "Date Required", type: "date" },
-    { key: "purpose", label: "Purpose", type: "textarea" },
-    { key: "remarks", label: "Remarks", type: "textarea" },
-    { key: "created_at", label: "Created At", type: "date", readOnly: true },
-    { key: "updated_at", label: "Updated At", type: "date", readOnly: true },
+    {
+      key: "date_required",
+      label: "Date Required",
+      type: "date",
+      readOnly: true,
+    },
+    { key: "purpose", label: "Purpose", type: "textarea", readOnly: true },
+    { key: "remarks", label: "Remarks", type: "textarea", readOnly: true },
   ],
 
   purchasing_request: [
@@ -32,15 +35,23 @@ const requestFieldConfig = {
       type: "text",
       readOnly: true,
     },
-    { key: "title", label: "Title", type: "text" },
-    { key: "priority", label: "Priority", type: "select" },
+    { key: "title", label: "Title", type: "text", readOnly: true },
+    { key: "priority", label: "Priority", type: "select", readOnly: true },
     { key: "requester", label: "Requester", type: "text", readOnly: true },
-    { key: "supply_category", label: "Supply Category", type: "text" },
-    { key: "date_required", label: "Date Required", type: "date" },
-    { key: "purpose", label: "Purpose", type: "textarea" },
-    { key: "remarks", label: "Remarks", type: "textarea" },
-    { key: "created_at", label: "Created At", type: "date", readOnly: true },
-    { key: "updated_at", label: "Updated At", type: "date", readOnly: true },
+    {
+      key: "supply_category",
+      label: "Supply Category",
+      type: "text",
+      readOnly: true,
+    },
+    {
+      key: "date_required",
+      label: "Date Required",
+      type: "date",
+      readOnly: true,
+    },
+    { key: "purpose", label: "Purpose", type: "textarea", readOnly: true },
+    { key: "remarks", label: "Remarks", type: "textarea", readOnly: true },
   ],
 
   venue_request: [
@@ -50,21 +61,49 @@ const requestFieldConfig = {
       type: "text",
       readOnly: true,
     },
-    { key: "title", label: "Title", type: "text" },
-    { key: "priority", label: "Priority", type: "select" },
+    { key: "title", label: "Title", type: "text", readOnly: true },
+    { key: "priority", label: "Priority", type: "select", readOnly: true },
     { key: "requester", label: "Requester", type: "text", readOnly: true },
-    { key: "organization", label: "Organization", type: "text" },
-    { key: "event_nature", label: "Event Nature", type: "text" },
-    { key: "venue_requested", label: "Venue Requested", type: "select" },
-    { key: "event_dates", label: "Event Date", type: "date" },
-    { key: "event_start_time", label: "Start Time", type: "time" },
-    { key: "event_end_time", label: "End Time", type: "time" },
-    { key: "participants", label: "Participants", type: "text" },
-    { key: "pax_estimation", label: "Estimated Participants", type: "number" },
-    { key: "purpose", label: "Purpose", type: "textarea" },
-    { key: "remarks", label: "Remarks", type: "textarea" },
-    { key: "created_at", label: "Created At", type: "date", readOnly: true },
-    { key: "updated_at", label: "Updated At", type: "date", readOnly: true },
+    {
+      key: "organization",
+      label: "Organization",
+      type: "text",
+      readOnly: true,
+    },
+    {
+      key: "event_nature",
+      label: "Event Nature",
+      type: "text",
+      readOnly: true,
+    },
+    {
+      key: "venue_requested",
+      label: "Venue Requested",
+      type: "select",
+      readOnly: true,
+    },
+    { key: "event_dates", label: "Event Date", type: "date", readOnly: true },
+    {
+      key: "event_start_time",
+      label: "Start Time",
+      type: "time",
+      readOnly: true,
+    },
+    { key: "event_end_time", label: "End Time", type: "time", readOnly: true },
+    {
+      key: "participants",
+      label: "Participants",
+      type: "text",
+      readOnly: true,
+    },
+    {
+      key: "pax_estimation",
+      label: "Estimated Participants",
+      type: "number",
+      readOnly: true,
+    },
+    { key: "purpose", label: "Purpose", type: "textarea", readOnly: true },
+    { key: "remarks", label: "Remarks", type: "textarea", readOnly: true },
   ],
 
   vehicle_request: [
@@ -74,23 +113,42 @@ const requestFieldConfig = {
       type: "text",
       readOnly: true,
     },
-    { key: "title", label: "Title", type: "text" },
-    { key: "priority", label: "Priority", type: "select" },
+    { key: "title", label: "Title", type: "text", readOnly: true },
+    { key: "priority", label: "Priority", type: "select", readOnly: true },
     { key: "requester", label: "Requester", type: "text", readOnly: true },
-    { key: "vehicle_requested", label: "Vehicle Requested", type: "select" },
-    { key: "date_of_trip", label: "Date of Trip", type: "date" },
-    { key: "time_of_departure", label: "Departure Time", type: "time" },
-    { key: "time_of_arrival", label: "Arrival Time", type: "time" },
+    {
+      key: "vehicle_requested",
+      label: "Vehicle Requested",
+      type: "select",
+      readOnly: true,
+    },
+    {
+      key: "date_of_trip",
+      label: "Date of Trip",
+      type: "date",
+      readOnly: true,
+    },
+    {
+      key: "time_of_departure",
+      label: "Departure Time",
+      type: "time",
+      readOnly: true,
+    },
+    {
+      key: "time_of_arrival",
+      label: "Arrival Time",
+      type: "time",
+      readOnly: true,
+    },
     {
       key: "number_of_passengers",
       label: "Number of Passengers",
       type: "number",
+      readOnly: true,
     },
-    { key: "destination", label: "Destination", type: "text" },
-    { key: "purpose", label: "Purpose", type: "textarea" },
-    { key: "remarks", label: "Remarks", type: "textarea" },
-    { key: "created_at", label: "Created At", type: "date", readOnly: true },
-    { key: "updated_at", label: "Updated At", type: "date", readOnly: true },
+    { key: "destination", label: "Destination", type: "text", readOnly: true },
+    { key: "purpose", label: "Purpose", type: "textarea", readOnly: true },
+    { key: "remarks", label: "Remarks", type: "textarea", readOnly: true },
   ],
 };
 
@@ -307,7 +365,7 @@ const DetailsTab = ({
                   formatDate(selectedRequest[key])
                 ) : key === "requester" ? (
                   getUserByReferenceNumber(selectedRequest[key]) || (
-                    <span className="text-gray-400 italic">Click to edit</span>
+                    <span className="text-gray-400 italic"></span>
                   )
                 ) : key === "department" ? (
                   <span className="flex items-end justify-end">
@@ -327,7 +385,7 @@ const DetailsTab = ({
                   />
                 ) : (
                   selectedRequest[key] || (
-                    <span className="text-gray-400 italic">Click to edit</span>
+                    <span className="text-gray-400 italic"></span>
                   )
                 )}
               </p>

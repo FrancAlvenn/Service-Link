@@ -83,7 +83,6 @@ function PriorityModal({ input, referenceNumber, requestType }) {
         method: "put",
         url: `/${requestType}/${referenceNumber}`,
         data: {
-          requester: user.reference_number,
           priority: selectedPriority,
         },
         withCredentials: true,

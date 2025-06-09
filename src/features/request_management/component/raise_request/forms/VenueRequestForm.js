@@ -53,10 +53,7 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
   const [venueOptions, setVenueOptions] = useState([]);
 
   // New: Individual error states
-  const [timeErrors, setTimeErrors] = useState({
-    date: "",
-    time: "",
-  });
+  const [formErrors, setFormErrors] = useState({});
 
   const {
     departments,
@@ -110,15 +107,26 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
     if (name === "event_dates") {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
+
+      const oneWeekFromNow = new Date();
+      oneWeekFromNow.setHours(0, 0, 0, 0);
+      oneWeekFromNow.setDate(oneWeekFromNow.getDate() + 7);
+
       const selectedDate = new Date(value);
+      selectedDate.setHours(0, 0, 0, 0);
 
       if (selectedDate < today) {
-        setTimeErrors((prev) => ({
+        setFormErrors((prev) => ({
           ...prev,
           date: "Event date cannot be in the past.",
         }));
+      } else if (selectedDate < oneWeekFromNow) {
+        setFormErrors((prev) => ({
+          ...prev,
+          date: "Requests should be at least one week prior. For urgent requests, please contact the GSO.",
+        }));
       } else {
-        setTimeErrors((prev) => ({ ...prev, date: "" }));
+        setFormErrors((prev) => ({ ...prev, date: "" }));
       }
     }
 
@@ -128,17 +136,17 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
 
       if (updatedRequest.event_start_time && updatedRequest.event_end_time) {
         if (start >= end) {
-          setTimeErrors((prev) => ({
+          setFormErrors((prev) => ({
             ...prev,
-            time: "Start time must be earlier than end time.",
+            time: "End time must be later than start time.",
           }));
         } else if ((end - start) / (1000 * 60) < 60) {
-          setTimeErrors((prev) => ({
+          setFormErrors((prev) => ({
             ...prev,
             time: "Event duration must be at least 1 hour.",
           }));
         } else {
-          setTimeErrors((prev) => ({ ...prev, time: "" }));
+          setFormErrors((prev) => ({ ...prev, time: "" }));
         }
       }
     }
@@ -146,14 +154,19 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
     setRequest(updatedRequest);
   };
 
-  const handleAddParticular = () => {
+  const handleAddParticular = (e) => {
+    e.preventDefault();
+    const newParticular = { particulars: "", quantity: 0, description: "" };
+    const updatedDetails = [...request.details, newParticular];
+
     setRequest({
       ...request,
-      details: [
-        ...request.details,
-        { particulars: "", quantity: 0, description: "" },
-      ],
+      details: updatedDetails,
     });
+
+    // Set the new index to edit mode
+    setEditingIndex(updatedDetails.length - 1);
+    setEditedParticular(newParticular);
   };
 
   const handleEditClick = (index) => {
@@ -411,8 +424,8 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
             onChange={handleChange}
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
           />
-          {timeErrors.date && (
-            <p className="text-red-500 text-xs mt-1">{timeErrors.date}</p>
+          {formErrors.date && (
+            <p className="text-red-500 text-xs mt-1">{formErrors.date}</p>
           )}
         </div>
 
@@ -442,8 +455,8 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
             onChange={handleChange}
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
           />
-          {timeErrors.time && (
-            <p className="text-red-500 text-xs mt-1">{timeErrors.time}</p>
+          {formErrors.time && (
+            <p className="text-red-500 text-xs mt-1">{formErrors.time}</p>
           )}
         </div>
       </div>
@@ -599,8 +612,8 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
           !request.participants ||
           !request.pax_estimation ||
           !request.purpose ||
-          timeErrors.date ||
-          timeErrors.time
+          formErrors.date ||
+          formErrors.time
         }
         className="dark:bg-blue-600 dark:hover:bg-blue-500 w-full md:w-auto"
       >

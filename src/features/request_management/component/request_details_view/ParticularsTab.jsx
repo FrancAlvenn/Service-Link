@@ -198,7 +198,7 @@ const ParticularsTab = ({
                 </td>
 
                 {/* Actions */}
-                {isAuthorized && (
+                {/* {isAuthorized && (
                   <td className="p-3 w-full flex items-center">
                     {editingIndex === index ? (
                       <div className="flex gap-2 justify-center">
@@ -236,14 +236,14 @@ const ParticularsTab = ({
                       </div>
                     )}
                   </td>
-                )}
+                )} */}
               </tr>
             ))
           )}
         </tbody>
       </table>
 
-      {isAuthorized && (
+      {/* {isAuthorized && (
         <Button
           variant="outlined"
           size="sm"
@@ -253,7 +253,7 @@ const ParticularsTab = ({
           <Plus size={16} />
           Add Particular
         </Button>
-      )}
+      )} */}
     </div>
   );
 };

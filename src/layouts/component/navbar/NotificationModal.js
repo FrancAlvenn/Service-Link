@@ -110,9 +110,14 @@ const NotificationModal = () => {
       dismiss={{ itemPress: false }}
     >
       <MenuHandler>
-        <Button variant="text" className="flex items-center px-3 py-3 gap-x-3">
-          <Bell size={24} className="cursor-pointer" />
-        </Button>
+        <div title="Click to open notifications">
+          <Button
+            variant="text"
+            className="flex items-center px-3 py-3 gap-x-3"
+          >
+            <Bell size={24} className="cursor-pointer" />
+          </Button>
+        </div>
       </MenuHandler>
 
       <MenuList className="w-[420px] max-h-[500px] overflow-auto p-4 dark:bg-gray-900 dark:text-gray-100 z-[9999]">

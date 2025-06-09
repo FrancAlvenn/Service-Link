@@ -99,6 +99,25 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
       }
     }
 
+    // Validate Date: Ensure that for user accounts the date_required should be at least one week prior
+    if (user.access_level === "user") {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Normalize to start of day for accuracy
+
+      const oneWeekFromToday = new Date(today);
+      oneWeekFromToday.setDate(today.getDate() + 7);
+
+      const selectedDate = new Date(e.target.value);
+
+      if (selectedDate < oneWeekFromToday) {
+        setErrorMessage(
+          "Requests should be at least one week prior. For urgent requests, please contact the GSO."
+        );
+        setRequest({ ...request, [e.target.name]: "" });
+        return;
+      }
+    }
+
     setErrorMessage("");
     setRequest({ ...request, [e.target.name]: e.target.value });
   };
@@ -125,14 +144,19 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
     setRequest({ ...request, details: updatedDetails });
   };
 
-  const handleAddParticular = () => {
+  const handleAddParticular = (e) => {
+    e.preventDefault();
+    const newParticular = { particulars: "", quantity: 0, description: "" };
+    const updatedDetails = [...request.details, newParticular];
+
     setRequest({
       ...request,
-      details: [
-        ...request.details,
-        { particulars: "", quantity: 0, description: "" },
-      ],
+      details: updatedDetails,
     });
+
+    // Set the new index to edit mode
+    setEditingIndex(updatedDetails.length - 1);
+    setEditedParticular(newParticular);
   };
 
   // Fetch department and supply categories from backend

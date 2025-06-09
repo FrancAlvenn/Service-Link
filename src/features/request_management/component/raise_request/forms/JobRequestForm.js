@@ -81,9 +81,28 @@ const JobRequestForm = ({ setSelectedRequest }) => {
       const selectedDate = new Date(e.target.value);
 
       if (selectedDate < today) {
-        setErrorMessage("Invalid Date");
+        setErrorMessage("Invalid Date. Date cannot be in the past.");
         // ToastNotification.error("Invalid Date", "Date cannot be in the past.");
         return; // Exit without updating state
+      }
+    }
+
+    // Validate Date: Ensure that for user accounts the date_required should be at least one week prior
+    if (user.access_level === "user") {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Normalize to start of day for accuracy
+
+      const oneWeekFromToday = new Date(today);
+      oneWeekFromToday.setDate(today.getDate() + 7);
+
+      const selectedDate = new Date(e.target.value);
+
+      if (selectedDate < oneWeekFromToday) {
+        setErrorMessage(
+          "Requests should be at least one week prior. For urgent requests, please contact the GSO."
+        );
+        setRequest({ ...request, [e.target.name]: "" });
+        return;
       }
     }
 
@@ -115,13 +134,17 @@ const JobRequestForm = ({ setSelectedRequest }) => {
 
   const handleAddParticular = (e) => {
     e.preventDefault();
+    const newParticular = { particulars: "", quantity: 0, description: "" };
+    const updatedDetails = [...request.details, newParticular];
+
     setRequest({
       ...request,
-      details: [
-        ...request.details,
-        { particulars: "", quantity: 0, description: "" },
-      ],
+      details: updatedDetails,
     });
+
+    // Set the new index to edit mode
+    setEditingIndex(updatedDetails.length - 1);
+    setEditedParticular(newParticular);
   };
 
   // Fetch department options from backend
@@ -282,7 +305,7 @@ const JobRequestForm = ({ setSelectedRequest }) => {
           required
         />
         {errorMessage && (
-          <p className="text-red-500 font-semibold text-xs pl-2 pt-1">
+          <p className="text-red-500 font-semibold text-xs pt-1">
             {errorMessage}
           </p>
         )}
@@ -437,7 +460,12 @@ const JobRequestForm = ({ setSelectedRequest }) => {
       <Button
         color="blue"
         onClick={() => submitJobRequest()}
-        disabled={!request.title || !request.date_required || !request.purpose}
+        disabled={
+          !request.title ||
+          !request.date_required ||
+          !request.purpose ||
+          errorMessage
+        }
         className="dark:bg-blue-600 dark:hover:bg-blue-500 w-full md:w-auto"
       >
         Submit Job Request

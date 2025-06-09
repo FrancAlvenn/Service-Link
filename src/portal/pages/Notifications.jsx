@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { Button, Typography } from "@material-tailwind/react";
+import { Button, Typography, Switch } from "@material-tailwind/react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,11 +12,13 @@ import { JobRequestsContext } from "../../features/request_management/context/Jo
 import { PurchasingRequestsContext } from "../../features/request_management/context/PurchasingRequestsContext";
 import { VenueRequestsContext } from "../../features/request_management/context/VenueRequestsContext";
 import { VehicleRequestsContext } from "../../features/request_management/context/VehicleRequestsContext";
+import { ArrowClockwise } from "@phosphor-icons/react";
 
 dayjs.extend(relativeTime);
 
 const NotificationPage = () => {
   const [selectedTab, setSelectedTab] = useState("all");
+  const [showOnlyUnread, setShowOnlyUnread] = useState(false);
   const [activities, setActivities] = useState([]);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -97,27 +99,55 @@ const NotificationPage = () => {
     }
   };
 
-  // Filter activities based on selected tab
+  // Filter activities based on selected tab and unread status
   const filteredActivities = activities.filter(
     (activity) =>
       activity.visibility !== "internal" &&
-      (selectedTab === "all" || activity.request_type === selectedTab)
+      (selectedTab === "all" || activity.request_type === selectedTab) &&
+      (!showOnlyUnread || !activity.viewed)
   );
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 rounded-lg w-full mt-0 px-3 py-4 flex flex-col gap-6 pb-24">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
+      <div className="flex justify-between items-center mb-3">
+        <Typography variant="h6" color="blue-gray" className="text-lg ">
           Notifications
-        </h2>
-        <Button
-          size="sm"
-          color="blue"
-          onClick={loadActivities}
-          disabled={loading}
-        >
-          Refresh
-        </Button>
+        </Typography>
+        <div className="flex items-center gap-2">
+          <div
+            className="flex items-center gap-2"
+            title="Toggle to show only unread notifications"
+          >
+            <label
+              htmlFor="unread-toggle"
+              className="flex items-center gap-2 cursor-pointer text-xs font-semibold"
+            >
+              Show only unread
+              <Switch
+                id="unread-toggle"
+                checked={showOnlyUnread}
+                onChange={() => setShowOnlyUnread((prev) => !prev)}
+                className="text-xs font-semibold"
+                crossOrigin={undefined}
+                color="blue"
+              />
+            </label>
+          </div>
+          <div title="Refresh">
+            <Button
+              variant="text"
+              color="blue"
+              className="rounded-md text-[10px] py-1 px-1"
+              onClick={loadActivities}
+              disabled={loading}
+            >
+              <ArrowClockwise
+                size={20}
+                className={loading ? "animate-spin" : ""}
+              />
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* Tab Filters */}

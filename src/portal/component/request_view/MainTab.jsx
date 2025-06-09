@@ -194,6 +194,11 @@ const MainTab = ({
         return;
       }
 
+      if (comment === "") {
+        ToastNotification.error("Error", "Please provide a comment.");
+        return;
+      }
+
       const currentPositionId = currentApprover.position.id;
 
       const updatedApprovers = flattened.map((approver) => {
@@ -268,7 +273,7 @@ const MainTab = ({
             />
           ) : (
             <p
-              onClick={handleEditPurpose}
+              // onClick={handleEditPurpose}
               className="cursor-pointer text-gray-900 dark:text-gray-300"
             >
               {request.purpose}
@@ -364,7 +369,7 @@ const MainTab = ({
                         detail.description
                       )}
                     </td>
-                    {isAuthorized && (
+                    {/* {isAuthorized && (
                       <td className="px-4 py-2 text-center text-sm text-gray-900 dark:text-gray-200">
                         {editingIndex === index ? (
                           <div className="flex justify-center gap-2">
@@ -402,14 +407,14 @@ const MainTab = ({
                           </div>
                         )}
                       </td>
-                    )}
+                    )} */}
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
 
-          {isAuthorized && (
+          {/* {isAuthorized && (
             <button
               className="font-normal text-sm mt-3 flex items-center gap-2 text-green-600  p-2 rounded-lg border border-green-500  hover:bg-green-50 w-fit"
               onClick={handleAddParticular}
@@ -417,7 +422,7 @@ const MainTab = ({
               <Plus size={16} />
               Add Particular
             </button>
-          )}
+          )} */}
         </div>
       )}
 
@@ -460,7 +465,7 @@ const MainTab = ({
             onClick={() => setOpenDeleteModal(true)}
             className="w-full p-2 text-sm text-white bg-red-500 rounded-md hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700"
           >
-            Delete Request
+            Cancel Request
           </button>
         </div>
       )}

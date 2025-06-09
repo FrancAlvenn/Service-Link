@@ -48,8 +48,13 @@ const PurchasingRequestTemplate = forwardRef(({ request, users }, ref) => {
       <div className="flex justify-between mb-4">
         <div className="flex items-center">
           <p>Control No.:</p>
-          <div className="border-b border-black ml-2 w-32 text-center">
-            {request.reference_number}
+          <div className="flex flex-col">
+            <div className="border-b border-black ml-2 w-32 text-center">
+              {request.reference_number}
+            </div>
+            <div className="text-[10px] italic text-center">
+              (PR+Area+Date+Number)
+            </div>
           </div>
         </div>
         <div className="flex items-center">
@@ -58,10 +63,6 @@ const PurchasingRequestTemplate = forwardRef(({ request, users }, ref) => {
             {formatDate(request.created_at)}
           </div>
         </div>
-      </div>
-
-      <div className="text-[10px] italic text-center">
-        (PR+Area+Date+Number)
       </div>
 
       {/* Department and Date Required */}

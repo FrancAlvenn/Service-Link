@@ -4,6 +4,7 @@ import { Op } from "sequelize";
 import { createLog } from "./system_logs.js";
 import VenueRequestDetails from "../models/VenueRequestDetails.js";
 import User from "../models/UserModel.js";
+import AssetModel from "../models/AssetsModel.js";
 
 // Generate a unique reference number (e.g., DYCI-2024-0001)
 function generateReferenceNumber(lastRequestId) {
@@ -27,7 +28,7 @@ export async function createVenueRequest(req, res) {
     const newVenueRequisition = await VenueRequestModel.create({
       reference_number: referenceNumber,
       title: req.body.title,
-      venue_requested: req.body.venue_requested,
+      venue_id: req.body.venue_id,
       requester: req.body.requester,
       organization: req.body.organization || null,
       event_title: req.body.event_title,
@@ -87,6 +88,10 @@ export async function getAllVenueRequest(req, res) {
           model: User,
           as: "requester_details",
         },
+        {
+          model: AssetModel,
+          as: "venue_details",
+        },
       ],
     });
     if (!requisitions || requisitions.length === 0) {
@@ -115,6 +120,10 @@ export async function getAllArchivedVenueRequest(req, res) {
           model: User,
           as: "requester_details",
         },
+        {
+          model: AssetModel,
+          as: "venue_details",
+        },
       ],
     });
     if (!requisitions || requisitions.length === 0) {
@@ -142,6 +151,10 @@ export async function getVenueRequestById(req, res) {
         {
           model: User,
           as: "requester_details",
+        },
+        {
+          model: AssetModel,
+          as: "venue_details",
         },
       ],
     });

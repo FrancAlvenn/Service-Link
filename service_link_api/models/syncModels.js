@@ -462,6 +462,8 @@ const seedOrganization = async () => {
   }
 };
 
+//Seed Assets
+
 // Seed Job Requests
 const seedJobRequests = async () => {
   const jobRequests = [

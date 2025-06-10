@@ -9,6 +9,8 @@ import DesignationModel from "./SettingsModels/DesignationModel.js";
 import UserModel from "./UserModel.js";
 import VehicleRequestModel from "./VehicleRequestModel.js";
 import Organization from "./SettingsModels/OrganizationModel.js";
+import AssetModel from "./AssetsModel.js";
+
 // Define associations
 JobRequestModel.hasMany(JobRequestDetails, {
   foreignKey: "job_request_id",
@@ -48,6 +50,12 @@ VenueRequests.hasMany(VenueRequestDetail, {
   foreignKey: "venue_request_id",
   sourceKey: "reference_number",
   as: "details",
+});
+
+VenueRequests.belongsTo(AssetModel, {
+  foreignKey: "venue_id",
+  targetKey: "asset_id",
+  as: "venue_details",
 });
 
 VenueRequests.belongsTo(UserModel, {
@@ -95,4 +103,5 @@ export {
   VenueRequestDetail,
   VehicleRequestModel,
   UserModel,
+  AssetModel,
 };

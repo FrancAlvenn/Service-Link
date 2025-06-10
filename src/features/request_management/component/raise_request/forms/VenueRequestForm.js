@@ -8,6 +8,7 @@ import axios from "axios";
 import { Button, Typography } from "@material-tailwind/react";
 import {
   FloppyDisk,
+  Info,
   PencilSimpleLine,
   Plus,
   Prohibit,
@@ -15,12 +16,17 @@ import {
 } from "@phosphor-icons/react";
 import { SettingsContext } from "../../../../settings/context/SettingsContext";
 import assignApproversToRequest from "../../../utils/assignApproversToRequest";
+import {
+  CheckScheduleConflict,
+  checkVenueConflict,
+} from "../../../utils/checkScheduleConflict";
 
 const VenueRequestForm = ({ setSelectedRequest }) => {
   const { user } = useContext(AuthContext);
   const { allUserInfo, getUserByReferenceNumber, fetchUsers } =
     useContext(UserContext);
-  const { fetchVenueRequests } = useContext(VenueRequestsContext);
+  const { venueRequests, fetchVenueRequests } =
+    useContext(VenueRequestsContext);
 
   const [request, setRequest] = useState({
     requester: user.reference_number,
@@ -31,7 +37,7 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
     event_dates: "",
     event_start_time: "",
     event_end_time: "",
-    venue_requested: "",
+    venue_id: "",
     participants: "",
     pax_estimation: "",
     purpose: "",
@@ -54,6 +60,7 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
 
   // New: Individual error states
   const [formErrors, setFormErrors] = useState({});
+  const [formWarnings, setFormWarnings] = useState({});
 
   const {
     departments,
@@ -89,6 +96,87 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
       setVenueOptions(venues);
     });
   }, []);
+
+  let conflicts = [];
+
+  const checkBookingConflicts = () => {
+    if (
+      !request.venue_id ||
+      !request.event_dates ||
+      !request.event_start_time ||
+      !request.event_end_time
+    )
+      return;
+
+    const targetVenueId = Number(request.venue_id);
+    const targetDate = Number(request.event_dates.replaceAll("-", "").trim());
+
+    const conflicts = venueRequests.filter((existing) => {
+      const existingVenueId = Number(existing.venue_id);
+      const existingDate = existing.event_dates
+        ? Number(existing.event_dates.replaceAll("-", "").trim())
+        : null;
+
+      // Skip if not same venue or date
+      if (existingVenueId !== targetVenueId || existingDate !== targetDate) {
+        return false;
+      }
+
+      // Parse times
+      const newStart = new Date(`1970-01-01T${request.event_start_time}`);
+      const newEnd = new Date(`1970-01-01T${request.event_end_time}`);
+      const existStart = new Date(`1970-01-01T${existing.event_start_time}`);
+      const existEnd = new Date(`1970-01-01T${existing.event_end_time}`);
+
+      // Check time overlap
+      const hasOverlap = newStart < existEnd && newEnd > existStart;
+
+      // Check 30-minute grace period before/after
+      const gracePeriodViolation =
+        (newStart >= existStart &&
+          newStart < new Date(existEnd.getTime() + 30 * 60000)) ||
+        (existStart >= newStart &&
+          existStart < new Date(newEnd.getTime() + 30 * 60000));
+
+      return hasOverlap || gracePeriodViolation;
+    });
+
+    // Clear previous messages
+    setFormErrors((prev) => ({ ...prev, booking: "" }));
+    setFormWarnings((prev) => ({ ...prev, booking: "" }));
+
+    if (conflicts.length > 0) {
+      const approvedConflict = conflicts.some((c) => c.status === "Approved");
+      const pendingConflict = conflicts.some((c) => c.status !== "Approved");
+
+      if (approvedConflict) {
+        setFormErrors((prev) => ({
+          ...prev,
+          booking: "Venue is already booked for this date/time!",
+        }));
+      } else if (pendingConflict) {
+        setFormWarnings((prev) => ({
+          ...prev,
+          booking: "Warning: Pending booking might conflict with your request",
+        }));
+      }
+    }
+  };
+
+  // Check for conflicts whenever relevant fields change
+  useEffect(() => {
+    // Inside the conflict useEffect, add:
+    console.log("Checking conflicts...", {
+      venueId: { value: request.venue_id, type: typeof request.venue_id },
+      date: { value: request.event_dates, type: typeof request.event_dates },
+      venueRequests: venueRequests.map((vr) => ({
+        venue: { value: vr.venue_id, type: typeof vr.venue_id },
+        date: { value: vr.event_dates, type: typeof vr.event_dates },
+      })),
+    });
+    console.log(conflicts);
+    checkBookingConflicts();
+  }, [request, venueRequests]);
 
   useEffect(() => {
     axios.get("/settings/department", { withCredentials: true }).then((res) => {
@@ -189,6 +277,8 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
 
   const submitVenueRequest = async () => {
     try {
+      await fetchVenueRequests();
+
       let requestData = {
         ...request,
         authorized_access: Array.from(
@@ -243,7 +333,7 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
           event_dates: "",
           event_start_time: "",
           event_end_time: "",
-          venue_requested: "",
+          venue_id: "",
           participants: "",
           pax_estimation: "",
           purpose: "",
@@ -306,15 +396,15 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
             Venue
           </label>
           <select
-            name="venue_requested"
-            value={request.venue_requested}
+            name="venue_id"
+            value={request.venue_id}
             onChange={handleChange}
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
             required
           >
             <option value="">Select Venue</option>
             {venueOptions.map((v) => (
-              <option key={v.id} value={v.name}>
+              <option key={v.id} value={v.asset_id}>
                 {v.name}
               </option>
             ))}
@@ -460,6 +550,48 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
           )}
         </div>
       </div>
+      {/* Booking conflict messages */}
+      <div className="space-y-2">
+        {formErrors.booking && (
+          <p className="text-red-500 text-xs mt-2 flex items-start gap-1">
+            {formErrors.booking}
+            <span className="relative flex group">
+              <Info
+                size={14}
+                className="text-red-500 cursor-pointer mt-0.5 transition-colors hover:text-red-700"
+                weight="duotone"
+              />
+              {/* Tooltip: top-right aligned */}
+              <div className="absolute bottom-full right-0 mb-2 w-64 bg-white text-gray-700 text-xs border border-red-200 rounded-lg shadow-lg p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-in-out z-50 pointer-events-none">
+                {/* Arrow (bottom-right corner) */}
+                <div className="absolute -bottom-1.5 right-2 w-3 h-3 bg-white border-b border-r border-red-200 rotate-45"></div>
+                This means the venue has already been booked for this date and
+                time. Try selecting a different time slot or another date.
+              </div>
+            </span>
+          </p>
+        )}
+
+        {formWarnings.booking && (
+          <p className="text-amber-500 text-xs mt-2 flex items-start gap-1">
+            {formWarnings.booking}
+            <span className="relative flex group">
+              <Info
+                size={14}
+                className="text-amber-500 cursor-pointer mt-0.5 transition-colors hover:text-amber-600"
+                weight="duotone"
+              />
+              {/* Tooltip: top-right aligned */}
+              <div className="absolute bottom-full right-0 mb-2 w-64 bg-white text-gray-700 text-xs border border-amber-200 rounded-lg shadow-lg p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-in-out z-50 pointer-events-none">
+                {/* Arrow (bottom-right corner) */}
+                <div className="absolute -bottom-1.5 right-2 w-3 h-3 bg-white border-b border-r border-amber-200 rotate-45"></div>
+                A pending request might conflict with your selected schedule.
+                Approval is not guaranteed until conflicts are resolved.
+              </div>
+            </span>
+          </p>
+        )}
+      </div>
 
       {/* Purpose */}
       <div>
@@ -601,7 +733,7 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
         type="submit"
         onClick={submitVenueRequest}
         disabled={
-          !request.venue_requested ||
+          !request.venue_id ||
           !request.organization ||
           !request.title ||
           !request.event_nature ||

@@ -19,9 +19,14 @@ const VenueRequest = sequelize.define(
       allowNull: true,
       defaultValue: null,
     },
-    venue_requested: {
-      type: DataTypes.STRING(255),
+    venue_id: {
+      type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: "assets",
+        key: "asset_id",
+      },
+      onDelete: "CASCADE",
     },
     requester: {
       type: DataTypes.STRING(100),

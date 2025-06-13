@@ -16,10 +16,6 @@ import {
 } from "@phosphor-icons/react";
 import { SettingsContext } from "../../../../settings/context/SettingsContext";
 import assignApproversToRequest from "../../../utils/assignApproversToRequest";
-import {
-  CheckScheduleConflict,
-  checkVenueConflict,
-} from "../../../utils/checkScheduleConflict";
 
 const VenueRequestForm = ({ setSelectedRequest }) => {
   const { user } = useContext(AuthContext);
@@ -108,6 +104,14 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
     )
       return;
 
+    // If venueRequests is undefined or empty, skip the check
+    if (!Array.isArray(venueRequests) || venueRequests.length === 0) {
+      // Clear any previous messages
+      setFormErrors((prev) => ({ ...prev, booking: "" }));
+      setFormWarnings((prev) => ({ ...prev, booking: "" }));
+      return;
+    }
+
     const targetVenueId = Number(request.venue_id);
     const targetDate = Number(request.event_dates.replaceAll("-", "").trim());
 
@@ -165,16 +169,17 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
 
   // Check for conflicts whenever relevant fields change
   useEffect(() => {
-    // Inside the conflict useEffect, add:
-    console.log("Checking conflicts...", {
-      venueId: { value: request.venue_id, type: typeof request.venue_id },
-      date: { value: request.event_dates, type: typeof request.event_dates },
-      venueRequests: venueRequests.map((vr) => ({
-        venue: { value: vr.venue_id, type: typeof vr.venue_id },
-        date: { value: vr.event_dates, type: typeof vr.event_dates },
-      })),
-    });
-    console.log(conflicts);
+    // if (!venueRequests || !request) return;
+    // // Inside the conflict useEffect, add:
+    // console.log("Checking conflicts...", {
+    //   venueId: { value: request.venue_id, type: typeof request.venue_id },
+    //   date: { value: request.event_dates, type: typeof request.event_dates },
+    //   venueRequests: venueRequests.map((vr) => ({
+    //     venue: { value: vr.venue_id, type: typeof vr.venue_id },
+    //     date: { value: vr.event_dates, type: typeof vr.event_dates },
+    //   })),
+    // });
+    // console.log(conflicts);
     checkBookingConflicts();
   }, [request, venueRequests]);
 

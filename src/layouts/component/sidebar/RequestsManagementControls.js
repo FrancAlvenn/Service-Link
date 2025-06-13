@@ -230,7 +230,7 @@ function RequestsManagementControls() {
         Board
       </ListItem>
 
-      <ListItem
+      {/* <ListItem
         className="text-sm"
         onClick={() => navigate("/workspace/employee-management/add-employee")}
       >
@@ -238,7 +238,7 @@ function RequestsManagementControls() {
           <UserPlus size={20} />
         </ListItemPrefix>
         Add Employee
-      </ListItem>
+      </ListItem> */}
 
       <hr className="my-2 border-t border-gray-300" />
 
@@ -268,7 +268,7 @@ function RequestsManagementControls() {
         Asset Tracking Log
       </ListItem>
 
-      <ListItem
+      {/* <ListItem
         className="text-sm"
         onClick={() => navigate("/workspace/asset-management/create-asset")}
       >
@@ -276,7 +276,7 @@ function RequestsManagementControls() {
           <PlusCircle size={20} />
         </ListItemPrefix>
         Add Asset
-      </ListItem>
+      </ListItem> */}
 
       <hr className="my-2 border-t border-gray-300" />
 

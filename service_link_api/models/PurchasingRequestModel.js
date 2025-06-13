@@ -70,6 +70,11 @@ const PurchasingRequest = sequelize.define(
       type: DataTypes.TEXT,
       defaultValue: null,
     },
+    verified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false,
+    },
     authorized_access: {
       type: DataTypes.JSON,
       allowNull: true,

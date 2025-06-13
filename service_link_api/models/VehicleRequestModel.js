@@ -85,6 +85,11 @@ const VehicleRequest = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    verified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false,
+    },
     immediate_head_approval: {
       type: DataTypes.ENUM("Pending", "Approved", "Denied"),
       defaultValue: "Pending",

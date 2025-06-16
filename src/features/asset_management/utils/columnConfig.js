@@ -7,7 +7,7 @@ const formatDate = (date) =>
 const normalText =
   "text-center font-semibold rounded-full flex items-center justify-center";
 
-export const getColumnConfig = ({ setIsSidebarOpen, setSelectedAsset }) => [
+export const getColumnConfig = ({ setAssetModalOpen, setSelectedAsset }) => [
   {
     key: "asset_id",
     label: "ID",
@@ -42,8 +42,13 @@ export const getColumnConfig = ({ setIsSidebarOpen, setSelectedAsset }) => [
         color="blue-gray"
         className="flex items-center gap-2 text-blue-500 cursor-pointer hover:underline font-semibold"
         onClick={() => {
-          setIsSidebarOpen(true);
-          setSelectedAsset(row.reference_number);
+          setSelectedAsset({
+            ...row,
+            purchase_date: row.purchase_date?.split("T")[0] || "",
+            last_maintenance: row.last_maintenance?.split("T")[0] || "",
+            warranty_expiry: row.warranty_expiry?.split("T")[0] || "",
+          });
+          setAssetModalOpen(true);
         }}
       >
         {row.reference_number}

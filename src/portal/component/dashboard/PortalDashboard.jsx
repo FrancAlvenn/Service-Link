@@ -160,21 +160,27 @@ function PortalDashboard() {
         <Typography variant="h5" className="text-gray-800 dark:text-gray-200">
           My Requests
         </Typography>
-        <Typography
-          className="text-blue-500 dark:text-blue-800 text-xs font-semibold cursor-pointer hover:underline"
-          onClick={() => handleNavigation("/portal/pending-approvals")}
-        >
-          Show Pending Approvals
-        </Typography>
+        {user?.designation_id !== 1 && (
+          <Typography
+            className="text-blue-500 dark:text-blue-800 text-xs font-semibold cursor-pointer hover:underline"
+            onClick={() => handleNavigation("/portal/pending-approvals")}
+          >
+            Show Pending Approvals
+          </Typography>
+        )}
       </div>
 
       {/* Filter Buttons */}
       <div className="flex flex-wrap gap-1 overflow-x-auto md:justify-start justify-start">
         {[
           { type: "All", color: "blue" },
-          { type: "Job Request", color: "blue" },
+          ...(user?.designation_id === 1 //Changeable later to dynamic if wanted to add to settings
+            ? [] // Student — hide Job & Purchasing
+            : [
+                { type: "Job Request", color: "blue" },
+                { type: "Purchasing Request", color: "green" },
+              ]),
           { type: "Venue Request", color: "purple" },
-          { type: "Purchasing Request", color: "green" },
           { type: "Vehicle Request", color: "red" },
         ].map(({ type, color }) => (
           <Button
@@ -190,7 +196,7 @@ function PortalDashboard() {
         ))}
       </div>
 
-      {pendingApprovals.length > 0 && (
+      {pendingApprovals.length > 0 && user?.designation_id !== 1 && (
         <button
           className=" bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg transition"
           onClick={() => handleNavigation("/portal/pending-approvals")}

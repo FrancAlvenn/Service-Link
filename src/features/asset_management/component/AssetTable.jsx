@@ -4,12 +4,13 @@ import {
   Button,
   CardBody,
 } from "@material-tailwind/react";
-import { ArrowClockwise, MagnifyingGlass } from "@phosphor-icons/react";
+import { ArrowClockwise, MagnifyingGlass, Plus } from "@phosphor-icons/react";
 import { useContext, useState } from "react";
 import { getColumnConfig } from "../utils/columnConfig.js";
 import { AssetContext } from "../context/AssetContext.js";
 import AssetSidebar from "./AssetSidebar.jsx";
 import Header from "../../../layouts/header.js";
+import AssetForm from "./AssetForm.jsx";
 
 const AssetTable = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -17,6 +18,8 @@ const AssetTable = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const { assets, fetchAssets, deleteAsset } = useContext(AssetContext);
+
+  const [assetModalOpen, setAssetModalOpen] = useState(false);
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
@@ -31,7 +34,7 @@ const AssetTable = () => {
     return rowString.includes(searchQuery.toLowerCase());
   });
 
-  const columns = getColumnConfig({ setIsSidebarOpen, setSelectedAsset });
+  const columns = getColumnConfig({ setAssetModalOpen, setSelectedAsset });
 
   return (
     <div className="flex flex-col h-full bg-white">
@@ -56,6 +59,16 @@ const AssetTable = () => {
               <MagnifyingGlass size={16} />
             </span>
           </div>
+          <Button
+            variant="outlined"
+            size="sm"
+            color="blue"
+            className="flex items-center gap-2"
+            onClick={() => setAssetModalOpen(true)}
+          >
+            <Plus size={16} />
+            Add Asset
+          </Button>
         </div>
       </CardHeader>
       <div className="h-full bg-white rounded-lg w-full mt-0 px-3 flex justify-between">
@@ -133,6 +146,33 @@ const AssetTable = () => {
           deleteAsset={deleteAsset}
         />
       </div>
+
+      {assetModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+          onClick={() => {
+            setAssetModalOpen(false);
+            setSelectedAsset(null);
+          }}
+        >
+          <div
+            className="bg-white dark:bg-gray-900 w-full h-full lg:max-w-[80vw] lg:max-h-[90vh] overflow-y-auto rounded-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <AssetForm
+              mode={selectedAsset ? "edit" : "add"}
+              initialValues={selectedAsset}
+              onClose={() => {
+                setAssetModalOpen(false);
+                setSelectedAsset(null);
+              }}
+              onSuccess={() => {
+                fetchAssets();
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

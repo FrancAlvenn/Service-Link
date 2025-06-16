@@ -12,9 +12,12 @@ import {
 } from "@phosphor-icons/react";
 import React, { useState } from "react";
 import RequestForm from "./RequestForm";
+import { useContext } from "react";
+import { AuthContext } from "../../../authentication";
 
 const RaiseRequest = () => {
   const [selectedRequest, setSelectedRequest] = useState("");
+  const { user } = useContext(AuthContext);
 
   return (
     <div className="min-h-screen h-full w-full bg-white dark:bg-gray-900 rounded-lg mt-0 px-3 flex flex-col justify-between transition-colors">
@@ -52,40 +55,44 @@ const RaiseRequest = () => {
         {!selectedRequest ? (
           <CardBody className="p-2 flex flex-col gap-4 w-full pb-28 ">
             {/* Job Request */}
-            <Card
-              className="p-5 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition w-full dark:bg-gray-800"
-              onClick={() => setSelectedRequest("job_request")}
-            >
-              <div className="flex items-center gap-4">
-                <ReadCvLogo className="h-8 w-8 text-blue-500" />
-                <span>
-                  <Typography className="text-blue-700 dark:text-blue-400 font-semibold text-sm">
-                    Submit a Job Request
-                  </Typography>
-                  <Typography className="text-gray-500 dark:text-gray-400 font-normal text-sm">
-                    Raise a request or report a problem.
-                  </Typography>
-                </span>
-              </div>
-            </Card>
+            {user.designation_id !== 1 && (
+              <Card
+                className="p-5 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition w-full dark:bg-gray-800"
+                onClick={() => setSelectedRequest("job_request")}
+              >
+                <div className="flex items-center gap-4">
+                  <ReadCvLogo className="h-8 w-8 text-blue-500" />
+                  <span>
+                    <Typography className="text-blue-700 dark:text-blue-400 font-semibold text-sm">
+                      Submit a Job Request
+                    </Typography>
+                    <Typography className="text-gray-500 dark:text-gray-400 font-normal text-sm">
+                      Raise a request or report a problem.
+                    </Typography>
+                  </span>
+                </div>
+              </Card>
+            )}
 
             {/* Purchasing Request */}
-            <Card
-              className="p-5 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition w-full dark:bg-gray-800"
-              onClick={() => setSelectedRequest("purchasing_request")}
-            >
-              <div className="flex items-center gap-4">
-                <ShoppingCart className="h-8 w-8 text-green-500" />
-                <span>
-                  <Typography className="text-green-700 dark:text-green-400 font-semibold text-sm">
-                    Request for Purchasing
-                  </Typography>
-                  <Typography className="text-gray-500 dark:text-gray-400 font-normal text-sm">
-                    Submit a request for procurement of items or supplies.
-                  </Typography>
-                </span>
-              </div>
-            </Card>
+            {user.designation_id !== 1 && (
+              <Card
+                className="p-5 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition w-full dark:bg-gray-800"
+                onClick={() => setSelectedRequest("purchasing_request")}
+              >
+                <div className="flex items-center gap-4">
+                  <ShoppingCart className="h-8 w-8 text-green-500" />
+                  <span>
+                    <Typography className="text-green-700 dark:text-green-400 font-semibold text-sm">
+                      Request for Purchasing
+                    </Typography>
+                    <Typography className="text-gray-500 dark:text-gray-400 font-normal text-sm">
+                      Submit a request for procurement of items or supplies.
+                    </Typography>
+                  </span>
+                </div>
+              </Card>
+            )}
 
             {/* Venue Booking Request */}
             <Card

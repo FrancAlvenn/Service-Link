@@ -224,50 +224,50 @@ export const getColumnConfig = (
             </Typography>
           ),
         },
-        {
-          key: "created_at",
-          label: "Created At",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              Created At
-            </Typography>
-          ),
-          render: (row) => (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              {formatDate(row.created_at)}
-            </Typography>
-          ),
-        },
-        {
-          key: "updated_at",
-          label: "Updated At",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              Updated At
-            </Typography>
-          ),
-          render: (row) => (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              {formatDate(row.updated_at)}
-            </Typography>
-          ),
-        },
+        // {
+        //   key: "created_at",
+        //   label: "Created At",
+        //   header: (
+        //     <Typography
+        //       variant="small"
+        //       color="blue-gray"
+        //       className={normalText}
+        //     >
+        //       Created At
+        //     </Typography>
+        //   ),
+        //   render: (row) => (
+        //     <Typography
+        //       variant="small"
+        //       color="blue-gray"
+        //       className={normalText}
+        //     >
+        //       {formatDate(row.created_at)}
+        //     </Typography>
+        //   ),
+        // },
+        // {
+        //   key: "updated_at",
+        //   label: "Updated At",
+        //   header: (
+        //     <Typography
+        //       variant="small"
+        //       color="blue-gray"
+        //       className={normalText}
+        //     >
+        //       Updated At
+        //     </Typography>
+        //   ),
+        //   render: (row) => (
+        //     <Typography
+        //       variant="small"
+        //       color="blue-gray"
+        //       className={normalText}
+        //     >
+        //       {formatDate(row.updated_at)}
+        //     </Typography>
+        //   ),
+        // },
       ];
 
     case "purchasing_request":
@@ -493,50 +493,50 @@ export const getColumnConfig = (
             </Typography>
           ),
         },
-        {
-          key: "created_at",
-          label: "Created At",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              Created At
-            </Typography>
-          ),
-          render: (row) => (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              {formatDate(row.created_at)}
-            </Typography>
-          ),
-        },
-        {
-          key: "updated_at",
-          label: "Updated At",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              Updated At
-            </Typography>
-          ),
-          render: (row) => (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              {formatDate(row.updated_at)}
-            </Typography>
-          ),
-        },
+        // {
+        //   key: "created_at",
+        //   label: "Created At",
+        //   header: (
+        //     <Typography
+        //       variant="small"
+        //       color="blue-gray"
+        //       className={normalText}
+        //     >
+        //       Created At
+        //     </Typography>
+        //   ),
+        //   render: (row) => (
+        //     <Typography
+        //       variant="small"
+        //       color="blue-gray"
+        //       className={normalText}
+        //     >
+        //       {formatDate(row.created_at)}
+        //     </Typography>
+        //   ),
+        // },
+        // {
+        //   key: "updated_at",
+        //   label: "Updated At",
+        //   header: (
+        //     <Typography
+        //       variant="small"
+        //       color="blue-gray"
+        //       className={normalText}
+        //     >
+        //       Updated At
+        //     </Typography>
+        //   ),
+        //   render: (row) => (
+        //     <Typography
+        //       variant="small"
+        //       color="blue-gray"
+        //       className={normalText}
+        //     >
+        //       {formatDate(row.updated_at)}
+        //     </Typography>
+        //   ),
+        // },
       ];
 
     case "venue_request":
@@ -894,50 +894,50 @@ export const getColumnConfig = (
             </Typography>
           ),
         },
-        {
-          key: "created_at",
-          label: "Created At",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              Created At
-            </Typography>
-          ),
-          render: (row) => (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              {formatDate(row.created_at)}
-            </Typography>
-          ),
-        },
-        {
-          key: "updated_at",
-          label: "Updated At",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              Updated At
-            </Typography>
-          ),
-          render: (row) => (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              {formatDate(row.updated_at)}
-            </Typography>
-          ),
-        },
+        // {
+        //   key: "created_at",
+        //   label: "Created At",
+        //   header: (
+        //     <Typography
+        //       variant="small"
+        //       color="blue-gray"
+        //       className={normalText}
+        //     >
+        //       Created At
+        //     </Typography>
+        //   ),
+        //   render: (row) => (
+        //     <Typography
+        //       variant="small"
+        //       color="blue-gray"
+        //       className={normalText}
+        //     >
+        //       {formatDate(row.created_at)}
+        //     </Typography>
+        //   ),
+        // },
+        // {
+        //   key: "updated_at",
+        //   label: "Updated At",
+        //   header: (
+        //     <Typography
+        //       variant="small"
+        //       color="blue-gray"
+        //       className={normalText}
+        //     >
+        //       Updated At
+        //     </Typography>
+        //   ),
+        //   render: (row) => (
+        //     <Typography
+        //       variant="small"
+        //       color="blue-gray"
+        //       className={normalText}
+        //     >
+        //       {formatDate(row.updated_at)}
+        //     </Typography>
+        //   ),
+        // },
       ];
 
     case "vehicle_request":
@@ -1273,50 +1273,50 @@ export const getColumnConfig = (
             </Typography>
           ),
         },
-        {
-          key: "created_at",
-          label: "Created At",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              Created At
-            </Typography>
-          ),
-          render: (row) => (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              {formatDate(row.created_at)}
-            </Typography>
-          ),
-        },
-        {
-          key: "updated_at",
-          label: "Updated At",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              Updated At
-            </Typography>
-          ),
-          render: (row) => (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              {formatDate(row.updated_at)}
-            </Typography>
-          ),
-        },
+        // {
+        //   key: "created_at",
+        //   label: "Created At",
+        //   header: (
+        //     <Typography
+        //       variant="small"
+        //       color="blue-gray"
+        //       className={normalText}
+        //     >
+        //       Created At
+        //     </Typography>
+        //   ),
+        //   render: (row) => (
+        //     <Typography
+        //       variant="small"
+        //       color="blue-gray"
+        //       className={normalText}
+        //     >
+        //       {formatDate(row.created_at)}
+        //     </Typography>
+        //   ),
+        // },
+        // {
+        //   key: "updated_at",
+        //   label: "Updated At",
+        //   header: (
+        //     <Typography
+        //       variant="small"
+        //       color="blue-gray"
+        //       className={normalText}
+        //     >
+        //       Updated At
+        //     </Typography>
+        //   ),
+        //   render: (row) => (
+        //     <Typography
+        //       variant="small"
+        //       color="blue-gray"
+        //       className={normalText}
+        //     >
+        //       {formatDate(row.updated_at)}
+        //     </Typography>
+        //   ),
+        // },
       ];
 
     default:

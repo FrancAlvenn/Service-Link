@@ -3,21 +3,36 @@ import {
   Typography,
   Button,
   CardBody,
-  Spinner,
 } from "@material-tailwind/react";
-import { ArrowClockwise, MagnifyingGlass } from "@phosphor-icons/react";
+import { ArrowClockwise, MagnifyingGlass, Plus } from "@phosphor-icons/react";
 import { useContext, useState } from "react";
 import { getColumnConfig } from "../utils/columnConfig.js";
 import { EmployeeContext } from "../context/EmployeeContext.js";
 import EmployeeSidebar from "./EmployeeSidebar.jsx";
 import Header from "../../../layouts/header.js";
+import UserPicker from "../../../components/user_picker/UserPicker.jsx";
+import EmployeeForm from "./EmployeeForm.jsx";
 
 const EmployeeTable = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [newEmployee, setNewEmployee] = useState({
+    reference_number: "",
+    first_name: "",
+    last_name: "",
+    email: "",
+    position: "",
+    department: "",
+    expertise: "",
+    hire_date: "",
+    employment_status: "Active",
+    contact_number: "",
+    address: "",
+  });
+  const [userPickerOpen, setUserPickerOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
-  const { employees, fetchEmployees, deleteEmployee } =
+  const { employees, fetchEmployees, deleteEmployee, createEmployee } =
     useContext(EmployeeContext);
 
   const handleSearch = (e) => {
@@ -36,7 +51,54 @@ const EmployeeTable = () => {
     }
   );
 
-  const columns = getColumnConfig({ setIsSidebarOpen, setSelectedEmployee });
+  const columns = getColumnConfig({
+    setNewEmployee,
+    setEditModalOpen,
+  });
+
+  const handleUserSelect = (user) => {
+    setNewEmployee((prev) => ({
+      ...prev,
+      reference_number: user.reference_number,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      email: user.email,
+      position: "",
+      department: "",
+      expertise: "",
+      hire_date: "",
+      employment_status: "Active",
+      contact_number: "",
+      address: "",
+    }));
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewEmployee({ ...newEmployee, [name]: value });
+  };
+
+  const handleSelectChange = (name, value) => {
+    setNewEmployee({ ...newEmployee, [name]: value });
+  };
+
+  const handleSubmit = async () => {
+    await createEmployee(newEmployee);
+    setAddModalOpen(false);
+    setNewEmployee({
+      reference_number: "",
+      first_name: "",
+      last_name: "",
+      email: "",
+      position: "",
+      department: "",
+      expertise: "",
+      hire_date: "",
+      employment_status: "Active",
+      contact_number: "",
+      address: "",
+    });
+  };
 
   return (
     <div className="flex flex-col h-full bg-white">
@@ -61,19 +123,27 @@ const EmployeeTable = () => {
               <MagnifyingGlass size={16} />
             </span>
           </div>
+          <div className="relative">
+            <UserPicker
+              onSelect={(user) => {
+                handleUserSelect(user);
+                setUserPickerOpen(false);
+                setAddModalOpen(true);
+              }}
+              variant="outlined"
+              color="blue"
+              dismiss={false}
+              title="Add Employee"
+              closeOnSelect={true}
+            />
+          </div>
         </div>
       </CardHeader>
       <div className="h-full bg-white rounded-lg w-full mt-0 px-3 flex justify-between">
         <div
-          className={`h-full bg-white w-full mt-0 px-3 flex justify-between transition-[max-width] duration-300 ${
-            isSidebarOpen ? "max-w-[55%]" : "w-full"
-          }`}
+          className={`h-full bg-white mt-0 flex justify-between transition-[max-width] duration-300 w-[77vw] overflow-x-auto`}
         >
-          <div
-            className={`flex flex-col gap-4 h-full ${
-              isSidebarOpen ? "max-w-[100%]" : "w-full"
-            }`}
-          >
+          <div className={`flex flex-col gap-4 h-full`}>
             <CardBody className="custom-scrollbar h-full pt-0">
               <table className="w-full min-w-max table-auto text-left">
                 <thead className="sticky top-0 z-10 border-b border-blue-gray-100">
@@ -104,11 +174,7 @@ const EmployeeTable = () => {
                             className="px-4 py-5 w-fit font-normal"
                           >
                             {col.render
-                              ? col.render(
-                                  row,
-                                  setIsSidebarOpen,
-                                  setSelectedEmployee
-                                )
+                              ? col.render(row)
                               : row[col.key] || "N/A"}
                           </td>
                         ))}
@@ -128,16 +194,49 @@ const EmployeeTable = () => {
             </CardBody>
           </div>
         </div>
-
-        <EmployeeSidebar
-          open={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-          referenceNumber={selectedEmployee}
-          employees={employees}
-          fetchEmployees={fetchEmployees}
-          deleteEmployee={deleteEmployee}
-        />
       </div>
+      {addModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+          onClick={() => setAddModalOpen(false)} // backdrop click to close
+        >
+          <div
+            className="bg-white dark:bg-gray-900 w-full h-full lg:max-w-[80vw] lg:max-h-[90vh] overflow-y-auto rounded-xl"
+            onClick={(e) => e.stopPropagation()} // prevent modal from closing when clicking inside
+          >
+            <EmployeeForm
+              initialValues={newEmployee} // pass prefilled user data
+              onClose={() => setAddModalOpen(false)}
+              onSuccess={() => {
+                setAddModalOpen(false);
+                fetchEmployees(); // optionally refresh the list after adding
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {editModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+          onClick={() => setEditModalOpen(false)}
+        >
+          <div
+            className="bg-white dark:bg-gray-900 w-full h-full lg:max-w-[80vw] lg:max-h-[90vh] overflow-y-auto rounded-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <EmployeeForm
+              mode="edit"
+              initialValues={newEmployee}
+              onClose={() => setEditModalOpen(false)}
+              onSuccess={() => {
+                setEditModalOpen(false);
+                fetchEmployees();
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

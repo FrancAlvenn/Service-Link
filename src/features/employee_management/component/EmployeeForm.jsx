@@ -5,29 +5,32 @@ import { AuthContext } from "../../authentication";
 import ToastNotification from "../../../utils/ToastNotification";
 import EmployeeContext from "../context/EmployeeContext";
 import Header from "../../../layouts/header";
+import PropTypes from "prop-types";
+import { formatDate } from "../../../utils/dateFormatter";
 
-const EmployeeForm = () => {
+const EmployeeForm = ({ mode = "add", initialValues, onClose, onSuccess }) => {
   const { user } = useContext(AuthContext);
 
   const [errorMessage, setErrorMessage] = useState("");
 
   const { fetchEmployees } = useContext(EmployeeContext);
 
-  const initialEmployeeState = {
-    reference_number: user?.reference_number || "",
-    first_name: "",
-    last_name: "",
-    email: "",
-    position: "",
-    department: "",
-    expertise: "",
-    date_hired: "",
-    employment_status: "Active",
-    contact_number: "",
-    address: "",
-  };
-
-  const [employee, setEmployee] = useState(initialEmployeeState);
+  // In EmployeeForm.jsx, update the initial state to include address:
+  const [employee, setEmployee] = useState(
+    initialValues || {
+      reference_number: "",
+      first_name: "",
+      last_name: "",
+      email: "",
+      position: "",
+      department: "",
+      expertise: "",
+      hire_date: "",
+      employment_status: "Active",
+      contact_number: "",
+      address: "",
+    }
+  );
 
   // Handle input changes
   const handleChange = (e) => {
@@ -36,24 +39,51 @@ const EmployeeForm = () => {
 
   // Reset the form
   const resetForm = () => {
-    setEmployee(initialEmployeeState);
+    setEmployee(
+      initialValues || {
+        reference_number: "",
+        first_name: "",
+        last_name: "",
+        email: "",
+        position: "",
+        department: "",
+        expertise: "",
+        hire_date: "",
+        employment_status: "Active",
+        contact_number: "",
+        address: "",
+      }
+    );
   };
 
   const submitEmployee = async () => {
     try {
-      const response = await axios.post("/employees", employee, {
-        withCredentials: true,
-      });
+      let response;
 
-      if (response.status === 201) {
-        fetchEmployees();
-        resetForm();
-        ToastNotification.success("Success!", "Employee added successfully.");
+      if (mode === "edit") {
+        response = await axios.put(
+          `/employees/${employee.reference_number}`,
+          employee,
+          { withCredentials: true }
+        );
+      } else {
+        response = await axios.post("/employees", employee, {
+          withCredentials: true,
+        });
+      }
+
+      if ([200, 201].includes(response.status)) {
+        ToastNotification.success(
+          "Success!",
+          `Employee ${mode === "edit" ? "updated" : "added"} successfully.`
+        );
+        if (onSuccess) onSuccess();
+        if (onClose) onClose();
       }
 
       setErrorMessage("");
     } catch (error) {
-      if (error.response && error.response.status === 400) {
+      if (error.response?.status === 400) {
         setErrorMessage("Email already exists. Please try again.");
       } else {
         setErrorMessage("An error occurred. Please try again.");
@@ -62,13 +92,19 @@ const EmployeeForm = () => {
   };
 
   return (
-    <div className="h-full">
+    <div className="h-full z-50">
       <div className="h-full bg-white rounded-lg w-full px-3 flex flex-col justify-start">
         <div className="py-4 px-5 mb-5 shadow-sm">
-          <Header
+          {/* <Header
             title={"Employee Information"}
             description={"Enter details about the employee below."}
-          />
+          /> */}
+          <Typography variant="h5" color="blue-gray" className="mb-2">
+            Employee Information
+          </Typography>
+          <Typography variant="small" className="mb-2">
+            Enter details about the employee below.
+          </Typography>
         </div>
 
         <div className="flex flex-col gap-4 px-5 pb-4 overflow-y-auto">
@@ -84,7 +120,7 @@ const EmployeeForm = () => {
                 value={employee.first_name}
                 onChange={handleChange}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-                required
+                disabled
               />
             </div>
 
@@ -98,7 +134,7 @@ const EmployeeForm = () => {
                 value={employee.last_name}
                 onChange={handleChange}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-                required
+                disabled
               />
             </div>
           </div>
@@ -114,12 +150,12 @@ const EmployeeForm = () => {
               value={employee.email}
               onChange={handleChange}
               className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-              required
+              disabled
             />
           </div>
 
           {/* Position & Department */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">
                 Position
@@ -145,20 +181,28 @@ const EmployeeForm = () => {
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
               />
             </div>
-          </div>
+          </div> */}
 
           {/* Expertise */}
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">
               Expertise
             </label>
-            <input
-              type="text"
+            <select
               name="expertise"
               value={employee.expertise}
               onChange={handleChange}
               className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-            />
+            >
+              <option value="">Select Expertise</option>
+              <option value="Electrician">Electrician</option>
+              <option value="Plumber">Plumber</option>
+              <option value="Carpenter">Carpenter</option>
+              <option value="Groundskeeper">Groundskeeper</option>
+              <option value="General Maintenance Technician">
+                General Maintenance Technician
+              </option>
+            </select>
           </div>
 
           {/* Date Hired & Employment Status */}
@@ -167,13 +211,23 @@ const EmployeeForm = () => {
               <label className="block text-xs font-medium text-gray-700 mb-1">
                 Date Hired
               </label>
-              <input
-                type="date"
-                name="date_hired"
-                value={employee.date_hired}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-              />
+              {mode === "add" ? (
+                <input
+                  type="date"
+                  name="hire_date"
+                  value={employee.hire_date}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                />
+              ) : (
+                <input
+                  type="text"
+                  name="hire_date"
+                  value={formatDate(employee.hire_date)}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                  readOnly
+                />
+              )}
             </div>
 
             <div>
@@ -215,13 +269,13 @@ const EmployeeForm = () => {
 
           <Button
             color="blue"
-            className="w-full min-h-[40px] max-w-[160px] mt-3"
+            className="w-full min-h-[40px] mt-3"
             onClick={submitEmployee}
             disabled={
               !employee.first_name || !employee.last_name || !employee.email
             }
           >
-            Submit Employee
+            {mode === "edit" ? "Update Employee" : "Add Employee"}
           </Button>
         </div>
       </div>

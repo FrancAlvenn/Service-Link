@@ -4,6 +4,7 @@ import {
   X,
   CaretRight,
   CaretLeft,
+  SealCheck,
 } from "@phosphor-icons/react";
 import { useContext, useEffect, useState } from "react";
 import { JobRequestsContext } from "../../context/JobRequestsContext";
@@ -463,7 +464,10 @@ const ModalView = ({ open, onClose, referenceNumber, asModal = false }) => {
                     title="Status"
                   />
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 items-center">
+                  {request.verified && (
+                    <SealCheck size={24} variant="filled" color="blue" />
+                  )}
                   {/* <RequestAccess selectedRequest={request} /> */}
                   <PrintableRequestForm
                     requestType={requestType}

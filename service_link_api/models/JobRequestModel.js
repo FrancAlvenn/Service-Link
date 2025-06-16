@@ -70,6 +70,15 @@ const JobRequest = sequelize.define(
       allowNull: true,
       defaultValue: null,
     },
+    job_category: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
+    verified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false,
+    },
     authorized_access: {
       type: DataTypes.JSON,
       allowNull: true,

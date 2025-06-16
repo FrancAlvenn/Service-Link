@@ -32,15 +32,12 @@ const defaultDetailsByType = {
   ],
 };
 
-const AssetForm = () => {
+const AssetForm = ({ mode = "add", initialValues, onClose, onSuccess }) => {
   const { user } = useContext(AuthContext);
   const { fetchAssets } = useContext(AssetContext);
-
   const [errorMessage, setErrorMessage] = useState("");
-  const [additionalDetails, setAdditionalDetails] = useState([]);
-  const [newDetail, setNewDetail] = useState({ key: "", value: "" });
 
-  const [asset, setAsset] = useState({
+  const [asset, setAsset] = useState(() => ({
     reference_number: user?.reference_number || "",
     name: "",
     asset_type: "",
@@ -50,8 +47,16 @@ const AssetForm = () => {
     purchase_cost: "",
     status: "Available",
     last_maintenance: new Date().toISOString().split("T")[0],
-    warranty_expiry: null,
-  });
+    warranty_expiry: "",
+    ...(initialValues || {}),
+  }));
+
+  // Also initialize `additionalDetails` from initialValues if present
+  const [additionalDetails, setAdditionalDetails] = useState(
+    initialValues?.additional_details || []
+  );
+
+  const [newDetail, setNewDetail] = useState({ key: "", value: "" });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -88,28 +93,36 @@ const AssetForm = () => {
 
   const submitAsset = async () => {
     try {
-      const response = await axios.post(
-        "/assets",
+      const endpoint =
+        mode === "edit"
+          ? `/assets/${asset.reference_number}` // Use reference_number as your unique key
+          : "/assets";
+
+      const method = mode === "edit" ? "put" : "post";
+
+      const response = await axios[method](
+        endpoint,
         { ...asset, additional_details: additionalDetails },
         { withCredentials: true }
       );
 
-      if (response.status === 201) {
-        ToastNotification.success("Success!", "Asset added successfully.");
+      if ([200, 201].includes(response.status)) {
+        ToastNotification.success(
+          "Success!",
+          `Asset ${mode === "edit" ? "updated" : "added"} successfully.`
+        );
         fetchAssets();
         resetForm();
-      }
-
-      if (response.status === 401) {
-        setErrorMessage("Serial Number already exists. Please try again.");
-        resetForm();
-        return;
+        if (onSuccess) onSuccess();
+        if (onClose) onClose();
       }
 
       setErrorMessage("");
     } catch (error) {
-      if (error.response && error.response.status === 401) {
+      if (error.response?.status === 401) {
         setErrorMessage("Serial Number already exists. Please try again.");
+      } else {
+        setErrorMessage("An error occurred while saving the asset.");
       }
     }
   };
@@ -117,10 +130,16 @@ const AssetForm = () => {
   return (
     <div className="h-full bg-white rounded-lg w-full px-3 flex flex-col justify-between">
       <div className="py-4 px-5 mb-5 shadow-sm">
-        <Header
+        {/* <Header
           title={"Asset Information"}
           description={"Enter details about the asset below."}
-        />
+        /> */}
+        <Typography variant="h5" className="mb-2">
+          Asset Information
+        </Typography>
+        <Typography variant="small" className="mb-2">
+          Enter details about the asset below.
+        </Typography>
       </div>
 
       <div className="flex flex-col gap-4 px-5 pb-4 overflow-y-auto">
@@ -290,7 +309,7 @@ const AssetForm = () => {
             color="blue"
             className="dark:bg-blue-600 dark:hover:bg-blue-500 w-full"
           >
-            Save
+            {mode === "edit" ? "Update" : "Save"}
           </Button>
         </div>
 

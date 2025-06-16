@@ -20,6 +20,7 @@ import { FunnelSimple, Plus, UserCircle } from "@phosphor-icons/react";
 import { UserContext } from "../../../context/UserContext";
 import DepartmentSelect from "../../../utils/select/departmentSelect";
 import PositionSelect from "../../../utils/select/positionSelect";
+import UserPicker from "../../../components/user_picker/UserPicker";
 
 const Approvers = () => {
   const {
@@ -228,50 +229,6 @@ const Approvers = () => {
           )}
         </td>
       </tr>
-    );
-  };
-
-  const UserPicker = ({ onSelect }) => {
-    const { allUserInfo } = useContext(UserContext);
-    const [searchQuery, setSearchQuery] = useState("");
-
-    const filtered = allUserInfo.filter((user) =>
-      `${user.first_name} ${user.last_name}`
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase())
-    );
-
-    return (
-      <Menu placement="bottom-start" dismiss={{ itemPress: false }}>
-        <MenuHandler>
-          <Button variant="outlined" size="sm" className="w-fit text-left py-2">
-            Select User
-          </Button>
-        </MenuHandler>
-        <MenuList className="max-h-64 overflow-y-auto w-full max-w-[440px] p-2">
-          <input
-            className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 mb-2 text-sm"
-            placeholder="Search employee..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          {filtered.length > 0 ? (
-            filtered.map((user) => (
-              <MenuItem
-                key={user.reference_number}
-                onClick={() => onSelect(user)}
-                className="flex items-center justify-between"
-              >
-                <span className="flex items-center gap-2">
-                  <UserCircle size={20} /> {user.first_name} {user.last_name}
-                </span>
-              </MenuItem>
-            ))
-          ) : (
-            <MenuItem disabled>No matching users</MenuItem>
-          )}
-        </MenuList>
-      </Menu>
     );
   };
 

@@ -13,7 +13,13 @@ import { AuthContext } from "../../../features/authentication";
 import ToastNotification from "../../../utils/ToastNotification";
 import RequestAccess from "./RequestAccess";
 
-function RequestDetailsPage({ referenceNumber, onClose, isApprover }) {
+function RequestDetailsPage({
+  referenceNumber,
+  onClose,
+  isApprover,
+  isEmployee,
+  forVerification,
+}) {
   const { jobRequests, fetchJobRequests } = useContext(JobRequestsContext);
   const { purchasingRequests, fetchPurchasingRequests } = useContext(
     PurchasingRequestsContext
@@ -178,18 +184,31 @@ function RequestDetailsPage({ referenceNumber, onClose, isApprover }) {
 
       {/* Tab Navigation */}
       <div className="flex gap-4 mb-6 items-center justify-between bg-gray-100 dark:bg-gray-800 shadow-sm rounded-lg w-full max-w-full">
-        {["Summary", "Details", "Activity"].map((tab) => (
-          <Button
-            key={tab}
-            size="sm"
-            className="w-full dark:text-gray-300"
-            variant={activeTab === tab ? "filled" : "text"}
-            color={activeTab === tab ? "blue" : "black"}
-            onClick={() => setActiveTab(tab)}
-          >
-            {tab}
-          </Button>
-        ))}
+        {isAuthorized
+          ? ["Summary", "Details", "Activity"].map((tab) => (
+              <Button
+                key={tab}
+                size="sm"
+                className="w-full dark:text-gray-300"
+                variant={activeTab === tab ? "filled" : "text"}
+                color={activeTab === tab ? "blue" : "black"}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab}
+              </Button>
+            ))
+          : ["Summary", "Details"].map((tab) => (
+              <Button
+                key={tab}
+                size="sm"
+                className="w-full dark:text-gray-300"
+                variant={activeTab === tab ? "filled" : "text"}
+                color={activeTab === tab ? "blue" : "black"}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab}
+              </Button>
+            ))}
       </div>
 
       {/* Render Active Tab */}
@@ -201,6 +220,7 @@ function RequestDetailsPage({ referenceNumber, onClose, isApprover }) {
           fetchRequests={fetchAllRequests}
           onClose={onClose}
           isApprover={isApprover}
+          forVerification={forVerification}
         />
       )}
       {activeTab === "Details" && (

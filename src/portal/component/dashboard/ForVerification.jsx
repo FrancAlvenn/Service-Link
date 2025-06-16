@@ -1,115 +1,28 @@
 import React, { useContext, useEffect, useState } from "react";
 import { JobRequestsContext } from "../../../features/request_management/context/JobRequestsContext";
-import { PurchasingRequestsContext } from "../../../features/request_management/context/PurchasingRequestsContext";
-import { VenueRequestsContext } from "../../../features/request_management/context/VenueRequestsContext";
-import { VehicleRequestsContext } from "../../../features/request_management/context/VehicleRequestsContext";
-import {
-  Typography,
-  Chip,
-  Button,
-  Menu,
-  MenuHandler,
-  MenuList,
-  MenuItem,
-} from "@material-tailwind/react";
+import { Typography, Chip, Button } from "@material-tailwind/react";
 import { AuthContext } from "../../../features/authentication";
 import axios from "axios";
-import {
-  ReadCvLogo,
-  ShoppingCart,
-  CalendarCheck,
-  Car,
-} from "@phosphor-icons/react";
+import { ReadCvLogo } from "@phosphor-icons/react";
 import RequestDetailsPage from "../request_view/RequestDetailsPage";
 import { motion, AnimatePresence } from "framer-motion";
 import { useOutletContext } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import service_request from "../../../assets/service_requests.png";
+import EmployeeContext from "../../../features/employee_management/context/EmployeeContext";
 
-function PendingApprovalsTab() {
+function ForVerification() {
   const { jobRequests } = useContext(JobRequestsContext);
-  const { purchasingRequests } = useContext(PurchasingRequestsContext);
-  const { venueRequests } = useContext(VenueRequestsContext);
-  const { vehicleRequests } = useContext(VehicleRequestsContext);
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [statusOptions, setStatusOptions] = useState([]);
-  const [selectedType, setSelectedType] = useState("All");
   const [selectedRequest, setSelectedRequest] = useState(null);
-
   const { searchQuery } = useOutletContext();
+  const [forVerification, setForVerification] = useState([]);
+  const { employees, fetchEmployees } = useContext(EmployeeContext);
 
-  const [pendingApprovals, setPendingApprovals] = useState([]);
-
-  const [selectedStatus, setSelectedStatus] = useState("All");
-
-  const getRequestType = (referenceNumber) => {
-    const firstTwoLetters = referenceNumber.slice(0, 2);
-    switch (firstTwoLetters) {
-      case "JR":
-        return "Job Request";
-      case "PR":
-        return "Purchasing Request";
-      case "VR":
-        return "Venue Request";
-      case "SV":
-        return "Vehicle Request";
-      default:
-        return "Unknown";
-    }
-  };
-
-  // Icon mapping for request types
-  const typeIcons = {
-    "Job Request": (
-      <span className="p-2 rounded-md bg-blue-500">
-        <ReadCvLogo size={24} color="white" />
-      </span>
-    ),
-    "Purchasing Request": (
-      <span className="p-2 rounded-md bg-green-500">
-        <ShoppingCart size={24} color="white" />
-      </span>
-    ),
-    "Venue Request": (
-      <span className="p-2 rounded-md bg-purple-500">
-        <CalendarCheck size={24} color="white" />
-      </span>
-    ),
-    "Vehicle Request": (
-      <span className="p-2 rounded-md bg-red-500">
-        <Car size={24} color="white" />
-      </span>
-    ),
-  };
-
-  // Combine all requests and filter by user's reference number
-  const allRequests = [
-    ...(jobRequests?.length
-      ? jobRequests.map((req) => ({ ...req, type: "Job Request" }))
-      : []),
-    ...(purchasingRequests?.length
-      ? purchasingRequests.map((req) => ({
-          ...req,
-          type: "Purchasing Request",
-        }))
-      : []),
-    ...(venueRequests?.length
-      ? venueRequests.map((req) => ({ ...req, type: "Venue Request" }))
-      : []),
-    ...(vehicleRequests?.length
-      ? vehicleRequests.map((req) => ({ ...req, type: "Vehicle Request" }))
-      : []),
-  ];
-
-  // Filter requests by selected type
-  const filteredRequests =
-    selectedType === "All"
-      ? allRequests
-      : allRequests.filter((request) => request.type === selectedType);
-
-  // Fetch status options from backend
+  // Get status options from backend
   useEffect(() => {
     const getStatus = async () => {
       try {
@@ -130,9 +43,13 @@ function PendingApprovalsTab() {
     getStatus();
   }, []);
 
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
+
   // Open RequestDetailsPage
   const openRequestDetails = (referenceNumber) => {
-    const request = allRequests.find(
+    const request = jobRequests.find(
       (req) => req.reference_number === referenceNumber
     );
     setSelectedRequest(request);
@@ -141,82 +58,58 @@ function PendingApprovalsTab() {
   // Close RequestDetailsPage
   const closeRequestDetails = () => setSelectedRequest(null);
 
-  const handleNavigation = (path) => {
-    navigate(path);
-  };
-
-  // Apply search filter on pending approvals instead of all requests
-  const searchedRequests = pendingApprovals
-    .filter((request) => {
-      const type = getRequestType(request.reference_number);
-      return selectedType === "All" || type === selectedType;
-    })
-    .filter((request) => {
-      const query = searchQuery.toLowerCase();
-      return (
-        request.title?.toLowerCase().includes(query) ||
-        request.purpose?.toLowerCase().includes(query) ||
-        request.reference_number?.toLowerCase().includes(query)
-      );
-    });
-
-  // You may need to fetch all request types from a context or API
+  // Filter job requests with pending approvals
   useEffect(() => {
-    const allRequests = [
-      ...Object.values(jobRequests),
-      ...Object.values(purchasingRequests),
-      ...Object.values(venueRequests),
-      ...Object.values(vehicleRequests),
-    ];
+    const employee = employees.find(
+      (e) => e.reference_number === user?.reference_number
+    );
 
-    const filtered = allRequests.filter((req) => {
-      if (!Array.isArray(req.approvers)) return false;
-
-      const flattened = req.approvers.flat(); // flatten any nested arrays
-
-      return flattened.some(
-        (approver) => approver.status?.toLowerCase() === "pending"
+    const forVerification = Object.values(jobRequests).filter((req) => {
+      return (
+        req.status?.toLowerCase() === "pending" &&
+        req.verified === false &&
+        req.job_category?.toLowerCase() === employee?.expertise?.toLowerCase()
       );
     });
 
-    setPendingApprovals(filtered);
-  }, [user, jobRequests, purchasingRequests, vehicleRequests, venueRequests]);
+    setForVerification(forVerification);
+  }, [jobRequests]);
+
+  // Apply search filter
+  const searchedRequests = forVerification.filter((request) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      request.title?.toLowerCase().includes(query) ||
+      request.purpose?.toLowerCase().includes(query) ||
+      request.reference_number?.toLowerCase().includes(query)
+    );
+  });
 
   return (
-    <div className="min-h-screen h-full bg-white dark:bg-gray-900 rounded-lg w-full mt-0 px-1 py-4 flex flex-col  gap-4 pb-24">
+    <div className="min-h-screen h-full bg-white dark:bg-gray-900 rounded-lg w-full mt-0 px-1 py-4 flex flex-col gap-4 pb-24">
       <Typography variant="h5" className="text-gray-800 dark:text-gray-200">
-        Pending Requests
+        Job Requests For Verification
       </Typography>
 
-      {/* Filter Buttons */}
-      <div className="flex flex-wrap gap-1 overflow-x-auto md:justify-start justify-start">
-        {[
-          { type: "All", color: "blue" },
-          { type: "Job Request", color: "blue" },
-          { type: "Venue Request", color: "purple" },
-          { type: "Purchasing Request", color: "green" },
-          { type: "Vehicle Request", color: "red" },
-        ].map(({ type, color }) => (
-          <Button
-            key={type}
-            size="sm"
-            color={color}
-            variant={selectedType === type ? "filled" : "outlined"}
-            onClick={() => setSelectedType(type)}
-            className="md:min-w-fit"
-          >
-            {type}
-          </Button>
-        ))}
+      {/* Filter Button - Only Job Requests */}
+      <div className="flex flex-wrap gap-1">
+        <Button
+          size="sm"
+          color="blue"
+          variant="filled"
+          className="md:min-w-fit"
+        >
+          Job Requests
+        </Button>
       </div>
 
       {/* Scrollable Container */}
       <div className="flex flex-wrap gap-4 overflow-y-auto">
         {searchedRequests.length === 0 ? (
-          <div className="text-gray-500 dark:text-gray-400  text-sm py-3 text-center flex flex-col gap-3 items-center justify-center w-full">
+          <div className="text-gray-500 dark:text-gray-400 text-sm py-3 text-center flex flex-col gap-3 items-center justify-center w-full">
             <img
               src={service_request}
-              alt="No act"
+              alt="No job requests"
               className="bg-transparent w-full h-auto max-w-xs sm:max-w-sm md:max-w-sm lg:max-w-sm xl:max-w-sm"
             />
 
@@ -224,8 +117,7 @@ function PendingApprovalsTab() {
               variant="h6"
               className="text-gray-500 dark:text-gray-400"
             >
-              Nothing to see yet. Start a request and be the first to fill this
-              space!
+              No job requests pending verification
             </Typography>
           </div>
         ) : (
@@ -237,14 +129,16 @@ function PendingApprovalsTab() {
             >
               <div className="flex flex-col justify-between items-start gap-2">
                 <div className="flex items-center gap-2 w-full mb-1">
-                  {typeIcons[getRequestType(request.reference_number)]}
+                  <span className="p-2 rounded-md bg-blue-500">
+                    <ReadCvLogo size={24} color="white" />
+                  </span>
                   <div className="flex flex-col w-full">
                     <div className="flex justify-between w-full items-center gap-2">
                       <Typography
                         variant="small"
                         className="font-semibold mb-1 dark:text-gray-200"
                       >
-                        {request.title || "Request Title"}
+                        {request.title || "Job Request"}
                       </Typography>
                       <Typography
                         variant="small"
@@ -284,6 +178,17 @@ function PendingApprovalsTab() {
               >
                 {request.purpose || "No description available."}
               </Typography>
+
+              {/* Show classification if available */}
+              {request.job_category && (
+                <Chip
+                  size="sm"
+                  variant="outlined"
+                  color="blue"
+                  value={request.job_category.toUpperCase()}
+                  className="mt-2 capitalize w-fit bg-blue-200 dark:bg-blue-700"
+                />
+              )}
             </div>
           ))
         )}
@@ -313,7 +218,8 @@ function PendingApprovalsTab() {
               <RequestDetailsPage
                 referenceNumber={selectedRequest.reference_number}
                 onClose={closeRequestDetails}
-                isApprover={true}
+                isApprover={false}
+                forVerification={true}
               />
             </motion.div>
           </>
@@ -323,4 +229,4 @@ function PendingApprovalsTab() {
   );
 }
 
-export default PendingApprovalsTab;
+export default ForVerification;

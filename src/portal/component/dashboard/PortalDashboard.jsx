@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { JobRequestsContext } from "../../../features/request_management/context/JobRequestsContext";
 import { PurchasingRequestsContext } from "../../../features/request_management/context/PurchasingRequestsContext";
 import { VenueRequestsContext } from "../../../features/request_management/context/VenueRequestsContext";
@@ -17,6 +17,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useOutletContext } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import service_request from "../../../assets/service_requests.png";
+import EmployeeContext from "../../../features/employee_management/context/EmployeeContext";
+import { SettingsContext } from "../../../features/settings/context/SettingsContext";
 
 function PortalDashboard() {
   const { jobRequests } = useContext(JobRequestsContext);
@@ -24,6 +26,8 @@ function PortalDashboard() {
   const { venueRequests } = useContext(VenueRequestsContext);
   const { vehicleRequests } = useContext(VehicleRequestsContext);
   const { user } = useContext(AuthContext);
+  const { employees, fetchEmployees } = useContext(EmployeeContext);
+  const { approvers, fetchApprovers } = useContext(SettingsContext);
   const navigate = useNavigate();
 
   const [statusOptions, setStatusOptions] = useState([]);
@@ -33,6 +37,7 @@ function PortalDashboard() {
   const { searchQuery } = useOutletContext();
 
   const [pendingApprovals, setPendingApprovals] = useState([]);
+  const [forVerification, setForVerification] = useState([]);
 
   // Icon mapping for request types
   const typeIcons = {
@@ -105,6 +110,11 @@ function PortalDashboard() {
     getStatus();
   }, []);
 
+  useEffect(() => {
+    fetchEmployees();
+    fetchApprovers();
+  }, []);
+
   // Open RequestDetailsPage
   const openRequestDetails = (referenceNumber) => {
     const request = allRequests.find(
@@ -152,7 +162,31 @@ function PortalDashboard() {
     });
 
     setPendingApprovals(filtered);
+
+    const employee = employees.find(
+      (e) => e.reference_number === user?.reference_number
+    );
+
+    const forVerification = Object.values(jobRequests).filter((req) => {
+      return (
+        req.status?.toLowerCase() === "pending" &&
+        req.verified === false &&
+        req.job_category?.toLowerCase() === employee?.expertise?.toLowerCase()
+      );
+    });
+
+    setForVerification(forVerification);
   }, [user, jobRequests, purchasingRequests, vehicleRequests, venueRequests]);
+
+  const isApprover = useMemo(() => {
+    if (!Array.isArray(approvers)) return false;
+    return approvers.some((a) => a.reference_number === user?.reference_number);
+  }, [user, approvers]);
+
+  const isEmployee = useMemo(() => {
+    if (!Array.isArray(employees)) return false;
+    return employees.some((e) => e.reference_number === user?.reference_number);
+  }, [user, employees]);
 
   return (
     <div className="min-h-screen h-full bg-white dark:bg-gray-900 rounded-lg w-full mt-0 px-1 py-4 flex flex-col  gap-4 pb-24">
@@ -160,12 +194,20 @@ function PortalDashboard() {
         <Typography variant="h5" className="text-gray-800 dark:text-gray-200">
           My Requests
         </Typography>
-        {user?.designation_id !== 1 && (
+        {user?.designation_id !== 1 && isApprover && (
           <Typography
             className="text-blue-500 dark:text-blue-800 text-xs font-semibold cursor-pointer hover:underline"
             onClick={() => handleNavigation("/portal/pending-approvals")}
           >
             Show Pending Approvals
+          </Typography>
+        )}
+        {user?.designation_id !== 1 && isEmployee && (
+          <Typography
+            className="text-blue-500 dark:text-blue-800 text-xs font-semibold cursor-pointer hover:underline"
+            onClick={() => handleNavigation("/portal/for-verification")}
+          >
+            Show For Verification
           </Typography>
         )}
       </div>
@@ -196,17 +238,37 @@ function PortalDashboard() {
         ))}
       </div>
 
-      {pendingApprovals.length > 0 && user?.designation_id !== 1 && (
-        <button
-          className=" bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg transition"
-          onClick={() => handleNavigation("/portal/pending-approvals")}
-          aria-label="View Pending Approvals"
-        >
-          <Typography variant="small" className="font-bold">
-            Pending Approvals ({pendingApprovals.length})
-          </Typography>
-        </button>
-      )}
+      {pendingApprovals.length > 0 &&
+        user?.designation_id !== 1 &&
+        approvers.some(
+          (emp) => emp.reference_number === user.reference_number
+        ) && (
+          <button
+            className=" bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg transition"
+            onClick={() => handleNavigation("/portal/pending-approvals")}
+            aria-label="View Pending Approvals"
+          >
+            <Typography variant="small" className="font-bold">
+              Pending Approvals ({pendingApprovals.length})
+            </Typography>
+          </button>
+        )}
+
+      {forVerification.length > 0 &&
+        user?.designation_id !== 1 &&
+        employees.some(
+          (emp) => emp.reference_number === user.reference_number
+        ) && (
+          <button
+            className=" bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg shadow-lg transition"
+            onClick={() => handleNavigation("/portal/for-verification")}
+            aria-label="View Pending Approvals"
+          >
+            <Typography variant="small" className="font-bold">
+              For Verification ({forVerification.length})
+            </Typography>
+          </button>
+        )}
 
       {/* Scrollable Container */}
       <div className="flex flex-wrap gap-4 overflow-y-auto">
@@ -311,6 +373,8 @@ function PortalDashboard() {
               <RequestDetailsPage
                 referenceNumber={selectedRequest.reference_number}
                 onClose={closeRequestDetails}
+                isApprover={isApprover}
+                isEmployee={isEmployee}
               />
             </motion.div>
           </>

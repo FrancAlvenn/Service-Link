@@ -466,7 +466,9 @@ const ModalView = ({ open, onClose, referenceNumber, asModal = false }) => {
                 </div>
                 <div className="flex gap-2 items-center">
                   {request.verified && (
-                    <SealCheck size={24} variant="filled" color="blue" />
+                    <div title={getUserByReferenceNumber(request.verified_by)}>
+                      <SealCheck size={24} variant="filled" color="blue" />
+                    </div>
                   )}
                   {/* <RequestAccess selectedRequest={request} /> */}
                   <PrintableRequestForm

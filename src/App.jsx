@@ -58,6 +58,7 @@ import { AssetAssignmentLogProvider } from "./features/asset_management/context/
 import { SettingsProvider } from "./features/settings/context/SettingsContext";
 import Settings from "./features/settings/component/Settings";
 import PendingApprovalsTab from "./portal/component/dashboard/PendingApprovalsTab";
+import ForVerification from "./portal/component/dashboard/ForVerification";
 import UserManagement from "./features/user_management/component/UserManagement";
 import SidebarView from "./components/sidebar/SidebarView";
 
@@ -285,6 +286,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute requiredAccess={"user"}>
             <PendingApprovalsTab />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "for-verification",
+        element: (
+          <ProtectedRoute requiredAccess={"user"}>
+            <ForVerification />
           </ProtectedRoute>
         ),
       },

@@ -32,6 +32,7 @@ export async function createJobRequest(req, res) {
         title: req.body.title,
         date_required: req.body.date_required,
         purpose: req.body.purpose,
+        job_category: req.body.job_category,
         requester: req.body.requester,
         status: "Pending",
         immediate_head_approval: "Pending",

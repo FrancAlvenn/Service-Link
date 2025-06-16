@@ -55,7 +55,7 @@ const RaiseRequest = () => {
         {!selectedRequest ? (
           <CardBody className="p-2 flex flex-col gap-4 w-full pb-28 ">
             {/* Job Request */}
-            {!user.designation === 1 && (
+            {user.designation_id !== 1 && (
               <Card
                 className="p-5 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition w-full dark:bg-gray-800"
                 onClick={() => setSelectedRequest("job_request")}
@@ -75,7 +75,7 @@ const RaiseRequest = () => {
             )}
 
             {/* Purchasing Request */}
-            {!user.designation === 1 && (
+            {user.designation_id !== 1 && (
               <Card
                 className="p-5 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition w-full dark:bg-gray-800"
                 onClick={() => setSelectedRequest("purchasing_request")}

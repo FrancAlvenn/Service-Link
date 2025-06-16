@@ -29,6 +29,7 @@ const MainTab = ({
   fetchRequests,
   onClose,
   isApprover,
+  forVerification,
 }) => {
   const { user } = useContext(AuthContext);
   const { getUserByReferenceNumber } = useContext(UserContext);
@@ -245,6 +246,38 @@ const MainTab = ({
     }
   };
 
+  const handleVerification = async () => {
+    const res = await axios.put(
+      `/${requestType}/${request.reference_number}`,
+      {
+        ...request,
+        verified: true,
+        verified_by: user.reference_number,
+      },
+      { withCredentials: true }
+    );
+
+    if (res.status === 200) {
+      ToastNotification.success("Verified", "Request has been verified.");
+
+      await axios.post(
+        "/request_activity",
+        {
+          reference_number: request.reference_number,
+          visibility: "internal",
+          type: "verification",
+          action: "Request has been verified",
+          details: "",
+          performed_by: user.reference_number,
+        },
+        { withCredentials: true }
+      );
+
+      fetchRequests();
+      onClose();
+    }
+  };
+
   return (
     <div className="flex flex-col gap-4">
       {/* Request Access */}
@@ -457,6 +490,19 @@ const MainTab = ({
           </div>
         )}
       </div>
+
+      {forVerification && (
+        <div className="mt-4 w-full">
+          <button
+            onClick={() => {
+              handleVerification();
+            }}
+            className="w-full p-2 text-sm text-white bg-green-500 rounded-md hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700"
+          >
+            Verify Request
+          </button>
+        </div>
+      )}
 
       {/* Delete Request Button with Confirmation */}
       {isAuthorized && (

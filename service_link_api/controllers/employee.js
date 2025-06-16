@@ -3,13 +3,6 @@ import EmployeeModel from "../models/EmployeeModel.js";
 import { createLog } from "./system_logs.js";
 import { Op } from "sequelize";
 
-// Generate a unique employee reference number (e.g., EMP-2025-00001)
-function generateEmployeeReferenceNumber(lastEmployeeId) {
-  const year = new Date().getFullYear();
-  const uniqueNumber = String(lastEmployeeId + 1).padStart(5, "0");
-  return `EMP-${year}-${uniqueNumber}`;
-}
-
 // Create a new Employee
 export const createEmployee = async (req, res) => {
   let transaction;
@@ -26,20 +19,12 @@ export const createEmployee = async (req, res) => {
       return res.status(400).json({ message: "Email must be unique." });
     }
 
-    // Generate a unique reference number
-    const lastEmployee = await EmployeeModel.findOne({
-      order: [["employee_id", "DESC"]],
-    });
-    const referenceNumber = generateEmployeeReferenceNumber(
-      lastEmployee ? lastEmployee.employee_id : 0
-    );
-
     const hireDate =
       req.body.hire_date || new Date().toISOString().split("T")[0];
 
     const newEmployee = await EmployeeModel.create(
       {
-        reference_number: referenceNumber,
+        reference_number: req.body.reference_number,
         first_name: req.body.first_name,
         last_name: req.body.last_name,
         middle_name: req.body.middle_name,
@@ -64,10 +49,10 @@ export const createEmployee = async (req, res) => {
 
     createLog({
       action: "create",
-      target: referenceNumber,
+      target: req.body.reference_number,
       performed_by: req.body.user || "system",
       title: "Employee Created",
-      details: `Employee with reference number ${referenceNumber} created successfully!`,
+      details: `Employee with reference number ${req.body.reference_number} created successfully!`,
     });
 
     res

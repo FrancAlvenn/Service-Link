@@ -92,7 +92,7 @@ function Portal() {
             </div>
           )}
 
-          {/* Search Toggle Button */}
+          {/* Pending Approvals Search Toggle Button */}
           {(currentTab === "dashboard" ||
             currentTab === "pending-approvals") && (
             <button

@@ -17,8 +17,6 @@ function Home() {
     return <div>Loading...</div>; // or redirect to login page
   }
 
-  const navigate = useNavigate();
-
   console.log(user);
   console.log(user?.username);
 
@@ -31,7 +29,6 @@ function Home() {
     clearAuthData();
 
     // Redirect to login page
-    navigate('/');
   };
 
   return (

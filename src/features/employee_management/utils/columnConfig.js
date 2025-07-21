@@ -92,34 +92,6 @@ export const getColumnConfig = ({ setNewEmployee, setEditModalOpen }) => [
     ),
   },
   {
-    key: "position",
-    label: "Position",
-    header: (
-      <Typography variant="small" color="blue-gray" className={normalText}>
-        Position
-      </Typography>
-    ),
-    render: (row) => (
-      <Typography variant="small" color="blue-gray" className={normalText}>
-        {row.position}
-      </Typography>
-    ),
-  },
-  {
-    key: "department",
-    label: "Department",
-    header: (
-      <Typography variant="small" color="blue-gray" className={normalText}>
-        Department
-      </Typography>
-    ),
-    render: (row) => (
-      <Typography variant="small" color="blue-gray" className={normalText}>
-        {row.department}
-      </Typography>
-    ),
-  },
-  {
     key: "expertise",
     label: "Expertise",
     header: (
@@ -172,48 +144,6 @@ export const getColumnConfig = ({ setNewEmployee, setEditModalOpen }) => [
     render: (row) => (
       <Typography variant="small" color="blue-gray" className={normalText}>
         {row.contact_number}
-      </Typography>
-    ),
-  },
-  {
-    key: "address",
-    label: "Address",
-    header: (
-      <Typography variant="small" color="blue-gray" className={normalText}>
-        Address
-      </Typography>
-    ),
-    render: (row) => (
-      <Typography variant="small" color="blue-gray" className={normalText}>
-        {row.address}
-      </Typography>
-    ),
-  },
-  {
-    key: "created_at",
-    label: "Created At",
-    header: (
-      <Typography variant="small" color="blue-gray" className={normalText}>
-        Created At
-      </Typography>
-    ),
-    render: (row) => (
-      <Typography variant="small" color="blue-gray" className={normalText}>
-        {formatDate(row.created_at)}
-      </Typography>
-    ),
-  },
-  {
-    key: "updated_at",
-    label: "Updated At",
-    header: (
-      <Typography variant="small" color="blue-gray" className={normalText}>
-        Updated At
-      </Typography>
-    ),
-    render: (row) => (
-      <Typography variant="small" color="blue-gray" className={normalText}>
-        {formatDate(row.updated_at)}
       </Typography>
     ),
   },

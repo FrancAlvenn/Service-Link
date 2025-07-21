@@ -43,7 +43,7 @@ export const VehicleRequestsProvider = ({ children }) => {
       setArchivedVehicleRequests(data);
     } catch (error) {
       console.error("Error fetching job requests:", error);
-    }
+     }
   };
 
   return (

@@ -50,7 +50,7 @@ const ActivityTab = ({ referenceNumber, activeTab }) => {
 
   const getRequestActivity = async () => {
     try {
-      const res = await axios.get(`/request_activity/${referenceNumber}`, {
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/request_activity/${referenceNumber}`, {
         withCredentials: true,
       });
       setActivities(Array.isArray(res.data) ? res.data : []);

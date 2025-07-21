@@ -64,7 +64,7 @@ function GoogleAuthLogin() {
       const email = decodedToken.email;
 
       if (email.endsWith("@dyci.edu.ph")) {
-        const response = await axios.post("/auth/google_login", {
+        const response = await axios.post(`${process.env.REACT_APP_API_URL}/auth/google_login`, {
           google_id: decodedToken.sub,
           email: decodedToken.email,
           first_name: decodedToken.given_name,

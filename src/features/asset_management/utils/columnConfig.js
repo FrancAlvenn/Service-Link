@@ -130,34 +130,6 @@ export const getColumnConfig = ({ setAssetModalOpen, setSelectedAsset }) => [
       </Typography>
     ),
   },
-  {
-    key: "createdAt",
-    label: "Created At",
-    header: (
-      <Typography variant="small" color="blue-gray" className={normalText}>
-        Created At
-      </Typography>
-    ),
-    render: (row) => (
-      <Typography variant="small" color="blue-gray" className={normalText}>
-        {formatDate(row.createdAt)}
-      </Typography>
-    ),
-  },
-  {
-    key: "updatedAt",
-    label: "Updated At",
-    header: (
-      <Typography variant="small" color="blue-gray" className={normalText}>
-        Updated At
-      </Typography>
-    ),
-    render: (row) => (
-      <Typography variant="small" color="blue-gray" className={normalText}>
-        {formatDate(row.updatedAt)}
-      </Typography>
-    ),
-  },
 ];
 
 export const getAssignmentLogColumns = (

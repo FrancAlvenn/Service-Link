@@ -37,6 +37,8 @@ const Designation = () => {
 
   const tableRef = useRef(null);
 
+  const isProtectedDesignation = [1, 2, 3].includes(selectedRowId);
+
   useEffect(() => {
     fetchDesignations();
   }, []);
@@ -289,6 +291,7 @@ const Designation = () => {
                       handleEditDepartment(selected);
                     }}
                     className="py-2 px-4"
+                    disabled={isProtectedDesignation}
                   >
                     Edit
                   </Button>
@@ -296,6 +299,7 @@ const Designation = () => {
                     color="red"
                     onClick={() => openDeleteDialog(selectedRowId)}
                     className="py-2 px-4"
+                    disabled={isProtectedDesignation}
                   >
                     Delete
                   </Button>

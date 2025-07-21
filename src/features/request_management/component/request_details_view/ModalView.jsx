@@ -466,7 +466,12 @@ const ModalView = ({ open, onClose, referenceNumber, asModal = false }) => {
                 </div>
                 <div className="flex gap-2 items-center">
                   {request.verified && (
-                    <div title={getUserByReferenceNumber(request.verified_by)}>
+                    <div
+                      title={
+                        "Verified by " +
+                        getUserByReferenceNumber(request.verified_by)
+                      }
+                    >
                       <SealCheck size={24} variant="filled" color="blue" />
                     </div>
                   )}

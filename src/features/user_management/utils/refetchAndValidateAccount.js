@@ -2,7 +2,7 @@ import shouldAccountBeActive from "./accountStatusChecker";
 
 export const refetchAndValidateAccount = async (userId) => {
   try {
-    const response = await fetch(`/users/${userId}`, {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/users/${userId}`, {
       credentials: "include",
       headers: {
         "Content-Type": "application/json",

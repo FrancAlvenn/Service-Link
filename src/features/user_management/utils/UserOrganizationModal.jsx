@@ -38,7 +38,7 @@ function UserOrganizationModal({
     const getOrganizations = async () => {
       try {
         setLoading(true);
-        const response = await fetch("/settings/organization", {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/settings/organization`, {
           credentials: "include",
         });
 
@@ -70,7 +70,7 @@ function UserOrganizationModal({
     try {
       setSelectedOrganizationId(organizationId);
 
-      const response = await fetch(`/users/${userId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/users/${userId}`, {
         method: "PUT",
         credentials: "include",
         headers: { "Content-Type": "application/json" },

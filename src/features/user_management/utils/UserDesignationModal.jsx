@@ -37,7 +37,7 @@ function UserDesignationModal({
     const getDesignations = async () => {
       try {
         setLoading(true);
-        const response = await fetch("/settings/designation", {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/settings/designation`, {
           credentials: "include",
         });
 
@@ -69,7 +69,7 @@ function UserDesignationModal({
     try {
       setSelectedDesignationId(designationId);
 
-      const response = await fetch(`/users/${userId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/users/${userId}`, {
         method: "PUT",
         credentials: "include",
         headers: { "Content-Type": "application/json" },

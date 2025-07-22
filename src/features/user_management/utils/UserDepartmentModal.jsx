@@ -36,7 +36,7 @@ function UserDepartmentModal({
     const getDepartments = async () => {
       setLoading(true); // START loading
       try {
-        const response = await fetch("/settings/department", {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/settings/department`, {
           credentials: "include",
         });
         const data = await response.json();
@@ -67,7 +67,7 @@ function UserDepartmentModal({
     try {
       setSelectedDepartmentId(departmentId);
 
-      const response = await fetch(`/users/${userId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/users/${userId}`, {
         method: "PUT",
         credentials: "include",
         headers: { "Content-Type": "application/json" },

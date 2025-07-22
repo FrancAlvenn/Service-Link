@@ -69,7 +69,8 @@ function GoogleAuthLogin() {
           email: decodedToken.email,
           first_name: decodedToken.given_name,
           last_name: decodedToken.family_name,
-        });
+        },
+        { withCredentials: true });
 
         if (response.status === 201) {
           ToastNotification.info(

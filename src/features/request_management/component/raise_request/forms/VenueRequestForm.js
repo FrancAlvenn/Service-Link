@@ -84,7 +84,7 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
   }, []);
 
   useEffect(() => {
-    axios.get("/assets/", { withCredentials: true }).then((response) => {
+    axios.get(`${process.env.REACT_APP_API_URL}/assets/`, { withCredentials: true }).then((response) => {
       const venues =
         response.data === null || response.data.length === 0
           ? []
@@ -184,7 +184,7 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
   }, [request, venueRequests]);
 
   useEffect(() => {
-    axios.get("/settings/department", { withCredentials: true }).then((res) => {
+    axios.get(`${process.env.REACT_APP_API_URL}/settings/department`, { withCredentials: true }).then((res) => {
       if (Array.isArray(res.data.departments)) {
         setDepartmentOptions(res.data.departments);
       }

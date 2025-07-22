@@ -79,7 +79,7 @@ const ActivityTab = ({ referenceNumber, activeTab }) => {
     };
 
     try {
-      await axios.post("/request_activity", newActivity, {
+      await axios.post(`${process.env.REACT_APP_API_URL}/request_activity`, newActivity, {
         withCredentials: true,
       });
       getRequestActivity();

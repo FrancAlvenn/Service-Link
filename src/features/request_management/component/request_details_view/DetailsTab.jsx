@@ -183,7 +183,7 @@ const DetailsTab = ({
   useEffect(() => {
     axios({
       method: "GET",
-      url: "/assets/",
+      url: `${process.env.REACT_APP_API_URL}/assets/`,
       withCredentials: true,
     })
       .then((response) => {
@@ -203,7 +203,7 @@ const DetailsTab = ({
   useEffect(() => {
     axios({
       method: "GET",
-      url: "/assets/",
+      url: `${process.env.REACT_APP_API_URL}/assets/`,
       withCredentials: true,
     })
       .then((response) => {

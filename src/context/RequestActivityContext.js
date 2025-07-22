@@ -59,7 +59,7 @@ export const RequestActivityProvider = ({ children }) => {
     try {
       const responses = await Promise.all(
         allRequests.map((req) =>
-          axios.get(`/request_activity/${req.reference_number}`, {
+          axios.get(`${process.env.REACT_APP_API_URL}/request_activity/${req.reference_number}`, {
             withCredentials: true,
           })
         )

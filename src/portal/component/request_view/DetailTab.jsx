@@ -23,7 +23,7 @@ const DetailTab = ({
   useEffect(() => {
     axios({
       method: "GET",
-      url: "/assets/",
+      url: `${process.env.REACT_APP_API_URL}/assets/`,
       withCredentials: true,
     })
       .then((response) => {

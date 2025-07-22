@@ -158,7 +158,7 @@ function AccountSetting({ onClose }) {
               label: "Department",
               icon: <Tag size={20} />,
               key: "department_id",
-              editable: true, // make it editable
+              editable: false, // make it editable
               customComponent:
                 editingField === "department_id" ? (
                   <DepartmentSelect

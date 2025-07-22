@@ -27,33 +27,11 @@ function ControlRenderer({ selectedControl }) {
     let controlComponent = null;
 
     if (
-      location.pathname.includes("requests-management") ||
+      location.pathname.includes("workspace") ||
       selectedControl === "Requests Management"
     ) {
       controlComponent = <RequestsManagementControls />;
     }
-
-    if (
-      location.pathname.includes("ticket-management/board") ||
-      selectedControl === "Ticket Management"
-    ) {
-      controlComponent = <RequestsManagementControls />;
-    }
-
-    if (
-      location.pathname.includes("asset-management/board") ||
-      selectedControl === "Asset Management"
-    ) {
-      controlComponent = <RequestsManagementControls />;
-    }
-
-    if (
-      location.pathname.includes("employee-management/board") ||
-      selectedControl === "Employee Management"
-    ) {
-      controlComponent = <RequestsManagementControls />;
-    }
-
     // Add styles before returning the component
     return (
       <div className=" px-1  h-full custom-scrollbar whitespace-nowrap">

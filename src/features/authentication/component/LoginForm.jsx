@@ -113,7 +113,7 @@ function LoginForm() {
       method: "post",
       url: `${process.env.REACT_APP_API_URL}/auth/login`,
       data: value,
-      headers: { "Access-Control-Allow-Origin": "*" },
+      withCredentials: true,
     })
       .then((res) => {
         if (res.status === 200) {

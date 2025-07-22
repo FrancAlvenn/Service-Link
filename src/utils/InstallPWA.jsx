@@ -29,7 +29,7 @@ const InstallPWA = () => {
     onClick={handleInstallClick}
     color="blue"
     ripple={true}
-    className="flex items-center gap-2 px-6 py-3 text-white rounded-lg shadow-md hover:shadow-lg transition-all"
+    className="flex items-center gap-2 px-4 py-2 text-white rounded-lg shadow-md hover:shadow-lg transition-all"
     >
     Install App
     </Button>

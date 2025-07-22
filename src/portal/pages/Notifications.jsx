@@ -54,11 +54,12 @@ const NotificationPage = () => {
   const hasLoadedActivities = useRef(false);
 
   useEffect(() => {
-    if (allRequests.length > 0 && !hasLoadedActivities.current) {
+    if (!hasLoadedActivities.current) {
       loadActivities();
       hasLoadedActivities.current = true;
     }
   }, [allRequests]);
+
 
   const handleTabChange = (tab) => {
     setSelectedTab(tab);
@@ -90,6 +91,13 @@ const NotificationPage = () => {
   const loadActivities = async () => {
     try {
       setLoading(true);
+
+      // If there are no requests, return empty activities
+      if (allRequests.length === 0) {
+        setActivities([]);
+        return;
+      }
+
       const userActivities = await fetchMultipleActivities(allRequests);
       setActivities(userActivities || []);
     } catch (error) {

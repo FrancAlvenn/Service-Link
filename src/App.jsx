@@ -61,6 +61,7 @@ import PendingApprovalsTab from "./portal/component/dashboard/PendingApprovalsTa
 import ForVerification from "./portal/component/dashboard/ForVerification";
 import UserManagement from "./features/user_management/component/UserManagement";
 import SidebarView from "./components/sidebar/SidebarView";
+import NotFound from "./pages/NotFound";
 
 library.add(fas, fab, far); // Add all the icons needed
 
@@ -263,6 +264,12 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      {
+        path: "*",
+        element: (
+          <Navigate to="/workspace/requests-management/queues/job-requests" />
+        ),
+      },
     ],
   },
   {
@@ -340,6 +347,10 @@ const router = createBrowserRouter([
         // element: <About/>
       },
     ],
+  },
+  {
+    path: "*",
+    element: <NotFound />,
   },
 ]);
 

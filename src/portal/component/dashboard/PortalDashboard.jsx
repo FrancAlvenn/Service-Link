@@ -163,9 +163,9 @@ function PortalDashboard() {
 
     setPendingApprovals(filtered);
 
-    const employee = employees.find(
-      (e) => e.reference_number === user?.reference_number
-    );
+    const employee = Array.isArray(employees) && employees.length > 0
+      ? employees.find((e) => e.reference_number === user?.reference_number)
+      : null;
 
     const forVerification = Object.values(jobRequests).filter((req) => {
       return (

@@ -34,7 +34,7 @@ const TicketForm = () => {
 
   const submitTicket = async () => {
     try {
-      const { status } = await axios.post("/tickets", ticket, { withCredentials: true });
+      const { status } = await axios.post(`${process.env.REACT_APP_API_URL}/tickets`, ticket, { withCredentials: true });
 
       if (status === 201) {
         resetForm();

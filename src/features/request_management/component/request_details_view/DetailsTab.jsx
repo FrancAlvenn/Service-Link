@@ -249,7 +249,7 @@ const DetailsTab = ({
 
       await axios({
         method: "PUT",
-        url: `/${requestType}/${editedRequest.reference_number}`,
+        url: `${process.env.REACT_APP_API_URL}/${requestType}/${editedRequest.reference_number}`,
         data: {
           ...selectedRequest,
           [field]: isDateOrTimeField

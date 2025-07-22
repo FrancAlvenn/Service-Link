@@ -24,7 +24,7 @@ const RequestAccess = ({selectedRequest, requestType}) => {
 
   const getAccessRequest = async () => {
     try {
-      const res = await axios.get(`/request_activity/${selectedRequest.reference_number}`, { withCredentials: true });
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/request_activity/${selectedRequest.reference_number}`, { withCredentials: true });
   
       // Filter request activities where type is "request_access"
       const accessRequests = res.data.filter((activity) => activity.request_type === "request_access");
@@ -50,7 +50,7 @@ const RequestAccess = ({selectedRequest, requestType}) => {
     try {
       const updatedAccess = [...userWithAccess, grantedUser];
 
-      await axios.put(`/${requestType}/${selectedRequest.reference_number}`, {
+      await axios.put(`${process.env.REACT_APP_API_URL}/${requestType}/${selectedRequest.reference_number}`, {
         ...selectedRequest,
         authorized_access: updatedAccess,
       });
@@ -71,7 +71,7 @@ const RequestAccess = ({selectedRequest, requestType}) => {
         performed_by: grantedUser,
       };
 
-      await axios.post("/request_activity", newActivity, { withCredentials: true });
+      await axios.post(`${process.env.REACT_APP_API_URL}/request_activity`, newActivity, { withCredentials: true });
 
       // ToastNotification.info("Success", "Access request processed successfully");
 

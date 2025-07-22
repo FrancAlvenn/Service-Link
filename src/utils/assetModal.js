@@ -52,7 +52,7 @@ function AssetModal({ assignedTo, assetId, onAssignmentUpdate }) {
       setOpenModal(false);
 
       const response = await axios.patch(
-        `/assets/${assetId}/assign`,
+        `${process.env.REACT_APP_API_URL}/assets/${assetId}/assign`,
         {
           assigned_asset_id: selectedAsset.asset_id,
           action: note,
@@ -68,7 +68,7 @@ function AssetModal({ assignedTo, assetId, onAssignmentUpdate }) {
         }
 
         await axios.post(
-          "/asset_activity",
+          `${process.env.REACT_APP_API_URL}/asset_activity`,
           {
             asset_id: assetId,
             type: "assignment",

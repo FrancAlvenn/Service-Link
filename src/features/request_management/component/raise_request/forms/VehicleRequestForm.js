@@ -149,7 +149,7 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const departmentResponse = await axios.get("/settings/department", {
+        const departmentResponse = await axios.get(`${process.env.REACT_APP_API_URL}/settings/department`, {
           withCredentials: true,
         });
 
@@ -195,7 +195,7 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
 
       const response = await axios({
         method: "POST",
-        url: "/vehicle_request",
+        url: `${process.env.REACT_APP_API_URL}/vehicle_request`,
         data: requestData,
         withCredentials: true,
       });

@@ -98,7 +98,7 @@ const ActivityTab = ({ referenceNumber, activeTab }) => {
   const handleSaveEdit = async (id) => {
     try {
       await axios.put(
-        `/request_activity/${id}`,
+        `${process.env.REACT_APP_API_URL}/request_activity/${id}`,
         { details: editContent, performed_by: user.reference_number },
         { withCredentials: true }
       );
@@ -114,7 +114,7 @@ const ActivityTab = ({ referenceNumber, activeTab }) => {
 
   const handleDeleteActivity = async (id) => {
     try {
-      await axios.delete(`/request_activity/${id}`, { withCredentials: true });
+      await axios.delete(`${process.env.REACT_APP_API_URL}/request_activity/${id}`, { withCredentials: true });
       setActivities((prev) => prev.filter((a) => a.id !== id));
     } catch (error) {
       console.error("Error deleting activity:", error);

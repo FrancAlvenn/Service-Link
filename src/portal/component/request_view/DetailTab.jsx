@@ -147,7 +147,7 @@ const DetailTab = ({
 
   const handleUpdate = async (field) => {
     try {
-      await axios.put(`/${requestType}/${editedRequest.reference_number}`, {
+      await axios.put(`${process.env.REACT_APP_API_URL}/${requestType}/${editedRequest.reference_number}`, {
         ...selectedRequest,
         [field]: editedRequest[field],
       });

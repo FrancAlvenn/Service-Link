@@ -32,7 +32,7 @@ export const UserProvider = ({ children }) => {
     try {
       const { data } = await axios({
         method: "get",
-        url: "/users", // This is the endpoint that retrieves the user data
+        url: `${process.env.REACT_APP_API_URL}/users`, // This is the endpoint that retrieves the user data
         withCredentials: true,
       });
       setAllUserInfo(data);
@@ -46,7 +46,7 @@ export const UserProvider = ({ children }) => {
     try {
       const { data } = await axios({
         method: "get",
-        url: `/users/${reference_number}`, // This is the endpoint that retrieves user data by reference number
+        url: `${process.env.REACT_APP_API_URL}/users/${reference_number}`, // This is the endpoint that retrieves user data by reference number
         withCredentials: true,
       });
       setAllUserInfo(data);
@@ -80,7 +80,7 @@ export const UserProvider = ({ children }) => {
     try {
       const { data } = await axios({
         method: "post",
-        url: "/users", // This is the endpoint that creates a new user
+        url: `${process.env.REACT_APP_API_URL}/users`, // This is the endpoint that creates a new user
         data: userData,
         withCredentials: true,
       });
@@ -95,7 +95,7 @@ export const UserProvider = ({ children }) => {
     try {
       const { data } = await axios({
         method: "put",
-        url: `/users/${referenceNumber}`, // This is the endpoint that updates user data by reference number
+        url: `${process.env.REACT_APP_API_URL}/users/${referenceNumber}`, // This is the endpoint that updates user data by reference number
         data: updatedData,
         withCredentials: true,
       });
@@ -110,7 +110,7 @@ export const UserProvider = ({ children }) => {
     try {
       const { data } = await axios({
         method: "delete",
-        url: `/users/${referenceNumber}`, // This is the endpoint that archives user data by reference number
+        url: `${process.env.REACT_APP_API_URL}/users/${referenceNumber}`, // This is the endpoint that archives user data by reference number
         withCredentials: true,
       });
       setAllUserInfo(data);

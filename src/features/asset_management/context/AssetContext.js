@@ -32,7 +32,7 @@ export const AssetProvider = ({ children }) => {
     try {
       const { data } = await axios({
         method: "get",
-        url: "/assets",
+        url: `${process.env.REACT_APP_API_URL}/assets`,
         withCredentials: true,
       });
       setAssets(data);
@@ -46,7 +46,7 @@ export const AssetProvider = ({ children }) => {
     try {
       const { data } = await axios({
         method: "post",
-        url: "/assets/",
+        url: `${process.env.REACT_APP_API_URL}/assets/`,
         data: newAsset,
         withCredentials: true,
       });
@@ -61,7 +61,7 @@ export const AssetProvider = ({ children }) => {
     try {
       const { data } = await axios({
         method: "put",
-        url: `/assets/${assetId}`,
+        url: `${process.env.REACT_APP_API_URL}/assets/${assetId}`,
         data: updatedAsset,
         withCredentials: true,
       });
@@ -80,7 +80,7 @@ export const AssetProvider = ({ children }) => {
     try {
       await axios({
         method: "delete",
-        url: `/assets/${assetId}`,
+        url: `${process.env.REACT_APP_API_URL}/assets/${assetId}`,
         withCredentials: true,
       });
       setAssets((prevAssets) =>

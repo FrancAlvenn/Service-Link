@@ -30,7 +30,7 @@ export const TicketProvider = ({ children }) => {
   // Fetch all tickets
   const fetchTickets = async () => {
     try {
-      const { data } = await axios.get("/ticket/", {
+      const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/ticket/`, {
         withCredentials: true,
       });
       setTickets(data);
@@ -42,7 +42,7 @@ export const TicketProvider = ({ children }) => {
   // Create a new ticket
   const createTicket = async (newTicket) => {
     try {
-      const { data } = await axios.post("/ticket/", newTicket, {
+      const { data } = await axios.post(`${process.env.REACT_APP_API_URL}/ticket/`, newTicket, {
         withCredentials: true,
       });
       setTickets((prevTickets) => [...prevTickets, data]);
@@ -54,7 +54,7 @@ export const TicketProvider = ({ children }) => {
   // Update an existing ticket
   const updateTicket = async (ticketId, updatedTicket) => {
     try {
-      const { data } = await axios.put(`/ticket/${ticketId}`, updatedTicket, {
+      const { data } = await axios.put(`${process.env.REACT_APP_API_URL}/ticket/${ticketId}`, updatedTicket, {
         withCredentials: true,
       });
       setTickets((prevTickets) =>
@@ -70,7 +70,7 @@ export const TicketProvider = ({ children }) => {
   // Delete a ticket
   const deleteTicket = async (ticketId) => {
     try {
-      await axios.delete(`/ticket/${ticketId}`, {
+      await axios.delete(`${process.env.REACT_APP_API_URL}/ticket/${ticketId}`, {
         withCredentials: true,
       });
       setTickets((prevTickets) =>

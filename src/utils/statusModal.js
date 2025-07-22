@@ -58,7 +58,7 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
   useEffect(() => {
     const getStatus = async () => {
       try {
-        const response = await axios.get("/settings/status", {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/settings/status`, {
           withCredentials: true,
         });
 
@@ -101,7 +101,7 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
       // Update the request status
       const response = await axios({
         method: "patch",
-        url: `/${requestType}/${referenceNumber}/status`,
+        url: `${process.env.REACT_APP_API_URL}/${requestType}/${referenceNumber}/status`,
         data: {
           requester: user.reference_number,
           status: selectedStatus,
@@ -121,7 +121,7 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
         // Log the request activity
         await axios({
           method: "post",
-          url: "/request_activity",
+          url: `${process.env.REACT_APP_API_URL}/request_activity`,
           data: {
             reference_number: referenceNumber,
             visibility: "external",
@@ -147,7 +147,7 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
   const getRequestActivity = async () => {
     await axios({
       method: "GET",
-      url: `/request_activity/${referenceNumber}`,
+      url: `${process.env.REACT_APP_API_URL}/request_activity/${referenceNumber}`,
       withCredentials: true,
     });
   };

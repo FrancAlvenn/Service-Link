@@ -25,7 +25,7 @@ function ThemeSetting({ onClose }) {
           setDarkMode(isDark);
         } else {
           const { data } = await axios.get(
-            `/settings/user_preference/${user.reference_number}`,
+            `${process.env.REACT_APP_API_URL}/settings/user_preference/${user.reference_number}`,
             { withCredentials: true }
           );
           if (data?.theme !== undefined) {

@@ -29,7 +29,7 @@ export const PurchasingRequestsProvider = ({ children }) => {
     try {
       const { data } = await axios({
         method: "get",
-        url: "/purchasing_request/",
+        url: `${process.env.REACT_APP_API_URL}/purchasing_request/`,
         withCredentials: true,
       });
       setPurchasingRequests(data);
@@ -42,7 +42,7 @@ export const PurchasingRequestsProvider = ({ children }) => {
     try {
       const { data } = await axios({
         method: "get",
-        url: "/purchasing_request/archived",
+        url: `${process.env.REACT_APP_API_URL}/purchasing_request/archived`,
         withCredentials: true,
       });
       setArchivedPurchasingRequests(data);

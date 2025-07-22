@@ -323,7 +323,7 @@ const CalendarView = () => {
     try {
       await axios({
         method: "put",
-        url: `/${requestType}/${referenceNumber}`,
+        url: `${process.env.REACT_APP_API_URL}/${requestType}/${referenceNumber}`,
         data: updateData,
         withCredentials: true,
       });

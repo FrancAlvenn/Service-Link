@@ -71,7 +71,7 @@ const MainTab = ({
     }
     try {
       await axios.put(
-        `/${requestType}/${request.reference_number}`,
+        `${process.env.REACT_APP_API_URL}/${requestType}/${request.reference_number}`,
         {
           ...request,
           purpose: editedPurpose,
@@ -105,7 +105,7 @@ const MainTab = ({
 
     try {
       const res = await axios.put(
-        `/${requestType}/${request.reference_number}`,
+        `${process.env.REACT_APP_API_URL}/${requestType}/${request.reference_number}`,
         {
           requester: user.reference_number,
           details: updatedDetails,
@@ -134,7 +134,7 @@ const MainTab = ({
 
     try {
       const res = await axios.put(
-        `/${requestType}/${request.reference_number}`,
+        `${process.env.REACT_APP_API_URL}/${requestType}/${request.reference_number}`,
         {
           requester: user.reference_number,
           details: updatedDetails,
@@ -162,7 +162,7 @@ const MainTab = ({
   const handleDeleteRequest = async () => {
     try {
       const res = await axios.delete(
-        `/${requestType}/${request.reference_number}/archive/1`,
+        `${process.env.REACT_APP_API_URL}/${requestType}/${request.reference_number}/archive/1`,
         {
           data: {
             requester: user.reference_number,
@@ -210,7 +210,7 @@ const MainTab = ({
       });
 
       const res = await axios.put(
-        `/${requestType}/${request.reference_number}`,
+        `${process.env.REACT_APP_API_URL}/${requestType}/${request.reference_number}`,
         {
           approvers: updatedApprovers,
         },
@@ -228,7 +228,7 @@ const MainTab = ({
         const actionText = `Request has been ${capitalizedStatus} by ${currentApprover.position.position}`;
 
         await axios.post(
-          "/request_activity",
+          `${process.env.REACT_APP_API_URL}/request_activity`,
           {
             reference_number: request.reference_number,
             visibility: "external",
@@ -248,7 +248,7 @@ const MainTab = ({
 
   const handleVerification = async () => {
     const res = await axios.put(
-      `/${requestType}/${request.reference_number}`,
+      `${process.env.REACT_APP_API_URL}/${requestType}/${request.reference_number}`,
       {
         ...request,
         verified: true,
@@ -261,7 +261,7 @@ const MainTab = ({
       ToastNotification.success("Verified", "Request has been verified.");
 
       await axios.post(
-        "/request_activity",
+        `${process.env.REACT_APP_API_URL}/request_activity`,
         {
           reference_number: request.reference_number,
           visibility: "internal",

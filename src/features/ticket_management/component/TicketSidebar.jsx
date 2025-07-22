@@ -54,7 +54,7 @@ const TicketSidebar = ({ open, onClose, ticketId, tickets, fetchTickets, deleteT
   const handleSave = async (field) => {
     try {
       await axios.put(
-        `/tickets/${ticket.ticket_id}`,
+        `${process.env.REACT_APP_API_URL}/tickets/${ticket.ticket_id}`,
         {
           ...ticket,
           [field]: editedFields[field],
@@ -79,7 +79,7 @@ const TicketSidebar = ({ open, onClose, ticketId, tickets, fetchTickets, deleteT
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`/tickets/${ticket.ticket_id}`, { withCredentials: true });
+      await axios.delete(`${process.env.REACT_APP_API_URL}/tickets/${ticket.ticket_id}`, { withCredentials: true });
       fetchTickets();
       ToastNotification.success("Success", "Ticket deleted successfully.");
     } catch (error) {

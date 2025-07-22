@@ -30,7 +30,7 @@ export const JobRequestsProvider = ({ children }) => {
     try {
       const { data } = await axios({
         method: "get",
-        url: "/job_request/",
+        url: `${process.env.REACT_APP_API_URL}/job_request/`,
         withCredentials: true,
       });
       setJobRequests(data);
@@ -43,7 +43,7 @@ export const JobRequestsProvider = ({ children }) => {
     try {
       const { data } = await axios({
         method: "get",
-        url: "/job_request/archived",
+        url: `${process.env.REACT_APP_API_URL}/job_request/archived`,
         withCredentials: true,
       });
       setArchivedJobRequests(data);

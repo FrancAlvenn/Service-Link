@@ -26,7 +26,7 @@ function NotificationSettings({ onClose }) {
                 }
 
                 // Fetch from backend
-                const { data } = await axios.get(`/settings/user_preference/${userId}`, { withCredentials: true });
+                const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/settings/user_preference/${userId}`, { withCredentials: true });
                 if (data) {
                     setNotificationsEnabled(data.notifications_enabled);
                     setEmailNotifications(data.email_notifications_enabled);
@@ -53,7 +53,7 @@ function NotificationSettings({ onClose }) {
             };
 
             // Update backend
-            await axios.put(`/settings/user_preference/${userId}`, updatedPreferences, { withCredentials: true });
+            await axios.put(`${process.env.REACT_APP_API_URL}/settings/user_preference/${userId}`, updatedPreferences, { withCredentials: true });
 
             // Update local storage
             localStorage.setItem(

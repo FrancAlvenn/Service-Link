@@ -210,7 +210,7 @@ const ModalView = ({ open, onClose, referenceNumber, asModal = false }) => {
     try {
       await axios({
         method: "put",
-        url: `/${requestType}/${request.reference_number}`,
+        url: `${process.env.REACT_APP_API_URL}/${requestType}/${request.reference_number}`,
         data: {
           ...request,
           title: editedTitle,
@@ -247,7 +247,7 @@ const ModalView = ({ open, onClose, referenceNumber, asModal = false }) => {
     try {
       await axios({
         method: "put",
-        url: `/${requestType}/${request.reference_number}`,
+        url: `${process.env.REACT_APP_API_URL}/${requestType}/${request.reference_number}`,
         data: {
           ...request,
           purpose: editedPurpose,

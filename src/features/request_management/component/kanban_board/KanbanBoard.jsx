@@ -69,7 +69,7 @@ export function KanbanBoard() {
       }
 
       // Fetch status list from the backend
-      const { data } = await axios.get("/settings/status", {
+      const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/settings/status`, {
         withCredentials: true,
       });
       if (Array.isArray(data.status)) {
@@ -123,7 +123,7 @@ export function KanbanBoard() {
   const handleStatusChange = async (referenceNumber, status) => {
     try {
       const response = await axios.patch(
-        `/${requestType}/${referenceNumber}/status`,
+        `${process.env.REACT_APP_API_URL}/${requestType}/${referenceNumber}/status`,
         { requester: user.reference_number, status },
         { withCredentials: true }
       );
@@ -138,14 +138,14 @@ export function KanbanBoard() {
   const confirmStatusChange = async () => {
     try {
       await axios.patch(
-        `/${requestType}/${selectedReferenceNumber}/status`,
+        `${process.env.REACT_APP_API_URL}/${requestType}/${selectedReferenceNumber}/status`,
         { requester: user.reference_number, status: selectedStatus },
         { withCredentials: true }
       );
 
       // Log the request activity
       await axios.post(
-        "/request_activity",
+        `${process.env.REACT_APP_API_URL}/request_activity`,
         {
           reference_number: selectedReferenceNumber,
           visibility: "external",
@@ -222,7 +222,7 @@ export function KanbanBoard() {
     try {
       await axios({
         method: "put",
-        url: `/settings/user_preference/${user.reference_number}`,
+        url: `${process.env.REACT_APP_API_URL}/settings/user_preference/${user.reference_number}`,
         data: {
           kanban_config: { columns: updatedColumns },
         },

@@ -62,12 +62,12 @@ const EmployeeForm = ({ mode = "add", initialValues, onClose, onSuccess }) => {
 
       if (mode === "edit") {
         response = await axios.put(
-          `/employees/${employee.reference_number}`,
+          `${process.env.REACT_APP_API_URL}/employees/${employee.reference_number}`,
           employee,
           { withCredentials: true }
         );
       } else {
-        response = await axios.post("/employees", employee, {
+        response = await axios.post(`${process.env.REACT_APP_API_URL}/employees`, employee, {
           withCredentials: true,
         });
       }

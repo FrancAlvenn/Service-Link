@@ -41,7 +41,7 @@ const ParticularsTab = ({
 
     try {
       const res = await axios.put(
-        `/${requestType}/${referenceNumber}`,
+        `${process.env.REACT_APP_API_URL}/${requestType}/${referenceNumber}`,
         {
           requester: user.reference_number,
           details: updatedDetails,
@@ -70,7 +70,7 @@ const ParticularsTab = ({
 
     try {
       const res = await axios.put(
-        `/${requestType}/${referenceNumber}`,
+        `${process.env.REACT_APP_API_URL}/${requestType}/${referenceNumber}`,
         {
           requester: user.reference_number,
           details: updatedDetails,

@@ -41,7 +41,7 @@ const RequestAccess = ({ selectedRequest }) => {
     try {
       await axios({
         method: "post",
-        url: "/request_activity",
+        url: `${process.env.REACT_APP_API_URL}/request_activity`,
         data: newActivity,
         withCredentials: true,
       }).then(() => {

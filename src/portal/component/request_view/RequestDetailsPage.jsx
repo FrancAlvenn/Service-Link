@@ -100,7 +100,7 @@ function RequestDetailsPage({
     }
     try {
       await axios.put(
-        `/${request.request_type}/${request.reference_number}`,
+        `${process.env.REACT_APP_API_URL}/${request.request_type}/${request.reference_number}`,
         {
           ...request,
           title: editedTitle,

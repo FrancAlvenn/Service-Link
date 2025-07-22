@@ -322,7 +322,7 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
         requestData.event_nature = request.event_nature_other.trim();
       }
 
-      let response = await axios.post("/venue_request", requestData, {
+      let response = await axios.post(`${process.env.REACT_APP_API_URL}/venue_request`, requestData, {
         withCredentials: true,
       });
 

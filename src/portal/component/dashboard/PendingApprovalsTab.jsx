@@ -113,7 +113,7 @@ function PendingApprovalsTab() {
   useEffect(() => {
     const getStatus = async () => {
       try {
-        const response = await axios.get("/settings/status", {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/settings/status`, {
           withCredentials: true,
         });
 

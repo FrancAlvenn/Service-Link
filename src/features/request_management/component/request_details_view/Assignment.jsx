@@ -91,7 +91,7 @@ const Assignment = ({
   };
 
   const getRequestActivity = async () => {
-    await axios.get(`/request_activity/${selectedRequest.reference_number}`, {
+    await axios.get(`${process.env.REACT_APP_API_URL}/request_activity/${selectedRequest.reference_number}`, {
       withCredentials: true,
     });
   };
@@ -147,7 +147,7 @@ const Assignment = ({
     if (selectedRequest.status === "In Progress") return;
     try {
       await axios.patch(
-        `/${requestType}/${selectedRequest.reference_number}/status`,
+        `${process.env.REACT_APP_API_URL}/${requestType}/${selectedRequest.reference_number}/status`,
         {
           requester: user.reference_number,
           status: "In Progress",
@@ -162,7 +162,7 @@ const Assignment = ({
       }));
 
       await axios.post(
-        "/request_activity",
+        `${process.env.REACT_APP_API_URL}/request_activity`,
         {
           reference_number: selectedRequest.reference_number,
           visibility: "external",
@@ -188,7 +188,7 @@ const Assignment = ({
       : [...current, referenceNumber];
 
     try {
-      await axios.put(`/${requestType}/${selectedRequest.reference_number}`, {
+      await axios.put(`${process.env.REACT_APP_API_URL}/${requestType}/${selectedRequest.reference_number}`, {
         ...selectedRequest,
         assigned_to: updated,
       });
@@ -250,7 +250,7 @@ const Assignment = ({
 
   const updateAssetAssignment = async (updatedAssets) => {
     try {
-      await axios.put(`/${requestType}/${selectedRequest.reference_number}`, {
+      await axios.put(`${process.env.REACT_APP_API_URL}/${requestType}/${selectedRequest.reference_number}`, {
         ...selectedRequest,
         assigned_assets: updatedAssets,
       });

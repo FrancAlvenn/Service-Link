@@ -24,7 +24,7 @@ export const VehicleRequestsProvider = ({ children }) => {
     try {
       const { data } = await axios({
         method: "get",
-        url: "/vehicle_request/",
+        url: `${process.env.REACT_APP_API_URL}/vehicle_request/`,
         withCredentials: true,
       });
       setVehicleRequests(data);
@@ -37,7 +37,7 @@ export const VehicleRequestsProvider = ({ children }) => {
     try {
       const { data } = await axios({
         method: "get",
-        url: "/vehicle_request/archived",
+        url: `${process.env.REACT_APP_API_URL}/vehicle_request/archived`,
         withCredentials: true,
       });
       setArchivedVehicleRequests(data);

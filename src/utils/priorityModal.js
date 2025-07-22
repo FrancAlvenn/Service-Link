@@ -47,7 +47,7 @@ function PriorityModal({ input, referenceNumber, requestType }) {
   useEffect(() => {
     const getPriority = async () => {
       try {
-        const response = await axios.get("/settings/priority", {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/settings/priority`, {
           withCredentials: true,
         });
 
@@ -81,7 +81,7 @@ function PriorityModal({ input, referenceNumber, requestType }) {
       // Update the request priority
       const response = await axios({
         method: "put",
-        url: `/${requestType}/${referenceNumber}`,
+        url: `${process.env.REACT_APP_API_URL}/${requestType}/${referenceNumber}`,
         data: {
           priority: selectedPriority,
         },

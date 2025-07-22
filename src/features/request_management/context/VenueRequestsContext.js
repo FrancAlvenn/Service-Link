@@ -26,7 +26,7 @@ export const VenueRequestsProvider = ({ children }) => {
     try {
       const { data } = await axios({
         method: "get",
-        url: "/venue_request/",
+        url: `${process.env.REACT_APP_API_URL}/venue_request/`,
         withCredentials: true,
       });
       setVenueRequests(data);
@@ -39,7 +39,7 @@ export const VenueRequestsProvider = ({ children }) => {
     try {
       const { data } = await axios({
         method: "get",
-        url: "/venue_request/archived",
+        url: `${process.env.REACT_APP_API_URL}/venue_request/archived`,
         withCredentials: true,
       });
       setArchivedVenueRequests(data);

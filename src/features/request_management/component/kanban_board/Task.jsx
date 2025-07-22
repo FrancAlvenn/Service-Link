@@ -13,7 +13,7 @@ export default function Task({ task, index, requestType, setRequests, setSelecte
 
   async function handleArchiveRequest(task) {
     try {
-      const res = await axios.delete(`/${requestType}/${task.reference_number}/archive/1`, {
+      const res = await axios.delete(`${process.env.REACT_APP_API_URL}/${requestType}/${task.reference_number}/archive/1`, {
         data: { requester: user.reference_number },
         withCredentials: true
       });

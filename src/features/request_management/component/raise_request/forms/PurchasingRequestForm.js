@@ -163,7 +163,7 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const departmentResponse = await axios.get("/settings/department", {
+        const departmentResponse = await axios.get(`${process.env.REACT_APP_API_URL}/settings/department`, {
           withCredentials: true,
         });
         if (Array.isArray(departmentResponse.data.departments)) {
@@ -210,7 +210,7 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
 
       const response = await axios({
         method: "POST",
-        url: "/purchasing_request",
+        url: `${process.env.REACT_APP_API_URL}/purchasing_request`,
         data: requestData,
         withCredentials: true,
       });

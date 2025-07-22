@@ -95,8 +95,8 @@ const AssetForm = ({ mode = "add", initialValues, onClose, onSuccess }) => {
     try {
       const endpoint =
         mode === "edit"
-          ? `/assets/${asset.reference_number}` // Use reference_number as your unique key
-          : "/assets";
+          ? `${process.env.REACT_APP_API_URL}/assets/${asset.reference_number}` // Use reference_number as your unique key
+          : `${process.env.REACT_APP_API_URL}/assets`;
 
       const method = mode === "edit" ? "put" : "post";
 

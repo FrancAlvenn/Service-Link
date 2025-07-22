@@ -32,7 +32,7 @@ export const AssetAssignmentLogProvider = ({ children }) => {
     try {
       const { data } = await axios({
         method: "get",
-        url: "/asset_assignment",
+        url: `${process.env.REACT_APP_API_URL}/asset_assignment`,
         withCredentials: true,
       });
       setAssetAssignmentLogs(data);
@@ -46,7 +46,7 @@ export const AssetAssignmentLogProvider = ({ children }) => {
     try {
       const { data } = await axios({
         method: "post",
-        url: "/asset_assignment",
+        url: `${process.env.REACT_APP_API_URL}/asset_assignment`,
         data: newAssetLog,
         withCredentials: true,
       });
@@ -61,7 +61,7 @@ export const AssetAssignmentLogProvider = ({ children }) => {
     try {
       const { data } = await axios({
         method: "put",
-        url: `/asset_assignment/${logId}`,
+        url: `${process.env.REACT_APP_API_URL}/asset_assignment/${logId}`,
         data: updatedAsset,
         withCredentials: true,
       });
@@ -80,7 +80,7 @@ export const AssetAssignmentLogProvider = ({ children }) => {
     try {
       await axios({
         method: "delete",
-        url: `/asset_assignment/${logId}`,
+        url: `${process.env.REACT_APP_API_URL}/asset_assignment/${logId}`,
         withCredentials: true,
       });
       setAssetAssignmentLogs((prevAssets) =>

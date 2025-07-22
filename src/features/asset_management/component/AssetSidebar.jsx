@@ -124,7 +124,7 @@ const AssetSidebar = ({
         ...(isAdditional ? {} : { [field]: editedValue }),
       };
 
-      await axios.put(`/assets/${asset.reference_number}`, updatedAsset, {
+      await axios.put(`${process.env.REACT_APP_API_URL}/assets/${asset.reference_number}`, updatedAsset, {
         withCredentials: true,
       });
 
@@ -172,7 +172,7 @@ const AssetSidebar = ({
         ],
       };
 
-      await axios.put(`/assets/${asset.reference_number}`, updatedAsset, {
+      await axios.put(`${process.env.REACT_APP_API_URL}/assets/${asset.reference_number}`, updatedAsset, {
         withCredentials: true,
       });
 
@@ -196,7 +196,7 @@ const AssetSidebar = ({
         additional_details: updatedDetails,
       };
 
-      await axios.put(`/assets/${asset.reference_number}`, updatedAsset, {
+      await axios.put(`${process.env.REACT_APP_API_URL}/assets/${asset.reference_number}`, updatedAsset, {
         withCredentials: true,
       });
 

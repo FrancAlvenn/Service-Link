@@ -111,7 +111,7 @@ function LoginForm() {
 
     await axios({
       method: "post",
-      url: "/auth/login",
+      url: `${process.env.REACT_APP_API_URL}/auth/login`,
       data: value,
       headers: { "Access-Control-Allow-Origin": "*" },
     })

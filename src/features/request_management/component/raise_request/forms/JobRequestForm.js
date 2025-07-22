@@ -164,7 +164,7 @@ const JobRequestForm = ({ setSelectedRequest }) => {
   useEffect(() => {
     const getDepartments = async () => {
       try {
-        const response = await axios.get("/settings/department", {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/settings/department`, {
           withCredentials: true,
         });
 
@@ -220,7 +220,7 @@ const JobRequestForm = ({ setSelectedRequest }) => {
 
       const response = await axios({
         method: "POST",
-        url: "/job_request",
+        url: `${process.env.REACT_APP_API_URL}/job_request`,
         data: requestData,
         withCredentials: true,
       });

@@ -42,7 +42,7 @@ function ArchiveStatusModal({ input, referenceNumber, requestType }) {
 
     await axios({
       method: "delete",
-      url: `/${requestType}/${referenceNumber}/archive/${convertedStatus}`,
+      url: `${process.env.REACT_APP_API_URL}/${requestType}/${referenceNumber}/archive/${convertedStatus}`,
       data: {
         requester: user.reference_number,
       },

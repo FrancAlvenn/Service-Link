@@ -41,7 +41,7 @@ export const SettingsProvider = ({ children }) => {
   // === Department ===
   const fetchDepartments = async () => {
     try {
-      const response = await axios.get("/settings/department", {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/settings/department`, {
         withCredentials: true,
       });
 
@@ -56,21 +56,21 @@ export const SettingsProvider = ({ children }) => {
   };
 
   const createDepartment = async (payload) => {
-    await axios.post(`/settings/department`, payload, {
+    await axios.post(`${process.env.REACT_APP_API_URL}/settings/department`, payload, {
       withCredentials: true,
     });
     fetchDepartments();
   };
 
   const updateDepartment = async (id, payload) => {
-    await axios.put(`/settings/department/${id}`, payload, {
+    await axios.put(`${process.env.REACT_APP_API_URL}/settings/department/${id}`, payload, {
       withCredentials: true,
     });
     fetchDepartments();
   };
 
   const deleteDepartment = async (id) => {
-    await axios.delete(`/settings/department/${id}`, {
+    await axios.delete(`${process.env.REACT_APP_API_URL}/settings/department/${id}`, {
       withCredentials: true,
     });
     fetchDepartments();
@@ -79,7 +79,7 @@ export const SettingsProvider = ({ children }) => {
   // === Priority ===
   const fetchPriorities = async () => {
     try {
-      const response = await axios.get("/settings/priority", {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/settings/priority`, {
         withCredentials: true,
       });
 
@@ -94,19 +94,19 @@ export const SettingsProvider = ({ children }) => {
   };
 
   const createPriority = async (payload) => {
-    await axios.post(`/settings/priority`, payload, { withCredentials: true });
+    await axios.post(`${process.env.REACT_APP_API_URL}/settings/priority`, payload, { withCredentials: true });
     fetchPriorities();
   };
 
   const updatePriority = async (id, payload) => {
-    await axios.put(`/settings/priority/${id}`, payload, {
+    await axios.put(`${process.env.REACT_APP_API_URL}/settings/priority/${id}`, payload, {
       withCredentials: true,
     });
     fetchPriorities();
   };
 
   const deletePriority = async (id) => {
-    await axios.delete(`/settings/priority/${id}`, {
+    await axios.delete(`${process.env.REACT_APP_API_URL}/settings/priority/${id}`, {
       withCredentials: true,
     });
     fetchPriorities();
@@ -115,7 +115,7 @@ export const SettingsProvider = ({ children }) => {
   // === Status ===
   const fetchStatuses = async () => {
     try {
-      const response = await axios.get("/settings/status", {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/settings/status`, {
         withCredentials: true,
       });
 
@@ -130,19 +130,19 @@ export const SettingsProvider = ({ children }) => {
   };
 
   const createStatus = async (payload) => {
-    await axios.post(`/settings/status`, payload, { withCredentials: true });
+    await axios.post(`${process.env.REACT_APP_API_URL}/settings/status`, payload, { withCredentials: true });
     fetchStatuses();
   };
 
   const updateStatus = async (id, payload) => {
-    await axios.put(`/settings/status/${id}`, payload, {
+    await axios.put(`${process.env.REACT_APP_API_URL}/settings/status/${id}`, payload, {
       withCredentials: true,
     });
     fetchStatuses();
   };
 
   const deleteStatus = async (id) => {
-    await axios.delete(`/settings/status/${id}`, {
+    await axios.delete(`${process.env.REACT_APP_API_URL}/settings/status/${id}`, {
       withCredentials: true,
     });
     fetchStatuses();
@@ -151,7 +151,7 @@ export const SettingsProvider = ({ children }) => {
   // === Designation ===
   const fetchDesignations = async () => {
     try {
-      const response = await axios.get("/settings/designation", {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/settings/designation`, {
         withCredentials: true,
       });
 
@@ -166,21 +166,21 @@ export const SettingsProvider = ({ children }) => {
   };
 
   const createDesignation = async (payload) => {
-    await axios.post(`/settings/designation`, payload, {
+    await axios.post(`${process.env.REACT_APP_API_URL}/settings/designation`, payload, {
       withCredentials: true,
     });
     fetchDesignations();
   };
 
   const updateDesignation = async (id, payload) => {
-    await axios.put(`/settings/designation/${id}`, payload, {
+    await axios.put(`${process.env.REACT_APP_API_URL}/settings/designation/${id}`, payload, {
       withCredentials: true,
     });
     fetchDesignations();
   };
 
   const deleteDesignation = async (id) => {
-    await axios.delete(`/settings/designation/${id}`, {
+    await axios.delete(`${process.env.REACT_APP_API_URL}/settings/designation/${id}`, {
       withCredentials: true,
     });
     fetchDesignations();
@@ -189,7 +189,7 @@ export const SettingsProvider = ({ children }) => {
   // === User Preferences ===
   const fetchUserPreferences = async () => {
     try {
-      const { data } = await axios.get(`/settings/user_preference`, {
+      const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/settings/user_preference`, {
         withCredentials: true,
       });
       setUserPreferences(data);
@@ -199,21 +199,21 @@ export const SettingsProvider = ({ children }) => {
   };
 
   const createUserPreference = async (payload) => {
-    await axios.post(`/settings/user_preference`, payload, {
+    await axios.post(`${process.env.REACT_APP_API_URL}/settings/user_preference`, payload, {
       withCredentials: true,
     });
     fetchUserPreferences();
   };
 
   const updateUserPreference = async (user_id, payload) => {
-    await axios.put(`/settings/user_preference/${user_id}`, payload, {
+    await axios.put(`${process.env.REACT_APP_API_URL}/settings/user_preference/${user_id}`, payload, {
       withCredentials: true,
     });
     fetchUserPreferences();
   };
 
   const deleteUserPreference = async (user_id) => {
-    await axios.delete(`/settings/user_preference/${user_id}`, {
+    await axios.delete(`${process.env.REACT_APP_API_URL}/settings/user_preference/${user_id}`, {
       withCredentials: true,
     });
     fetchUserPreferences();
@@ -222,7 +222,7 @@ export const SettingsProvider = ({ children }) => {
   // === Organization ===
   const fetchOrganizations = async () => {
     try {
-      const response = await axios.get("/settings/organization", {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/settings/organization`, {
         withCredentials: true,
       });
 
@@ -237,21 +237,21 @@ export const SettingsProvider = ({ children }) => {
   };
 
   const createOrganization = async (payload) => {
-    await axios.post(`/settings/organization`, payload, {
+    await axios.post(`${process.env.REACT_APP_API_URL}/settings/organization`, payload, {
       withCredentials: true,
     });
     fetchOrganizations();
   };
 
   const updateOrganization = async (id, payload) => {
-    await axios.put(`/settings/organization/${id}`, payload, {
+    await axios.put(`${process.env.REACT_APP_API_URL}/settings/organization/${id}`, payload, {
       withCredentials: true,
     });
     fetchOrganizations();
   };
 
   const deleteOrganization = async (id) => {
-    await axios.delete(`/settings/organization/${id}`, {
+    await axios.delete(`${process.env.REACT_APP_API_URL}/settings/organization/${id}`, {
       withCredentials: true,
     });
     fetchOrganizations();
@@ -260,7 +260,7 @@ export const SettingsProvider = ({ children }) => {
   // === Approvers ===
   const fetchApprovers = async () => {
     try {
-      const response = await axios.get("/settings/approver", {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/settings/approver`, {
         withCredentials: true,
       });
 
@@ -275,19 +275,19 @@ export const SettingsProvider = ({ children }) => {
   };
 
   const createApprover = async (payload) => {
-    await axios.post(`/settings/approver`, payload, { withCredentials: true });
+    await axios.post(`${process.env.REACT_APP_API_URL}/settings/approver`, payload, { withCredentials: true });
     fetchApprovers();
   };
 
   const updateApprover = async (id, payload) => {
-    await axios.put(`/settings/approver/${id}`, payload, {
+    await axios.put(`${process.env.REACT_APP_API_URL}/settings/approver/${id}`, payload, {
       withCredentials: true,
     });
     fetchApprovers();
   };
 
   const deleteApprover = async (id) => {
-    await axios.delete(`/settings/approver/${id}`, {
+    await axios.delete(`${process.env.REACT_APP_API_URL}/settings/approver/${id}`, {
       withCredentials: true,
     });
     fetchApprovers();
@@ -297,7 +297,7 @@ export const SettingsProvider = ({ children }) => {
 
   const fetchPositions = async () => {
     try {
-      const response = await axios.get(`/settings/position`, {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/settings/position`, {
         withCredentials: true,
       });
 
@@ -312,19 +312,19 @@ export const SettingsProvider = ({ children }) => {
   };
 
   const createPosition = async (payload) => {
-    await axios.post(`/settings/position`, payload, { withCredentials: true });
+    await axios.post(`${process.env.REACT_APP_API_URL}/settings/position`, payload, { withCredentials: true });
     fetchPositions();
   };
 
   const updatePosition = async (id, payload) => {
-    await axios.put(`/settings/position/${id}`, payload, {
+    await axios.put(`${process.env.REACT_APP_API_URL}/settings/position/${id}`, payload, {
       withCredentials: true,
     });
     fetchPositions();
   };
 
   const deletePosition = async (id) => {
-    await axios.delete(`/settings/position/${id}`, {
+    await axios.delete(`${process.env.REACT_APP_API_URL}/settings/position/${id}`, {
       withCredentials: true,
     });
     fetchPositions();
@@ -335,7 +335,7 @@ export const SettingsProvider = ({ children }) => {
   const fetchApprovalRulesByDepartment = async () => {
     try {
       const response = await axios.get(
-        `/settings/approval_rule_by_department`,
+        `${process.env.REACT_APP_API_URL}/settings/approval_rule_by_department`,
         {
           withCredentials: true,
         }
@@ -352,21 +352,21 @@ export const SettingsProvider = ({ children }) => {
   };
 
   const createApprovalRuleByDepartment = async (payload) => {
-    await axios.post(`/settings/approval_rule_by_department`, payload, {
+    await axios.post(`${process.env.REACT_APP_API_URL}/settings/approval_rule_by_department`, payload, {
       withCredentials: true,
     });
     fetchApprovalRulesByDepartment();
   };
 
   const updateApprovalRuleByDepartment = async (id, payload) => {
-    await axios.put(`/settings/approval_rule_by_department/${id}`, payload, {
+    await axios.put(`${process.env.REACT_APP_API_URL}/settings/approval_rule_by_department/${id}`, payload, {
       withCredentials: true,
     });
     fetchApprovalRulesByDepartment();
   };
 
   const deleteApprovalRuleByDepartment = async (id) => {
-    await axios.delete(`/settings/approval_rule_by_department/${id}`, {
+    await axios.delete(`${process.env.REACT_APP_API_URL}/settings/approval_rule_by_department/${id}`, {
       withCredentials: true,
     });
     fetchApprovalRulesByDepartment();
@@ -377,7 +377,7 @@ export const SettingsProvider = ({ children }) => {
   const fetchApprovalRulesByDesignation = async () => {
     try {
       const response = await axios.get(
-        `/settings/approval_rule_by_designation`,
+        `${process.env.REACT_APP_API_URL}/settings/approval_rule_by_designation`,
         {
           withCredentials: true,
         }
@@ -394,21 +394,21 @@ export const SettingsProvider = ({ children }) => {
   };
 
   const createApprovalRuleByDesignation = async (payload) => {
-    await axios.post(`/settings/approval_rule_by_designation`, payload, {
+    await axios.post(`${process.env.REACT_APP_API_URL}/settings/approval_rule_by_designation`, payload, {
       withCredentials: true,
     });
     fetchApprovalRulesByDesignation();
   };
 
   const updateApprovalRuleByDesignation = async (id, payload) => {
-    await axios.put(`/settings/approval_rule_by_designation/${id}`, payload, {
+    await axios.put(`${process.env.REACT_APP_API_URL}/settings/approval_rule_by_designation/${id}`, payload, {
       withCredentials: true,
     });
     fetchApprovalRulesByDesignation();
   };
 
   const deleteApprovalRuleByDesignation = async (id) => {
-    await axios.delete(`/settings/approval_rule_by_designation/${id}`, {
+    await axios.delete(`${process.env.REACT_APP_API_URL}/settings/approval_rule_by_designation/${id}`, {
       withCredentials: true,
     });
     fetchApprovalRulesByDesignation();
@@ -419,7 +419,7 @@ export const SettingsProvider = ({ children }) => {
   const fetchApprovalRulesByRequestType = async () => {
     try {
       const response = await axios.get(
-        `/settings/approval_rule_by_request_type`,
+        `${process.env.REACT_APP_API_URL}/settings/approval_rule_by_request_type`,
         {
           withCredentials: true,
         }
@@ -436,21 +436,21 @@ export const SettingsProvider = ({ children }) => {
   };
 
   const createApprovalRuleByRequestType = async (payload) => {
-    await axios.post(`/settings/approval_rule_by_request_type`, payload, {
+    await axios.post(`${process.env.REACT_APP_API_URL}/settings/approval_rule_by_request_type`, payload, {
       withCredentials: true,
     });
     fetchApprovalRulesByRequestType();
   };
 
   const updateApprovalRuleByRequestType = async (id, payload) => {
-    await axios.put(`/settings/approval_rule_by_request_type/${id}`, payload, {
+    await axios.put(`${process.env.REACT_APP_API_URL}/settings/approval_rule_by_request_type/${id}`, payload, {
       withCredentials: true,
     });
     fetchApprovalRulesByRequestType();
   };
 
   const deleteApprovalRuleByRequestType = async (id) => {
-    await axios.delete(`/settings/approval_rule_by_request_type/${id}`, {
+    await axios.delete(`${process.env.REACT_APP_API_URL}/settings/approval_rule_by_request_type/${id}`, {
       withCredentials: true,
     });
     fetchApprovalRulesByRequestType();
@@ -460,7 +460,7 @@ export const SettingsProvider = ({ children }) => {
 
   const fetchManualApprovalRules = async () => {
     try {
-      const response = await axios.get(`/settings/manual_approval_rule`, {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/settings/manual_approval_rule`, {
         withCredentials: true,
       });
 
@@ -477,21 +477,21 @@ export const SettingsProvider = ({ children }) => {
   };
 
   const createManualApprovalRule = async (payload) => {
-    await axios.post(`/settings/manual_approval_rule`, payload, {
+    await axios.post(`${process.env.REACT_APP_API_URL}/settings/manual_approval_rule`, payload, {
       withCredentials: true,
     });
     fetchManualApprovalRules();
   };
 
   const updateManualApprovalRule = async (id, payload) => {
-    await axios.put(`/settings/manual_approval_rule/${id}`, payload, {
+    await axios.put(`${process.env.REACT_APP_API_URL}/settings/manual_approval_rule/${id}`, payload, {
       withCredentials: true,
     });
     fetchManualApprovalRules();
   };
 
   const deleteManualApprovalRule = async (id) => {
-    await axios.delete(`/settings/manual_approval_rule/${id}`, {
+    await axios.delete(`${process.env.REACT_APP_API_URL}/settings/manual_approval_rule/${id}`, {
       withCredentials: true,
     });
     fetchManualApprovalRules();

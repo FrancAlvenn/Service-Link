@@ -75,7 +75,7 @@ function ApprovalStatusModal({
 
     try {
       const response = await axios.patch(
-        `/${requestType}/${referenceNumber}/${approvingPosition}/${status}`,
+        `${process.env.REACT_APP_API_URL}/${requestType}/${referenceNumber}/${approvingPosition}/${status}`,
         { requester: user.reference_number },
         { withCredentials: true }
       );
@@ -90,7 +90,7 @@ function ApprovalStatusModal({
       // Log the request activity
       await axios({
         method: "post",
-        url: "/request_activity",
+        url: `${process.env.REACT_APP_API_URL}/request_activity`,
         data: {
           reference_number: referenceNumber,
           visibility: "external",

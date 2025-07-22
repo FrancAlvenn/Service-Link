@@ -26,7 +26,7 @@ export const EmployeeProvider = ({ children }) => {
   // Fetch all employees
   const fetchEmployees = async () => {
     try {
-      const { data } = await axios.get("/employees/", { withCredentials: true });
+      const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/employees/`, { withCredentials: true });
       setEmployees(data);
     } catch (error) {
       console.error("Error fetching employees:", error);
@@ -36,7 +36,7 @@ export const EmployeeProvider = ({ children }) => {
   // Create a new employee
   const createEmployee = async (newEmployee) => {
     try {
-      const { data } = await axios.post("/employees/", newEmployee, {
+      const { data } = await axios.post(`${process.env.REACT_APP_API_URL}/employees/`, newEmployee, {
         withCredentials: true,
       });
       setEmployees((prev) => [...prev, data]);
@@ -48,7 +48,7 @@ export const EmployeeProvider = ({ children }) => {
   // Update an employee by ID
   const updateEmployee = async (employeeId, updatedEmployee) => {
     try {
-      const { data } = await axios.put(`/employees/${employeeId}`, updatedEmployee, {
+      const { data } = await axios.put(`${process.env.REACT_APP_API_URL}/employees/${employeeId}`, updatedEmployee, {
         withCredentials: true,
       });
       setEmployees((prev) =>
@@ -62,7 +62,7 @@ export const EmployeeProvider = ({ children }) => {
   // Delete an employee by ID
   const deleteEmployee = async (employeeId) => {
     try {
-      await axios.delete(`/employees/${employeeId}`, { withCredentials: true });
+      await axios.delete(`${process.env.REACT_APP_API_URL}/employees/${employeeId}`, { withCredentials: true });
       setEmployees((prev) => prev.filter((emp) => emp.reference_number !== employeeId));
       ToastNotification.success("Success", "Employee archived successfully.");
     } catch (error) {

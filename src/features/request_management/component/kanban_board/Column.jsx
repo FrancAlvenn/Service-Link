@@ -25,7 +25,7 @@ export default function Column({
     try {
       await axios({
         method: "put",
-        url: `/settings/user_preference/${user.reference_number}`,
+        url: `${process.env.REACT_APP_API_URL}/settings/user_preference/${user.reference_number}`,
         data: {
           kanban_config: { columns: updatedColumns },
         },

@@ -16,7 +16,7 @@ export const RequestActivityProvider = ({ children }) => {
 
     try {
       const response = await axios.post(
-        "/request_activity",
+        `${process.env.REACT_APP_API_URL}/request_activity`,
         {
           ...activityData,
           performed_by: user.reference_number,
@@ -40,7 +40,7 @@ export const RequestActivityProvider = ({ children }) => {
     setError(null);
 
     try {
-      const response = await axios.get(`/request_activity/${referenceNumber}`, {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/request_activity/${referenceNumber}`, {
         withCredentials: true,
       });
 
@@ -85,7 +85,7 @@ export const RequestActivityProvider = ({ children }) => {
 
     try {
       const response = await axios.put(
-        `/request_activity/${id}`,
+        `${process.env.REACT_APP_API_URL}/request_activity/${id}`,
         {
           ...updateData,
           performed_by: user.reference_number,
@@ -110,7 +110,7 @@ export const RequestActivityProvider = ({ children }) => {
 
     try {
       const response = await axios.put(
-        `/request_activity/${id}`,
+        `${process.env.REACT_APP_API_URL}/request_activity/${id}`,
         {
           viewed: true,
         },
@@ -135,7 +135,7 @@ export const RequestActivityProvider = ({ children }) => {
     setError(null);
 
     try {
-      await axios.delete(`/request_activity/${id}`, {
+      await axios.delete(`${process.env.REACT_APP_API_URL}/request_activity/${id}`, {
         withCredentials: true,
       });
 

@@ -60,7 +60,7 @@ function AccountSetting({ onClose }) {
           ToastNotification.info("Notice!", "Passwords don't match.");
           return;
         }
-        await axios.put(`/users/${currentUser.reference_number}`, {
+        await axios.put(`${process.env.REACT_APP_API_URL}/users/${currentUser.reference_number}`, {
           password: passwords.password,
         });
         ToastNotification.success("Success!", "Password updated.");
@@ -83,7 +83,7 @@ function AccountSetting({ onClose }) {
         const valueToSave =
           newValue !== undefined ? newValue : currentUser[key];
 
-        await axios.put(`/users/${currentUser.reference_number}`, {
+        await axios.put(`${process.env.REACT_APP_API_URL}/users/${currentUser.reference_number}`, {
           [key]: valueToSave,
         });
 

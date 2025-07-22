@@ -145,7 +145,7 @@ export function ArchivedRequests() {
   const fetchData = async () => {
     try {
       // Fetch status list from the backend
-      const { data } = await axios.get("/settings/status", {
+      const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/settings/status`, {
         withCredentials: true,
       });
       if (Array.isArray(data.status)) {

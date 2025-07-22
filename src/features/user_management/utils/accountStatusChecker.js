@@ -18,7 +18,7 @@ const shouldAccountBeActive = async (user) => {
 
   if (shouldActivate && user.status !== "active") {
     try {
-      const response = await axios.put(`/users/${user.reference_number}`, {
+      const response = await axios.put(`${process.env.REACT_APP_API_URL}/users/${user.reference_number}`, {
         status: "active",
       });
 

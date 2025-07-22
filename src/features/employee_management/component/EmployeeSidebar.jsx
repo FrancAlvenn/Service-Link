@@ -72,7 +72,7 @@ const EmployeeSidebar = ({
   const handleSave = async (field) => {
     try {
       await axios.put(
-        `/employees/${employee.reference_number}`,
+        `${process.env.REACT_APP_API_URL}/employees/${employee.reference_number}`,
         {
           ...employee,
           [field]: editedFields[field],
@@ -97,7 +97,7 @@ const EmployeeSidebar = ({
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`/employees/${employee.reference_number}`, {
+      await axios.delete(`${process.env.REACT_APP_API_URL}/employees/${employee.reference_number}`, {
         withCredentials: true,
       });
       fetchEmployees();

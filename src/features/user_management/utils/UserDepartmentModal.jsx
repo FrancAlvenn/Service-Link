@@ -12,9 +12,9 @@ import { PlusCircle } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../authentication";
 import ToastNotification from "../../../utils/ToastNotification";
-import shouldAccountBeActive from "./accountStatusChecker";
+
 import { UserContext } from "../../../context/UserContext";
-import { refetchAndValidateAccount } from "./refetchAndValidateAccount";
+
 
 function UserDepartmentModal({
   currentDepartmentId,
@@ -30,7 +30,7 @@ function UserDepartmentModal({
   const { user } = useContext(AuthContext);
   const [isAuthorized, setIsAuthorized] = useState(false);
 
-  const { allUserInfo, fetchUsers } = useContext(UserContext);
+  const { fetchUsers } = useContext(UserContext);
 
   useEffect(() => {
     const getDepartments = async () => {
@@ -82,7 +82,7 @@ function UserDepartmentModal({
           data.message || "Department updated."
         );
         onDepartmentUpdate?.(departmentId);
-        await refetchAndValidateAccount(userId);
+        
         fetchUsers();
       } else {
         throw new Error(data.message || "Update failed.");

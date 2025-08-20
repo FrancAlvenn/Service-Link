@@ -8,33 +8,24 @@ export default function assignApproversToRequest({
   department_id,
   designation_id,
 }) {
-  // const requestType = "Job Request";
-
-  // const requestInformation = {
-  //   approvers: [],
-  //   authorized_access: [],
-  //   date_required: null,
-  //   details: [],
-  //   purpose: "",
-  //   remarks: "",
-  //   requester: "",
-  //   title: "",
-  // };
 
   const addedPositions = new Set();
 
   const addApprovers = (positionId) => {
-    const matches = approvers.filter((a) => a.position_id === positionId);
-    matches.forEach((a) => {
-      if (!requestInformation.approvers.find((ap) => ap.id === a.id)) {
-        requestInformation.approvers.push({
-          ...a,
-          status: "pending",
-        });
-        addedPositions.add(positionId);
-      }
-    });
-  };
+  const matches = approvers.filter((a) => a.position_id === positionId);
+
+  matches.forEach((a) => {
+    // check by position_id instead of id to avoid missing new users
+    if (!requestInformation.approvers.find((ap) => ap.position_id === a.position_id)) {
+      requestInformation.approvers.push({
+        ...a,
+        status: "pending",
+      });
+      addedPositions.add(positionId);
+    }
+  });
+};
+
 
   const removeApprovers = (positionId) => {
     requestInformation.approvers = requestInformation.approvers.filter(
@@ -111,8 +102,5 @@ export default function assignApproversToRequest({
     );
     requestInformation.approvers = fallbackApprovers;
   }
-
-  console.log(requestInformation);
-  console.log(department_id, designation_id);
   return requestInformation;
 }

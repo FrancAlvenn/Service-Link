@@ -65,7 +65,7 @@ function RequestDetailsPage({
         typeName = "venue_request";
         break;
       case "SV":
-        typeName = "v";
+        typeName = "vehicle_request";
         break;
       default:
         console.warn("Unknown request type:", referenceNumber);
@@ -149,7 +149,7 @@ function RequestDetailsPage({
           <div className="p-1 rounded-md bg-red-500">
             <X color="white" onClick={onClose} className="cursor-pointer" />
           </div>
-          {request.status === "Pending" && (
+          {request.status === "Completed" && (
             <>
               {requestType === "job_request" && (
                 <FeedbackButtonJobRequest referenceNumber={request.reference_number} />

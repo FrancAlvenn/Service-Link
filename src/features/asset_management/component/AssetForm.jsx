@@ -4,14 +4,13 @@ import axios from "axios";
 import { AuthContext } from "../../authentication";
 import AssetContext from "../context/AssetContext";
 import ToastNotification from "../../../utils/ToastNotification";
-import Header from "../../../layouts/header";
 
 const defaultDetailsByType = {
   Venue: [{ key: "Capacity", value: "" }],
   Vehicle: [
     { key: "Plate Number", value: "" },
-    { key: "Purchase Cost", value: "" },
-    { key: "Purchase Date", value: "" },
+    { key: "Acquisition Value", value: "" },
+    { key: "Date of Issuance", value: "" },
     { key: "Warranty Expiry", value: "" },
   ],
   Device: [
@@ -20,17 +19,18 @@ const defaultDetailsByType = {
     { key: "Processor", value: "" },
     { key: "RAM", value: "" },
     { key: "Storage", value: "" },
-    { key: "Purchase Cost", value: "" },
-    { key: "Purchase Date", value: "" },
+    { key: "Acquisition Value", value: "" },
+    { key: "Date of Issuance", value: "" },
     { key: "Warranty Expiry", value: "" },
   ],
   "Office Supplies": [
     { key: "Brand", value: "" },
     { key: "Unit Count", value: "" },
-    { key: "Purchase Cost", value: "" },
-    { key: "Purchase Date", value: "" },
+    { key: "Acquisition Value", value: "" },
+    { key: "Date of Issuance", value: "" },
   ],
 };
+
 
 const AssetForm = ({ mode = "add", initialValues, onClose, onSuccess }) => {
   const { user } = useContext(AuthContext);
@@ -39,17 +39,22 @@ const AssetForm = ({ mode = "add", initialValues, onClose, onSuccess }) => {
 
   const [asset, setAsset] = useState(() => ({
     reference_number: user?.reference_number || "",
+    item_code: "",
     name: "",
-    asset_type: "",
+    category: "",
     description: "",
     location: "",
-    purchase_date: "",
-    purchase_cost: "",
+    acquisition_value: "",
+    depreciation_period: "",
+    assigned_department: "",
+    assigned_personnel: "",
+    date_of_issuance: "",
     status: "Available",
-    last_maintenance: new Date().toISOString().split("T")[0],
-    warranty_expiry: "",
+    last_maintenance: new Date().toISOString().split("T")[0], 
+    warranty_expiry: null,
     ...(initialValues || {}),
   }));
+
 
   // Also initialize `additionalDetails` from initialValues if present
   const [additionalDetails, setAdditionalDetails] = useState(
@@ -71,13 +76,17 @@ const AssetForm = ({ mode = "add", initialValues, onClose, onSuccess }) => {
   const resetForm = () => {
     setAsset({
       reference_number: user?.reference_number || "",
-      name: "",
-      asset_type: "",
-      description: "",
-      location: "",
-      purchase_date: "",
-      purchase_cost: "",
-      status: "Available",
+    item_code: "",
+    name: "",
+    category: "",
+    description: "",
+    location: "",
+    acquisition_value: "",
+    depreciation_period: "",
+    assigned_department: "",
+    assigned_personnel: "",
+    date_of_issuance: "",
+    status: "Available",
       last_maintenance: new Date().toISOString().split("T")[0],
       warranty_expiry: null,
     });
@@ -143,95 +152,183 @@ const AssetForm = ({ mode = "add", initialValues, onClose, onSuccess }) => {
       </div>
 
       <div className="flex flex-col gap-4 px-5 pb-4 overflow-y-auto">
-        {/* Asset Name */}
+        {/* Asset Information Section */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-800 my-2">
+            Asset Information
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            {/* Item Code */}
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">
+                Item Code
+              </label>
+              <input
+                type="text"
+                name="item_code"
+                value={asset.item_code || ""}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                required
+              />
+            </div>
+            {/* Asset Name */}
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">
+                Asset Name
+              </label>
+              <input
+                type="text"
+                name="name"
+                value={asset.name || ""}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                required
+              />
+            </div>
+          </div>
+
+          {/* Category */}
+          <div className="mt-2">
+            <label className="block text-xs font-medium text-gray-700 mb-1">
+              Category
+            </label>
+            <select
+              name="category"
+              value={asset.category}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+              required
+            >
+              <option value="">Select Category</option>
+              <option value="Furniture">Furniture</option>
+              <option value="Computer">Computer</option>
+              <option value="Equipment">Equipment</option>
+              <option value="Machinery">Machinery</option>
+              <option value="Appliance">Appliance</option>
+              <option value="Vehicle">Vehicle</option>
+              <option value="Tools">Tools</option>
+              <option value="Software">Software</option>
+              <option value="Others">Others</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Assignment & Value Section */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-800 my-2">
+            Assignment & Value
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">
+                Acquisition Value
+              </label>
+              <input
+                type="number"
+                name="acquisition_value"
+                value={asset.acquisition_value || ""}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">
+                Depreciation Period (Years)
+              </label>
+              <input
+                type="number"
+                name="depreciation_period"
+                value={asset.depreciation_period || ""}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                required
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2 mt-2">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">
+                Assigned Department
+              </label>
+              <input
+                type="text"
+                name="assigned_department"
+                value={asset.assigned_department || ""}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">
+                Assigned Personnel
+              </label>
+              <input
+                type="text"
+                name="assigned_personnel"
+                value={asset.assigned_personnel || ""}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                required
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Location & Date Section */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-800 my-2">
+            Location & Dates
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">
+                Location
+              </label>
+              <input
+                type="text"
+                name="location"
+                value={asset.location || ""}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">
+                Date of Issuance
+              </label>
+              <input
+                type="date"
+                name="date_of_issuance"
+                value={asset.date_of_issuance || ""}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                required
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Description */}
         <div>
           <label className="block text-xs font-medium text-gray-700 mb-1">
-            Asset Name
+            Description
           </label>
-          <input
-            type="text"
-            name="name"
-            value={asset.name || ""}
+          <textarea
+            name="description"
+            value={asset.description || ""}
             onChange={handleChange}
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
             required
           />
         </div>
 
-        {/* Asset Type */}
-        <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">
-            Asset Type
-          </label>
-          <select
-            name="asset_type"
-            value={asset.asset_type}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-            required
-          >
-            <option value="">Select Asset Type</option>
-            <option value="Venue">Venue</option>
-            <option value="Vehicle">Vehicle</option>
-            <option value="Office Supplies">Office Supplies</option>
-            <option value="Device">Device</option>
-            <option value="Others">Others</option>
-          </select>
-        </div>
-
-        {/* Asset Status */}
-        <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">
-            Asset Status
-          </label>
-          <select
-            name="status"
-            value={asset.status}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-            required
-          >
-            <option value="Available">Available</option>
-            <option value="In Use">In Use</option>
-            <option value="Under Maintenance">Under Maintenance</option>
-            <option value="Disposed">Disposed</option>
-            <option value="Lost">Lost</option>
-          </select>
-        </div>
-
-        {/* Location, Description, Cost */}
-        {[
-          { name: "location", label: "Location" },
-          { name: "description", label: "Description", type: "textarea" },
-        ].map(({ name, label, type = "text" }) => (
-          <div key={name}>
-            <label className="block text-xs font-medium text-gray-700 mb-1">
-              {label}
-            </label>
-            {type === "textarea" ? (
-              <textarea
-                name={name}
-                value={asset[name] || ""}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-                required
-              />
-            ) : (
-              <input
-                type={type}
-                name={name}
-                value={asset[name] || ""}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-                required
-              />
-            )}
-          </div>
-        ))}
-
         {/* Additional Details Section */}
         <div>
-          <label className="block text-xs font-medium text-gray-700 my-1">
+          <label className="block text-sm font-semibold text-gray-800 my-2">
             Additional Details
           </label>
         </div>
@@ -239,7 +336,7 @@ const AssetForm = ({ mode = "add", initialValues, onClose, onSuccess }) => {
         {additionalDetails.length > 0 && (
           <div className="mt-2 space-y-6">
             {additionalDetails.map((item, index) => (
-              <div key={index} className="grid grid-cols-2 gap-2 ">
+              <div key={index} className="grid grid-cols-2 gap-2">
                 <input
                   type="text"
                   value={item.key}
@@ -277,18 +374,14 @@ const AssetForm = ({ mode = "add", initialValues, onClose, onSuccess }) => {
               type="text"
               placeholder="Field Name"
               value={newDetail.key}
-              onChange={(e) =>
-                setNewDetail({ ...newDetail, key: e.target.value })
-              }
+              onChange={(e) => setNewDetail({ ...newDetail, key: e.target.value })}
               className="border border-gray-300 rounded-md px-3 py-2 text-sm"
             />
             <input
               type="text"
               placeholder="Field Value"
               value={newDetail.value}
-              onChange={(e) =>
-                setNewDetail({ ...newDetail, value: e.target.value })
-              }
+              onChange={(e) => setNewDetail({ ...newDetail, value: e.target.value })}
               className="border border-gray-300 rounded-md px-3 py-2 text-sm"
             />
           </div>
@@ -318,6 +411,7 @@ const AssetForm = ({ mode = "add", initialValues, onClose, onSuccess }) => {
           <div className="text-red-500 mt-2 text-sm">{errorMessage}</div>
         )}
       </div>
+
     </div>
   );
 };

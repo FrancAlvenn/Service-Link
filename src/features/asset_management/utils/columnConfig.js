@@ -40,18 +40,33 @@ export const getColumnConfig = ({ setAssetModalOpen, setSelectedAsset }) => [
       <Typography
         variant="small"
         color="blue-gray"
-        className="flex items-center gap-2 text-blue-500 cursor-pointer hover:underline font-semibold"
+        className="flex items-center justify-center text-center gap-2 text-blue-500 cursor-pointer hover:underline font-semibold"
         onClick={() => {
           setSelectedAsset({
             ...row,
             purchase_date: row.purchase_date?.split("T")[0] || "",
             last_maintenance: row.last_maintenance?.split("T")[0] || "",
             warranty_expiry: row.warranty_expiry?.split("T")[0] || "",
+            date_of_issuance: row.date_of_issuance?.split("T")[0] || "",
           });
           setAssetModalOpen(true);
         }}
       >
         {row.reference_number}
+      </Typography>
+    ),
+  },
+  {
+    key: "item_code",
+    label: "Item Code",
+    header: (
+      <Typography variant="small" color="blue-gray" className={normalText}>
+        Item Code
+      </Typography>
+    ),
+    render: (row) => (
+      <Typography variant="small" color="blue-gray" className={normalText}>
+        {row.item_code}
       </Typography>
     ),
   },
@@ -70,20 +85,6 @@ export const getColumnConfig = ({ setAssetModalOpen, setSelectedAsset }) => [
     ),
   },
   {
-    key: "asset_type",
-    label: "Asset Type",
-    header: (
-      <Typography variant="small" color="blue-gray" className={normalText}>
-        Asset Type
-      </Typography>
-    ),
-    render: (row) => (
-      <Typography variant="small" color="blue-gray" className={normalText}>
-        {row.asset_type}
-      </Typography>
-    ),
-  },
-  {
     key: "location",
     label: "Location",
     header: (
@@ -98,23 +99,76 @@ export const getColumnConfig = ({ setAssetModalOpen, setSelectedAsset }) => [
     ),
   },
   {
-    key: "status",
-    label: "Status",
+    key: "acquisition_value",
+    label: "Acquisition Value",
     header: (
       <Typography variant="small" color="blue-gray" className={normalText}>
-        Status
+        Acquisition Value
       </Typography>
     ),
     render: (row) => (
-      <Chip
-        size="sm"
-        variant="ghost"
-        color="blue"
-        className="text-center font-bold flex items-center justify-center rounded-full"
-        value={row.status}
-      />
+      <Typography variant="small" color="blue-gray" className={normalText}>
+        ₱{Number(row.acquisition_value).toLocaleString()}
+      </Typography>
     ),
-    // render: (row) => <StatusModal input={row.status} referenceNumber={row.reference_number} requestType={requestType} />,
+  },
+  {
+    key: "assigned_department",
+    label: "Assigned Department",
+    header: (
+      <Typography variant="small" color="blue-gray" className={normalText}>
+        Department
+      </Typography>
+    ),
+    render: (row) => (
+      <Typography variant="small" color="blue-gray" className={normalText}>
+        {row.assigned_department}
+      </Typography>
+    ),
+  },
+  {
+    key: "assigned_personnel",
+    label: "Assigned Personnel",
+    header: (
+      <Typography variant="small" color="blue-gray" className={normalText}>
+        Personnel
+      </Typography>
+    ),
+    render: (row) => (
+      <Typography variant="small" color="blue-gray" className={normalText}>
+        {row.assigned_personnel}
+      </Typography>
+    ),
+  },
+  {
+    key: "date_of_issuance",
+    label: "Date of Issuance",
+    header: (
+      <Typography variant="small" color="blue-gray" className={normalText}>
+        Date of Issuance
+      </Typography>
+    ),
+    render: (row) => (
+      <Typography variant="small" color="blue-gray" className={normalText}>
+        {formatDate(row.date_of_issuance)}
+      </Typography>
+    ),
+  },
+  {
+    key: "depreciation_period",
+    label: "Lifespan (Years)",
+    header: (
+      <Typography variant="small" color="blue-gray" className={normalText}>
+        Lifespan
+      </Typography>
+    ),
+    render: (row) => (
+      <Typography variant="small" color="blue-gray" className={normalText}>
+        {row.depreciation_period
+          ? `${row.depreciation_period} year(s)`
+          : "N/A"}
+      </Typography>
+    ),
   },
   {
     key: "last_maintenance",
@@ -131,6 +185,7 @@ export const getColumnConfig = ({ setAssetModalOpen, setSelectedAsset }) => [
     ),
   },
 ];
+
 
 export const getAssignmentLogColumns = (
   getUserByReferenceNumber,

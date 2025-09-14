@@ -201,6 +201,7 @@ const AssetForm = ({ mode = "add", initialValues, onClose, onSuccess }) => {
               required
             >
               <option value="">Select Category</option>
+              <option value="Venue">Venue</option>
               <option value="Furniture">Furniture</option>
               <option value="Computer">Computer</option>
               <option value="Equipment">Equipment</option>

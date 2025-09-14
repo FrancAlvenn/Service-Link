@@ -5,7 +5,7 @@ import { VenueRequestsContext } from "../../../context/VenueRequestsContext";
 import ToastNotification from "../../../../../utils/ToastNotification";
 import { useContext, useState, useEffect } from "react";
 import axios from "axios";
-import { Button, Typography } from "@material-tailwind/react";
+import { Button, Typography, Checkbox } from "@material-tailwind/react";
 import {
   FloppyDisk,
   Info,
@@ -58,6 +58,14 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
   const [formErrors, setFormErrors] = useState({});
   const [formWarnings, setFormWarnings] = useState({});
 
+  // Define your possible add-ons
+  const addonsList = [
+    { id: "microphone", label: "Microphone" },
+    { id: "projector", label: "Projector" },
+    { id: "chairs", label: "Chairs" },
+    { id: "tables", label: "Tables" },
+  ];
+
   const {
     departments,
     designations,
@@ -88,7 +96,7 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
       const venues =
         response.data === null || response.data.length === 0
           ? []
-          : response.data.filter((a) => a.asset_type === "Venue");
+          : response.data.filter((a) => a.category === "Venue");
       setVenueOptions(venues);
     });
   }, []);
@@ -617,15 +625,34 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
         <Typography className="text-xs font-semibold text-gray-600 dark:text-gray-300">
           Particulars
         </Typography>
+{/* 
+        <div className="">
+          <Checkbox
+            label={
+              <div className="flex gap-2">
+              <Typography className="text-xs font-semibold text-gray-600 dark:text-gray-300">
+                Microphone
+              </Typography>
+              <input 
+                name="microphone"
+                value={1}
+                onChange={(e) => handleChange(e)}
+                className="w-5 text-xs font-semibold text-gray-600 dark:text-gray-300"
+                required
+              />
+              </div>
+            }
+          />
+        </div> */}
 
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm border border-gray-300 dark:border-gray-600 rounded-md overflow-hidden">
             <thead className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
               <tr>
-                <th className="px-4 py-2 dark:border-gray-600">Item</th>
-                <th className="px-4 py-2 dark:border-gray-600">Quantity</th>
-                <th className="px-4 py-2  dark:border-gray-600">Description</th>
-                <th className="px-4 py-2">Actions</th>
+                <th className="px-4 py-2 text-xs font-semibold text-gray-600 dark:border-gray-600">Item</th>
+                <th className="px-4 py-2 text-xs font-semibold text-gray-600 dark:border-gray-600">Quantity</th>
+                <th className="px-4 py-2 text-xs font-semibold text-gray-600  dark:border-gray-600">Description</th>
+                <th className="px-4 py-2 text-xs font-semibold text-gray-600">Actions</th>
               </tr>
             </thead>
             <tbody>

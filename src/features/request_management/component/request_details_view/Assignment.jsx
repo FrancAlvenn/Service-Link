@@ -191,7 +191,7 @@ const Assignment = ({
       await axios.put(`${process.env.REACT_APP_API_URL}/${requestType}/${selectedRequest.reference_number}`, {
         ...selectedRequest,
         assigned_to: updated,
-      });
+      }, { withCredentials: true });
 
       setSelectedRequest((prev) => ({
         ...prev,
@@ -253,7 +253,7 @@ const Assignment = ({
       await axios.put(`${process.env.REACT_APP_API_URL}/${requestType}/${selectedRequest.reference_number}`, {
         ...selectedRequest,
         assigned_assets: updatedAssets,
-      });
+      }, { withCredentials: true });
 
       setSelectedRequest((prev) => ({
         ...prev,

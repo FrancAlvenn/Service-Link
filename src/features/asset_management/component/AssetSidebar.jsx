@@ -2,7 +2,6 @@ import { CaretRight, X } from "@phosphor-icons/react";
 import axios from "axios";
 import { useContext, useEffect, useState } from "react";
 import { Button } from "@material-tailwind/react";
-import AssetContext from "../context/AssetContext";
 import { AuthContext } from "../../authentication";
 import { UserContext } from "../../../context/UserContext";
 import ToastNotification from "../../../utils/ToastNotification";

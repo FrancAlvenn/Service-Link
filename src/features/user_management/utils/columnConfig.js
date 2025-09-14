@@ -3,6 +3,7 @@ import { UserCircle } from "@phosphor-icons/react";
 import UserDepartmentModal from "./UserDepartmentModal";
 import UserDesignationModal from "./UserDesignationModal";
 import UserOrganizationModal from "./UserOrganizationModal";
+import UserAccountActiveModal from "./UserAccountActiveModal";
 
 const normalText =
   "text-center font-semibold rounded-full flex items-center justify-center";
@@ -139,26 +140,12 @@ export const getUserColumnConfig = ({
         Status
       </Typography>
     ),
-    render: (row) => {
-      const statusColor =
-        row.status === "active"
-          ? "green"
-          : row.status === "invited"
-          ? "blue"
-          : row.status === "inactive"
-          ? "red"
-          : "gray";
-
-      return (
-        <Chip
-          size="sm"
-          variant="ghost"
-          color={statusColor}
-          value={row.status.charAt(0).toUpperCase() + row.status.slice(1)}
-          className="mx-auto text-center"
-        />
-      );
-    },
+    render: (row) => (
+      <UserAccountActiveModal
+        currentStatus={row.status}
+        userId={row.reference_number}
+      />
+    ),
   },
   // {
   //   key: "action",

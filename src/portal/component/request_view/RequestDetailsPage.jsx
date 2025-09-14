@@ -12,6 +12,7 @@ import axios from "axios";
 import { AuthContext } from "../../../features/authentication";
 import ToastNotification from "../../../utils/ToastNotification";
 import RequestAccess from "./RequestAccess";
+import {FeedbackButtonJobRequest, FeedbackButtonPurchasingRequest, FeedbackButtonVehicleRequest, FeedbackButtonVenueRequest} from "../../../components/feedback_button/FeedbackButton";
 
 function RequestDetailsPage({
   referenceNumber,
@@ -148,6 +149,22 @@ function RequestDetailsPage({
           <div className="p-1 rounded-md bg-red-500">
             <X color="white" onClick={onClose} className="cursor-pointer" />
           </div>
+          {request.status === "Completed" && (
+            <>
+              {requestType === "job_request" && (
+                <FeedbackButtonJobRequest referenceNumber={request.reference_number} />
+              )}
+              {requestType === "purchasing_request" && (
+                <FeedbackButtonPurchasingRequest referenceNumber={request.reference_number} />
+              )}
+              {requestType === "vehicle_request" && (
+                <FeedbackButtonVehicleRequest referenceNumber={request.reference_number} />
+              )}
+              {requestType === "venue_request" && (
+                <FeedbackButtonVenueRequest referenceNumber={request.reference_number} />
+              )}
+            </>
+          )}
           {/* <RequestAccess selectedRequest={request} requestType={requestType} /> */}
         </div>
 

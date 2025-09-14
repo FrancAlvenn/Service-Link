@@ -16,11 +16,15 @@ import {
   MenuList,
   MenuItem,
 } from "@material-tailwind/react";
-import { FunnelSimple, Plus, UserCircle } from "@phosphor-icons/react";
+import { FunnelSimple, Plus, UserCircle, ArrowClockwise } from "@phosphor-icons/react";
 import { UserContext } from "../../../context/UserContext";
 import DepartmentSelect from "../../../utils/select/departmentSelect";
 import PositionSelect from "../../../utils/select/positionSelect";
 import UserPicker from "../../../components/user_picker/UserPicker";
+import { JobRequestsContext } from "../../request_management/context/JobRequestsContext";
+import { PurchasingRequestsContext } from "../../request_management/context/PurchasingRequestsContext";
+import { VehicleRequestsContext } from "../../request_management/context/VehicleRequestsContext";
+import { VenueRequestsContext } from "../../request_management/context/VenueRequestsContext";
 
 const Approvers = () => {
   const {
@@ -44,6 +48,23 @@ const Approvers = () => {
   const [approverToDelete, setApproverToDelete] = useState(null);
 
   const [selectedRowId, setSelectedRowId] = useState(null);
+
+  // const { allUserInfo } = useContext(UserContext);
+
+  // const {jobRequests, fetchJobRequests} = useContext(JobRequestsContext);
+
+  // const {purchasingRequests, fetchPurchasingRequests} = useContext(PurchasingRequestsContext);
+
+  // const {vehicleRequests, fetchVehicleRequests} = useContext(VehicleRequestsContext);
+
+  // const {venueRequests, fetchVenueRequests} = useContext(VenueRequestsContext);
+
+  // const allRequests = [
+  //   ...Object.values(jobRequests),
+  //   ...Object.values(purchasingRequests),
+  //   ...Object.values(vehicleRequests),
+  //   ...Object.values(venueRequests),
+  // ];
 
   const tableRef = useRef(null);
 
@@ -237,6 +258,7 @@ const Approvers = () => {
 
   const { departments, fetchDepartments } = useContext(SettingsContext);
   const { positions, fetchPositions } = useContext(SettingsContext);
+  const { approvalRulesByDepartment, approvalRulesByDesignation, approvalRulesByRequestType } = useContext(SettingsContext);
 
   const filteredApprovers = approvers.filter(
     (a) =>
@@ -444,6 +466,16 @@ const Approvers = () => {
               >
                 <Plus size={16} /> Add Approver
               </Button>
+
+              {/* <Button
+                variant="outlined"
+                color="blue"
+                className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 flex items-center gap-2"
+                onClick={}
+                disabled={editIndex !== null}
+              >
+                <ArrowClockwise size={16} /> Sync Approvers
+              </Button> */}
 
               {(editIndex === "new" || editIndex !== null) && (
                 <UserPicker

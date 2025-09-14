@@ -12,9 +12,9 @@ import { PlusCircle } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../authentication";
 import ToastNotification from "../../../utils/ToastNotification";
-import shouldAccountBeActive from "./accountStatusChecker";
+
 import { UserContext } from "../../../context/UserContext";
-import { refetchAndValidateAccount } from "./refetchAndValidateAccount";
+
 
 function UserDesignationModal({
   currentDesignationId,
@@ -84,7 +84,7 @@ function UserDesignationModal({
           data.message || "Designation updated."
         );
         onDesignationUpdate?.(designationId);
-        await refetchAndValidateAccount(userId);
+        
         fetchUsers();
       } else {
         throw new Error(data.message || "Update failed.");

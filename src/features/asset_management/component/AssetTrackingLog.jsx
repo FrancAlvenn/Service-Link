@@ -6,6 +6,7 @@ import { AssetAssignmentLogContext } from "../context/AssetAssignmentLogContext"
 import { getAssignmentLogColumns } from "../utils/columnConfig";
 import { UserContext } from "../../../context/UserContext";
 import SidebarView from "../../../components/sidebar/SidebarView";
+import ModalView from "../../request_management/component/request_details_view/ModalView";
 
 const AssetTrackingLog = () => {
   const { assetAssignmentLogs, fetchAssetAssignmentLogs } = useContext(
@@ -16,7 +17,7 @@ const AssetTrackingLog = () => {
 
   const [searchQuery, setSearchQuery] = useState("");
 
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const [selectedReferenceNumber, setSelectedReferenceNumber] = useState("");
 
@@ -31,7 +32,7 @@ const AssetTrackingLog = () => {
 
   const columns = getAssignmentLogColumns(
     getUserByReferenceNumber,
-    setSidebarOpen,
+    setModalOpen,
     setSelectedReferenceNumber
   );
 
@@ -72,7 +73,7 @@ const AssetTrackingLog = () => {
         {/* Table Section */}
         <div
           className={`h-full bg-white w-full mt-0 px-3 flex flex-col justify-between transition-[max-width] duration-300 ${
-            sidebarOpen ? "max-w-[55%]" : "w-full"
+            modalOpen ? "max-w-[55%]" : "w-full"
           }`}
         >
           <div className="flex flex-col gap-4 h-full">
@@ -127,13 +128,25 @@ const AssetTrackingLog = () => {
           </div>
         </div>
 
-        {/* Sidebar Section */}
-        <SidebarView
-          open={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-          referenceNumber={selectedReferenceNumber}
-          requests={assetAssignmentLogs}
-        />
+        {modalOpen && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+            style={{ alignItems: "center", justifyContent: "center" }}
+            onClick={() => setModalOpen(false)} // close on backdrop click
+          >
+            <div
+              className="bg-white dark:bg-gray-900 w-full h-full lg:max-w-[80vw] lg:max-h-[90vh] overflow-y-auto rounded-xl"
+              onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside modal
+            >
+              <ModalView
+                open={modalOpen}
+                onClose={() => setModalOpen(false)}
+                referenceNumber={selectedReferenceNumber}
+                asModal={true}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -65,6 +65,10 @@ const UserManagement = () => {
     }
   );
 
+  // useEffect(()=>{
+  //   console.log(filteredUsers)
+  // },[ ])
+
   useEffect(() => {
     fetchUsers();
     fetchJobRequests();

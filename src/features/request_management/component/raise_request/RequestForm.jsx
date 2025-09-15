@@ -90,8 +90,15 @@ const RequestForm = ({ selectedRequest, setSelectedRequest }) => {
 
         {/* Dropdown List - Shown when clicked */}
         {isDropdownOpen && (
-          <div className="absolute w-full mt-2 bg-white dark:bg-gray-800 shadow-lg z-50 rounded-lg">
-            {availableOptions.map((option) => (
+        <div className="absolute w-full mt-2 bg-white dark:bg-gray-800 shadow-lg z-50 rounded-lg">
+          {availableOptions
+            .filter((option) => {
+              if (user?.designation_id === 1) {
+                return option.key !== "job_request" && option.key !== "purchasing_request";
+              }
+              return true; // otherwise show all
+            })
+            .map((option) => (
               <div
                 key={option.key}
                 className="p-5 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition w-full"
@@ -115,8 +122,8 @@ const RequestForm = ({ selectedRequest, setSelectedRequest }) => {
                 </div>
               </div>
             ))}
-          </div>
-        )}
+        </div>
+      )}
       </div>
 
       <div className="my-4">

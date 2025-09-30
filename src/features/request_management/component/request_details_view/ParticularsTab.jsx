@@ -106,7 +106,7 @@ const ParticularsTab = ({
               <th className="p-2">Item</th>
               <th className="p-2">Quantity</th>
               <th className="p-2">Description</th>
-              {isAuthorized && <th className=" p-2">Actions</th>}
+              {/* {isAuthorized && <th className=" p-2">Actions</th>} */}
             </tr>
           )}
         </thead>

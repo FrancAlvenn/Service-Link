@@ -60,11 +60,72 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
 
   // Define your possible add-ons
   const addonsList = [
-    { id: "microphone", label: "Microphone" },
-    { id: "projector", label: "Projector" },
-    { id: "chairs", label: "Chairs" },
-    { id: "tables", label: "Tables" },
+    { id: "Chairs", label: "Chairs" },
+    { id: "Tables", label: "Tables" },
+    { id: "Microphone", label: "Microphone" },
+    { id: "Whiteboard", label: "Whiteboard" },
+    { id: "LCD Projector", label: "LCD Projector" },
+    { id: "Electric Fan", label: "Electric Fan" },
+    { id: "Water Dispenser", label: "Water Dispenser" },
+    { id: "LED Monitor", label: "LED Monitor" },
+    { id: "Others", label: "Others", isCustom: true },
   ];
+
+  // State to track selected add-ons and their quantities
+  const [selectedAddons, setSelectedAddons] = useState({});
+
+  // Handle checkbox change
+  const handleCheckboxChange = (addonId) => (event) => {
+    const isChecked = event.target.checked;
+    setSelectedAddons((prev) => ({
+      ...prev,
+      [addonId]: isChecked ? { quantity: 1 } : undefined,
+    }));
+
+    // Update request.details
+    setRequest((prev) => {
+      const newDetails = isChecked
+        ? [...prev.details, { particulars: addonId, quantity: 1 }]
+        : prev.details.filter((item) => item.particulars !== addonId);
+      return { ...prev, details: newDetails };
+    });
+  };
+
+  // Handle quantity input change
+  const handleQuantityChange = (addonId) => (event) => {
+    const quantity = parseInt(event.target.value) || 1;
+    setSelectedAddons((prev) => ({
+      ...prev,
+      [addonId]: { quantity },
+    }));
+
+    // Update quantity in request.details
+    setRequest((prev) => {
+      const newDetails = prev.details.map((item) =>
+        item.particulars === addonId ? { ...item, quantity } : item
+      );
+      return { ...prev, details: newDetails };
+    });
+  };
+
+  // Handle custom particular name input change
+  const handleCustomNameChange = (addonId) => (event) => {
+    const customName = event.target.value;
+    setSelectedAddons((prev) => ({
+      ...prev,
+      [addonId]: { ...prev[addonId], customName },
+    }));
+
+    // Update particulars in request.details with a unique identifier
+    setRequest((prev) => {
+      const newDetails = prev.details.map((item) =>
+        item.particulars === addonId || item.particulars.startsWith('*')
+          ? { ...item, particulars: `*${customName}` }
+          : item
+      );
+      return { ...prev, details: newDetails };
+    });
+  };
 
   const {
     departments,
@@ -625,27 +686,49 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
         <Typography className="text-xs font-semibold text-gray-600 dark:text-gray-300">
           Particulars
         </Typography>
-{/* 
-        <div className="">
-          <Checkbox
-            label={
-              <div className="flex gap-2">
-              <Typography className="text-xs font-semibold text-gray-600 dark:text-gray-300">
-                Microphone
-              </Typography>
-              <input 
-                name="microphone"
-                value={1}
-                onChange={(e) => handleChange(e)}
-                className="w-5 text-xs font-semibold text-gray-600 dark:text-gray-300"
-                required
-              />
-              </div>
-            }
-          />
-        </div> */}
 
-        <div className="overflow-x-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pr-4 sm:pr-20">
+          {addonsList.map((addon) => (
+            <div key={addon.id} className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
+                <Checkbox
+                  checked={!!selectedAddons[addon.id]}
+                  onChange={handleCheckboxChange(addon.id, addon.isCustom)}
+                  name={addon.id}
+                />
+                <Typography className="text-xs font-semibold text-gray-600 dark:text-gray-300">
+                  {addon.label}
+                </Typography>
+              </div>
+              {selectedAddons[addon.id] && (
+                <div className="flex gap-2">
+                  {addon.isCustom && (
+                    <input
+                      type="text"
+                      label="Particular Name"
+                      value={selectedAddons[addon.id].customName || ''}
+                      onChange={handleCustomNameChange(addon.id)}
+                      size="small"
+                      className="w-40 p-1 text-xs font-semibold text-gray-600 dark:text-gray-300"
+                      required
+                    />
+                  )}
+                  <input
+                    type="number"
+                    label="Quantity"
+                    value={selectedAddons[addon.id].quantity}
+                    onChange={handleQuantityChange(addon.id, addon.isCustom)}
+                    inputProps={{ min: 1 }}
+                    size="small"
+                    className="w-10 p-1 text-xs font-semibold text-gray-600 dark:text-gray-300"
+                  />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm border border-gray-300 dark:border-gray-600 rounded-md overflow-hidden">
             <thead className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
               <tr>
@@ -744,7 +827,6 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
           </table>
         </div>
 
-        {/* Add Particular Button */}
         <Button
           color="green"
           variant="outlined"
@@ -753,8 +835,9 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
         >
           <Plus size={18} />
           <Typography className="text-xs">Add Particular</Typography>
-        </Button>
-      </div>
+        </Button>*/}
+
+      </div> 
 
       {/* The rest of the form (participants, purpose, details, submit) remains unchanged... */}
       {/* You can copy your previous implementation here as it does not affect the new logic */}

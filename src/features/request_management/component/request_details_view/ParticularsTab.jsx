@@ -105,7 +105,12 @@ const ParticularsTab = ({
             <tr className="bg-gray-100 text-left">
               <th className="p-2">Item</th>
               <th className="p-2">Quantity</th>
-              <th className="p-2">Description</th>
+              {requestType !== "venue_request" && (
+                 <>
+                  <th className="p-2">Description</th>
+                  {requestType !== "purchasing_request" && (<th className="p-2">Remarks</th>)}
+                </>
+              )}
               {/* {isAuthorized && <th className=" p-2">Actions</th>} */}
             </tr>
           )}
@@ -175,7 +180,7 @@ const ParticularsTab = ({
 
                 {/* Description */}
                 <td className="p-3">
-                  {isAuthorized && editingIndex === index ? (
+                  {isAuthorized && editingIndex === index && requestType !== "venue_request"  ? (
                     <textarea
                       className="w-full p-1 -gray-300 rounded"
                       value={editedParticular.description}
@@ -193,6 +198,30 @@ const ParticularsTab = ({
                       className="font-normal"
                     >
                       {detail.description}
+                    </Typography>
+                  )}
+                </td>
+
+                {/* Remarks */}
+                <td className="p-3">
+                  {isAuthorized && editingIndex === index && requestType !== "venue_request" && requestType !== "purchasing_request" ? (
+                    <textarea
+                      className="w-full p-1 -gray-300 rounded"
+                      value={editedParticular.remarks}
+                      onChange={(e) =>
+                        setEditedParticular({
+                          ...editedParticular,
+                          remarks: e.target.value,
+                        })
+                      }
+                    />
+                  ) : (
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-normal"
+                    >
+                      {detail.remarks}
                     </Typography>
                   )}
                 </td>

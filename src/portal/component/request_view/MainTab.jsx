@@ -278,6 +278,69 @@ const MainTab = ({
     }
   };
 
+  const [selectedReason, setSelectedReason] = useState("");
+  const [additionalComment, setAdditionalComment] = useState("");
+
+  // Predefined reasons for approval and rejection
+  const approvalReasons = [
+    { id: 1, value: "Request meets all requirements" },
+    { id: 2, value: "Urgent need verified" },
+    { id: 3, value: "Budget approved" },
+    { id: 4, value: "Other" },
+  ];
+
+  const rejectionReasons = [
+    { id: 1, value: "Insufficient justification" },
+    { id: 2, value: "Budget constraints" },
+    { id: 3, value: "Item not available" },
+    { id: 4, value: "Other" },
+  ];
+
+    // Handle dropdown change and update actionComment
+  const handleReasonChange = (e, isDelete = false) => {
+    const reason = e.target.value;
+    setSelectedReason(reason);
+    // Combine reason with additional comment if present
+    setActionComment(additionalComment ? `${reason}: ${additionalComment}` : reason);
+  };
+
+  // Handle textarea change and update actionComment
+  const handleCommentChange = (e) => {
+    const comment = e.target.value;
+    setAdditionalComment(comment);
+    // Combine selected reason with comment if present
+    setActionComment(selectedReason ? `${selectedReason}: ${comment}` : comment);
+  };
+
+  // Handle confirm action for approval/rejection
+  const handleConfirmApproval = () => {
+    setOpenApprovalDialog(false);
+    handleRequestApproveStatus(approvalStatus, actionComment);
+    setActionComment("");
+    setSelectedReason("");
+    setAdditionalComment("");
+    setApprovalStatus("");
+  };
+
+  // Handle confirm action for deletion
+  const handleConfirmDelete = () => {
+    setOpenDeleteModal(false);
+    handleDeleteRequest(actionComment); // Pass actionComment to handleDeleteRequest
+    setActionComment("");
+    setSelectedReason("");
+    setAdditionalComment("");
+  };
+
+  // Reset state on cancel
+  const handleCancel = () => {
+    setOpenApprovalDialog(false);
+    setOpenDeleteModal(false);
+    setActionComment("");
+    setSelectedReason("");
+    setAdditionalComment("");
+    setApprovalStatus("");
+  };
+
   return (
     <div className="flex flex-col gap-4">
       {/* Request Access */}
@@ -328,19 +391,17 @@ const MainTab = ({
               <thead className="bg-gray-100 dark:bg-gray-800">
                 <tr>
                   <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    Particulars
-                  </th>
-                  <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">
                     Quantity
                   </th>
                   <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    Description
+                    Particulars
                   </th>
-                  {/* {isAuthorized && (
-                    <th className="px-4 py-2 text-center text-sm font-semibold text-gray-700 dark:text-gray-300">
-                      Actions
-                    </th>
-                  )} */}
+                  {requestType !== "venue_request" && (
+                 <>
+                  <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">Description</th>
+                  {requestType !== "purchasing_request" && (<th className="px-4 py-2 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">Remarks</th>)}
+                </>
+              )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900">
@@ -349,24 +410,6 @@ const MainTab = ({
                     key={index}
                     className="hover:bg-gray-50 dark:hover:bg-gray-800 transition"
                   >
-                    <td className="px-4 py-2 text-sm text-gray-900 dark:text-gray-200">
-                      {isAuthorized && editingIndex === index ? (
-                        <input
-                          type="text"
-                          className="w-full p-1 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700"
-                          placeholder="Particulars"
-                          value={editedParticular.particulars}
-                          onChange={(e) =>
-                            setEditedParticular({
-                              ...editedParticular,
-                              particulars: e.target.value,
-                            })
-                          }
-                        />
-                      ) : (
-                        detail.particulars
-                      )}
-                    </td>
                     <td className="px-4 py-2 text-sm text-gray-900 dark:text-gray-200">
                       {isAuthorized && editingIndex === index ? (
                         <input
@@ -387,6 +430,24 @@ const MainTab = ({
                     </td>
                     <td className="px-4 py-2 text-sm text-gray-900 dark:text-gray-200">
                       {isAuthorized && editingIndex === index ? (
+                        <input
+                          type="text"
+                          className="w-full p-1 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700"
+                          placeholder="Particulars"
+                          value={editedParticular.particulars}
+                          onChange={(e) =>
+                            setEditedParticular({
+                              ...editedParticular,
+                              particulars: e.target.value,
+                            })
+                          }
+                        />
+                      ) : (
+                        detail.particulars
+                      )}
+                    </td>
+                    <td className="px-4 py-2 text-sm text-gray-900 dark:text-gray-200">
+                      {isAuthorized && editingIndex === index && requestType !== "venue_request" ?  (
                         <textarea
                           className="w-full p-1 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700"
                           placeholder="Description"
@@ -400,6 +461,23 @@ const MainTab = ({
                         />
                       ) : (
                         detail.description
+                      )}
+                    </td>
+                    <td className="px-4 py-2 text-sm text-gray-900 dark:text-gray-200">
+                      {isAuthorized && editingIndex === index && requestType !== "venue_request" && requestType !== "purchasing_request" ? (
+                        <textarea
+                          className="w-full p-1 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700"
+                          placeholder="Remarks"
+                          value={editedParticular.remarks}
+                          onChange={(e) =>
+                            setEditedParticular({
+                              ...editedParticular,
+                              remarks: e.target.value,
+                            })
+                          }
+                        />
+                      ) : (
+                        detail.remarks
                       )}
                     </td>
                     {/* {isAuthorized && (
@@ -517,50 +595,64 @@ const MainTab = ({
       )}
 
       <Dialog open={openApprovalDialog} handler={setOpenApprovalDialog}>
-        <DialogHeader>
+        <DialogHeader className="text-lg text-gray-900 dark:text-gray-200">
           {approvalStatus === "approved" ? "Approve Request" : "Reject Request"}
         </DialogHeader>
         <DialogBody>
           <Typography
             variant="small"
-            className="mb-2 text-gray-700 dark:text-gray-300"
+            className="mb-2 text-xs font-medium text-gray-700 dark:text-gray-300"
           >
-            Please provide a reason or comment for this action:
+            Select a reason for this action:
+          </Typography>
+          <select
+            value={selectedReason}
+            onChange={(e) => handleReasonChange(e)}
+            className="w-full border text-sm font-medium border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 mb-2 normal-case"
+            required
+          >
+            <option value="">Select Reason</option>
+            {(approvalStatus === "approved" ? approvalReasons : rejectionReasons).map((reason) => (
+              <option key={reason.id} value={reason.value}>
+                {reason.value}
+              </option>
+            ))}
+          </select>
+          <Typography
+            variant="small"
+            className="mb-2 text-xs font-medium text-gray-700 dark:text-gray-300"
+          >
+            Additional comments (optional):
           </Typography>
           <textarea
-            className="w-full p-2 border border-gray-300 rounded-md dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600"
+            className="w-full text-sm font-medium text-gray-700 dark:text-gray-300 px-3 py-2 border border-gray-300 rounded-md dark:bg-gray-800 dark:border-gray-600"
             rows={4}
-            placeholder="Enter your reason here..."
-            value={actionComment}
-            onChange={(e) => setActionComment(e.target.value)}
+            placeholder="Enter additional comments here..."
+            value={additionalComment}
+            onChange={handleCommentChange}
           />
         </DialogBody>
         <DialogFooter className="flex gap-2">
           <Button
             variant="outlined"
             color="red"
-            onClick={() => {
-              setOpenApprovalDialog(false);
-              setActionComment("");
-              setApprovalStatus("");
-            }}
+            onClick={handleCancel}
+            className="flex items-center gap-1 px-4 py-2 border rounded-md hover:text-red-500 dark:border-gray-600 normal-case"
           >
             Cancel
           </Button>
           <Button
-            variant="gradient"
+            variant=""
             color="green"
-            onClick={() => {
-              setOpenApprovalDialog(false);
-              handleRequestApproveStatus(approvalStatus, actionComment);
-              setActionComment("");
-              setApprovalStatus("");
-            }}
+            onClick={handleConfirmApproval}
+            className="flex items-center gap-1 px-4 py-2 normal-case"
+            disabled={!selectedReason}
           >
             Confirm
           </Button>
         </DialogFooter>
       </Dialog>
+
 
       {/* Delete Confirmation Modal */}
       <Dialog

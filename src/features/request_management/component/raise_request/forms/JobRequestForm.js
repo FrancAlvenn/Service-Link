@@ -1,6 +1,4 @@
 import React, { useContext, useEffect, useState } from "react";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css"; // Import styles for ReactQuill
 import { Button, Typography } from "@material-tailwind/react";
 import {
   Plus,
@@ -20,36 +18,9 @@ import { classifyJobRequest } from "../../../utils/classifyJobRequest";
 
 const JobRequestForm = ({ setSelectedRequest }) => {
   const { user } = useContext(AuthContext);
-
   const { allUserInfo, getUserByReferenceNumber, fetchUsers } =
     useContext(UserContext);
-
   const { fetchJobRequests } = useContext(JobRequestsContext);
-
-  const [errorMessage, setErrorMessage] = useState("");
-
-  const [request, setRequest] = useState({
-    requester: user.reference_number,
-    title: "",
-    job_category: "",
-    date_required: "",
-    purpose: "",
-    remarks: "",
-    details: [],
-    approvers: [],
-  });
-
-  const requestType = "Job Request";
-
-  const [editingIndex, setEditingIndex] = useState(null);
-  const [editedParticular, setEditedParticular] = useState({
-    particulars: "",
-    quantity: "",
-    description: "",
-  });
-
-  const [departmentOptions, setDepartmentOptions] = useState([]);
-
   const {
     departments,
     designations,
@@ -64,6 +35,27 @@ const JobRequestForm = ({ setSelectedRequest }) => {
     fetchApprovalRulesByRequestType,
     fetchApprovalRulesByDesignation,
   } = useContext(SettingsContext);
+
+  const [errorMessage, setErrorMessage] = useState("");
+  const [request, setRequest] = useState({
+    requester: user.reference_number,
+    title: "",
+    job_category: "",
+    date_required: "",
+    purpose: "",
+    remarks: "",
+    details: [],
+    approvers: [],
+  });
+  const [showParticularForm, setShowParticularForm] = useState(false);
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [particularForm, setParticularForm] = useState({
+    particulars: "",
+    quantity: "",
+    description: "",
+  });
+  const [departmentOptions, setDepartmentOptions] = useState([]);
+  const requestType = "Job Request";
 
   useEffect(() => {
     fetchDepartments();
@@ -83,82 +75,7 @@ const JobRequestForm = ({ setSelectedRequest }) => {
       purpose: request.purpose,
     });
     setRequest((prev) => ({ ...prev, job_category: category }));
-    console.log(request.job_category);
   }, [request.title, request.description, request.remarks, request.purpose]);
-
-  const handleChange = (e) => {
-    // Validate Date: Ensure date_required is not in the past
-    if (e.target.name === "date_required") {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0); // Normalize to start of day for accuracy
-      const selectedDate = new Date(e.target.value);
-
-      if (selectedDate < today) {
-        setErrorMessage("Invalid Date. Date cannot be in the past.");
-        // ToastNotification.error("Invalid Date", "Date cannot be in the past.");
-        return; // Exit without updating state
-      }
-    }
-
-    // Validate Date: Ensure that for user accounts the date_required should be at least one week prior
-    if (user.access_level === "user") {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0); // Normalize to start of day for accuracy
-
-      const oneWeekFromToday = new Date(today);
-      oneWeekFromToday.setDate(today.getDate() + 7);
-
-      const selectedDate = new Date(e.target.value);
-
-      if (selectedDate < oneWeekFromToday) {
-        setErrorMessage(
-          "Requests should be at least one week prior. For urgent requests, please contact the GSO."
-        );
-        setRequest({ ...request, [e.target.name]: "" });
-        return;
-      }
-    }
-
-    setErrorMessage("");
-    setRequest({ ...request, [e.target.name]: e.target.value });
-  };
-
-  const handleQuillChange = (name, value) => {
-    setRequest({ ...request, [name]: value });
-  };
-
-  const handleEditClick = (index) => {
-    setEditingIndex(index);
-    setEditedParticular({ ...request.details[index] });
-  };
-
-  const handleSaveEdit = (index) => {
-    const updatedDetails = [...request.details];
-    updatedDetails[index] = editedParticular;
-    setRequest({ ...request, details: updatedDetails });
-    setEditingIndex(null);
-  };
-
-  const handleDetailRemove = (index) => {
-    const updatedDetails = [...request.details];
-    updatedDetails.splice(index, 1);
-    setRequest({ ...request, details: updatedDetails });
-  };
-
-  const handleAddParticular = (e) => {
-    e.preventDefault();
-    const newParticular = { particulars: "", quantity: 0, description: "" };
-    const updatedDetails = [...request.details, newParticular];
-
-    setRequest({
-      ...request,
-      details: updatedDetails,
-    });
-
-    // Set the new index to edit mode
-    setEditingIndex(updatedDetails.length - 1);
-    setEditedParticular(newParticular);
-  };
 
   // Fetch department options from backend
   useEffect(() => {
@@ -167,7 +84,6 @@ const JobRequestForm = ({ setSelectedRequest }) => {
         const response = await axios.get(`${process.env.REACT_APP_API_URL}/settings/department`, {
           withCredentials: true,
         });
-
         if (Array.isArray(response.data.departments)) {
           setDepartmentOptions(response.data.departments);
         } else {
@@ -177,18 +93,96 @@ const JobRequestForm = ({ setSelectedRequest }) => {
         console.error("Error fetching department options:", error);
       }
     };
-
     getDepartments();
   }, []);
 
+  const handleChange = (e) => {
+    if (e.target.name === "date_required") {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const selectedDate = new Date(e.target.value);
+      if (selectedDate < today) {
+        setErrorMessage("Invalid Date. Date cannot be in the past.");
+        return;
+      }
+      if (user.access_level === "user") {
+        const oneWeekFromToday = new Date(today);
+        oneWeekFromToday.setDate(today.getDate() + 7);
+        if (selectedDate < oneWeekFromToday) {
+          setErrorMessage(
+            "Requests should be at least one week prior. For urgent requests, please contact the GSO."
+          );
+          setRequest({ ...request, [e.target.name]: "" });
+          return;
+        }
+      }
+    }
+    setErrorMessage("");
+    setRequest({ ...request, [e.target.name]: e.target.value });
+  };
+
+  const handleParticularFormChange = (e) => {
+    setParticularForm({ ...particularForm, [e.target.name]: e.target.value });
+  };
+
+  const handleAddParticular = () => {
+    setShowParticularForm(true);
+    setEditingIndex(null);
+    setParticularForm({ particulars: "", quantity: "", description: "" });
+  };
+
+  const handleSaveParticular = () => {
+    const { particulars, quantity, description, remarks } = particularForm;
+    if (!particulars || !quantity || parseInt(quantity) < 1) {
+      ToastNotification.error("Error", "Particulars and a valid quantity are required.");
+      return;
+    }
+
+    const newDetail = {
+      particulars,
+      quantity: parseInt(quantity),
+      description,
+      remarks
+    };
+
+    setRequest((prev) => {
+      if (editingIndex !== null) {
+        const updatedDetails = [...prev.details];
+        updatedDetails[editingIndex] = newDetail;
+        return { ...prev, details: updatedDetails };
+      }
+      return { ...prev, details: [...prev.details, newDetail] };
+    });
+
+    setShowParticularForm(false);
+    setParticularForm({ particulars: "", quantity: "", description: "" });
+    setEditingIndex(null);
+  };
+
+  const handleEditClick = (index) => {
+    setShowParticularForm(true);
+    setEditingIndex(index);
+    setParticularForm({ ...request.details[index] });
+  };
+
+  const handleDetailRemove = (index) => {
+    const updatedDetails = [...request.details];
+    updatedDetails.splice(index, 1);
+    setRequest((prev) => ({ ...prev, details: updatedDetails }));
+  };
+
+  const handleCancelParticular = () => {
+    setShowParticularForm(false);
+    setParticularForm({ particulars: "", quantity: "", description: "" });
+    setEditingIndex(null);
+  };
+
   const submitJobRequest = async () => {
     try {
-      // Ensure date is properly formatted for MySQL
       const formattedDate = request.date_required
         ? new Date(request.date_required).toISOString().split("T")[0]
         : null;
 
-      // Prepare request payload with correctly formatted date
       let requestData = {
         ...request,
         date_required: formattedDate,
@@ -215,8 +209,6 @@ const JobRequestForm = ({ setSelectedRequest }) => {
         department_id: requesterId?.department_id,
         designation_id: requesterId?.designation_id,
       });
-
-      console.log(requestData);
 
       const response = await axios({
         method: "POST",
@@ -332,7 +324,7 @@ const JobRequestForm = ({ setSelectedRequest }) => {
         <textarea
           name="purpose"
           value={request.purpose}
-          onChange={(e) => handleQuillChange("purpose", e.target.value)}
+          onChange={handleChange}
           className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
           required
         />
@@ -340,17 +332,103 @@ const JobRequestForm = ({ setSelectedRequest }) => {
 
       {/* Particulars Section */}
       <div className="space-y-2">
-        <Typography className="text-xs font-semibold text-gray-600 dark:text-gray-300">
-          Particulars
-        </Typography>
+        <div className="flex justify-between items-center">
+          <Typography className="text-xs font-semibold text-gray-600 dark:text-gray-300">
+            Particulars
+          </Typography>
+          {/* Add Particular Button */}
+          <Button
+            color="green"
+            variant="ghost"
+            onClick={handleAddParticular}
+            className="flex text-xs items-center gap-1 px-3 py-2 border rounded-md hover:bg-green-600 dark:border-gray-600 normal-case"
+          >
+            <Plus size={15} />
+            <Typography className="text-xs font-semibold">Add Particular</Typography>
+          </Button>
+        </div>
 
-        <div className="overflow-x-auto">
+        {/* Particular Input Form */}
+        {showParticularForm && (
+          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 gap-4 mb-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Quantity
+              </label>
+              <input
+                type="number"
+                name="quantity"
+                value={particularForm.quantity}
+                onChange={handleParticularFormChange}
+                min="1"
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+                required
+              />
+            </div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Particulars
+            </label>
+            <input
+              type="text"
+              name="particulars"
+              value={particularForm.particulars}
+              onChange={handleParticularFormChange}
+              className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+              required
+            />
+            <div>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Description / Nature of Work
+              </label>
+              <textarea
+                name="description"
+                value={particularForm.description}
+                onChange={handleParticularFormChange}
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Remarks
+              </label>
+              <textarea
+                name="remarks"
+                value={particularForm.remarks}
+                onChange={handleParticularFormChange}
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+              />
+            </div>
+            <div className="flex gap-3 col-span-full ml-auto">
+              <Button
+                color="green"
+                onClick={handleSaveParticular}
+                className="flex items-center gap-1 px-2 py-1 normal-case"
+              >
+                <FloppyDisk size={18} />
+                <Typography className="text-xs font-semibold">Save</Typography>
+              </Button>
+              <Button
+                color="red"
+                variant="outlined"
+                onClick={handleCancelParticular}
+                className="flex items-center gap-1 px-2 py-1 border rounded-md hover:text-red-500 dark:border-gray-600"
+              >
+                <Prohibit size={18} />
+                <Typography className="text-xs font-semibold normal-case">Cancel</Typography>
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Particulars Table */}
+        <div className="overflow-x-auto pt-3">
           <table className="min-w-full text-left text-sm border border-gray-300 dark:border-gray-600 rounded-md overflow-hidden">
             <thead className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
               <tr>
-                <th className="px-4 py-2 text-xs font-semibold text-gray-600 dark:border-gray-600">Item</th>
                 <th className="px-4 py-2 text-xs font-semibold text-gray-600 dark:border-gray-600">Quantity</th>
-                <th className="px-4 py-2 text-xs font-semibold text-gray-600 dark:border-gray-600">Description</th>
+                <th className="px-4 py-2 text-xs font-semibold text-gray-600 dark:border-gray-600">Particulars</th>
+                <th className="px-4 py-2 text-xs font-semibold text-gray-600 dark:border-gray-600">Description / Nature of Work</th>
+                <th className="px-4 py-2 text-xs font-semibold text-gray-600 dark:border-gray-600">Remarks</th>
                 <th className="px-4 py-2 text-xs font-semibold text-gray-600 dark:border-gray-600">Actions</th>
               </tr>
             </thead>
@@ -360,99 +438,30 @@ const JobRequestForm = ({ setSelectedRequest }) => {
                   key={index}
                   className="border-t border-gray-300 dark:border-gray-600"
                 >
-                  {editingIndex === index ? (
-                    <>
-                      <td className="px-4 py-2">
-                        <input
-                          type="text"
-                          value={editedParticular.particulars}
-                          onChange={(e) =>
-                            setEditedParticular({
-                              ...editedParticular,
-                              particulars: e.target.value,
-                            })
-                          }
-                          className="w-full px-2 py-1 border border-gray-400 rounded-md dark:bg-gray-800 dark:text-white"
-                        />
-                      </td>
-                      <td className="px-4 py-2">
-                        <input
-                          type="number"
-                          value={editedParticular.quantity}
-                          onChange={(e) =>
-                            setEditedParticular({
-                              ...editedParticular,
-                              quantity: e.target.value,
-                            })
-                          }
-                          className="w-full px-2 py-1 border border-gray-400 rounded-md dark:bg-gray-800 dark:text-white"
-                        />
-                      </td>
-                      <td className="px-4 py-2">
-                        <textarea
-                          value={editedParticular.description}
-                          rows={1}
-                          onChange={(e) =>
-                            setEditedParticular({
-                              ...editedParticular,
-                              description: e.target.value,
-                            })
-                          }
-                          className="w-full px-2 py-1 border border-gray-400 rounded-md dark:bg-gray-800 dark:text-white"
-                        />
-                      </td>
-                      <td className="px-4 py-2 space-x-2">
-                        <button
-                          className="text-green-500"
-                          onClick={() => handleSaveEdit(index)}
-                        >
-                          <FloppyDisk size={18} />
-                        </button>
-                        <button
-                          className="text-red-500"
-                          onClick={() => setEditingIndex(null)}
-                        >
-                          <Prohibit size={18} />
-                        </button>
-                      </td>
-                    </>
-                  ) : (
-                    <>
-                      <td className="px-4 py-2">{detail.particulars}</td>
-                      <td className="px-4 py-2">x{detail.quantity}</td>
-                      <td className="px-4 py-2">{detail.description}</td>
-                      <td className="px-4 py-2 space-x-2">
-                        <button
-                          className="text-blue-500"
-                          onClick={() => handleEditClick(index)}
-                        >
-                          <PencilSimpleLine size={18} />
-                        </button>
-                        <button
-                          className="text-red-500"
-                          onClick={() => handleDetailRemove(index)}
-                        >
-                          <X size={18} />
-                        </button>
-                      </td>
-                    </>
-                  )}
+                  <td className="px-4 py-2">{detail.particulars}</td>
+                  <td className="px-4 py-2">x{detail.quantity}</td>
+                  <td className="px-4 py-2">{detail.description}</td>
+                  <td className="px-4 py-2">{detail.remarks}</td>
+                  <td className="px-4 py-2 space-x-2">
+                    <button
+                      className="text-blue-500"
+                      onClick={() => handleEditClick(index)}
+                    >
+                      <PencilSimpleLine size={18} />
+                    </button>
+                    <button
+                      className="text-red-500"
+                      onClick={() => handleDetailRemove(index)}
+                    >
+                      <X size={18} />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
 
-        {/* Add Particular Button */}
-        <Button
-          color="green"
-          variant="outlined"
-          onClick={handleAddParticular}
-          className="flex items-center gap-1 px-3 py-2 border rounded-md hover:text-green-500 dark:border-gray-600"
-        >
-          <Plus size={18} />
-          <Typography className="text-xs">Add Particular</Typography>
-        </Button>
       </div>
 
       {/* Remarks */}

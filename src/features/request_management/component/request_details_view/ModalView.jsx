@@ -15,15 +15,63 @@ import { AuthContext } from "../../../authentication/index";
 import { UserContext } from "../../../../context/UserContext";
 import axios from "axios";
 import ToastNotification from "../../../../utils/ToastNotification";
-import { Chip, Typography } from "@material-tailwind/react";
+import { Typography } from "@material-tailwind/react";
 import ParticularsTab from "./ParticularsTab";
 import ActivityTab from "./ActivityTab";
-
 import RequestAccess from "./RequestAccess";
 import DetailsTab from "./DetailsTab";
 import Assignment from "./Assignment";
 import StatusModal from "../../../../utils/statusModal";
 import PrintableRequestForm from "../reporting_dashboard/PrintableRequestForm";
+
+const DynamicStepper = ({ approvers }) => {
+  const statusOptions = [
+    { status: "approved", color: "bg-green-500" },
+    { status: "pending", color: "bg-gray-500" },
+    { status: "in-review", color: "bg-gray-500" },
+    { status: "rejected", color: "bg-red-500" },
+  ];
+
+  // Group approvers by position
+  const groupedByPosition = {};
+  approvers.flat().forEach((approver) => {
+    const position = approver.position?.position || "Unknown Position";
+    if (!groupedByPosition[position]) {
+      groupedByPosition[position] = [];
+    }
+    groupedByPosition[position].push(approver);
+  });
+
+  const totalSteps = Object.keys(groupedByPosition).length;
+  const positions = Object.keys(groupedByPosition);
+
+  return (
+    <div className="flex items-center w-full relative">
+      <div className="w-full h-px bg-gray-500 absolute top-1/2 transform -translate-y-1/2"></div>
+      {positions.map((positionName, index) => {
+        const approversInPosition = groupedByPosition[positionName];
+        const status =
+          approversInPosition.find((a) => a.status === "approved")?.status ||
+          approversInPosition.find((a) => a.status === "rejected")?.status ||
+          "Pending";
+
+        return (
+          <div key={positionName} className={`flex flex-col ${index === 0 ? "" : "items-center"} ${(index === totalSteps - 1 && index !== 0) ? "items-end" : ""} justify-between w-full relative z-10`}>
+            <div
+              onClick={() =>
+                ToastNotification.info("Request Approval Status", approversInPosition.map(a => a.position.position).join(", ") + " - " + status.charAt(0).toUpperCase() + status.slice(1) + ".")
+              }
+              title={`${positionName} - ${status.charAt(0).toUpperCase() + status.slice(1)}`}
+              className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs bg-gray-500 cursor-pointer ${statusOptions.find((option) => option.status === status)?.color}`}
+            >
+              <div className="w-2 h-2 rounded-full bg-white"></div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 const ModalView = ({ open, onClose, referenceNumber, asModal = false }) => {
   const [isOpen, setIsOpen] = useState(open);
@@ -330,68 +378,8 @@ const ModalView = ({ open, onClose, referenceNumber, asModal = false }) => {
 
               {/* Status & Approvals */}
               <div className="flex items-center gap-3 mb-5">
-                {/* Dynamic Approvers Section */}
-                <div className="flex gap-2">
-                  {/* <p className="text-sm font-semibold dark:text-gray-300">
-                    Approver Statuses
-                  </p> */}
-                  {(() => {
-                    if (!request?.approvers) return null;
-
-                    // Flatten and group by position
-                    const groupedByPosition = {};
-                    request.approvers.flat().forEach((approver) => {
-                      const position =
-                        approver.position?.position || "Unknown Position";
-                      if (!groupedByPosition[position]) {
-                        groupedByPosition[position] = [];
-                      }
-                      groupedByPosition[position].push(approver);
-                    });
-
-                    return Object.entries(groupedByPosition).map(
-                      ([positionName, approversInPosition]) => {
-                        // Determine the current status for this position
-                        const status =
-                          approversInPosition.find(
-                            (a) => a.status === "approved"
-                          )?.status ||
-                          approversInPosition.find(
-                            (a) => a.status === "rejected"
-                          )?.status ||
-                          approversInPosition.find(
-                            (a) => a.status === "in-review"
-                          )?.status ||
-                          "Pending";
-
-                        const chipColor =
-                          statusOptions.find(
-                            (option) =>
-                              option.status.toLowerCase() ===
-                              status.toLowerCase()
-                          )?.color || "gray";
-
-                        return (
-                          <div
-                            key={positionName}
-                            className="flex flex-col gap-1"
-                          >
-                            {/* Tooltip on Chip instead of label */}
-                            <div title={`${positionName} Approval`}>
-                              <Chip
-                                size="sm"
-                                variant="ghost"
-                                value={status}
-                                className="text-center h-9 cursor-default w-full dark:bg-gray-800 dark:text-white"
-                                color={chipColor}
-                              />
-                            </div>
-                          </div>
-                        );
-                      }
-                    );
-                  })()}
-                </div>
+                {/* Dynamic Stepper for Approvers */}
+                {request?.approvers && <DynamicStepper approvers={request.approvers} />}
               </div>
 
               {/* Purpose */}

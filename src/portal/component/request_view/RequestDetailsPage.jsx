@@ -12,7 +12,61 @@ import axios from "axios";
 import { AuthContext } from "../../../features/authentication";
 import ToastNotification from "../../../utils/ToastNotification";
 import RequestAccess from "./RequestAccess";
-import {FeedbackButtonJobRequest, FeedbackButtonPurchasingRequest, FeedbackButtonVehicleRequest, FeedbackButtonVenueRequest} from "../../../components/feedback_button/FeedbackButton";
+import { FeedbackButtonJobRequest, FeedbackButtonPurchasingRequest, FeedbackButtonVehicleRequest, FeedbackButtonVenueRequest } from "../../../components/feedback_button/FeedbackButton";
+
+const DynamicStepper = ({ approvers }) => {
+  const statusOptions = [
+    { status: "approved", color: "bg-green-500" },
+    { status: "pending", color: "bg-gray-500" },
+    { status: "in-review", color: "bg-gray-500" },
+    { status: "rejected", color: "bg-red-500" },
+  ];
+
+  // Group approvers by position
+  const groupedByPosition = {};
+  approvers.flat().forEach((approver) => {
+    const position = approver.position?.position || "Unknown Position";
+    if (!groupedByPosition[position]) {
+      groupedByPosition[position] = [];
+    }
+    groupedByPosition[position].push(approver);
+  });
+
+  const totalSteps = Object.keys(groupedByPosition).length;
+  const positions = Object.keys(groupedByPosition);
+
+  return (
+    <div className="flex items-center w-full relative">
+      <div className="w-full h-px bg-gray-500 absolute top-1/2 transform -translate-y-1/2"></div>
+      {positions.map((positionName, index) => {
+        const approversInPosition = groupedByPosition[positionName];
+        const status =
+          approversInPosition.find((a) => a.status === "approved")?.status ||
+          approversInPosition.find((a) => a.status === "rejected")?.status ||
+          "Pending";
+
+        return (
+          <div
+            key={positionName}
+            className={`flex flex-col ${
+              index === 0 ? "" : "items-center"
+            } ${(index === totalSteps - 1 && index !== 0) ? "items-end" : ""} justify-between w-full relative z-10`}
+          >
+            <div
+              onClick={() =>
+                ToastNotification.info("Request Approval Status", approversInPosition.map(a => a.position.position).join(", ") + " - " + status.charAt(0).toUpperCase() + status.slice(1) + ".")
+              }
+              title={`${positionName} - ${status.charAt(0).toUpperCase() + status.slice(1)}`}
+              className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs bg-gray-500 ${statusOptions.find((option) => option.status === status)?.color}`}
+            >
+              <div className="w-2 h-2 rounded-full bg-white"></div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 function RequestDetailsPage({
   referenceNumber,
@@ -198,6 +252,9 @@ function RequestDetailsPage({
           </Typography>
         )}
       </div>
+
+      {/* Insert Stepper Here */}
+      <div className="mb-6">{request?.approvers && <DynamicStepper approvers={request.approvers} />}</div>
 
       {/* Tab Navigation */}
       <div className="flex gap-4 mb-6 items-center justify-between bg-gray-100 dark:bg-gray-800 shadow-sm rounded-lg w-full max-w-full">

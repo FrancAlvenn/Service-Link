@@ -9,7 +9,7 @@ export function getActivityStyle(type) {
     request_access:
       "bg-pink-100 dark:bg-pink-900 text-pink-900 dark:text-pink-100 border-pink-500",
     approval:
-      "bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-200 border-green-500",
+      "bg-yellow-100 dark:bg-yellow-900 text-yellow-900 dark:text-yellow-200 border-yellow-500",
     assign_approver:
       "bg-teal-100 dark:bg-teal-900 text-teal-900 dark:text-teal-100 border-teal-500",
     comment:

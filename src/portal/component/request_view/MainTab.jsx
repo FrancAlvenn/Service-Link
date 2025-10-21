@@ -218,7 +218,7 @@ const MainTab = ({
       );
 
       if (res.status === 200) {
-        ToastNotification.success("Approved", "Request has been approved.");
+        ToastNotification.success(approvalStatus.charAt(0).toUpperCase() + approvalStatus.slice(1), "Request has been " + approvalStatus + ".");
         fetchRequests();
         onClose();
 

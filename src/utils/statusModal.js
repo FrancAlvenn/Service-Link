@@ -11,7 +11,6 @@ import {
   DialogHeader,
   DialogBody,
   DialogFooter,
-  Input,
   Button,
 } from "@material-tailwind/react";
 import { PlusCircle } from "@phosphor-icons/react";
@@ -27,21 +26,20 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
   const navigate = useNavigate();
   const [statusOptions, setStatusOptions] = useState([]);
   const [currentStatus, setCurrentStatus] = useState(input);
-  const [selectedStatus, setSelectedStatus] = useState(null); // Status clicked
-  const [actionTaken, setActionTaken] = useState(""); // Action input
-  const [openModal, setOpenModal] = useState(false); // Controls popup visibility
+  const [selectedStatus, setSelectedStatus] = useState(null);
+  const [openModal, setOpenModal] = useState(false);
+
+  // Reason + Comment state (exactly like MainTab)
+  const [selectedReason, setSelectedReason] = useState("");
+  const [additionalComment, setAdditionalComment] = useState("");
+  const [actionTaken, setActionTaken] = useState("");
 
   const { user } = useContext(AuthContext);
 
-  const { fetchJobRequests, fetchArchivedJobRequests } =
-    useContext(JobRequestsContext);
-  const { fetchPurchasingRequests, fetchArchivedPurchasingRequests } =
-    useContext(PurchasingRequestsContext);
-  const { fetchVehicleRequests, fetchArchivedVehicleRequests } = useContext(
-    VehicleRequestsContext
-  );
-  const { fetchVenueRequests, fetchArchivedVenueRequests } =
-    useContext(VenueRequestsContext);
+  const { fetchJobRequests, fetchArchivedJobRequests } = useContext(JobRequestsContext);
+  const { fetchPurchasingRequests, fetchArchivedPurchasingRequests } = useContext(PurchasingRequestsContext);
+  const { fetchVehicleRequests, fetchArchivedVehicleRequests } = useContext(VehicleRequestsContext);
+  const { fetchVenueRequests, fetchArchivedVenueRequests } = useContext(VenueRequestsContext);
 
   const fetchAllRequests = () => {
     fetchJobRequests();
@@ -54,7 +52,7 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
     fetchArchivedVenueRequests();
   };
 
-  // Fetch status options from backend
+  // Fetch status options
   useEffect(() => {
     const getStatus = async () => {
       try {
@@ -64,8 +62,6 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
 
         if (Array.isArray(response.data.status)) {
           setStatusOptions(response.data.status);
-        } else {
-          console.error("Invalid response: 'status' is not an array");
         }
       } catch (error) {
         console.error("Error fetching status options:", error);
@@ -75,30 +71,67 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
     getStatus();
   }, []);
 
-  // Update status when `input` prop changes
   useEffect(() => {
     setCurrentStatus(input);
   }, [input]);
 
-  // Handle status selection
-  const handleStatusClick = (status) => {
-    setSelectedStatus(status);
-    setActionTaken(""); // Reset input field
-    setOpenModal(true); // Show popup
+  // Predefined reasons (mirroring MainTab pattern)
+  const positiveReasons = [
+    { id: 1, value: "Completed successfully" },
+    { id: 2, value: "Requirements fully met" },
+    { id: 3, value: "Approved and finalized" },
+    { id: 4, value: "Delivered as expected" },
+    { id: 5, value: "Verified and confirmed" },
+    { id: 6, value: "Processed without issues" },
+    { id: 7, value: "Other" },
+  ];
+
+  const negativeReasons = [
+    { id: 1, value: "Incomplete or pending" },
+    { id: 2, value: "Missing requirements" },
+    { id: 3, value: "Rejected or denied" },
+    { id: 4, value: "Cancelled by requester" },
+    { id: 5, value: "Resource unavailable" },
+    { id: 6, value: "Failed verification" },
+    { id: 7, value: "Other" },
+  ];
+
+  const isPositiveStatus = (status) => {
+    const positiveKeywords = ["completed", "approved", "done", "finished", "verified"];
+    return positiveKeywords.some((kw) => status?.toLowerCase().includes(kw));
   };
 
-  // Confirm status change
+  // Handlers
+  const handleStatusClick = (status) => {
+    setSelectedStatus(status);
+    setSelectedReason("");
+    setAdditionalComment("");
+    setActionTaken("");
+    setOpenModal(true);
+  };
+
+  const handleReasonChange = (e) => {
+    const reason = e.target.value;
+    setSelectedReason(reason);
+    setActionTaken(additionalComment ? `${reason}: ${additionalComment}` : reason);
+  };
+
+  const handleCommentChange = (e) => {
+    const comment = e.target.value;
+    setAdditionalComment(comment);
+    setActionTaken(selectedReason ? `${selectedReason}: ${comment}` : comment);
+  };
+
   const confirmStatusChange = async () => {
     if (!actionTaken.trim()) {
-      ToastNotification.error("Error!", "Please provide an action taken.");
+      ToastNotification.error("Error!", "Please provide a reason or comment.");
       return;
     }
 
     try {
       setCurrentStatus(selectedStatus);
-      setOpenModal(false); // Close popup
+      setOpenModal(false);
 
-      // Update the request status
       const response = await axios({
         method: "patch",
         url: `${process.env.REACT_APP_API_URL}/${requestType}/${referenceNumber}/status`,
@@ -113,12 +146,8 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
       if (response.status === 200) {
         ToastNotification.success("Success!", response.data.message);
         fetchAllRequests();
+        onStatusUpdate?.(selectedStatus);
 
-        if (onStatusUpdate) {
-          onStatusUpdate(selectedStatus);
-        }
-
-        // Log the request activity
         await axios({
           method: "post",
           url: `${process.env.REACT_APP_API_URL}/request_activity`,
@@ -132,45 +161,33 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
           },
           withCredentials: true,
         });
-        // ToastNotification.success("Success!", "Activity logged successfully.");
-        getRequestActivity();
       }
     } catch (error) {
-      ToastNotification.error(
-        "Error!",
-        "Failed to update status or log activity."
-      );
-      console.error("Status update or activity log failed:", error);
+      ToastNotification.error("Error!", "Failed to update status or log activity.");
+      console.error("Status update failed:", error);
     }
-  };
-
-  const getRequestActivity = async () => {
-    await axios({
-      method: "GET",
-      url: `${process.env.REACT_APP_API_URL}/request_activity/${referenceNumber}`,
-      withCredentials: true,
-    });
   };
 
   return (
     <div className="flex flex-col gap-2 z-50">
+      {/* Status Dropdown */}
       <Menu placement="bottom-start">
         <MenuHandler>
           <Chip
             size="sm"
             variant="ghost"
             value={currentStatus || "Select Status"}
-            className="text-center w-fit cursor-pointe px-4 py-2"
+            className="text-center w-fit cursor-pointer px-4 py-2"
             color={
-              statusOptions.find((option) => option.status === currentStatus)
-                ?.color || "gray"
+              statusOptions.find((opt) => opt.status === currentStatus)?.color || "gray"
             }
           />
         </MenuHandler>
-        <MenuList className="mt-2 divide-y divide-gray-100 rounded-md bg-white shadow-lg shadow-topping ring-2 ring-black/5 border-none w-fit">
+
+        <MenuList className="mt-2 divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-2 ring-black/5 border-none w-fit">
           {statusOptions.length > 0 ? (
             <div className="flex flex-col">
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2 p-2">
                 {statusOptions.map((option) => (
                   <MenuItem
                     key={option.id}
@@ -207,41 +224,62 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
         </MenuList>
       </Menu>
 
-      {/* Status Confirmation Modal */}
-      <Dialog
-        open={openModal}
-        handler={setOpenModal}
-        size="sm"
-        className="backdrop:bg-transparent"
-      >
-        <DialogHeader>Confirm Status Change</DialogHeader>
+      {/* Confirmation Dialog - EXACTLY like MainTab */}
+      <Dialog open={openModal} handler={setOpenModal} size="sm">
+        <DialogHeader className="text-lg text-gray-900 dark:text-gray-200">
+          Confirm Status Change
+        </DialogHeader>
         <DialogBody>
-          <div className="flex flex-col gap-4">
-            <Typography variant="small" className="font-sans">
-              You selected <strong>{selectedStatus}</strong>. Please enter the
-              action taken before proceeding.
-            </Typography>
-            <input
-              type="text"
-              placeholder="Action Taken"
-              value={actionTaken}
-              onChange={(e) => setActionTaken(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md"
-            />
-          </div>
+          <Typography
+            variant="small"
+            className="mb-2 text-xs font-medium text-gray-700 dark:text-gray-300"
+          >
+            Select a reason for this action:
+          </Typography>
+          <select
+            value={selectedReason}
+            onChange={handleReasonChange}
+            className="w-full border text-sm font-medium border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 mb-2 normal-case"
+            required
+          >
+            <option value="">Select Reason</option>
+            {(isPositiveStatus(selectedStatus) ? positiveReasons : negativeReasons).map(
+              (reason) => (
+                <option key={reason.id} value={reason.value}>
+                  {reason.value}
+                </option>
+              )
+            )}
+          </select>
+
+          <Typography
+            variant="small"
+            className="mb-2 text-xs font-medium text-gray-700 dark:text-gray-300"
+          >
+            Additional comments (optional):
+          </Typography>
+          <textarea
+            className="w-full text-sm font-medium text-gray-700 dark:text-gray-300 px-3 py-2 border border-gray-300 rounded-md dark:bg-gray-800 dark:border-gray-600"
+            rows={4}
+            placeholder="Enter additional comments here..."
+            value={additionalComment}
+            onChange={handleCommentChange}
+          />
         </DialogBody>
-        <DialogFooter>
+        <DialogFooter className="flex gap-2">
           <Button
-            color="gray"
+            variant="outlined"
+            color="red"
             onClick={() => setOpenModal(false)}
-            className="mr-2 bg-gray-500 cursor-pointer"
+            className="flex items-center gap-1 px-4 py-2 border rounded-md hover:text-red-500 dark:border-gray-600 normal-case"
           >
             Cancel
           </Button>
           <Button
+            color="green"
             onClick={confirmStatusChange}
-            disabled={!actionTaken.trim()}
-            className="bg-blue-500 cursor-pointer"
+            className="flex items-center gap-1 px-4 py-2 normal-case"
+            disabled={!selectedReason && !additionalComment}
           >
             Confirm
           </Button>

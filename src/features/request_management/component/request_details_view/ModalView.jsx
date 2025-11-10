@@ -23,6 +23,7 @@ import DetailsTab from "./DetailsTab";
 import Assignment from "./Assignment";
 import StatusModal from "../../../../utils/statusModal";
 import PrintableRequestForm from "../reporting_dashboard/PrintableRequestForm";
+import TimelineTab from "./TimelineTab";
 
 const DynamicStepper = ({ approvers }) => {
   const statusOptions = [
@@ -480,6 +481,12 @@ const ModalView = ({ open, onClose, referenceNumber, asModal = false }) => {
                   fetchRequests={fetchAllRequests}
                   user={user}
                   isAuthorized={isAuthorized}
+                />
+
+                {/* Timeline */}
+                <TimelineTab
+                  referenceNumber={referenceNumber}
+                  request={request}
                 />
 
                 {/* Assignment */}

@@ -13,7 +13,6 @@ import {
   Dialog,
   DialogHeader,
   DialogBody,
-  Input,
   DialogFooter,
   Chip,
 } from "@material-tailwind/react";
@@ -32,118 +31,126 @@ import ModalView from "../request_details_view/ModalView";
 
 export function KanbanBoard() {
   const [columns, setColumns] = useState([]);
-  const [status, setStatus] = useState([]); // Stores departments from DB
-  const [requestType, setRequestType] = useState("job_request"); // Default request type
+  const [status, setStatus] = useState([]);
+  const [requestType, setRequestType] = useState("job_request");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { jobRequests, fetchJobRequests, setJobRequests } =
-    useContext(JobRequestsContext);
-  const { purchasingRequests, fetchPurchasingRequests, setPurchasingRequests } =
-    useContext(PurchasingRequestsContext);
-  const { vehicleRequests, fetchVehicleRequests, setVehicleRequests } =
-    useContext(VehicleRequestsContext);
-  const { venueRequests, fetchVenueRequests, setVenueRequests } =
-    useContext(VenueRequestsContext);
+  const { jobRequests, fetchJobRequests, setJobRequests } = useContext(JobRequestsContext);
+  const { purchasingRequests, fetchPurchasingRequests, setPurchasingRequests } = useContext(PurchasingRequestsContext);
+  const { vehicleRequests, fetchVehicleRequests, setVehicleRequests } = useContext(VehicleRequestsContext);
+  const { venueRequests, fetchVenueRequests, setVenueRequests } = useContext(VenueRequestsContext);
   const { user } = useContext(AuthContext);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedReferenceNumber, setSelectedReferenceNumber] = useState("");
 
+  /* ---------- Confirmation modal state (same as StatusModal) ---------- */
   const [openModal, setOpenModal] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedReason, setSelectedReason] = useState("");
+  const [additionalComment, setAdditionalComment] = useState("");
   const [actionTaken, setActionTaken] = useState("");
 
-  const [filters, setFilters] = useState({
-    status: "",
-    department: "",
-  });
+  const [filters, setFilters] = useState({ status: "", department: "" });
 
+  /* ------------------- Fetch preferences & statuses ------------------- */
   const fetchData = async () => {
     try {
-      // Retrieve user preferences
-      const userPreferences = JSON.parse(
-        localStorage.getItem("userPreference")
-      );
-      if (userPreferences?.kanban_config) {
-        setColumns(userPreferences.kanban_config.columns);
-      }
+      const pref = JSON.parse(localStorage.getItem("userPreference"));
+      if (pref?.kanban_config) setColumns(pref.kanban_config.columns);
 
-      // Fetch status list from the backend
       const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/settings/status`, {
         withCredentials: true,
       });
-      if (Array.isArray(data.status)) {
-        setStatus(data.status);
-      } else {
-        console.error("Invalid response: 'status' is not an array");
-      }
-    } catch (error) {
-      console.error("Error fetching status:", error);
+      if (Array.isArray(data.status)) setStatus(data.status);
+    } catch (e) {
+      console.error("Error fetching data:", e);
     }
   };
+  useEffect(() => { fetchData(); }, []);
 
-  // Fetch user preferences and departments on mount
-  useEffect(() => {
-    fetchData();
-  }, []);
-
+  /* ------------------- Request-type helpers ------------------- */
   const getRequestData = () => {
     switch (requestType) {
       case "job_request":
-        return {
-          requests: jobRequests,
-          setRequests: setJobRequests,
-          fetchRequests: fetchJobRequests,
-        };
+        return { requests: jobRequests, setRequests: setJobRequests, fetchRequests: fetchJobRequests };
       case "purchasing_request":
-        return {
-          requests: purchasingRequests,
-          setRequests: setPurchasingRequests,
-          fetchRequests: fetchPurchasingRequests,
-        };
+        return { requests: purchasingRequests, setRequests: setPurchasingRequests, fetchRequests: fetchPurchasingRequests };
       case "vehicle_request":
-        return {
-          requests: vehicleRequests,
-          setRequests: setVehicleRequests,
-          fetchRequests: fetchVehicleRequests,
-        };
+        return { requests: vehicleRequests, setRequests: setVehicleRequests, fetchRequests: fetchVehicleRequests };
       case "venue_request":
-        return {
-          requests: venueRequests,
-          setRequests: setVenueRequests,
-          fetchRequests: fetchVenueRequests,
-        };
+        return { requests: venueRequests, setRequests: setVenueRequests, fetchRequests: fetchVenueRequests };
       default:
         return { requests: [], setRequests: () => {}, fetchRequests: () => {} };
     }
   };
-
   const { requests, setRequests, fetchRequests } = getRequestData();
 
-  const handleStatusChange = async (referenceNumber, status) => {
-    try {
-      const response = await axios.patch(
-        `${process.env.REACT_APP_API_URL}/${requestType}/${referenceNumber}/status`,
-        { requester: user.reference_number, status },
-        { withCredentials: true }
-      );
-      if (response.status === 200) {
-        fetchRequests();
-      }
-    } catch (error) {
-      console.error("Status update failed:", error);
-    }
+  /* ------------------- Reason lists (mirrors StatusModal) ------------------- */
+  const positiveReasons = [
+    { id: 1, value: "Completed successfully" },
+    { id: 2, value: "Requirements fully met" },
+    { id: 3, value: "Approved and finalized" },
+    { id: 4, value: "Delivered as expected" },
+    { id: 5, value: "Verified and confirmed" },
+    { id: 6, value: "Processed without issues" },
+    { id: 7, value: "Other" },
+  ];
+
+  const negativeReasons = [
+    { id: 1, value: "Incomplete or pending" },
+    { id: 2, value: "Missing requirements" },
+    { id: 3, value: "Rejected or denied" },
+    { id: 4, value: "Cancelled by requester" },
+    { id: 5, value: "Resource unavailable" },
+    { id: 6, value: "Failed verification" },
+    { id: 7, value: "Other" },
+  ];
+  const isPositiveStatus = (s) =>
+    ["completed", "approved", "done", "finished", "verified"].some((kw) =>
+      s?.toLowerCase().includes(kw)
+    );
+
+  /* ------------------- Drag-end handling ------------------- */
+  const handleOnDragEnd = (result) => {
+    const { destination, source, draggableId } = result;
+    if (!destination || source.droppableId === destination.droppableId) return;
+
+    setSelectedReferenceNumber(draggableId.toString());
+    setSelectedStatus(destination.droppableId);
+    setSelectedReason("");
+    setAdditionalComment("");
+    setActionTaken("");
+    setOpenModal(true);
   };
 
+  const handleReasonChange = (e) => {
+    const r = e.target.value;
+    setSelectedReason(r);
+    setActionTaken(additionalComment ? `${r}: ${additionalComment}` : r);
+  };
+  const handleCommentChange = (e) => {
+    const c = e.target.value;
+    setAdditionalComment(c);
+    setActionTaken(selectedReason ? `${selectedReason}: ${c}` : c);
+  };
+
+  /* ------------------- Confirm status change ------------------- */
   const confirmStatusChange = async () => {
+    if (!actionTaken.trim()) {
+      ToastNotification.error("Error!", "Please provide a reason or comment.");
+      return;
+    }
+
     try {
+      // Update status
       await axios.patch(
         `${process.env.REACT_APP_API_URL}/${requestType}/${selectedReferenceNumber}/status`,
-        { requester: user.reference_number, status: selectedStatus },
+        { requester: user.reference_number, status: selectedStatus, action: actionTaken },
         { withCredentials: true }
       );
 
-      // Log the request activity
+      // Log activity
       await axios.post(
         `${process.env.REACT_APP_API_URL}/request_activity`,
         {
@@ -157,85 +164,57 @@ export function KanbanBoard() {
         { withCredentials: true }
       );
 
-      // Refresh request data
-      getRequestData().fetchRequests();
-      ToastNotification.success(
-        "Success!",
-        "Status updated and activity logged."
-      );
-    } catch (error) {
-      console.error("Error during status change:", error);
+      fetchRequests();
+      ToastNotification.success("Success!", "Status updated and logged.");
+    } catch (e) {
+      console.error("Status change error:", e);
       ToastNotification.error("Error", "Failed to update status.");
     } finally {
       setOpenModal(false);
+      setSelectedReason("");
+      setAdditionalComment("");
       setActionTaken("");
       setSelectedReferenceNumber("");
       setSelectedStatus("");
     }
   };
 
-  const handleOnDragEnd = (result) => {
-    const { destination, source, draggableId } = result;
-    if (!destination || source.droppableId === destination.droppableId) return;
-
-    setSelectedReferenceNumber(draggableId.toString());
-    setSelectedStatus(destination.droppableId);
-    setOpenModal(true);
-  };
-
+  /* ------------------- Filters & column add ------------------- */
   const filteredTasks = (tasks) => {
-    return tasks.filter((task) => {
-      const matchesSearch =
-        task.title.toLowerCase().includes(searchQuery) ||
-        task.reference_number.toLowerCase().includes(searchQuery);
-
-      const matchesStatus = filters.status
-        ? task.status === filters.status
+    return tasks.filter((t) => {
+      const s = t.title?.toLowerCase().includes(searchQuery) ||
+                t.reference_number?.toLowerCase().includes(searchQuery);
+      const st = filters.status ? t.status === filters.status : true;
+      const dep = filters.department
+        ? t.department?.toLowerCase().includes(filters.department.toLowerCase())
         : true;
-
-      const matchesDepartment = filters.department
-        ? task.department
-            ?.toLowerCase()
-            .includes(filters.department.toLowerCase())
-        : true;
-
-      const matchesPriority =
-        !filters.priority || task.priority === filters.priority;
-
-      return (
-        matchesSearch && matchesStatus && matchesDepartment && matchesPriority
-      );
+      const pri = !filters.priority || t.priority === filters.priority;
+      return s && st && dep && pri;
     });
   };
 
-  const addColumn = async (status) => {
-    if (!status) return;
-
-    if (columns.some((column) => column.name === status)) {
+  const addColumn = async (statusName) => {
+    if (!statusName) return;
+    if (columns.some((c) => c.name === statusName)) {
       ToastNotification.info("Notice!", "Column already exists");
       return;
     }
-
-    const newColumn = { id: columns.length + 1, name: status };
-    const updatedColumns = [...columns, newColumn];
-
+    const newCol = { id: columns.length + 1, name: statusName };
+    const upd = [...columns, newCol];
     try {
-      await axios({
-        method: "put",
-        url: `${process.env.REACT_APP_API_URL}/settings/user_preference/${user.reference_number}`,
-        data: {
-          kanban_config: { columns: updatedColumns },
-        },
-        withCredentials: true,
-      });
-      setColumns(updatedColumns);
+      await axios.put(
+        `${process.env.REACT_APP_API_URL}/settings/user_preference/${user.reference_number}`,
+        { kanban_config: { columns: upd } },
+        { withCredentials: true }
+      );
+      setColumns(upd);
       localStorage.setItem(
         "userPreference",
-        JSON.stringify({ kanban_config: { columns: updatedColumns } })
+        JSON.stringify({ kanban_config: { columns: upd } })
       );
       fetchData();
-    } catch (error) {
-      console.error("Failed to add column:", error);
+    } catch (e) {
+      console.error("Add column error:", e);
     }
   };
 
@@ -246,17 +225,15 @@ export function KanbanBoard() {
     vehicle_request: "orange",
   };
 
+  /* ------------------- Render ------------------- */
   return (
     <div className="flex flex-col h-full bg-white">
-      <CardHeader
-        floated={false}
-        shadow={false}
-        className="rounded-none min-h-fit pb-2"
-      >
-        <Header title={"Kanban Board"} />
+      {/* Header */}
+      <CardHeader floated={false} shadow={false} className="rounded-none min-h-fit pb-2">
+        <Header title="Kanban Board" />
 
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between px-3 gap-4 mt-2 w-full">
-          {/* Search Bar */}
+          {/* Search */}
           <div className="relative w-full max-w-[230px] min-w-[150px]">
             <input
               className="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md pl-3 pr-28 py-2 focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
@@ -269,92 +246,58 @@ export function KanbanBoard() {
             </span>
           </div>
 
-          {/* Filter & Menus */}
-          <div className="flex flex-col  lg:flex-row lg:justify-end lg:items-center gap-2 w-full">
-            <div className="w-full">
-              <RequestFilter filters={filters} onFilterChange={setFilters} />
-            </div>
+          {/* Filters + Menus */}
+          <div className="flex flex-col lg:flex-row lg:justify-end lg:items-center gap-2 w-full">
+            <div className="w-full"><RequestFilter filters={filters} onFilterChange={setFilters} /></div>
+
             <div className="flex lg:flex-row lg:justify-end items-center gap-2 w-fit">
               <span className="text-xs font-semibold whitespace-nowrap text-gray-700 text-center sm:text-left">
                 GROUP BY
               </span>
 
-              {/* Request Type Menu */}
-
+              {/* Request-type selector */}
               <Menu placement="bottom-end">
                 <MenuHandler>
                   <div className="cursor-pointer w-fit">
                     <Chip
-                      value={requestType
-                        .replace("_", " ")
-                        .replace(/\b\w/g, (l) => l.toUpperCase())}
+                      value={requestType.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase())}
                       variant="filled"
                       color={requestTypeColor[requestType] || "gray"}
-                      className="pointer-events-none" // Prevent Chip's default click
-                    />
-                  </div>
-                </MenuHandler>
-
-                <MenuList className="flex flex-col flex-wrap gap-2 px-3 py-2">
-                  <Chip
-                    value="Job Requests"
-                    onClick={() => setRequestType("job_request")}
-                    variant={requestType === "job_request" ? "filled" : "ghost"}
-                    color={requestType === "job_request" ? "blue" : "gray"}
-                    className="cursor-pointer w-fit"
-                  />
-                  <Chip
-                    value="Purchasing Requests"
-                    onClick={() => setRequestType("purchasing_request")}
-                    variant={
-                      requestType === "purchasing_request" ? "filled" : "ghost"
-                    }
-                    color={
-                      requestType === "purchasing_request" ? "green" : "gray"
-                    }
-                    className="cursor-pointer w-fit"
-                  />
-                  <Chip
-                    value="Vehicle Requests"
-                    onClick={() => setRequestType("vehicle_request")}
-                    variant={
-                      requestType === "vehicle_request" ? "filled" : "ghost"
-                    }
-                    color={requestType === "vehicle_request" ? "amber" : "gray"}
-                    className="cursor-pointer w-fit"
-                  />
-                  <Chip
-                    value="Venue Requests"
-                    onClick={() => setRequestType("venue_request")}
-                    variant={
-                      requestType === "venue_request" ? "filled" : "ghost"
-                    }
-                    color={requestType === "venue_request" ? "purple" : "gray"}
-                    className="cursor-pointer w-fit"
-                  />
-                </MenuList>
-              </Menu>
-
-              <Menu placement="bottom-end">
-                <MenuHandler>
-                  <div className="cursor-pointer w-fit">
-                    <Chip
-                      value="Add Column"
-                      variant="ghost"
-                      color="gray"
                       className="pointer-events-none"
                     />
                   </div>
                 </MenuHandler>
-
                 <MenuList className="flex flex-col flex-wrap gap-2 px-3 py-2">
-                  {status.map((stat) => (
+                  <Chip value="Job Requests" onClick={() => setRequestType("job_request")}
+                    variant={requestType === "job_request" ? "filled" : "ghost"}
+                    color={requestType === "job_request" ? "blue" : "gray"} className="cursor-pointer w-fit" />
+                  <Chip value="Purchasing Requests" onClick={() => setRequestType("purchasing_request")}
+                    variant={requestType === "purchasing_request" ? "filled" : "ghost"}
+                    color={requestType === "purchasing_request" ? "green" : "gray"} className="cursor-pointer w-fit" />
+                  <Chip value="Vehicle Requests" onClick={() => setRequestType("vehicle_request")}
+                    variant={requestType === "vehicle_request" ? "filled" : "ghost"}
+                    color={requestType === "vehicle_request" ? "amber" : "gray"} className="cursor-pointer w-fit" />
+                  <Chip value="Venue Requests" onClick={() => setRequestType("venue_request")}
+                    variant={requestType === "venue_request" ? "filled" : "ghost"}
+                    color={requestType === "venue_request" ? "purple" : "gray"} className="cursor-pointer w-fit" />
+                </MenuList>
+              </Menu>
+
+              {/* Add column */}
+              <Menu placement="bottom-end">
+                <MenuHandler>
+                  <div className="cursor-pointer w-fit">
+                    <Chip value="Add Column" variant="ghost" color="gray" className="pointer-events-none" />
+                  </div>
+                </MenuHandler>
+                <MenuList className="flex flex-col flex-wrap gap-2 px-3 py-2">
+                  {status.map((s) => (
                     <Chip
-                      key={stat.id}
-                      value={stat.status}
-                      onClick={() => addColumn(stat.status)}
+                      key={s.id}
+                      value={s.status}
+                      onClick={() => addColumn(s.status)}
                       variant="ghost"
-                      color={stat.color || "gray"}
+                      color={s.color || "gray"}
                       className="cursor-pointer w-fit"
                     />
                   ))}
@@ -365,6 +308,7 @@ export function KanbanBoard() {
         </div>
       </CardHeader>
 
+      {/* Board */}
       <div className="flex justify-between h-full bg-white">
         <div
           className={`h-full bg-white rounded-lg w-full mt-0 p-1 flex justify-between transition-[max-width] duration-300 ${
@@ -375,17 +319,15 @@ export function KanbanBoard() {
             <CardBody className="custom-scrollbar h-full pt-0">
               <DragDropContext onDragEnd={handleOnDragEnd}>
                 <div className="flex justify-between items-center flex-row gap-3">
-                  {columns.map((column) => (
+                  {columns.map((col) => (
                     <Column
-                      key={column.name}
-                      title={column.name}
+                      key={col.name}
+                      title={col.name}
                       tasks={filteredTasks(
-                        (Array.isArray(requests) ? requests : []).filter(
-                          (task) => task.status === column.name
-                        )
+                        (Array.isArray(requests) ? requests : []).filter((t) => t.status === col.name)
                       )}
-                      id={column.name}
-                      columnID={column.id}
+                      id={col.name}
+                      columnID={col.id}
                       requestType={requestType}
                       setRequests={setRequests}
                       user={user}
@@ -401,6 +343,8 @@ export function KanbanBoard() {
             </CardBody>
           </div>
         </div>
+
+        {/* Sidebar */}
         {sidebarOpen && (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
@@ -419,39 +363,63 @@ export function KanbanBoard() {
             </div>
           </div>
         )}
-        <Dialog
-          open={openModal}
-          handler={setOpenModal}
-          size="sm"
-          className="backdrop:bg-transparent"
-        >
-          <DialogHeader>Confirm Status Change</DialogHeader>
+
+        {/* ---------- Confirmation Dialog (exact StatusModal UI) ---------- */}
+        <Dialog open={openModal} handler={setOpenModal} size="sm">
+          <DialogHeader className="text-lg text-gray-900 dark:text-gray-200">
+            Confirm Status Change
+          </DialogHeader>
+
           <DialogBody>
-            <div className="flex flex-col gap-4">
-              <Typography variant="small" className="font-sans">
-                You selected <strong>{selectedStatus}</strong>. Please enter the
-                action taken before proceeding.
-              </Typography>
-              <Input
-                type="text"
-                placeholder="Action Taken"
-                value={actionTaken}
-                onChange={(e) => setActionTaken(e.target.value)}
-              />
-            </div>
+            <Typography
+              variant="small"
+              className="mb-2 text-xs font-medium text-gray-700 dark:text-gray-300"
+            >
+              Select a reason for this action:
+            </Typography>
+            <select
+              value={selectedReason}
+              onChange={handleReasonChange}
+              className="w-full border text-sm font-medium border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 mb-2 normal-case"
+              required
+            >
+              <option value="">Select Reason</option>
+              {(isPositiveStatus(selectedStatus) ? positiveReasons : negativeReasons).map((r) => (
+                <option key={r.id} value={r.value}>
+                  {r.value}
+                </option>
+              ))}
+            </select>
+
+            <Typography
+              variant="small"
+              className="mb-2 text-xs font-medium text-gray-700 dark:text-gray-300"
+            >
+              Additional comments (optional):
+            </Typography>
+            <textarea
+              className="w-full text-sm font-medium text-gray-700 dark:text-gray-300 px-3 py-2 border border-gray-300 rounded-md dark:bg-gray-800 dark:border-gray-600"
+              rows={4}
+              placeholder="Enter additional comments here..."
+              value={additionalComment}
+              onChange={handleCommentChange}
+            />
           </DialogBody>
-          <DialogFooter>
+
+          <DialogFooter className="flex gap-2">
             <Button
-              color="gray"
+              variant="outlined"
+              color="red"
               onClick={() => setOpenModal(false)}
-              className="mr-2 bg-gray-500 cursor-pointer"
+              className="flex items-center gap-1 px-4 py-2 border rounded-md hover:text-red-500 dark:border-gray-600 normal-case"
             >
               Cancel
             </Button>
             <Button
+              color="green"
               onClick={confirmStatusChange}
-              disabled={!actionTaken.trim()}
-              className="bg-blue-500 cursor-pointer"
+              className="flex items-center gap-1 px-4 py-2 normal-case"
+              disabled={!selectedReason && !additionalComment}
             >
               Confirm
             </Button>

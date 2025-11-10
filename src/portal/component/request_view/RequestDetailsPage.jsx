@@ -13,6 +13,7 @@ import { AuthContext } from "../../../features/authentication";
 import ToastNotification from "../../../utils/ToastNotification";
 import RequestAccess from "./RequestAccess";
 import { FeedbackButtonJobRequest, FeedbackButtonPurchasingRequest, FeedbackButtonVehicleRequest, FeedbackButtonVenueRequest } from "../../../components/feedback_button/FeedbackButton";
+import TimelineTab from "./TimelineTab";
 
 const DynamicStepper = ({ approvers }) => {
   const statusOptions = [
@@ -257,32 +258,27 @@ function RequestDetailsPage({
       <div className="mb-6">{request?.approvers && <DynamicStepper approvers={request.approvers} />}</div>
 
       {/* Tab Navigation */}
-      <div className="flex gap-4 mb-6 items-center justify-between bg-gray-100 dark:bg-gray-800 shadow-sm rounded-lg w-full max-w-full">
-        {isAuthorized
-          ? ["Summary", "Details", "Activity"].map((tab) => (
-              <Button
-                key={tab}
-                size="sm"
-                className="w-full dark:text-gray-300"
-                variant={activeTab === tab ? "filled" : "text"}
-                color={activeTab === tab ? "blue" : "black"}
-                onClick={() => setActiveTab(tab)}
-              >
-                {tab}
-              </Button>
-            ))
-          : ["Summary", "Details"].map((tab) => (
-              <Button
-                key={tab}
-                size="sm"
-                className="w-full dark:text-gray-300"
-                variant={activeTab === tab ? "filled" : "text"}
-                color={activeTab === tab ? "blue" : "black"}
-                onClick={() => setActiveTab(tab)}
-              >
-                {tab}
-              </Button>
-            ))}
+      <div className="mb-6 overflow-x-auto">
+        <div className="flex gap-2 items-center bg-gray-100 dark:bg-gray-800 shadow-sm rounded-lg p-1 min-w-max">
+          {(isAuthorized
+            ? ["Summary", "Details", "Timeline", "Activity"]
+            : ["Summary", "Details"]
+          ).map((tab) => (
+            <Button
+              key={tab}
+              size="sm"
+              className={`whitespace-nowrap px-4 ${
+                activeTab === tab
+                  ? "bg-blue-500 text-white"
+                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+              }`}
+              variant="text"
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab}
+            </Button>
+          ))}
+        </div>
       </div>
 
       {/* Render Active Tab */}
@@ -305,6 +301,9 @@ function RequestDetailsPage({
           fetchRequests={fetchAllRequests}
           isAuthorized={isAuthorized}
         />
+      )}
+      {activeTab === "Timeline" && (
+        <TimelineTab referenceNumber={referenceNumber} request={request} />
       )}
       {activeTab === "Activity" && (
         <ActivityTab referenceNumber={request.reference_number} />

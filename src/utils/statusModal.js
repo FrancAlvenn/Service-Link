@@ -1,5 +1,7 @@
-import { useState, useEffect, useContext } from "react";
+// components/request/StatusModal.jsx
+import { useState, useEffect, useContext, useRef } from "react";
 import axios from "axios";
+import { GoogleGenAI } from "@google/genai";
 import {
   Menu,
   MenuHandler,
@@ -12,8 +14,9 @@ import {
   DialogBody,
   DialogFooter,
   Button,
+  Spinner,
 } from "@material-tailwind/react";
-import { PlusCircle } from "@phosphor-icons/react";
+import { PlusCircle, Sparkle, ArrowClockwise } from "@phosphor-icons/react";
 import AuthContext from "../features/authentication/context/AuthContext";
 import ToastNotification from "./ToastNotification";
 import { JobRequestsContext } from "../features/request_management/context/JobRequestsContext";
@@ -22,6 +25,12 @@ import { VehicleRequestsContext } from "../features/request_management/context/V
 import { VenueRequestsContext } from "../features/request_management/context/VenueRequestsContext";
 import { useNavigate } from "react-router-dom";
 
+// Initialize Gemini
+const genAI = new GoogleGenAI({
+  apiKey: process.env.REACT_APP_GEMINI_API_KEY,
+  apiVersion: "v1",
+});
+
 function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
   const navigate = useNavigate();
   const [statusOptions, setStatusOptions] = useState([]);
@@ -29,13 +38,14 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [openModal, setOpenModal] = useState(false);
 
-  // Reason + Comment state (exactly like MainTab)
   const [selectedReason, setSelectedReason] = useState("");
   const [additionalComment, setAdditionalComment] = useState("");
   const [actionTaken, setActionTaken] = useState("");
 
-  const { user } = useContext(AuthContext);
+  const [aiLoading, setAiLoading] = useState(false);
+  const textareaRef = useRef(null);
 
+  const { user } = useContext(AuthContext);
   const { fetchJobRequests, fetchArchivedJobRequests } = useContext(JobRequestsContext);
   const { fetchPurchasingRequests, fetchArchivedPurchasingRequests } = useContext(PurchasingRequestsContext);
   const { fetchVehicleRequests, fetchArchivedVehicleRequests } = useContext(VehicleRequestsContext);
@@ -52,14 +62,12 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
     fetchArchivedVenueRequests();
   };
 
-  // Fetch status options
   useEffect(() => {
     const getStatus = async () => {
       try {
         const response = await axios.get(`${process.env.REACT_APP_API_URL}/settings/status`, {
           withCredentials: true,
         });
-
         if (Array.isArray(response.data.status)) {
           setStatusOptions(response.data.status);
         }
@@ -67,15 +75,11 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
         console.error("Error fetching status options:", error);
       }
     };
-
     getStatus();
   }, []);
 
-  useEffect(() => {
-    setCurrentStatus(input);
-  }, [input]);
+  useEffect(() => setCurrentStatus(input), [input]);
 
-  // Predefined reasons (mirroring MainTab pattern)
   const positiveReasons = [
     { id: 1, value: "Completed successfully" },
     { id: 2, value: "Requirements fully met" },
@@ -96,12 +100,11 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
     { id: 7, value: "Other" },
   ];
 
-  const isPositiveStatus = (status) => {
-    const positiveKeywords = ["completed", "approved", "done", "finished", "verified"];
-    return positiveKeywords.some((kw) => status?.toLowerCase().includes(kw));
-  };
+  const isPositiveStatus = (status) =>
+    ["completed", "approved", "done", "finished", "verified"].some((kw) =>
+      status?.toLowerCase().includes(kw)
+    );
 
-  // Handlers
   const handleStatusClick = (status) => {
     setSelectedStatus(status);
     setSelectedReason("");
@@ -120,6 +123,54 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
     const comment = e.target.value;
     setAdditionalComment(comment);
     setActionTaken(selectedReason ? `${selectedReason}: ${comment}` : comment);
+  };
+
+  // AI: Generate Reason
+  const generateReason = async () => {
+    if (!selectedStatus) return;
+    setAiLoading(true);
+    try {
+      const prompt = `You are a professional admin. Generate a short, polite reason for changing request status to "${selectedStatus}". Keep under 50 words.`;
+
+      const result = await genAI.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+      });
+
+      const text = result.text?.trim();
+      if (text) {
+        setAdditionalComment(text);
+        setActionTaken(selectedReason ? `${selectedReason}: ${text}` : text);
+      }
+    } catch (err) {
+      ToastNotification.error("AI Error", "Failed to generate reason.");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  // AI: Rephrase Comment
+  const rephraseComment = async () => {
+    if (!additionalComment.trim()) return;
+    setAiLoading(true);
+    try {
+      const prompt = `Rephrase this comment professionally and concisely (under 60 words):\n"${additionalComment}"`;
+
+      const result = await genAI.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+      });
+
+      const text = result.text?.trim();
+      if (text) {
+        setAdditionalComment(text);
+        setActionTaken(selectedReason ? `${selectedReason}: ${text}` : text);
+      }
+    } catch (err) {
+      ToastNotification.error("AI Error", "Failed to rephrase.");
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   const confirmStatusChange = async () => {
@@ -163,8 +214,8 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
         });
       }
     } catch (error) {
-      ToastNotification.error("Error!", "Failed to update status or log activity.");
-      console.error("Status update failed:", error);
+      ToastNotification.error("Error!", "Failed to update status.");
+      console.error(error);
     }
   };
 
@@ -178,9 +229,7 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
             variant="ghost"
             value={currentStatus || "Select Status"}
             className="text-center w-fit cursor-pointer px-4 py-2"
-            color={
-              statusOptions.find((opt) => opt.status === currentStatus)?.color || "gray"
-            }
+            color={statusOptions.find((opt) => opt.status === currentStatus)?.color || "gray"}
           />
         </MenuHandler>
 
@@ -211,30 +260,25 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
                   className="flex items-center gap-2 font-semibold text-sm text-gray-500 cursor-pointer"
                   onClick={() => navigate("/workspace/settings")}
                 >
-                  <PlusCircle size={18} className="cursor-pointer" />
+                  <PlusCircle size={18} />
                   Add new status
                 </Typography>
               </div>
             </div>
           ) : (
-            <MenuItem className="flex items-center justify-center text-xs text-gray-500">
-              Loading status options...
-            </MenuItem>
+            <MenuItem className="text-xs text-gray-500">Loading...</MenuItem>
           )}
         </MenuList>
       </Menu>
 
-      {/* Confirmation Dialog - EXACTLY like MainTab */}
+      {/* Confirmation Dialog */}
       <Dialog open={openModal} handler={setOpenModal} size="sm">
         <DialogHeader className="text-lg text-gray-900 dark:text-gray-200">
           Confirm Status Change
         </DialogHeader>
         <DialogBody>
-          <Typography
-            variant="small"
-            className="mb-2 text-xs font-medium text-gray-700 dark:text-gray-300"
-          >
-            Select a reason for this action:
+          <Typography variant="small" className="mb-2 text-xs font-medium text-gray-700 dark:text-gray-300">
+            Select a reason:
           </Typography>
           <select
             value={selectedReason}
@@ -243,43 +287,58 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
             required
           >
             <option value="">Select Reason</option>
-            {(isPositiveStatus(selectedStatus) ? positiveReasons : negativeReasons).map(
-              (reason) => (
-                <option key={reason.id} value={reason.value}>
-                  {reason.value}
-                </option>
-              )
-            )}
+            {(isPositiveStatus(selectedStatus) ? positiveReasons : negativeReasons).map((reason) => (
+              <option key={reason.id} value={reason.value}>
+                {reason.value}
+              </option>
+            ))}
           </select>
 
-          <Typography
-            variant="small"
-            className="mb-2 text-xs font-medium text-gray-700 dark:text-gray-300"
-          >
+          <Typography variant="small" className="mb-2 text-xs font-medium text-gray-700 dark:text-gray-300">
             Additional comments (optional):
           </Typography>
-          <textarea
-            className="w-full text-sm font-medium text-gray-700 dark:text-gray-300 px-3 py-2 border border-gray-300 rounded-md dark:bg-gray-800 dark:border-gray-600"
-            rows={4}
-            placeholder="Enter additional comments here..."
-            value={additionalComment}
-            onChange={handleCommentChange}
-          />
+
+          {/* Textarea + Floating AI Buttons */}
+          <div className="relative">
+            <textarea
+              ref={textareaRef}
+              className="w-full text-sm font-medium text-gray-700 dark:text-gray-300 px-3 py-2 pr-20 border border-gray-300 rounded-md dark:bg-gray-800 dark:border-gray-600 resize-none"
+              rows={4}
+              placeholder="Enter comments or use AI..."
+              value={additionalComment}
+              onChange={handleCommentChange}
+            />
+
+            {/* Floating AI Buttons (same bg as textarea) */}
+            <div className="absolute bottom-2 right-2 flex gap-1 bg-white dark:bg-gray-800 p-1 md:flex-row flex-col p-1 rounded-md ">
+              <button
+                onClick={generateReason}
+                disabled={aiLoading || !selectedStatus}
+                className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition disabled:opacity-50"
+                title="Generate reason"
+              >
+                {aiLoading ? <Spinner className="h-4 w-4" /> : <Sparkle size={16} />}
+              </button>
+              <button
+                onClick={rephraseComment}
+                disabled={aiLoading || !additionalComment.trim()}
+                className="p-1.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded transition disabled:opacity-50"
+                title="Rephrase comment"
+              >
+                <ArrowClockwise size={16} />
+              </button>
+            </div>
+          </div>
         </DialogBody>
+
         <DialogFooter className="flex gap-2">
-          <Button
-            variant="outlined"
-            color="red"
-            onClick={() => setOpenModal(false)}
-            className="flex items-center gap-1 px-4 py-2 border rounded-md hover:text-red-500 dark:border-gray-600 normal-case"
-          >
+          <Button variant="outlined" color="red" onClick={() => setOpenModal(false)}>
             Cancel
           </Button>
           <Button
             color="green"
             onClick={confirmStatusChange}
-            className="flex items-center gap-1 px-4 py-2 normal-case"
-            disabled={!selectedReason && !additionalComment}
+            disabled={!actionTaken.trim()}
           >
             Confirm
           </Button>

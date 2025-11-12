@@ -24,6 +24,7 @@ import Assignment from "./Assignment";
 import StatusModal from "../../../../utils/statusModal";
 import PrintableRequestForm from "../reporting_dashboard/PrintableRequestForm";
 import TimelineTab from "./TimelineTab";
+import AIAssistantPanel from "./AIAssisstantPanel";
 
 const DynamicStepper = ({ approvers }) => {
   const statusOptions = [
@@ -418,6 +419,15 @@ const ModalView = ({ open, onClose, referenceNumber, asModal = false }) => {
                   )}
                 </span>
               </div>
+
+              {/* AI Assistant Panel */}
+              {request && requestType === "job_request" && (
+                <AIAssistantPanel
+                  request={request}
+                  requestType={requestType}
+                  referenceNumber={referenceNumber}
+                />
+              )}
 
               {/* Particulars (conditional) */}
               {["job_request", "purchasing_request", "venue_request"].includes(

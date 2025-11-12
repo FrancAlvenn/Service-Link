@@ -221,7 +221,7 @@ const JobRequestForm = ({ setSelectedRequest }) => {
       const prompt = `Rephrase this purpose professionally and concisely (under 80 words):\n"${request.purpose}"`;
 
       const result = await genAI.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-2.5-flash",
         contents: prompt,
       });
 

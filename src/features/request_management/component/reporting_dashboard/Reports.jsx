@@ -1,5 +1,5 @@
 /*  src/pages/Reports/Reports.jsx  */
-import React, { useContext, useState, useMemo } from "react";
+import React, { useContext, useState, useMemo, useEffect } from "react";
 import {
   Bar,
   Line,
@@ -279,7 +279,7 @@ const Reports = () => {
   /* ------------------- AI ------------------- */
   const [showAI, setShowAI] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
-  const [aiInsights, setAiInsights] = useState("");
+  const [aiInsights, setAiInsights] = useState(null);
 
   const generateAIInsights = async () => {
     setAiLoading(true);
@@ -291,47 +291,57 @@ const Reports = () => {
       : "0";
 
     const topDept =
-      Object.entries(departmentCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ??
-      "N/A";
+      Object.entries(departmentCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "N/A";
     const topVehicle =
-      Object.entries(vehicleCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ??
-      "N/A";
+      Object.entries(vehicleCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "N/A";
     const topVenue =
-      Object.entries(venueCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ??
-      "N/A";
+      Object.entries(venueCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "N/A";
 
     const prompt = `
-You are a BI analyst. Summarise the dashboard in **max 6 bullet points**:
+  You are a BI analyst. Summarise the dashboard in **max 6 bullet points**:
 
-- Total requests: ${total}
-- Approval rate: ${approvedRate}%
-- Top department: ${topDept} (${departmentCounts[topDept] ?? 0})
-- Most requested vehicle: ${topVehicle} (${vehicleCounts[topVehicle] ?? 0})
-- Most booked venue: ${topVenue} (${venueCounts[topVenue] ?? 0})
-- Avg resolution (days): ${avgResolution}
-- Active / Archived: ${archiveCounts.Active} / ${archiveCounts.Archived}
+  - Total requests: ${total}
+  - Approval rate: ${approvedRate}%
+  - Top department: ${topDept} (${departmentCounts[topDept] ?? 0})
+  - Most requested vehicle: ${topVehicle} (${vehicleCounts[topVehicle] ?? 0})
+  - Most booked venue: ${topVenue} (${venueCounts[topVenue] ?? 0})
+  - Avg resolution (days): ${avgResolution}
+  - Active / Archived: ${archiveCounts.Active} / ${archiveCounts.Archived}
 
-Give **actionable recommendations** (bottlenecks, trends, suggestions). Use **bold** for key numbers.`;
+  Give **actionable recommendations** (bottlenecks, trends, suggestions). Use **bold** for key numbers.`;
 
     try {
+      // Use v1 API format (same as VenueRequestForm but with correct path)
       const result = await genAI.models.generateContent({
         model: "gemini-2.5-flash",
-        contents: prompt,
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
       });
-      const raw = result?.text?.trim() ?? "No insight generated.";
+
+      // v1 response path
+      const raw =
+        result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ||
+        "No insight generated.";
+
+      console.log("Gemini Response:", result); // Debug
       setAiInsights(formatResponse(raw));
-    } catch {
-      setAiInsights(formatResponse("AI unavailable."));
+    } catch (err) {
+      console.error("Gemini Error:", err);
+      setAiInsights(formatResponse("**AI Error:** Failed to generate insights."));
     } finally {
       setAiLoading(false);
     }
   };
 
+
+  useEffect(() => {
+    console.log(showAI);
+  },[showAI])
+
   /* ------------------- Render ------------------- */
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-900">
+    <div className="flex flex-col bg-white dark:bg-gray-900 ">
       {/* Header */}
-      <div className="rounded-none min-h-fit pb-2">
+      <div className="rounded-none min-h-fit pb-2 mt-4 mx-4">
         <Header title="Reports" description="Actionable analytics" />
 
         {/* FILTER BAR – EXACT STYLE FROM KANBAN */}
@@ -471,37 +481,6 @@ Give **actionable recommendations** (bottlenecks, trends, suggestions). Use **bo
         </div>
       </div>
 
-      {/* AI Panel */}
-      <Collapse open={showAI}>
-        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 border border-slate-200 dark:border-indigo-700 rounded-2xl p-5 shadow-md mt-6 mx-3">
-          <div className="flex items-center justify-between mb-3">
-            <Typography className="text-lg font-semibold text-indigo-800 dark:text-indigo-200 flex items-center gap-2">
-              <Sparkle size={20} weight="fill" className="text-indigo-600" />
-              AI Insights
-            </Typography>
-            <Button
-              size="sm"
-              variant="text"
-              onClick={() => setShowAI(false)}
-              className="text-indigo-600 hover:text-indigo-800"
-            >
-              Close
-            </Button>
-          </div>
-          {aiLoading ? (
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Spinner className="h-4 w-4" />
-              Generating…
-            </div>
-          ) : (
-            <div
-              className="text-sm text-gray-700 dark:text-gray-300 space-y-1"
-              dangerouslySetInnerHTML={{ __html: aiInsights }}
-            />
-          )}
-        </div>
-      </Collapse>
-
       <div className="flex justify-end mt-4 mx-3">
         <Button
           color="indigo"
@@ -523,6 +502,50 @@ Give **actionable recommendations** (bottlenecks, trends, suggestions). Use **bo
           )}
         </Button>
       </div>
+
+      {/* AI Panel */}
+      <Collapse>
+        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 border border-slate-200 dark:border-indigo-700 rounded-2xl p-5 shadow-md mt-6 mx-3">
+          <div className="flex items-center justify-between mb-3">
+            <Typography className="text-lg font-semibold text-indigo-800 dark:text-indigo-200 flex items-center gap-2">
+              <Sparkle size={20} weight="fill" className="text-indigo-600" />
+              AI Insights
+            </Typography>
+            {/* <Button
+              size="sm"
+              variant="text"
+              onClick={() => setShowAI(false)}
+              className="text-indigo-600 hover:text-indigo-800"
+            >
+              Close
+            </Button> */}
+            <Button
+              size="sm"
+              variant="text"
+              onClick={() => setAiInsights(null)}
+              className="text-indigo-600 hover:text-indigo-800"
+            >
+              Reset Insight
+            </Button>
+          </div>
+
+          {aiLoading ? (
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Spinner className="h-4 w-4" />
+              Generating…
+            </div>
+          ) : aiInsights ? (
+            <div
+              className="text-sm text-gray-700 dark:text-gray-300 space-y-1"
+              dangerouslySetInnerHTML={{ __html: aiInsights }}
+            />
+          ) : (
+            <div className="text-sm text-gray-500 italic">
+              Click "Generate AI Insights" to analyze the data.
+            </div>
+          )}
+        </div>
+      </Collapse>
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mt-6 px-3 pb-6">

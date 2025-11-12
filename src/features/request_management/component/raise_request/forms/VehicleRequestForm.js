@@ -394,7 +394,14 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
               </Typography>
             </div>
             <div className=""> 
-              <X size={20} className="text-indigo-700 cursor-pointer hover:bg-indigo-100 dark:hover:bg-indigo-800 rounded-full p-1" onClick={() => setShowAnalytics(false)} />
+              <Button
+                size="sm"
+                variant="text"
+                onClick={() => setShowAnalytics(false)}
+                className="text-indigo-600 hover:text-indigo-800"  
+              >
+                Close
+              </Button>
             </div>
           </div>
 

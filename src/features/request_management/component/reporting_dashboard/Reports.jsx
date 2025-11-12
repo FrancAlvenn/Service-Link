@@ -315,7 +315,7 @@ Give **actionable recommendations** (bottlenecks, trends, suggestions). Use **bo
 
     try {
       const result = await genAI.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-2.5-flash",
         contents: prompt,
       });
       const raw = result?.text?.trim() ?? "No insight generated.";

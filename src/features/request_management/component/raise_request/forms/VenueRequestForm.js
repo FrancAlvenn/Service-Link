@@ -30,8 +30,7 @@ const genAI = new GoogleGenAI({
 // ---------------------------------------------------------------------
 // Markdown → HTML formatter (same as VehicleRequestForm)
 // ---------------------------------------------------------------------
-const formatResponse = (text: string): string => {
-  if (!text) return "";
+const formatResponse = (text) => {
   return text
     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
     .replace(/\n/g, "<br>")

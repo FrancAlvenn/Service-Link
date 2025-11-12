@@ -493,7 +493,7 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
             name="purpose"
             value={request.purpose}
             onChange={handleChange}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 pr-10 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 resize-none"
+            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 pr-10 md:pr-20 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 resize-none"
             rows={4}
             placeholder="Enter purpose or use AI (note: a title is required to generate with AI)..."
             required

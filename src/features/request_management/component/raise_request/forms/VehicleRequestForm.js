@@ -226,6 +226,29 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
       setAiLoading(false);
     }
   };
+const [isDataReady, setIsDataReady] = useState(false);
+
+useEffect(() => {
+  const ready =
+    allUserInfo != null &&
+    departments != null &&
+    approvers != null &&
+    approvalRulesByDepartment != null &&
+    approvalRulesByRequestType != null && 
+    approvalRulesByDesignation != null && 
+    departmentOptions != null; 
+
+  setIsDataReady(ready);
+}, [
+  allUserInfo,
+  departments,
+  approvers,
+  approvalRulesByDepartment,
+  approvalRulesByRequestType,
+  approvalRulesByDesignation,
+  departmentOptions,
+]);
+
 
   const submitVehicleRequest = async () => {
     try {
@@ -293,264 +316,275 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
 
   return (
     <div className="py-2 text-sm space-y-4">
-      {/* Requester */}
-      <div className="grid grid-cols-1 gap-4">
-        <div>
-          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Requester
-          </label>
-          {user.access_level === "admin" ? (
-            <select
-              name="requester"
-              value={request.requester || ""}
+      {!isDataReady ? (
+        <div className="flex flex-col items-center justify-center py-12">
+          <Spinner className="h-8 w-8 mb-3" />
+          <Typography className="text-sm text-gray-600">
+            Loading ...
+          </Typography>
+        </div>
+      ) : (
+        <>
+          {/* Requester */}
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Requester
+              </label>
+              {user.access_level === "admin" ? (
+                <select
+                  name="requester"
+                  value={request.requester || ""}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+                  required
+                >
+                  <option value="">Select Requester</option>
+                  {allUserInfo.map((u) => (
+                    <option key={u.reference_number} value={u.reference_number}>
+                      {u.first_name} {u.last_name}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <>
+                  <input
+                    type="text"
+                    value={getUserByReferenceNumber(user.reference_number)}
+                    readOnly
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+                  />
+                  <input type="hidden" name="requester" value={user.reference_number} />
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Title */}
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Title
+            </label>
+            <input
+              type="text"
+              name="title"
+              value={request.title || ""}
               onChange={handleChange}
               className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-              required
-            >
-              <option value="">Select Requester</option>
-              {allUserInfo.map((u) => (
-                <option key={u.reference_number} value={u.reference_number}>
-                  {u.first_name} {u.last_name}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <>
-              <input
-                type="text"
-                value={getUserByReferenceNumber(user.reference_number)}
-                readOnly
-                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-              />
-              <input type="hidden" name="requester" value={user.reference_number} />
-            </>
-          )}
-        </div>
-      </div>
+            />
+          </div>
 
-      {/* Title */}
-      <div>
-        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Title
-        </label>
-        <input
-          type="text"
-          name="title"
-          value={request.title || ""}
-          onChange={handleChange}
-          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-        />
-      </div>
+          {/* Destination + Analytics Button */}
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Destination
+            </label>
+            <MapboxAddressPicker
+              ref={mapboxAddressPickerRef}
+              onSelect={handleDestinationSelect}
+              token={process.env.REACT_APP_MAPBOX_TOKEN}
+            />
+            <input
+              type="hidden"
+              name="destination_coordinates"
+              value={request.destination_coordinates ? JSON.stringify(request.destination_coordinates) : ""}
+            />
 
-      {/* Destination + Analytics Button */}
-      <div>
-        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Destination
-        </label>
-        <MapboxAddressPicker
-          ref={mapboxAddressPickerRef}
-          onSelect={handleDestinationSelect}
-          token={process.env.REACT_APP_MAPBOX_TOKEN}
-        />
-        <input
-          type="hidden"
-          name="destination_coordinates"
-          value={request.destination_coordinates ? JSON.stringify(request.destination_coordinates) : ""}
-        />
-
-        {/* Show Analytics Button */}
-        <div className="mt-2">
-          <Button
-            size="sm"
-            color="indigo"
-            variant="outlined"
-            onClick={generateTravelAnalytics}
-            disabled={!canShowAnalytics || aiLoading}
-            className="flex items-center gap-1 text-xs normal-case"
-          >
-            {aiLoading ? (
-              <>
-                <Spinner className="h-4 w-4" />
-                Analyzing...
-              </>
-            ) : (
-              <>
-                <Info size={16} />
-                Show Travel Insights
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
-
-      {/* Travel Analytics Panel */}
-      <Collapse open={showAnalytics && !!travelAnalytics}>
-        <div className="p-4 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700 rounded-md">
-          <div className="flex justify-between">
-            <div className="flex items-center gap-2 mb-2">
-              <MapPin size={18} className="text-indigo-600" />
-              <Typography className="font-semibold text-sm text-indigo-800 dark:text-indigo-200">
-                AI Travel Insights
-              </Typography>
-            </div>
-            <div className=""> 
+            {/* Show Analytics Button */}
+            <div className="mt-2">
               <Button
                 size="sm"
-                variant="text"
-                onClick={() => setShowAnalytics(false)}
-                className="text-indigo-600 hover:text-indigo-800"  
+                color="indigo"
+                variant="outlined"
+                onClick={generateTravelAnalytics}
+                disabled={!canShowAnalytics || aiLoading}
+                className="flex items-center gap-1 text-xs normal-case"
               >
-                Close
+                {aiLoading ? (
+                  <>
+                    <Spinner className="h-4 w-4" />
+                    Analyzing...
+                  </>
+                ) : (
+                  <>
+                    <Info size={16} />
+                    Show Travel Insights
+                  </>
+                )}
               </Button>
             </div>
           </div>
 
-          {aiLoading ? (
-            <div className="flex items-center gap-2 text-xs text-gray-600">
-              <Spinner className="h-4 w-4" />
-              Analyzing route...
+          {/* Travel Analytics Panel */}
+          <Collapse open={showAnalytics && !!travelAnalytics}>
+            <div className="p-4 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700 rounded-md">
+              <div className="flex justify-between">
+                <div className="flex items-center gap-2 mb-2">
+                  <MapPin size={18} className="text-indigo-600" />
+                  <Typography className="font-semibold text-sm text-indigo-800 dark:text-indigo-200">
+                    AI Travel Insights
+                  </Typography>
+                </div>
+                <div className=""> 
+                  <Button
+                    size="sm"
+                    variant="text"
+                    onClick={() => setShowAnalytics(false)}
+                    className="text-indigo-600 hover:text-indigo-800"  
+                  >
+                    Close
+                  </Button>
+                </div>
+              </div>
+
+              {aiLoading ? (
+                <div className="flex items-center gap-2 text-xs text-gray-600">
+                  <Spinner className="h-4 w-4" />
+                  Analyzing route...
+                </div>
+              ) : (
+                <div
+                  className="text-xs text-gray-700 dark:text-gray-300 font-sans space-y-1"
+                  dangerouslySetInnerHTML={{ __html: travelAnalytics }}
+                />
+              )}
             </div>
-          ) : (
-            <div
-              className="text-xs text-gray-700 dark:text-gray-300 font-sans space-y-1"
-              dangerouslySetInnerHTML={{ __html: travelAnalytics }}
-            />
-          )}
-        </div>
-      </Collapse>
+          </Collapse>
 
-      {/* Date, Time */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Date of Trip
-          </label>
-          <input
-            type="date"
-            name="date_of_trip"
-            value={request.date_of_trip || ""}
-            onChange={handleChange}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-            required
-          />
-          {formErrors.date_of_trip && (
-            <p className="text-xs text-red-500">{formErrors.date_of_trip}</p>
-          )}
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Time of Departure
-          </label>
-          <input
-            type="time"
-            name="time_of_departure"
-            value={request.time_of_departure || ""}
-            onChange={handleChange}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Time of Arrival
-          </label>
-          <input
-            type="time"
-            name="time_of_arrival"
-            value={request.time_of_arrival || ""}
-            onChange={handleChange}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-          />
-          {formErrors.time && (
-            <p className="text-xs text-red-500 col-span-3">{formErrors.time}</p>
-          )}
-        </div>
-      </div>
-
-      {/* Passengers */}
-      <div>
-        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Number of Passengers
-        </label>
-        <input
-          type="number"
-          name="number_of_passengers"
-          value={request.number_of_passengers || ""}
-          onChange={handleChange}
-          min="1"
-          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-        />
-      </div>
-
-      {/* Purpose with AI */}
-      <div>
-        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Purpose
-        </label>
-        <div className="relative">
-          <textarea
-            ref={purposeTextareaRef}
-            name="purpose"
-            value={request.purpose}
-            onChange={handleChange}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 pr-10 md:pr-20 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 resize-none"
-            rows={4}
-            placeholder="Enter purpose or use AI (note: a title is required to generate with AI)..."
-            required
-          />
-          <div className="absolute bottom-2 right-2 flex gap-1 bg-white dark:bg-gray-800 p-1 md:flex-row flex-col">
-            <button
-              onClick={generatePurpose}
-              disabled={aiLoading || !request.title.trim()}
-              className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition disabled:opacity-50"
-              title="Generate purpose"
-            >
-              {aiLoading ? <Spinner className="h-4 w-4" /> : <Sparkle size={16} />}
-            </button>
-            <button
-              onClick={rephrasePurpose}
-              disabled={aiLoading || !request.purpose.trim()}
-              className="p-1.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded transition disabled:opacity-50"
-              title="Rephrase"
-            >
-              <ArrowClockwise size={16} />
-            </button>
+          {/* Date, Time */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Date of Trip
+              </label>
+              <input
+                type="date"
+                name="date_of_trip"
+                value={request.date_of_trip || ""}
+                onChange={handleChange}
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+                required
+              />
+              {formErrors.date_of_trip && (
+                <p className="text-xs text-red-500">{formErrors.date_of_trip}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Time of Departure
+              </label>
+              <input
+                type="time"
+                name="time_of_departure"
+                value={request.time_of_departure || ""}
+                onChange={handleChange}
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Time of Arrival
+              </label>
+              <input
+                type="time"
+                name="time_of_arrival"
+                value={request.time_of_arrival || ""}
+                onChange={handleChange}
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+              />
+              {formErrors.time && (
+                <p className="text-xs text-red-500 col-span-3">{formErrors.time}</p>
+              )}
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* Remarks */}
-      <div>
-        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Remarks
-        </label>
-        <textarea
-          name="remarks"
-          value={request.remarks}
-          onChange={handleChange}
-          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-          required
-        />
-      </div>
+          {/* Passengers */}
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Number of Passengers
+            </label>
+            <input
+              type="number"
+              name="number_of_passengers"
+              value={request.number_of_passengers || ""}
+              onChange={handleChange}
+              min="1"
+              className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+            />
+          </div>
 
-      {/* Submit */}
-      <Button
-        color="blue"
-        onClick={submitVehicleRequest}
-        disabled={
-          !request.title ||
-          !request.destination ||
-          !request.date_of_trip ||
-          !request.time_of_departure ||
-          !request.time_of_arrival ||
-          !request.number_of_passengers ||
-          !request.purpose ||
-          Object.keys(formErrors).length > 0
-        }
-        className="dark:bg-blue-600 dark:hover:bg-blue-500 w-full md:w-auto"
-      >
-        Submit Request
-      </Button>
+          {/* Purpose with AI */}
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Purpose
+            </label>
+            <div className="relative">
+              <textarea
+                ref={purposeTextareaRef}
+                name="purpose"
+                value={request.purpose}
+                onChange={handleChange}
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 pr-10 md:pr-20 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 resize-none"
+                rows={4}
+                placeholder="Enter purpose or use AI (note: a title is required to generate with AI)..."
+                required
+              />
+              <div className="absolute bottom-2 right-2 flex gap-1 bg-white dark:bg-gray-800 p-1 md:flex-row flex-col">
+                <button
+                  onClick={generatePurpose}
+                  disabled={aiLoading || !request.title.trim()}
+                  className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition disabled:opacity-50"
+                  title="Generate purpose"
+                >
+                  {aiLoading ? <Spinner className="h-4 w-4" /> : <Sparkle size={16} />}
+                </button>
+                <button
+                  onClick={rephrasePurpose}
+                  disabled={aiLoading || !request.purpose.trim()}
+                  className="p-1.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded transition disabled:opacity-50"
+                  title="Rephrase"
+                >
+                  <ArrowClockwise size={16} />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Remarks */}
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Remarks
+            </label>
+            <textarea
+              name="remarks"
+              value={request.remarks}
+              onChange={handleChange}
+              className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+              required
+            />
+          </div>
+
+          {/* Submit */}
+          <Button
+            color="blue"
+            onClick={submitVehicleRequest}
+            disabled={
+              !request.title ||
+              !request.destination ||
+              !request.date_of_trip ||
+              !request.time_of_departure ||
+              !request.time_of_arrival ||
+              !request.number_of_passengers ||
+              !request.purpose ||
+              Object.keys(formErrors).length > 0
+            }
+            className="dark:bg-blue-600 dark:hover:bg-blue-500 w-full md:w-auto"
+          >
+            Submit Request
+          </Button>
+        </>
+      )}
     </div>
   );
 };

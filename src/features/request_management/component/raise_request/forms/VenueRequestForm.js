@@ -323,6 +323,29 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
     }
   };
 
+const [isDataReady, setIsDataReady] = useState(false);
+
+useEffect(() => {
+  const ready =
+    allUserInfo != null &&
+    departments != null &&
+    approvers != null &&
+    approvalRulesByDepartment != null &&
+    approvalRulesByRequestType != null && 
+    approvalRulesByDesignation != null && 
+    departmentOptions != null; 
+
+  setIsDataReady(ready);
+}, [
+  allUserInfo,
+  departments,
+  approvers,
+  approvalRulesByDepartment,
+  approvalRulesByRequestType,
+  approvalRulesByDesignation,
+  departmentOptions,
+]);
+
   const submitVenueRequest = async () => {
     try {
       await fetchVenueRequests();
@@ -393,295 +416,306 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
 
   return (
     <div className="py-2 text-sm space-y-4 overflow-y-auto">
-      {/* Requester & Venue */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Requester</label>
-          {user.access_level === "admin" ? (
-            <select
-              name="requester"
-              value={request.requester || ""}
-              onChange={handleChange}
-              className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-              required
-            >
-              <option value="">Select Requester</option>
-              {allUserInfo.map((u) => (
-                <option key={u.reference_number} value={u.reference_number}>
-                  {u.first_name} {u.last_name}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <>
-              <input
-                type="text"
-                value={getUserByReferenceNumber(user.reference_number)}
-                readOnly
-                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-              />
-              <input type="hidden" name="requester" value={user.reference_number} />
-            </>
-          )}
+      {!isDataReady ? (
+        <div className="flex flex-col items-center justify-center py-12">
+          <Spinner className="h-8 w-8 mb-3" />
+          <Typography className="text-sm text-gray-600">
+            Loading ... 
+          </Typography>
         </div>
+      ) : (
+        <>
+          {/* Requester & Venue */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Requester</label>
+              {user.access_level === "admin" ? (
+                <select
+                  name="requester"
+                  value={request.requester || ""}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+                  required
+                >
+                  <option value="">Select Requester</option>
+                  {allUserInfo.map((u) => (
+                    <option key={u.reference_number} value={u.reference_number}>
+                      {u.first_name} {u.last_name}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <>
+                  <input
+                    type="text"
+                    value={getUserByReferenceNumber(user.reference_number)}
+                    readOnly
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+                  />
+                  <input type="hidden" name="requester" value={user.reference_number} />
+                </>
+              )}
+            </div>
 
-        <div>
-          <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Venue</label>
-          <select
-            name="venue_id"
-            value={request.venue_id}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
-            required
-          >
-            <option value="">Select Venue</option>
-            {venueOptions.map((v) => (
-              <option key={v.id} value={v.asset_id}>
-                {v.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Venue</label>
+              <select
+                name="venue_id"
+                value={request.venue_id}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
+                required
+              >
+                <option value="">Select Venue</option>
+                {venueOptions.map((v) => (
+                  <option key={v.id} value={v.asset_id}>
+                    {v.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
-      {/* Organization & Title */}
-      <div>
-        <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Organization</label>
-        <input
-          type="text"
-          name="organization"
-          value={request.organization}
-          onChange={handleChange}
-          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
-        />
-      </div>
-
-      <div>
-        <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Event Title</label>
-        <input
-          type="text"
-          name="title"
-          value={request.title}
-          onChange={handleChange}
-          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
-        />
-      </div>
-
-      {/* Event Nature */}
-      <div>
-        <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Event Nature</label>
-        <select
-          name="event_nature"
-          value={request.event_nature}
-          onChange={handleChange}
-          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
-          required
-        >
-          <option value="">Select Event Nature</option>
-          <option value="curricular">Curricular</option>
-          <option value="non-curricular">Non-Curricular</option>
-          <option value="others">Others</option>
-        </select>
-        {request.event_nature === "others" && (
-          <div className="mt-2">
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Please Specify</label>
+          {/* Organization & Title */}
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Organization</label>
             <input
               type="text"
-              name="event_nature_other"
-              value={request.event_nature_other}
+              name="organization"
+              value={request.organization}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Event Title</label>
+            <input
+              type="text"
+              name="title"
+              value={request.title}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
+            />
+          </div>
+
+          {/* Event Nature */}
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Event Nature</label>
+            <select
+              name="event_nature"
+              value={request.event_nature}
               onChange={handleChange}
               className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
               required
-            />
-          </div>
-        )}
-      </div>
-
-      {/* Participants & Pax */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Participants</label>
-          <input
-            type="text"
-            name="participants"
-            value={request.participants}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Pax Estimation</label>
-          <input
-            type="number"
-            name="pax_estimation"
-            value={request.pax_estimation}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
-          />
-        </div>
-      </div>
-
-      {/* Date & Time */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Event Date</label>
-          <input
-            type="date"
-            name="event_dates"
-            value={request.event_dates}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
-          />
-          {formErrors.date && <p className="text-red-500 text-xs mt-1">{formErrors.date}</p>}
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Start Time</label>
-          <input
-            type="time"
-            name="event_start_time"
-            value={request.event_start_time}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">End Time</label>
-          <input
-            type="time"
-            name="event_end_time"
-            value={request.event_end_time}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
-          />
-          {formErrors.time && <p className="text-red-500 text-xs mt-1">{formErrors.time}</p>}
-        </div>
-      </div>
-
-      {/* Booking Conflicts */}
-      <div className="space-y-2">
-        {formErrors.booking && (
-          <p className="text-red-500 text-xs mt-2 flex items-start gap-1">
-            {formErrors.booking}
-            <span className="relative flex group">
-              <Info size={14} className="text-red-500 cursor-pointer mt-0.5" weight="duotone" />
-              <div className="absolute bottom-full right-0 mb-2 w-64 bg-white text-gray-700 text-xs border border-red-200 rounded-lg shadow-lg p-3 opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
-                <div className="absolute -bottom-1.5 right-2 w-3 h-3 bg-white border-b border-r border-red-200 rotate-45"></div>
-                This means the venue has already been booked for this date and time.
-              </div>
-            </span>
-          </p>
-        )}
-        {formWarnings.booking && (
-          <p className="text-amber-500 text-xs mt-2 flex items-start gap-1">
-            {formWarnings.booking}
-            <span className="relative flex group">
-              <Info size={14} className="text-amber-500 cursor-pointer mt-0.5" weight="duotone" />
-              <div className="absolute bottom-full right-0 mb-2 w-64 bg-white text-gray-700 text-xs border border-amber-200 rounded-lg shadow-lg p-3 opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
-                <div className="absolute -bottom-1.5 right-2 w-3 h-3 bg-white border-b border-r border-amber-200 rotate-45"></div>
-                A pending request might conflict with your selected schedule.
-              </div>
-            </span>
-          </p>
-        )}
-      </div>
-
-      {/* Purpose with AI */}
-      <div>
-        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Purpose</label>
-        <div className="relative">
-          <textarea
-            ref={purposeTextareaRef}
-            name="purpose"
-            value={request.purpose}
-            onChange={handleChange}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 pr-10 md:pr-20 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 resize-none"
-            rows={4}
-            placeholder="Enter purpose or use AI (note: a title is required to generate with AI)..."
-            required
-          />
-          <div className="absolute bottom-2 right-2 flex gap-1 bg-white dark:bg-gray-800 p-1 flex-col md:flex-row">
-            <button
-              onClick={generatePurpose}
-              disabled={aiLoading || !request.title.trim()}
-              className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition disabled:opacity-50"
-              title="Generate purpose"
             >
-              {aiLoading ? <Spinner className="h-4 w-4" /> : <Sparkle size={16} />}
-            </button>
-            <button
-              onClick={rephrasePurpose}
-              disabled={aiLoading || !request.purpose.trim()}
-              className="p-1.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded transition disabled:opacity-50"
-              title="Rephrase"
-            >
-              <ArrowClockwise size={16} />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Particulars (Add-ons) */}
-      <div className="space-y-2">
-        <Typography className="text-xs font-semibold text-gray-600 dark:text-gray-300">Particulars</Typography>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          {addonsList.map((addon) => (
-            <div key={addon.id} className="flex items-center gap-2">
-              <div className="flex items-center gap-1">
-                <Checkbox
-                  checked={!!selectedAddons[addon.id]}
-                  onChange={handleCheckboxChange(addon.id)}
+              <option value="">Select Event Nature</option>
+              <option value="curricular">Curricular</option>
+              <option value="non-curricular">Non-Curricular</option>
+              <option value="others">Others</option>
+            </select>
+            {request.event_nature === "others" && (
+              <div className="mt-2">
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Please Specify</label>
+                <input
+                  type="text"
+                  name="event_nature_other"
+                  value={request.event_nature_other}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
+                  required
                 />
-                <Typography className="text-xs font-semibold text-gray-600 dark:text-gray-300">{addon.label}</Typography>
               </div>
-              {selectedAddons[addon.id] && (
-                <div className="flex gap-2">
-                  {addon.isCustom && (
-                    <input
-                      type="text"
-                      value={selectedAddons[addon.id].customName || ""}
-                      onChange={handleCustomNameChange(addon.id)}
-                      className="w-40 p-1 text-xs border rounded"
-                      placeholder="Name"
-                    />
-                  )}
-                  <input
-                    type="number"
-                    value={selectedAddons[addon.id].quantity}
-                    onChange={handleQuantityChange(addon.id)}
-                    min="1"
-                    className="w-16 p-1 text-xs border rounded"
-                  />
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
+            )}
+          </div>
 
-      {/* Submit */}
-      <Button
-        color="blue"
-        onClick={submitVenueRequest}
-        disabled={
-          !request.venue_id ||
-          !request.organization ||
-          !request.title ||
-          !request.event_nature ||
-          (request.event_nature === "others" && !request.event_nature_other) ||
-          !request.event_dates ||
-          !request.event_start_time ||
-          !request.event_end_time ||
-          !request.participants ||
-          !request.pax_estimation ||
-          !request.purpose ||
-          formErrors.date ||
-          formErrors.time ||
-          formErrors.booking
-        }
-        className="dark:bg-blue-600 dark:hover:bg-blue-500 w-full md:w-auto"
-      >
-        Submit Request
-      </Button>
+          {/* Participants & Pax */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Participants</label>
+              <input
+                type="text"
+                name="participants"
+                value={request.participants}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Pax Estimation</label>
+              <input
+                type="number"
+                name="pax_estimation"
+                value={request.pax_estimation}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
+              />
+            </div>
+          </div>
+
+          {/* Date & Time */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Event Date</label>
+              <input
+                type="date"
+                name="event_dates"
+                value={request.event_dates}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
+              />
+              {formErrors.date && <p className="text-red-500 text-xs mt-1">{formErrors.date}</p>}
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Start Time</label>
+              <input
+                type="time"
+                name="event_start_time"
+                value={request.event_start_time}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">End Time</label>
+              <input
+                type="time"
+                name="event_end_time"
+                value={request.event_end_time}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
+              />
+              {formErrors.time && <p className="text-red-500 text-xs mt-1">{formErrors.time}</p>}
+            </div>
+          </div>
+
+          {/* Booking Conflicts */}
+          <div className="space-y-2">
+            {formErrors.booking && (
+              <p className="text-red-500 text-xs mt-2 flex items-start gap-1">
+                {formErrors.booking}
+                <span className="relative flex group">
+                  <Info size={14} className="text-red-500 cursor-pointer mt-0.5" weight="duotone" />
+                  <div className="absolute bottom-full right-0 mb-2 w-64 bg-white text-gray-700 text-xs border border-red-200 rounded-lg shadow-lg p-3 opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
+                    <div className="absolute -bottom-1.5 right-2 w-3 h-3 bg-white border-b border-r border-red-200 rotate-45"></div>
+                    This means the venue has already been booked for this date and time.
+                  </div>
+                </span>
+              </p>
+            )}
+            {formWarnings.booking && (
+              <p className="text-amber-500 text-xs mt-2 flex items-start gap-1">
+                {formWarnings.booking}
+                <span className="relative flex group">
+                  <Info size={14} className="text-amber-500 cursor-pointer mt-0.5" weight="duotone" />
+                  <div className="absolute bottom-full right-0 mb-2 w-64 bg-white text-gray-700 text-xs border border-amber-200 rounded-lg shadow-lg p-3 opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
+                    <div className="absolute -bottom-1.5 right-2 w-3 h-3 bg-white border-b border-r border-amber-200 rotate-45"></div>
+                    A pending request might conflict with your selected schedule.
+                  </div>
+                </span>
+              </p>
+            )}
+          </div>
+
+          {/* Purpose with AI */}
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Purpose</label>
+            <div className="relative">
+              <textarea
+                ref={purposeTextareaRef}
+                name="purpose"
+                value={request.purpose}
+                onChange={handleChange}
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 pr-10 md:pr-20 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 resize-none"
+                rows={4}
+                placeholder="Enter purpose or use AI (note: a title is required to generate with AI)..."
+                required
+              />
+              <div className="absolute bottom-2 right-2 flex gap-1 bg-white dark:bg-gray-800 p-1 flex-col md:flex-row">
+                <button
+                  onClick={generatePurpose}
+                  disabled={aiLoading || !request.title.trim()}
+                  className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition disabled:opacity-50"
+                  title="Generate purpose"
+                >
+                  {aiLoading ? <Spinner className="h-4 w-4" /> : <Sparkle size={16} />}
+                </button>
+                <button
+                  onClick={rephrasePurpose}
+                  disabled={aiLoading || !request.purpose.trim()}
+                  className="p-1.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded transition disabled:opacity-50"
+                  title="Rephrase"
+                >
+                  <ArrowClockwise size={16} />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Particulars (Add-ons) */}
+          <div className="space-y-2">
+            <Typography className="text-xs font-semibold text-gray-600 dark:text-gray-300">Particulars</Typography>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+              {addonsList.map((addon) => (
+                <div key={addon.id} className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
+                    <Checkbox
+                      checked={!!selectedAddons[addon.id]}
+                      onChange={handleCheckboxChange(addon.id)}
+                    />
+                    <Typography className="text-xs font-semibold text-gray-600 dark:text-gray-300">{addon.label}</Typography>
+                  </div>
+                  {selectedAddons[addon.id] && (
+                    <div className="flex gap-2">
+                      {addon.isCustom && (
+                        <input
+                          type="text"
+                          value={selectedAddons[addon.id].customName || ""}
+                          onChange={handleCustomNameChange(addon.id)}
+                          className="w-40 p-1 text-xs border rounded"
+                          placeholder="Name"
+                        />
+                      )}
+                      <input
+                        type="number"
+                        value={selectedAddons[addon.id].quantity}
+                        onChange={handleQuantityChange(addon.id)}
+                        min="1"
+                        className="w-16 p-1 text-xs border rounded"
+                      />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Submit */}
+          <Button
+            color="blue"
+            onClick={submitVenueRequest}
+            disabled={
+              !request.venue_id ||
+              !request.organization ||
+              !request.title ||
+              !request.event_nature ||
+              (request.event_nature === "others" && !request.event_nature_other) ||
+              !request.event_dates ||
+              !request.event_start_time ||
+              !request.event_end_time ||
+              !request.participants ||
+              !request.pax_estimation ||
+              !request.purpose ||
+              formErrors.date ||
+              formErrors.time ||
+              formErrors.booking
+            }
+            className="dark:bg-blue-600 dark:hover:bg-blue-500 w-full md:w-auto"
+          >
+            Submit Request
+          </Button>
+        </>
+      )}
     </div>
   );
 };

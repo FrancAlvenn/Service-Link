@@ -235,6 +235,29 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
     }
   };
 
+const [isDataReady, setIsDataReady] = useState(false);
+
+useEffect(() => {
+  const ready =
+    allUserInfo != null &&
+    departments != null &&
+    approvers != null &&
+    approvalRulesByDepartment != null &&
+    approvalRulesByRequestType != null && 
+    approvalRulesByDesignation != null && 
+    departmentOptions != null; 
+
+  setIsDataReady(ready);
+}, [
+  allUserInfo,
+  departments,
+  approvers,
+  approvalRulesByDepartment,
+  approvalRulesByRequestType,
+  approvalRulesByDesignation,
+  departmentOptions,
+]);
+
   const submitPurchasingRequest = async () => {
     try {
       const formattedDate = request.date_required
@@ -297,274 +320,285 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
 
   return (
     <div className="py-2 text-sm space-y-4 overflow-y-auto">
-      {/* Requester */}
-      <div className="grid grid-cols-1 gap-4">
-        <div>
-          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Requester
-          </label>
-          {user.access_level === "admin" ? (
+      {!isDataReady ? (
+        <div className="flex flex-col items-center justify-center py-12">
+          <Spinner className="h-8 w-8 mb-3" />
+          <Typography className="text-sm text-gray-600">
+            Loading ...
+          </Typography>
+        </div>
+      ) : (
+        <>
+          {/* Requester */}
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Requester
+              </label>
+              {user.access_level === "admin" ? (
+                <select
+                  name="requester"
+                  value={request.requester || ""}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+                  required
+                >
+                  <option value="">Select Requester</option>
+                  {allUserInfo.map((u) => (
+                    <option key={u.reference_number} value={u.reference_number}>
+                      {u.first_name} {u.last_name}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <>
+                  <input
+                    type="text"
+                    value={getUserByReferenceNumber(user.reference_number)}
+                    readOnly
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+                  />
+                  <input type="hidden" name="requester" value={user.reference_number} />
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Title */}
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Title
+            </label>
+            <input
+              type="text"
+              name="title"
+              value={request.title || ""}
+              onChange={handleChange}
+              className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+              required
+            />
+          </div>
+
+          {/* Date Required */}
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Date Required
+            </label>
+            <input
+              type="date"
+              name="date_required"
+              value={request.date_required || ""}
+              onChange={handleChange}
+              className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+              required
+            />
+            {errorMessage && (
+              <p className="text-red-500 font-semibold text-xs pt-1">{errorMessage}</p>
+            )}
+          </div>
+
+          {/* Supply Category */}
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Supply Category
+            </label>
             <select
-              name="requester"
-              value={request.requester || ""}
+              name="supply_category"
+              value={request.supply_category || ""}
               onChange={handleChange}
               className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
               required
             >
-              <option value="">Select Requester</option>
-              {allUserInfo.map((u) => (
-                <option key={u.reference_number} value={u.reference_number}>
-                  {u.first_name} {u.last_name}
+              <option value="">Select Category</option>
+              {supplyCategories.map((cat) => (
+                <option key={cat.id} value={cat.name}>
+                  {cat.name}
                 </option>
               ))}
             </select>
-          ) : (
-            <>
-              <input
-                type="text"
-                value={getUserByReferenceNumber(user.reference_number)}
-                readOnly
-                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-              />
-              <input type="hidden" name="requester" value={user.reference_number} />
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Title */}
-      <div>
-        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Title
-        </label>
-        <input
-          type="text"
-          name="title"
-          value={request.title || ""}
-          onChange={handleChange}
-          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-          required
-        />
-      </div>
-
-      {/* Date Required */}
-      <div>
-        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Date Required
-        </label>
-        <input
-          type="date"
-          name="date_required"
-          value={request.date_required || ""}
-          onChange={handleChange}
-          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-          required
-        />
-        {errorMessage && (
-          <p className="text-red-500 font-semibold text-xs pt-1">{errorMessage}</p>
-        )}
-      </div>
-
-      {/* Supply Category */}
-      <div>
-        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Supply Category
-        </label>
-        <select
-          name="supply_category"
-          value={request.supply_category || ""}
-          onChange={handleChange}
-          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-          required
-        >
-          <option value="">Select Category</option>
-          {supplyCategories.map((cat) => (
-            <option key={cat.id} value={cat.name}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Purpose with AI */}
-      <div>
-        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Purpose
-        </label>
-
-        <div className="relative">
-          <textarea
-            ref={purposeTextareaRef}
-            name="purpose"
-            value={request.purpose}
-            onChange={handleChange}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 pr-10 md:pr-20 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 resize-none"
-            rows={4}
-            placeholder="Enter purpose or use AI (note: a title is required to generate with AI)..."
-            required
-          />
-
-          {/* Floating AI Buttons */}
-          <div className="absolute bottom-2 right-2 flex gap-1 bg-white dark:bg-gray-800 p-1 md:flex-row flex-col p-1">
-            <button
-              onClick={generatePurpose}
-              disabled={aiLoading || !request.title.trim()}
-              className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition disabled:opacity-50"
-              title="Generate purpose from title"
-            >
-              {aiLoading ? <Spinner className="h-4 w-4" /> : <Sparkle size={16} />}
-            </button>
-            <button
-              onClick={rephrasePurpose}
-              disabled={aiLoading || !request.purpose.trim()}
-              className="p-1.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded transition disabled:opacity-50"
-              title="Rephrase purpose"
-            >
-              <ArrowClockwise size={16} />
-            </button>
           </div>
-        </div>
-      </div>
 
-      {/* Particulars Section */}
-      <div className="space-y-2">
-        <div className="flex justify-between items-center">
-          <Typography className="text-xs font-semibold text-gray-600 dark:text-gray-300">
-            Particulars
-          </Typography>
-          <Button
-            color="green"
-            variant="ghost"
-            onClick={handleAddParticular}
-            className="flex text-xs items-center gap-1 px-3 py-2 border rounded-md hover:bg-green-600 dark:border-gray-600 normal-case"
-          >
-            <Plus size={15} />
-            <Typography className="text-xs font-semibold">Add Particular</Typography>
-          </Button>
-        </div>
+          {/* Purpose with AI */}
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Purpose
+            </label>
 
-        {showParticularForm && (
-          <div className="grid grid-cols-1 gap-4 mb-3">
-            <div>
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Particulars / Items Description / Specifications
-              </label>
-              <input
-                type="text"
-                name="particulars"
-                value={particularForm.particulars}
-                onChange={handleParticularFormChange}
-                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Quantity
-              </label>
-              <input
-                type="number"
-                name="quantity"
-                value={particularForm.quantity}
-                onChange={handleParticularFormChange}
-                min="1"
-                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Description
-              </label>
+            <div className="relative">
               <textarea
-                name="description"
-                value={particularForm.description}
-                onChange={handleParticularFormChange}
-                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+                ref={purposeTextareaRef}
+                name="purpose"
+                value={request.purpose}
+                onChange={handleChange}
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 pr-10 md:pr-20 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 resize-none"
+                rows={4}
+                placeholder="Enter purpose or use AI (note: a title is required to generate with AI)..."
+                required
               />
+
+              {/* Floating AI Buttons */}
+              <div className="absolute bottom-2 right-2 flex gap-1 bg-white dark:bg-gray-800 p-1 md:flex-row flex-col p-1">
+                <button
+                  onClick={generatePurpose}
+                  disabled={aiLoading || !request.title.trim()}
+                  className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition disabled:opacity-50"
+                  title="Generate purpose from title"
+                >
+                  {aiLoading ? <Spinner className="h-4 w-4" /> : <Sparkle size={16} />}
+                </button>
+                <button
+                  onClick={rephrasePurpose}
+                  disabled={aiLoading || !request.purpose.trim()}
+                  className="p-1.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded transition disabled:opacity-50"
+                  title="Rephrase purpose"
+                >
+                  <ArrowClockwise size={16} />
+                </button>
+              </div>
             </div>
-            <div className="flex gap-3 col-span-full ml-auto">
+          </div>
+
+          {/* Particulars Section */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <Typography className="text-xs font-semibold text-gray-600 dark:text-gray-300">
+                Particulars
+              </Typography>
               <Button
                 color="green"
-                onClick={handleSaveParticular}
-                className="flex items-center gap-1 px-2 py-1 normal-case"
+                variant="ghost"
+                onClick={handleAddParticular}
+                className="flex text-xs items-center gap-1 px-3 py-2 border rounded-md hover:bg-green-600 dark:border-gray-600 normal-case"
               >
-                <FloppyDisk size={18} />
-                <Typography className="text-xs font-semibold">Save</Typography>
-              </Button>
-              <Button
-                color="red"
-                variant="outlined"
-                onClick={handleCancelParticular}
-                className="flex items-center gap-1 px-2 py-1 border rounded-md hover:text-red-500 dark:border-gray-600 normal-case"
-              >
-                <Prohibit size={18} />
-                <Typography className="text-xs font-semibold">Cancel</Typography>
+                <Plus size={15} />
+                <Typography className="text-xs font-semibold">Add Particular</Typography>
               </Button>
             </div>
+
+            {showParticularForm && (
+              <div className="grid grid-cols-1 gap-4 mb-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Particulars / Items Description / Specifications
+                  </label>
+                  <input
+                    type="text"
+                    name="particulars"
+                    value={particularForm.particulars}
+                    onChange={handleParticularFormChange}
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Quantity
+                  </label>
+                  <input
+                    type="number"
+                    name="quantity"
+                    value={particularForm.quantity}
+                    onChange={handleParticularFormChange}
+                    min="1"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    name="description"
+                    value={particularForm.description}
+                    onChange={handleParticularFormChange}
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+                  />
+                </div>
+                <div className="flex gap-3 col-span-full ml-auto">
+                  <Button
+                    color="green"
+                    onClick={handleSaveParticular}
+                    className="flex items-center gap-1 px-2 py-1 normal-case"
+                  >
+                    <FloppyDisk size={18} />
+                    <Typography className="text-xs font-semibold">Save</Typography>
+                  </Button>
+                  <Button
+                    color="red"
+                    variant="outlined"
+                    onClick={handleCancelParticular}
+                    className="flex items-center gap-1 px-2 py-1 border rounded-md hover:text-red-500 dark:border-gray-600 normal-case"
+                  >
+                    <Prohibit size={18} />
+                    <Typography className="text-xs font-semibold">Cancel</Typography>
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            <div className="overflow-x-auto pt-3">
+              <table className="min-w-full text-left text-sm border border-gray-300 dark:border-gray-600 rounded-md overflow-hidden">
+                <thead className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                  <tr>
+                    <th className="px-4 py-2 text-xs font-semibold">Item</th>
+                    <th className="px-4 py-2 text-xs font-semibold">Quantity</th>
+                    <th className="px-4 py-2 text-xs font-semibold">Description</th>
+                    <th className="px-4 py-2 text-xs font-semibold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {request.details.map((detail, index) => (
+                    <tr key={index} className="border-t border-gray-300 dark:border-gray-600">
+                      <td className="px-4 py-2">{detail.particulars}</td>
+                      <td className="px-4 py-2">x{detail.quantity}</td>
+                      <td className="px-4 py-2">{detail.description}</td>
+                      <td className="px-4 py-2 space-x-2">
+                        <button className="text-blue-500" onClick={() => handleEditClick(index)}>
+                          <PencilSimpleLine size={18} />
+                        </button>
+                        <button className="text-red-500" onClick={() => handleDetailRemove(index)}>
+                          <X size={18} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        )}
 
-        <div className="overflow-x-auto pt-3">
-          <table className="min-w-full text-left text-sm border border-gray-300 dark:border-gray-600 rounded-md overflow-hidden">
-            <thead className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-              <tr>
-                <th className="px-4 py-2 text-xs font-semibold">Item</th>
-                <th className="px-4 py-2 text-xs font-semibold">Quantity</th>
-                <th className="px-4 py-2 text-xs font-semibold">Description</th>
-                <th className="px-4 py-2 text-xs font-semibold">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {request.details.map((detail, index) => (
-                <tr key={index} className="border-t border-gray-300 dark:border-gray-600">
-                  <td className="px-4 py-2">{detail.particulars}</td>
-                  <td className="px-4 py-2">x{detail.quantity}</td>
-                  <td className="px-4 py-2">{detail.description}</td>
-                  <td className="px-4 py-2 space-x-2">
-                    <button className="text-blue-500" onClick={() => handleEditClick(index)}>
-                      <PencilSimpleLine size={18} />
-                    </button>
-                    <button className="text-red-500" onClick={() => handleDetailRemove(index)}>
-                      <X size={18} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+          {/* Remarks */}
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 pt-1">
+              Remarks
+            </label>
+            <textarea
+              name="remarks"
+              value={request.remarks}
+              onChange={handleChange}
+              className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+              required
+            />
+          </div>
 
-      {/* Remarks */}
-      <div>
-        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 pt-1">
-          Remarks
-        </label>
-        <textarea
-          name="remarks"
-          value={request.remarks}
-          onChange={handleChange}
-          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-          required
-        />
-      </div>
-
-      {/* Submit */}
-      <Button
-        color="blue"
-        onClick={submitPurchasingRequest}
-        disabled={
-          !request.title ||
-          !request.date_required ||
-          !request.supply_category ||
-          !request.purpose ||
-          errorMessage
-        }
-        className="dark:bg-blue-600 dark:hover:bg-blue-500 w-full md:w-auto"
-      >
-        Submit Request
-      </Button>
+          {/* Submit */}
+          <Button
+            color="blue"
+            onClick={submitPurchasingRequest}
+            disabled={
+              !request.title ||
+              !request.date_required ||
+              !request.supply_category ||
+              !request.purpose ||
+              errorMessage
+            }
+            className="dark:bg-blue-600 dark:hover:bg-blue-500 w-full md:w-auto"
+          >
+            Submit Request
+          </Button>
+          </>
+      )}
     </div>
   );
 };

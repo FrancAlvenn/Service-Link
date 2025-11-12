@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useRef } from "react";
 import { DragDropContext } from "react-beautiful-dnd";
 import Column from "./Column";
 import {
@@ -15,8 +15,9 @@ import {
   DialogBody,
   DialogFooter,
   Chip,
+  Spinner,
 } from "@material-tailwind/react";
-import { MagnifyingGlass } from "@phosphor-icons/react";
+import { MagnifyingGlass, Sparkle, ArrowClockwise } from "@phosphor-icons/react";
 import { JobRequestsContext } from "../../context/JobRequestsContext";
 import { VenueRequestsContext } from "../../context/VenueRequestsContext";
 import { VehicleRequestsContext } from "../../context/VehicleRequestsContext";
@@ -28,6 +29,15 @@ import SidebarView from "../../../../components/sidebar/SidebarView";
 import RequestFilter from "../../utils/requestFilter";
 import Header from "../../../../layouts/header";
 import ModalView from "../request_details_view/ModalView";
+import { GoogleGenAI } from "@google/genai";
+
+// ---------------------------------------------------------------------
+// Gemini initialisation (frontend only)
+// ---------------------------------------------------------------------
+const genAI = new GoogleGenAI({
+  apiKey: process.env.REACT_APP_GEMINI_API_KEY,
+  apiVersion: "v1",
+});
 
 export function KanbanBoard() {
   const [columns, setColumns] = useState([]);
@@ -44,12 +54,14 @@ export function KanbanBoard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedReferenceNumber, setSelectedReferenceNumber] = useState("");
 
-  /* ---------- Confirmation modal state (same as StatusModal) ---------- */
+  /* ---------- Confirmation modal state ---------- */
   const [openModal, setOpenModal] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedReason, setSelectedReason] = useState("");
   const [additionalComment, setAdditionalComment] = useState("");
   const [actionTaken, setActionTaken] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const textareaRef = useRef(null);
 
   const [filters, setFilters] = useState({ status: "", department: "" });
 
@@ -86,7 +98,7 @@ export function KanbanBoard() {
   };
   const { requests, setRequests, fetchRequests } = getRequestData();
 
-  /* ------------------- Reason lists (mirrors StatusModal) ------------------- */
+  /* ------------------- Reason lists ------------------- */
   const positiveReasons = [
     { id: 1, value: "Completed successfully" },
     { id: 2, value: "Requirements fully met" },
@@ -96,7 +108,6 @@ export function KanbanBoard() {
     { id: 6, value: "Processed without issues" },
     { id: 7, value: "Other" },
   ];
-
   const negativeReasons = [
     { id: 1, value: "Incomplete or pending" },
     { id: 2, value: "Missing requirements" },
@@ -135,6 +146,53 @@ export function KanbanBoard() {
     setActionTaken(selectedReason ? `${selectedReason}: ${c}` : c);
   };
 
+  /* ------------------- AI Helpers ------------------- */
+  const generateReason = async () => {
+    if (!selectedStatus) return;
+    setAiLoading(true);
+    try {
+      const prompt = `You are a professional admin. Write a short, polite reason for changing a request status to "${selectedStatus}". Keep under 50 words.`;
+
+      const result = await genAI.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+      });
+
+      const text = result.text?.trim();
+      if (text) {
+        setAdditionalComment(text);
+        setActionTaken(selectedReason ? `${selectedReason}: ${text}` : text);
+      }
+    } catch (err) {
+      ToastNotification.error("AI Error", "Failed to generate reason.");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const rephraseComment = async () => {
+    if (!additionalComment.trim()) return;
+    setAiLoading(true);
+    try {
+      const prompt = `Rephrase this comment professionally and concisely (under 60 words):\n"${additionalComment}"`;
+
+      const result = await genAI.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+      });
+
+      const text = result.text?.trim();
+      if (text) {
+        setAdditionalComment(text);
+        setActionTaken(selectedReason ? `${selectedReason}: ${text}` : text);
+      }
+    } catch (err) {
+      ToastNotification.error("AI Error", "Failed to rephrase.");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   /* ------------------- Confirm status change ------------------- */
   const confirmStatusChange = async () => {
     if (!actionTaken.trim()) {
@@ -143,14 +201,12 @@ export function KanbanBoard() {
     }
 
     try {
-      // Update status
       await axios.patch(
         `${process.env.REACT_APP_API_URL}/${requestType}/${selectedReferenceNumber}/status`,
         { requester: user.reference_number, status: selectedStatus, action: actionTaken },
         { withCredentials: true }
       );
 
-      // Log activity
       await axios.post(
         `${process.env.REACT_APP_API_URL}/request_activity`,
         {
@@ -364,7 +420,7 @@ export function KanbanBoard() {
           </div>
         )}
 
-        {/* ---------- Confirmation Dialog (exact StatusModal UI) ---------- */}
+        {/* ---------- Confirmation Dialog with AI ---------- */}
         <Dialog open={openModal} handler={setOpenModal} size="sm">
           <DialogHeader className="text-lg text-gray-900 dark:text-gray-200">
             Confirm Status Change
@@ -397,13 +453,38 @@ export function KanbanBoard() {
             >
               Additional comments (optional):
             </Typography>
-            <textarea
-              className="w-full text-sm font-medium text-gray-700 dark:text-gray-300 px-3 py-2 border border-gray-300 rounded-md dark:bg-gray-800 dark:border-gray-600"
-              rows={4}
-              placeholder="Enter additional comments here..."
-              value={additionalComment}
-              onChange={handleCommentChange}
-            />
+
+            {/* Textarea + floating AI buttons */}
+            <div className="relative">
+              <textarea
+                ref={textareaRef}
+                className="w-full text-sm font-medium text-gray-700 dark:text-gray-300 px-3 py-2 pr-20 border border-gray-300 rounded-md dark:bg-gray-800 dark:border-gray-600 resize-none"
+                rows={4}
+                placeholder="Enter comments or use AI..."
+                value={additionalComment}
+                onChange={handleCommentChange}
+              />
+
+              {/* AI buttons (same bg as textarea) */}
+              <div className="absolute bottom-2 right-2 flex gap-1 bg-white dark:bg-gray-800 p-1 md:flex-row flex-col p-1 rounded-md">
+                <button
+                  onClick={generateReason}
+                  disabled={aiLoading || !selectedStatus}
+                  className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition disabled:opacity-50"
+                  title="Generate reason"
+                >
+                  {aiLoading ? <Spinner className="h-4 w-4" /> : <Sparkle size={16} />}
+                </button>
+                <button
+                  onClick={rephraseComment}
+                  disabled={aiLoading || !additionalComment.trim()}
+                  className="p-1.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded transition disabled:opacity-50"
+                  title="Rephrase comment"
+                >
+                  <ArrowClockwise size={16} />
+                </button>
+              </div>
+            </div>
           </DialogBody>
 
           <DialogFooter className="flex gap-2">
@@ -419,7 +500,7 @@ export function KanbanBoard() {
               color="green"
               onClick={confirmStatusChange}
               className="flex items-center gap-1 px-4 py-2 normal-case"
-              disabled={!selectedReason && !additionalComment}
+              disabled={!actionTaken.trim()}
             >
               Confirm
             </Button>

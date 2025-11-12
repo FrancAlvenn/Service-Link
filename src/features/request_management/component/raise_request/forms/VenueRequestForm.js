@@ -1,11 +1,10 @@
-// ... [imports remain unchanged]
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { Button, Typography, Checkbox, Spinner } from "@material-tailwind/react";
 import { AuthContext } from "../../../../authentication";
 import { UserContext } from "../../../../../context/UserContext";
 import { VenueRequestsContext } from "../../../context/VenueRequestsContext";
 import ToastNotification from "../../../../../utils/ToastNotification";
-import { useContext, useState, useEffect } from "react";
 import axios from "axios";
-import { Button, Typography, Checkbox } from "@material-tailwind/react";
 import {
   FloppyDisk,
   Info,
@@ -13,16 +12,43 @@ import {
   Plus,
   Prohibit,
   X,
+  Sparkle,
+  ArrowClockwise,
 } from "@phosphor-icons/react";
 import { SettingsContext } from "../../../../settings/context/SettingsContext";
 import assignApproversToRequest from "../../../utils/assignApproversToRequest";
+import { GoogleGenAI } from "@google/genai";
+
+// ---------------------------------------------------------------------
+// Gemini initialisation
+// ---------------------------------------------------------------------
+const genAI = new GoogleGenAI({
+  apiKey: process.env.REACT_APP_GEMINI_API_KEY,
+  apiVersion: "v1",
+});
+
+// ---------------------------------------------------------------------
+// Markdown → HTML formatter (same as VehicleRequestForm)
+// ---------------------------------------------------------------------
+const formatResponse = (text: string): string => {
+  if (!text) return "";
+  return text
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\n/g, "<br>")
+    .replace(/•/g, "<li>")
+    .replace(/^\d+\.\s/gm, "<strong>$1</strong>")
+    .replace(/<li>/g, "</ul><ul><li>")
+    .replace(/<\/ul><ul>/g, "")
+    .replace(/^/, "<ul>")
+    .replace(/$/, "</ul>");
+};
 
 const VenueRequestForm = ({ setSelectedRequest }) => {
+  const purposeTextareaRef = useRef(null);
+
   const { user } = useContext(AuthContext);
-  const { allUserInfo, getUserByReferenceNumber, fetchUsers } =
-    useContext(UserContext);
-  const { venueRequests, fetchVenueRequests } =
-    useContext(VenueRequestsContext);
+  const { allUserInfo, getUserByReferenceNumber, fetchUsers } = useContext(UserContext);
+  const { venueRequests, fetchVenueRequests } = useContext(VenueRequestsContext);
 
   const [request, setRequest] = useState({
     requester: user.reference_number,
@@ -54,11 +80,10 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
   const [departmentOptions, setDepartmentOptions] = useState([]);
   const [venueOptions, setVenueOptions] = useState([]);
 
-  // New: Individual error states
   const [formErrors, setFormErrors] = useState({});
   const [formWarnings, setFormWarnings] = useState({});
+  const [aiLoading, setAiLoading] = useState(false);
 
-  // Define your possible add-ons
   const addonsList = [
     { id: "Chairs", label: "Chairs" },
     { id: "Tables", label: "Tables" },
@@ -71,10 +96,8 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
     { id: "Others", label: "Others", isCustom: true },
   ];
 
-  // State to track selected add-ons and their quantities
   const [selectedAddons, setSelectedAddons] = useState({});
 
-  // Handle checkbox change
   const handleCheckboxChange = (addonId) => (event) => {
     const isChecked = event.target.checked;
     setSelectedAddons((prev) => ({
@@ -82,7 +105,6 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
       [addonId]: isChecked ? { quantity: 1 } : undefined,
     }));
 
-    // Update request.details
     setRequest((prev) => {
       const newDetails = isChecked
         ? [...prev.details, { particulars: addonId, quantity: 1 }]
@@ -91,7 +113,6 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
     });
   };
 
-  // Handle quantity input change
   const handleQuantityChange = (addonId) => (event) => {
     const quantity = parseInt(event.target.value) || 1;
     setSelectedAddons((prev) => ({
@@ -99,7 +120,6 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
       [addonId]: { quantity },
     }));
 
-    // Update quantity in request.details
     setRequest((prev) => {
       const newDetails = prev.details.map((item) =>
         item.particulars === addonId ? { ...item, quantity } : item
@@ -108,7 +128,6 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
     });
   };
 
-  // Handle custom particular name input change
   const handleCustomNameChange = (addonId) => (event) => {
     const customName = event.target.value;
     setSelectedAddons((prev) => ({
@@ -116,10 +135,9 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
       [addonId]: { ...prev[addonId], customName },
     }));
 
-    // Update particulars in request.details with a unique identifier
     setRequest((prev) => {
       const newDetails = prev.details.map((item) =>
-        item.particulars === addonId || item.particulars.startsWith('*')
+        item.particulars === addonId || item.particulars.startsWith("*")
           ? { ...item, particulars: `*${customName}` }
           : item
       );
@@ -154,28 +172,15 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
 
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_URL}/assets/`, { withCredentials: true }).then((response) => {
-      const venues =
-        response.data === null || response.data.length === 0
-          ? []
-          : response.data.filter((a) => a.category === "Venue");
+      const venues = response.data?.filter((a) => a.category === "Venue") || [];
       setVenueOptions(venues);
     });
   }, []);
 
-  let conflicts = [];
-
   const checkBookingConflicts = () => {
-    if (
-      !request.venue_id ||
-      !request.event_dates ||
-      !request.event_start_time ||
-      !request.event_end_time
-    )
-      return;
+    if (!request.venue_id || !request.event_dates || !request.event_start_time || !request.event_end_time) return;
 
-    // If venueRequests is undefined or empty, skip the check
     if (!Array.isArray(venueRequests) || venueRequests.length === 0) {
-      // Clear any previous messages
       setFormErrors((prev) => ({ ...prev, booking: "" }));
       setFormWarnings((prev) => ({ ...prev, booking: "" }));
       return;
@@ -190,31 +195,21 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
         ? Number(existing.event_dates.replaceAll("-", "").trim())
         : null;
 
-      // Skip if not same venue or date
-      if (existingVenueId !== targetVenueId || existingDate !== targetDate) {
-        return false;
-      }
+      if (existingVenueId !== targetVenueId || existingDate !== targetDate) return false;
 
-      // Parse times
       const newStart = new Date(`1970-01-01T${request.event_start_time}`);
       const newEnd = new Date(`1970-01-01T${request.event_end_time}`);
       const existStart = new Date(`1970-01-01T${existing.event_start_time}`);
       const existEnd = new Date(`1970-01-01T${existing.event_end_time}`);
 
-      // Check time overlap
       const hasOverlap = newStart < existEnd && newEnd > existStart;
-
-      // Check 30-minute grace period before/after
       const gracePeriodViolation =
-        (newStart >= existStart &&
-          newStart < new Date(existEnd.getTime() + 30 * 60000)) ||
-        (existStart >= newStart &&
-          existStart < new Date(newEnd.getTime() + 30 * 60000));
+        (newStart >= existStart && newStart < new Date(existEnd.getTime() + 30 * 60000)) ||
+        (existStart >= newStart && existStart < new Date(newEnd.getTime() + 30 * 60000));
 
       return hasOverlap || gracePeriodViolation;
     });
 
-    // Clear previous messages
     setFormErrors((prev) => ({ ...prev, booking: "" }));
     setFormWarnings((prev) => ({ ...prev, booking: "" }));
 
@@ -236,19 +231,7 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
     }
   };
 
-  // Check for conflicts whenever relevant fields change
   useEffect(() => {
-    // if (!venueRequests || !request) return;
-    // // Inside the conflict useEffect, add:
-    // console.log("Checking conflicts...", {
-    //   venueId: { value: request.venue_id, type: typeof request.venue_id },
-    //   date: { value: request.event_dates, type: typeof request.event_dates },
-    //   venueRequests: venueRequests.map((vr) => ({
-    //     venue: { value: vr.venue_id, type: typeof vr.venue_id },
-    //     date: { value: vr.event_dates, type: typeof vr.event_dates },
-    //   })),
-    // });
-    // console.log(conflicts);
     checkBookingConflicts();
   }, [request, venueRequests]);
 
@@ -262,26 +245,15 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     const updatedRequest = { ...request, [name]: value };
 
-    // Time and date validation
     if (name === "event_dates") {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      const oneWeekFromNow = new Date();
-      oneWeekFromNow.setHours(0, 0, 0, 0);
-      oneWeekFromNow.setDate(oneWeekFromNow.getDate() + 7);
-
-      const selectedDate = new Date(value);
-      selectedDate.setHours(0, 0, 0, 0);
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const oneWeekFromNow = new Date(); oneWeekFromNow.setDate(today.getDate() + 7); oneWeekFromNow.setHours(0, 0, 0, 0);
+      const selectedDate = new Date(value); selectedDate.setHours(0, 0, 0, 0);
 
       if (selectedDate < today) {
-        setFormErrors((prev) => ({
-          ...prev,
-          date: "Event date cannot be in the past.",
-        }));
+        setFormErrors((prev) => ({ ...prev, date: "Event date cannot be in the past." }));
       } else if (selectedDate < oneWeekFromNow) {
         setFormErrors((prev) => ({
           ...prev,
@@ -298,15 +270,9 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
 
       if (updatedRequest.event_start_time && updatedRequest.event_end_time) {
         if (start >= end) {
-          setFormErrors((prev) => ({
-            ...prev,
-            time: "End time must be later than start time.",
-          }));
+          setFormErrors((prev) => ({ ...prev, time: "End time must be later than start time." }));
         } else if ((end - start) / (1000 * 60) < 60) {
-          setFormErrors((prev) => ({
-            ...prev,
-            time: "Event duration must be at least 1 hour.",
-          }));
+          setFormErrors((prev) => ({ ...prev, time: "Event duration must be at least 1 hour." }));
         } else {
           setFormErrors((prev) => ({ ...prev, time: "" }));
         }
@@ -316,37 +282,46 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
     setRequest(updatedRequest);
   };
 
-  const handleAddParticular = (e) => {
-    e.preventDefault();
-    const newParticular = { particulars: "", quantity: 0, description: "" };
-    const updatedDetails = [...request.details, newParticular];
+  // AI: Generate Purpose
+  const generatePurpose = async () => {
+    if (!request.title.trim()) return;
+    setAiLoading(true);
+    try {
+      const prompt = `Generate a clear, professional purpose (under 80 words) from the requester’s point of view, explaining the reason for holding the event, its objectives, and how the requested venue supports the activity titled: "${request.title}".`;
 
-    setRequest({
-      ...request,
-      details: updatedDetails,
-    });
+      const result = await genAI.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+      });
 
-    // Set the new index to edit mode
-    setEditingIndex(updatedDetails.length - 1);
-    setEditedParticular(newParticular);
+      const text = result.text?.trim();
+      if (text) setRequest((prev) => ({ ...prev, purpose: text }));
+    } catch (err) {
+      ToastNotification.error("AI Error", "Failed to generate purpose.");
+    } finally {
+      setAiLoading(false);
+    }
   };
 
-  const handleEditClick = (index) => {
-    setEditingIndex(index);
-    setEditedParticular({ ...request.details[index] });
-  };
+  // AI: Rephrase Purpose
+  const rephrasePurpose = async () => {
+    if (!request.purpose.trim()) return;
+    setAiLoading(true);
+    try {
+      const prompt = `Rephrase professionally and concisely (under 80 words):\n"${request.purpose}"`;
 
-  const handleSaveEdit = (index) => {
-    const updatedDetails = [...request.details];
-    updatedDetails[index] = editedParticular;
-    setRequest({ ...request, details: updatedDetails });
-    setEditingIndex(null);
-  };
+      const result = await genAI.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+      });
 
-  const handleDetailRemove = (index) => {
-    const updatedDetails = [...request.details];
-    updatedDetails.splice(index, 1);
-    setRequest({ ...request, details: updatedDetails });
+      const text = result.text?.trim();
+      if (text) setRequest((prev) => ({ ...prev, purpose: text }));
+    } catch (err) {
+      ToastNotification.error("AI Error", "Failed to rephrase purpose.");
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   const submitVenueRequest = async () => {
@@ -364,14 +339,9 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
         ),
       };
 
-      const requesterId = allUserInfo.find(
-        (user) => user.reference_number === request.requester
-      );
+      const requesterId = allUserInfo.find((u) => u.reference_number === request.requester);
 
-      if (
-        request.event_nature === "others" &&
-        !request.event_nature_other.trim()
-      ) {
+      if (request.event_nature === "others" && !request.event_nature_other.trim()) {
         ToastNotification.error("Please specify the event nature.");
         return;
       }
@@ -391,7 +361,7 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
         requestData.event_nature = request.event_nature_other.trim();
       }
 
-      let response = await axios.post(`${process.env.REACT_APP_API_URL}/venue_request`, requestData, {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/venue_request`, requestData, {
         withCredentials: true,
       });
 
@@ -404,6 +374,7 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
           organization: "",
           title: "",
           event_nature: "",
+          event_nature_other: "",
           event_dates: "",
           event_start_time: "",
           event_end_time: "",
@@ -417,18 +388,16 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
       }
     } catch (err) {
       console.error("Submit error:", err);
+      ToastNotification.error("Error", "Failed to submit request.");
     }
   };
 
   return (
     <div className="py-2 text-sm space-y-4 overflow-y-auto">
-      {/* Requester, Department, Venue */}
+      {/* Requester & Venue */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Requester */}
         <div>
-          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Requester
-          </label>
+          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Requester</label>
           {user.access_level === "admin" ? (
             <select
               name="requester"
@@ -438,12 +407,9 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
               required
             >
               <option value="">Select Requester</option>
-              {allUserInfo.map((user) => (
-                <option
-                  key={user.reference_number}
-                  value={user.reference_number}
-                >
-                  {user.first_name} {user.last_name}
+              {allUserInfo.map((u) => (
+                <option key={u.reference_number} value={u.reference_number}>
+                  {u.first_name} {u.last_name}
                 </option>
               ))}
             </select>
@@ -455,20 +421,13 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
                 readOnly
                 className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200"
               />
-              <input
-                type="hidden"
-                name="requester"
-                value={user.reference_number}
-              />
+              <input type="hidden" name="requester" value={user.reference_number} />
             </>
           )}
         </div>
 
-        {/* Venue */}
         <div>
-          <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
-            Venue
-          </label>
+          <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Venue</label>
           <select
             name="venue_id"
             value={request.venue_id}
@@ -488,9 +447,7 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
 
       {/* Organization & Title */}
       <div>
-        <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
-          Organization
-        </label>
+        <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Organization</label>
         <input
           type="text"
           name="organization"
@@ -501,9 +458,7 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
-          Event Title
-        </label>
+        <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Event Title</label>
         <input
           type="text"
           name="title"
@@ -515,9 +470,7 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
 
       {/* Event Nature */}
       <div>
-        <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
-          Event Nature
-        </label>
+        <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Event Nature</label>
         <select
           name="event_nature"
           value={request.event_nature}
@@ -532,9 +485,7 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
         </select>
         {request.event_nature === "others" && (
           <div className="mt-2">
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
-              Please Specify
-            </label>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Please Specify</label>
             <input
               type="text"
               name="event_nature_other"
@@ -547,11 +498,10 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
         )}
       </div>
 
+      {/* Participants & Pax */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
-            Participants
-          </label>
+          <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Participants</label>
           <input
             type="text"
             name="participants"
@@ -560,11 +510,8 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
           />
         </div>
-
         <div>
-          <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
-            Pax Estimation
-          </label>
+          <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Pax Estimation</label>
           <input
             type="number"
             name="pax_estimation"
@@ -574,13 +521,11 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
           />
         </div>
       </div>
-      {/* Date and Time */}
+
+      {/* Date & Time */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Event Date */}
         <div>
-          <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
-            Event Date
-          </label>
+          <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Event Date</label>
           <input
             type="date"
             name="event_dates"
@@ -588,16 +533,10 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
             onChange={handleChange}
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
           />
-          {formErrors.date && (
-            <p className="text-red-500 text-xs mt-1">{formErrors.date}</p>
-          )}
+          {formErrors.date && <p className="text-red-500 text-xs mt-1">{formErrors.date}</p>}
         </div>
-
-        {/* Start Time */}
         <div>
-          <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
-            Start Time
-          </label>
+          <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Start Time</label>
           <input
             type="time"
             name="event_start_time"
@@ -606,12 +545,8 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
           />
         </div>
-
-        {/* End Time */}
         <div>
-          <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
-            End Time
-          </label>
+          <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">End Time</label>
           <input
             type="time"
             name="event_end_time"
@@ -619,233 +554,114 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
             onChange={handleChange}
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
           />
-          {formErrors.time && (
-            <p className="text-red-500 text-xs mt-1">{formErrors.time}</p>
-          )}
+          {formErrors.time && <p className="text-red-500 text-xs mt-1">{formErrors.time}</p>}
         </div>
       </div>
-      {/* Booking conflict messages */}
+
+      {/* Booking Conflicts */}
       <div className="space-y-2">
         {formErrors.booking && (
           <p className="text-red-500 text-xs mt-2 flex items-start gap-1">
             {formErrors.booking}
             <span className="relative flex group">
-              <Info
-                size={14}
-                className="text-red-500 cursor-pointer mt-0.5 transition-colors hover:text-red-700"
-                weight="duotone"
-              />
-              {/* Tooltip: top-right aligned */}
-              <div className="absolute bottom-full right-0 mb-2 w-64 bg-white text-gray-700 text-xs border border-red-200 rounded-lg shadow-lg p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-in-out z-50 pointer-events-none">
-                {/* Arrow (bottom-right corner) */}
+              <Info size={14} className="text-red-500 cursor-pointer mt-0.5" weight="duotone" />
+              <div className="absolute bottom-full right-0 mb-2 w-64 bg-white text-gray-700 text-xs border border-red-200 rounded-lg shadow-lg p-3 opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
                 <div className="absolute -bottom-1.5 right-2 w-3 h-3 bg-white border-b border-r border-red-200 rotate-45"></div>
-                This means the venue has already been booked for this date and
-                time. Try selecting a different time slot or another date.
+                This means the venue has already been booked for this date and time.
               </div>
             </span>
           </p>
         )}
-
         {formWarnings.booking && (
           <p className="text-amber-500 text-xs mt-2 flex items-start gap-1">
             {formWarnings.booking}
             <span className="relative flex group">
-              <Info
-                size={14}
-                className="text-amber-500 cursor-pointer mt-0.5 transition-colors hover:text-amber-600"
-                weight="duotone"
-              />
-              {/* Tooltip: top-right aligned */}
-              <div className="absolute bottom-full right-0 mb-2 w-64 bg-white text-gray-700 text-xs border border-amber-200 rounded-lg shadow-lg p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-in-out z-50 pointer-events-none">
-                {/* Arrow (bottom-right corner) */}
+              <Info size={14} className="text-amber-500 cursor-pointer mt-0.5" weight="duotone" />
+              <div className="absolute bottom-full right-0 mb-2 w-64 bg-white text-gray-700 text-xs border border-amber-200 rounded-lg shadow-lg p-3 opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
                 <div className="absolute -bottom-1.5 right-2 w-3 h-3 bg-white border-b border-r border-amber-200 rotate-45"></div>
                 A pending request might conflict with your selected schedule.
-                Approval is not guaranteed until conflicts are resolved.
               </div>
             </span>
           </p>
         )}
       </div>
 
-      {/* Purpose */}
+      {/* Purpose with AI */}
       <div>
-        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Purpose
-        </label>
-        <textarea
-          name="purpose"
-          value={request.purpose}
-          onChange={(e) => handleChange(e)}
-          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-300"
-          required
-        />
+        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Purpose</label>
+        <div className="relative">
+          <textarea
+            ref={purposeTextareaRef}
+            name="purpose"
+            value={request.purpose}
+            onChange={handleChange}
+            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 pr-10 md:pr-20 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 resize-none"
+            rows={4}
+            placeholder="Enter purpose or use AI (note: a title is required to generate with AI)..."
+            required
+          />
+          <div className="absolute bottom-2 right-2 flex gap-1 bg-white dark:bg-gray-800 p-1 flex-col md:flex-row">
+            <button
+              onClick={generatePurpose}
+              disabled={aiLoading || !request.title.trim()}
+              className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition disabled:opacity-50"
+              title="Generate purpose"
+            >
+              {aiLoading ? <Spinner className="h-4 w-4" /> : <Sparkle size={16} />}
+            </button>
+            <button
+              onClick={rephrasePurpose}
+              disabled={aiLoading || !request.purpose.trim()}
+              className="p-1.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded transition disabled:opacity-50"
+              title="Rephrase"
+            >
+              <ArrowClockwise size={16} />
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Particulars Section */}
+      {/* Particulars (Add-ons) */}
       <div className="space-y-2">
-        <Typography className="text-xs font-semibold text-gray-600 dark:text-gray-300">
-          Particulars
-        </Typography>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pr-4 sm:pr-20">
+        <Typography className="text-xs font-semibold text-gray-600 dark:text-gray-300">Particulars</Typography>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {addonsList.map((addon) => (
             <div key={addon.id} className="flex items-center gap-2">
               <div className="flex items-center gap-1">
                 <Checkbox
                   checked={!!selectedAddons[addon.id]}
-                  onChange={handleCheckboxChange(addon.id, addon.isCustom)}
-                  name={addon.id}
+                  onChange={handleCheckboxChange(addon.id)}
                 />
-                <Typography className="text-xs font-semibold text-gray-600 dark:text-gray-300">
-                  {addon.label}
-                </Typography>
+                <Typography className="text-xs font-semibold text-gray-600 dark:text-gray-300">{addon.label}</Typography>
               </div>
               {selectedAddons[addon.id] && (
                 <div className="flex gap-2">
                   {addon.isCustom && (
                     <input
                       type="text"
-                      label="Particular Name"
-                      value={selectedAddons[addon.id].customName || ''}
+                      value={selectedAddons[addon.id].customName || ""}
                       onChange={handleCustomNameChange(addon.id)}
-                      size="small"
-                      className="w-40 p-1 text-xs font-semibold text-gray-600 dark:text-gray-300"
-                      required
+                      className="w-40 p-1 text-xs border rounded"
+                      placeholder="Name"
                     />
                   )}
                   <input
                     type="number"
-                    label="Quantity"
                     value={selectedAddons[addon.id].quantity}
-                    onChange={handleQuantityChange(addon.id, addon.isCustom)}
-                    inputProps={{ min: 1 }}
-                    size="small"
-                    className="w-10 p-1 text-xs font-semibold text-gray-600 dark:text-gray-300"
+                    onChange={handleQuantityChange(addon.id)}
+                    min="1"
+                    className="w-16 p-1 text-xs border rounded"
                   />
                 </div>
               )}
             </div>
           ))}
         </div>
+      </div>
 
-        {/* <div className="overflow-x-auto">
-          <table className="min-w-full text-left text-sm border border-gray-300 dark:border-gray-600 rounded-md overflow-hidden">
-            <thead className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-              <tr>
-                <th className="px-4 py-2 text-xs font-semibold text-gray-600 dark:border-gray-600">Item</th>
-                <th className="px-4 py-2 text-xs font-semibold text-gray-600 dark:border-gray-600">Quantity</th>
-                <th className="px-4 py-2 text-xs font-semibold text-gray-600  dark:border-gray-600">Description</th>
-                <th className="px-4 py-2 text-xs font-semibold text-gray-600">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {request.details.map((detail, index) => (
-                <tr
-                  key={index}
-                  className="border-t border-gray-300 dark:border-gray-600"
-                >
-                  {editingIndex === index ? (
-                    <>
-                      <td className="px-4 py-2">
-                        <input
-                          type="text"
-                          value={editedParticular.particulars}
-                          onChange={(e) =>
-                            setEditedParticular({
-                              ...editedParticular,
-                              particulars: e.target.value,
-                            })
-                          }
-                          className="w-full px-2 py-1 border border-gray-400 rounded-md dark:bg-gray-800 dark:text-white"
-                        />
-                      </td>
-                      <td className="px-4 py-2">
-                        <input
-                          type="number"
-                          value={editedParticular.quantity}
-                          onChange={(e) =>
-                            setEditedParticular({
-                              ...editedParticular,
-                              quantity: e.target.value,
-                            })
-                          }
-                          className="w-full px-2 py-1 border border-gray-400 rounded-md dark:bg-gray-800 dark:text-white"
-                        />
-                      </td>
-                      <td className="px-4 py-2">
-                        <textarea
-                          value={editedParticular.description}
-                          rows={1}
-                          onChange={(e) =>
-                            setEditedParticular({
-                              ...editedParticular,
-                              description: e.target.value,
-                            })
-                          }
-                          className="w-full px-2 py-1 border border-gray-400 rounded-md dark:bg-gray-800 dark:text-white"
-                        />
-                      </td>
-                      <td className="px-4 py-2 space-x-2">
-                        <button
-                          className="text-green-500"
-                          onClick={() => handleSaveEdit(index)}
-                        >
-                          <FloppyDisk size={18} />
-                        </button>
-                        <button
-                          className="text-red-500"
-                          onClick={() => setEditingIndex(null)}
-                        >
-                          <Prohibit size={18} />
-                        </button>
-                      </td>
-                    </>
-                  ) : (
-                    <>
-                      <td className="px-4 py-2">{detail.particulars}</td>
-                      <td className="px-4 py-2">x{detail.quantity}</td>
-                      <td className="px-4 py-2">{detail.description}</td>
-                      <td className="px-4 py-2 space-x-2">
-                        <button
-                          className="text-blue-500"
-                          onClick={() => handleEditClick(index)}
-                        >
-                          <PencilSimpleLine size={18} />
-                        </button>
-                        <button
-                          className="text-red-500"
-                          onClick={() => handleDetailRemove(index)}
-                        >
-                          <X size={18} />
-                        </button>
-                      </td>
-                    </>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <Button
-          color="green"
-          variant="outlined"
-          onClick={handleAddParticular}
-          className="flex items-center gap-1 px-3 py-2 border rounded-md hover:text-green-500 dark:border-gray-600"
-        >
-          <Plus size={18} />
-          <Typography className="text-xs">Add Particular</Typography>
-        </Button>*/}
-
-      </div> 
-
-      {/* The rest of the form (participants, purpose, details, submit) remains unchanged... */}
-      {/* You can copy your previous implementation here as it does not affect the new logic */}
-
-      {/* Submit Button */}
+      {/* Submit */}
       <Button
         color="blue"
-        type="submit"
         onClick={submitVenueRequest}
         disabled={
           !request.venue_id ||
@@ -860,7 +676,8 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
           !request.pax_estimation ||
           !request.purpose ||
           formErrors.date ||
-          formErrors.time
+          formErrors.time ||
+          formErrors.booking
         }
         className="dark:bg-blue-600 dark:hover:bg-blue-500 w-full md:w-auto"
       >

@@ -1,11 +1,13 @@
-import React, { useContext, useEffect, useState } from "react";
-import { Button, Typography } from "@material-tailwind/react";
+import React, { useContext, useEffect, useState, useRef } from "react";
+import { Button, Typography, Spinner } from "@material-tailwind/react";
 import {
   Plus,
   FloppyDisk,
   PencilSimpleLine,
   Prohibit,
   X,
+  Sparkle,
+  ArrowClockwise,
 } from "@phosphor-icons/react";
 import { AuthContext } from "../../../../authentication";
 import axios from "axios";
@@ -14,11 +16,19 @@ import ToastNotification from "../../../../../utils/ToastNotification";
 import { PurchasingRequestsContext } from "../../../context/PurchasingRequestsContext";
 import { SettingsContext } from "../../../../settings/context/SettingsContext";
 import assignApproversToRequest from "../../../utils/assignApproversToRequest";
+import { GoogleGenAI } from "@google/genai";
+
+// ---------------------------------------------------------------------
+// Gemini initialisation (frontend only)
+// ---------------------------------------------------------------------
+const genAI = new GoogleGenAI({
+  apiKey: process.env.REACT_APP_GEMINI_API_KEY,
+  apiVersion: "v1",
+});
 
 const PurchasingRequestForm = ({ setSelectedRequest }) => {
   const { user } = useContext(AuthContext);
-  const { allUserInfo, getUserByReferenceNumber, fetchUsers } =
-    useContext(UserContext);
+  const { allUserInfo, getUserByReferenceNumber, fetchUsers } = useContext(UserContext);
   const { fetchPurchasingRequests } = useContext(PurchasingRequestsContext);
   const {
     departments,
@@ -54,7 +64,7 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
     description: "",
   });
   const [departmentOptions, setDepartmentOptions] = useState([]);
-  const [supplyCategories, setSupplyCategories] = useState([
+  const [supplyCategories] = useState([
     { id: 1, name: "Office Supplies" },
     { id: 2, name: "Computer Parts / Peripherals" },
     { id: 3, name: "Electrical Supplies" },
@@ -65,6 +75,9 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
     { id: 8, name: "Publications" },
     { id: 9, name: "Others" },
   ]);
+  const [aiLoading, setAiLoading] = useState(false);
+  const purposeTextareaRef = useRef(null);
+
   const requestType = "Purchasing Request";
 
   useEffect(() => {
@@ -77,7 +90,6 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
     fetchUsers();
   }, []);
 
-  // Fetch department options from backend
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -95,10 +107,12 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
   }, []);
 
   const handleChange = (e) => {
-    if (e.target.name === "date_required") {
+    const { name, value } = e.target;
+
+    if (name === "date_required") {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const selectedDate = new Date(e.target.value);
+      const selectedDate = new Date(value);
       if (selectedDate < today) {
         setErrorMessage("Invalid Date. Date cannot be in the past.");
         return;
@@ -110,13 +124,13 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
           setErrorMessage(
             "Requests should be at least one week prior. For urgent requests, please contact the GSO."
           );
-          setRequest({ ...request, [e.target.name]: "" });
+          setRequest({ ...request, [name]: "" });
           return;
         }
       }
     }
     setErrorMessage("");
-    setRequest({ ...request, [e.target.name]: e.target.value });
+    setRequest({ ...request, [name]: value });
   };
 
   const handleParticularFormChange = (e) => {
@@ -175,6 +189,52 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
     setEditingIndex(null);
   };
 
+  // AI: Generate Purpose from Title
+  const generatePurpose = async () => {
+    if (!request.title.trim()) return;
+    setAiLoading(true);
+    try {
+      const prompt = `As the requester, write a clear and concise purpose statement (under 80 words) explaining why I am submitting this purchasing request, including what the items or services will be used for and how they support current operations or objectives, based on the title: “${request.title}”.`;
+
+      const result = await genAI.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+      });
+
+      const text = result.text?.trim();
+      if (text) {
+        setRequest((prev) => ({ ...prev, purpose: text }));
+      }
+    } catch (err) {
+      ToastNotification.error("AI Error", "Failed to generate purpose.");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  // AI: Rephrase Purpose
+  const rephrasePurpose = async () => {
+    if (!request.purpose.trim()) return;
+    setAiLoading(true);
+    try {
+      const prompt = `Rephrase this purpose professionally and concisely (under 80 words):\n"${request.purpose}"`;
+
+      const result = await genAI.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+      });
+
+      const text = result.text?.trim();
+      if (text) {
+        setRequest((prev) => ({ ...prev, purpose: text }));
+      }
+    } catch (err) {
+      ToastNotification.error("AI Error", "Failed to rephrase purpose.");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   const submitPurchasingRequest = async () => {
     try {
       const formattedDate = request.date_required
@@ -193,7 +253,7 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
       };
 
       const requesterId = allUserInfo.find(
-        (user) => user.reference_number === request.requester
+        (u) => u.reference_number === request.requester
       );
 
       requestData = assignApproversToRequest({
@@ -231,13 +291,14 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
       }
     } catch (error) {
       console.error("Error submitting purchasing request:", error);
+      ToastNotification.error("Error", "Failed to submit request.");
     }
   };
 
   return (
     <div className="py-2 text-sm space-y-4 overflow-y-auto">
-      {/* Requester & Department */}
-      <div className="grid grid-cols-1 sm:grid-cols-1 gap-4">
+      {/* Requester */}
+      <div className="grid grid-cols-1 gap-4">
         <div>
           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
             Requester
@@ -251,12 +312,9 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
               required
             >
               <option value="">Select Requester</option>
-              {allUserInfo.map((user) => (
-                <option
-                  key={user.reference_number}
-                  value={user.reference_number}
-                >
-                  {user.first_name} {user.last_name}
+              {allUserInfo.map((u) => (
+                <option key={u.reference_number} value={u.reference_number}>
+                  {u.first_name} {u.last_name}
                 </option>
               ))}
             </select>
@@ -268,17 +326,13 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
                 readOnly
                 className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200"
               />
-              <input
-                type="hidden"
-                name="requester"
-                value={user.reference_number}
-              />
+              <input type="hidden" name="requester" value={user.reference_number} />
             </>
           )}
         </div>
       </div>
 
-      {/* Title & Date Required */}
+      {/* Title */}
       <div>
         <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
           Title
@@ -293,6 +347,7 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
         />
       </div>
 
+      {/* Date Required */}
       <div>
         <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
           Date Required
@@ -306,9 +361,7 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
           required
         />
         {errorMessage && (
-          <p className="text-red-500 font-semibold text-xs pt-1">
-            {errorMessage}
-          </p>
+          <p className="text-red-500 font-semibold text-xs pt-1">{errorMessage}</p>
         )}
       </div>
 
@@ -325,26 +378,52 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
           required
         >
           <option value="">Select Category</option>
-          {supplyCategories?.map((category) => (
-            <option key={category.id} value={category.name}>
-              {category.name}
+          {supplyCategories.map((cat) => (
+            <option key={cat.id} value={cat.name}>
+              {cat.name}
             </option>
           ))}
         </select>
       </div>
 
-      {/* Purpose */}
+      {/* Purpose with AI */}
       <div>
         <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
           Purpose
         </label>
-        <textarea
-          name="purpose"
-          value={request.purpose}
-          onChange={handleChange}
-          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-          required
-        />
+
+        <div className="relative">
+          <textarea
+            ref={purposeTextareaRef}
+            name="purpose"
+            value={request.purpose}
+            onChange={handleChange}
+            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 pr-10 md:p-20 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 resize-none"
+            rows={4}
+            placeholder="Enter purpose or use AI (note: a title is required to generate with AI)..."
+            required
+          />
+
+          {/* Floating AI Buttons */}
+          <div className="absolute bottom-2 right-2 flex gap-1 bg-white dark:bg-gray-800 p-1 md:flex-row flex-col p-1">
+            <button
+              onClick={generatePurpose}
+              disabled={aiLoading || !request.title.trim()}
+              className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition disabled:opacity-50"
+              title="Generate purpose from title"
+            >
+              {aiLoading ? <Spinner className="h-4 w-4" /> : <Sparkle size={16} />}
+            </button>
+            <button
+              onClick={rephrasePurpose}
+              disabled={aiLoading || !request.purpose.trim()}
+              className="p-1.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded transition disabled:opacity-50"
+              title="Rephrase purpose"
+            >
+              <ArrowClockwise size={16} />
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Particulars Section */}
@@ -364,9 +443,8 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
           </Button>
         </div>
 
-        {/* Particular Input Form */}
         {showParticularForm && (
-          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 gap-4 mb-3">
+          <div className="grid grid-cols-1 gap-4 mb-3">
             <div>
               <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Particulars / Items Description / Specifications
@@ -427,37 +505,27 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
           </div>
         )}
 
-        {/* Particulars Table */}
         <div className="overflow-x-auto pt-3">
           <table className="min-w-full text-left text-sm border border-gray-300 dark:border-gray-600 rounded-md overflow-hidden">
             <thead className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
               <tr>
-                <th className="px-4 py-2 text-xs font-semibold text-gray-600 dark:border-gray-600">Item</th>
-                <th className="px-4 py-2 text-xs font-semibold text-gray-600 dark:border-gray-600">Quantity</th>
-                <th className="px-4 py-2 text-xs font-semibold text-gray-600 dark:border-gray-600">Description</th>
-                <th className="px-4 py-2 text-xs font-semibold text-gray-600 dark:border-gray-600">Actions</th>
+                <th className="px-4 py-2 text-xs font-semibold">Item</th>
+                <th className="px-4 py-2 text-xs font-semibold">Quantity</th>
+                <th className="px-4 py-2 text-xs font-semibold">Description</th>
+                <th className="px-4 py-2 text-xs font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody>
               {request.details.map((detail, index) => (
-                <tr
-                  key={index}
-                  className="border-t border-gray-300 dark:border-gray-600"
-                >
+                <tr key={index} className="border-t border-gray-300 dark:border-gray-600">
                   <td className="px-4 py-2">{detail.particulars}</td>
                   <td className="px-4 py-2">x{detail.quantity}</td>
                   <td className="px-4 py-2">{detail.description}</td>
                   <td className="px-4 py-2 space-x-2">
-                    <button
-                      className="text-blue-500"
-                      onClick={() => handleEditClick(index)}
-                    >
+                    <button className="text-blue-500" onClick={() => handleEditClick(index)}>
                       <PencilSimpleLine size={18} />
                     </button>
-                    <button
-                      className="text-red-500"
-                      onClick={() => handleDetailRemove(index)}
-                    >
+                    <button className="text-red-500" onClick={() => handleDetailRemove(index)}>
                       <X size={18} />
                     </button>
                   </td>
@@ -482,6 +550,7 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
         />
       </div>
 
+      {/* Submit */}
       <Button
         color="blue"
         onClick={submitPurchasingRequest}

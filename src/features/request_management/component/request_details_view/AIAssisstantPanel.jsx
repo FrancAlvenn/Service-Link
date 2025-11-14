@@ -4,7 +4,6 @@ import axios from "axios";
 import { GoogleGenAI } from "@google/genai";
 import { Spinner } from "@material-tailwind/react";
 import { Sparkle, CaretDown, CaretUp } from "@phosphor-icons/react";
-import ToastNotification from "../../../../../utils/ToastNotification";
 
 // Initialise Gemini (frontend)
 const genAI = new GoogleGenAI({
@@ -52,7 +51,7 @@ const AIAssistantPanel = ({ request, requestType, referenceNumber }) => {
   }, [isJobRequest]);
 
   // ---------------------------------------------------------------
-  // 2. AI call – with 503-retry & friendly toast
+  // 2. AI call – with 503-retry & message shown **inside the panel**
   // ---------------------------------------------------------------
   const runAI = async (retryCount = 0) => {
     const MAX_RETRIES = 2;
@@ -81,19 +80,19 @@ const AIAssistantPanel = ({ request, requestType, referenceNumber }) => {
         err?.code === "ECONNABORTED" ||
         /network|timeout|unavailable/i.test(err?.message ?? "");
 
-      // ---- Auto-retry ----
+      // ---- Auto-retry -------------------------------------------------
       if (isUnavailable && retryCount < MAX_RETRIES) {
         setTimeout(() => runAI(retryCount + 1), RETRY_DELAY);
         return;
       }
 
-      // ---- Final friendly message ----
+      // ---- Final message (shown inside the panel) --------------------
       const message = isUnavailable
         ? "AI assistant is temporarily unavailable. Please try again later."
         : "Failed to generate suggestions. Please try again.";
 
-      ToastNotification.error("AI Unavailable", message);
-      setError(message);
+      setError(message);               // <-- shown in the panel
+      setAiResponse("");               // clear any previous response
     } finally {
       setLoading(false);
     }

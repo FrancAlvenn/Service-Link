@@ -23,7 +23,9 @@ const AIAssistantPanel = ({ request, requestType, referenceNumber }) => {
 
   const isJobRequest = requestType === "job_request";
 
-  // Fetch all job requests & employees once
+  // ---------------------------------------------------------------
+  // 1. Fetch context data (once)
+  // ---------------------------------------------------------------
   useEffect(() => {
     if (!isJobRequest) return;
 
@@ -48,34 +50,73 @@ const AIAssistantPanel = ({ request, requestType, referenceNumber }) => {
     fetchData();
   }, [isJobRequest]);
 
-  useEffect(() => {
-    if (!isOpen || !isJobRequest || aiResponse || !allRequests.length) return;
+  // ---------------------------------------------------------------
+  // 2. AI call – with 503-retry & message shown **inside the panel**
+  // ---------------------------------------------------------------
+  const runAI = async (retryCount = 0) => {
+    const MAX_RETRIES = 2;
+    const RETRY_DELAY = 1500; // ms
 
-    const runAI = async () => {
-      setLoading(true);
-      setError("");
+    setLoading(true);
+    setError("");
 
-      try {
-        const context = gatherContext(request, allRequests, employees);
-        const prompt = buildPrompt(context);
+    try {
+      const context = gatherContext(request, allRequests, employees);
+      const prompt = buildPrompt(context);
 
-        const result = await genAI.models.generateContent({
-          model: "gemini-2.5-flash",
-          contents: prompt,
-        });
+      const result = await genAI.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+      });
 
-        setAiResponse(result.text ?? "No response.");
-      } catch (err) {
-        console.error("Gemini Error:", err);
-        setError("AI is unavailable. Try again later.");
-      } finally {
-        setLoading(false);
+      const text = result.text?.trim() ?? "No response.";
+      setAiResponse(text);
+    } catch (err) {
+      console.error("Gemini Assistant Error:", err);
+
+      // ---- Detect service-unavailable / network problems ----
+      const isUnavailable =
+        err?.status === 503 ||
+        err?.code === "ECONNABORTED" ||
+        /network|timeout|unavailable/i.test(err?.message ?? "");
+
+      // ---- Auto-retry -------------------------------------------------
+      if (isUnavailable && retryCount < MAX_RETRIES) {
+        setTimeout(() => runAI(retryCount + 1), RETRY_DELAY);
+        return;
       }
-    };
+
+      // ---- Final message (shown inside the panel) --------------------
+      const message = isUnavailable
+        ? "AI assistant is temporarily unavailable. Please try again later."
+        : "Failed to generate suggestions. Please try again.";
+
+      setError(message);               // <-- shown in the panel
+      setAiResponse("");               // clear any previous response
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ---------------------------------------------------------------
+  // 3. Trigger AI when panel opens & data is ready
+  // ---------------------------------------------------------------
+  useEffect(() => {
+    if (
+      !isOpen ||
+      !isJobRequest ||
+      aiResponse ||
+      !allRequests.length ||
+      !request?.title
+    )
+      return;
 
     runAI();
-  }, [isOpen, isJobRequest, aiResponse, request, allRequests, employees]);
+  }, [isOpen, isJobRequest, aiResponse, request, allRequests]);
 
+  // ---------------------------------------------------------------
+  // 4. Render
+  // ---------------------------------------------------------------
   return (
     <div className="mb-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800">
       {/* Header */}
@@ -108,7 +149,9 @@ const AIAssistantPanel = ({ request, requestType, referenceNumber }) => {
               dangerouslySetInnerHTML={{ __html: formatResponse(aiResponse) }}
             />
           ) : (
-            <p className="text-gray-500 italic text-sm">No suggestion available.</p>
+            <p className="text-gray-500 italic text-sm">
+              No suggestion available.
+            </p>
           )}
         </div>
       )}
@@ -116,6 +159,9 @@ const AIAssistantPanel = ({ request, requestType, referenceNumber }) => {
   );
 };
 
+/* -----------------------------------------------------------------
+   Helper functions (unchanged – just moved below for clarity)
+----------------------------------------------------------------- */
 const gatherContext = (current, allRequests, employees) => {
   const keywords = current.title + " " + current.purpose + " " + current.department;
   const lower = keywords.toLowerCase();
@@ -131,11 +177,15 @@ const gatherContext = (current, allRequests, employees) => {
     .map((r) => ({
       ref: r.reference_number,
       title: r.title,
-      assigned: r.assigned_to?.map((a) => a.first_name + " " + a.last_name).join(", ") || "None",
+      assigned:
+        r.assigned_to?.map((a) => a.first_name + " " + a.last_name).join(", ") ||
+        "None",
       assets: r.assigned_assets?.join(", ") || "None",
       time:
         r.completed_at && r.created_at
-          ? `${Math.round((new Date(r.completed_at) - new Date(r.created_at)) / 86400000)} days`
+          ? `${Math.round(
+              (new Date(r.completed_at) - new Date(r.created_at)) / 86400000
+            )} days`
           : "Ongoing",
       status: r.status,
     }));
@@ -152,7 +202,9 @@ const gatherContext = (current, allRequests, employees) => {
     const match = Object.entries(roleMap).find(([_, re]) => re.test(lower));
     if (match) {
       const [role] = match;
-      const expert = employees.find((e) => e.expertise?.toLowerCase().includes(role));
+      const expert = employees.find((e) =>
+        e.expertise?.toLowerCase().includes(role)
+      );
       if (expert) {
         guess = `**Suggested Assignee**: ${expert.first_name} ${expert.last_name} (${expert.expertise})\n`;
       }

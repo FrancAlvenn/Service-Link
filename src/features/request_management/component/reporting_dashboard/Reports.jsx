@@ -44,7 +44,6 @@ import {
   Filter,
 } from "@phosphor-icons/react";
 import dayjs from "dayjs";
-
 /* --------------------------------------------------------------
    Gemini init
 ---------------------------------------------------------------- */
@@ -281,56 +280,76 @@ const Reports = () => {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiInsights, setAiInsights] = useState(null);
 
-  const generateAIInsights = async () => {
-    setAiLoading(true);
-    setShowAI(true);
+  /* --------------------------------------------------------------
+   AI – generate insights (no Toast, show message inside the panel)
+---------------------------------------------------------------- */
+const generateAIInsights = async (retryCount = 0) => {
+  setAiLoading(true);
+  setShowAI(true);
 
-    const total = filteredRequests.length;
-    const approvedRate = total
-      ? ((statusCounts.Approved ?? 0) / total * 100).toFixed(1)
-      : "0";
+  const total = filteredRequests.length;
+  const approvedRate = total
+    ? ((statusCounts.Approved ?? 0) / total * 100).toFixed(1)
+    : "0";
 
-    const topDept =
-      Object.entries(departmentCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "N/A";
-    const topVehicle =
-      Object.entries(vehicleCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "N/A";
-    const topVenue =
-      Object.entries(venueCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "N/A";
+  const topDept =
+    Object.entries(departmentCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "N/A";
+  const topVehicle =
+    Object.entries(vehicleCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "N/A";
+  const topVenue =
+    Object.entries(venueCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "N/A";
 
-    const prompt = `
-  You are a BI analyst. Summarise the dashboard in **max 6 bullet points**:
+  const prompt = `
+You are a BI analyst. Summarise the dashboard in **max 6 bullet points**:
 
-  - Total requests: ${total}
-  - Approval rate: ${approvedRate}%
-  - Top department: ${topDept} (${departmentCounts[topDept] ?? 0})
-  - Most requested vehicle: ${topVehicle} (${vehicleCounts[topVehicle] ?? 0})
-  - Most booked venue: ${topVenue} (${venueCounts[topVenue] ?? 0})
-  - Avg resolution (days): ${avgResolution}
-  - Active / Archived: ${archiveCounts.Active} / ${archiveCounts.Archived}
+- Total requests: ${total}
+- Approval rate: ${approvedRate}%
+- Top department: ${topDept} (${departmentCounts[topDept] ?? 0})
+- Most requested vehicle: ${topVehicle} (${vehicleCounts[topVehicle] ?? 0})
+- Most booked venue: ${topVenue} (${venueCounts[topVenue] ?? 0})
+- Avg resolution (days): ${avgResolution}
+- Active / Archived: ${archiveCounts.Active} / ${archiveCounts.Archived}
 
-  Give **actionable recommendations** (bottlenecks, trends, suggestions). Use **bold** for key numbers.`;
+Give **actionable recommendations** (bottlenecks, trends, suggestions). Use **bold** for key numbers.`;
 
-    try {
-      // Use v1 API format (same as VenueRequestForm but with correct path)
-      const result = await genAI.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-      });
+  const MAX_RETRIES = 2;
+  const RETRY_DELAY = 1500;
 
-      // v1 response path
-      const raw =
-        result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ||
-        "No insight generated.";
+  try {
+    const result = await genAI.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+    });
 
-      console.log("Gemini Response:", result); // Debug
-      setAiInsights(formatResponse(raw));
-    } catch (err) {
-      console.error("Gemini Error:", err);
-      setAiInsights(formatResponse("**AI Error:** Failed to generate insights."));
-    } finally {
-      setAiLoading(false);
+    const raw =
+      result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ||
+      "No insight generated.";
+
+    setAiInsights(formatResponse(raw));
+  } catch (err) {
+    console.error("Gemini Insights Error:", err);
+
+    const isUnavailable =
+      err?.status === 503 ||
+      err?.code === "ECONNABORTED" ||
+      /network|timeout|unavailable/i.test(err?.message ?? "");
+
+    // ---- auto-retry -------------------------------------------------
+    if (isUnavailable && retryCount < MAX_RETRIES) {
+      setTimeout(() => generateAIInsights(retryCount + 1), RETRY_DELAY);
+      return;
     }
-  };
+
+    // ---- final message (shown inside the panel) --------------------
+    const message = isUnavailable
+      ? "AI insights are temporarily unavailable. Please try again later."
+      : "Failed to generate insights. Please try again.";
+
+    setAiInsights(formatResponse(`**AI unavailable:** ${message}`));
+  } finally {
+    setAiLoading(false);
+  }
+};
 
 
   useEffect(() => {
@@ -504,28 +523,24 @@ const Reports = () => {
       </div>
 
       {/* AI Panel */}
-      <Collapse>
-        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 border border-slate-200 dark:border-indigo-700 rounded-2xl p-5 shadow-md mt-6 mx-3">
+      <Collapse open={showAI}>
+        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark: inbox-indigo-900/30 dark:to-purple-900/30 border border-slate-200 dark:border-indigo-700 rounded-2xl p-5 shadow-md mt-6 mx-3">
           <div className="flex items-center justify-between mb-3">
             <Typography className="text-lg font-semibold text-indigo-800 dark:text-indigo-200 flex items-center gap-2">
               <Sparkle size={20} weight="fill" className="text-indigo-600" />
               AI Insights
             </Typography>
-            {/* <Button
-              size="sm"
-              variant="text"
-              onClick={() => setShowAI(false)}
-              className="text-indigo-600 hover:text-indigo-800"
-            >
-              Close
-            </Button> */}
+
             <Button
               size="sm"
               variant="text"
-              onClick={() => setAiInsights(null)}
+              onClick={() => {
+                setShowAI(false);
+                setAiInsights(null);
+              }}
               className="text-indigo-600 hover:text-indigo-800"
             >
-              Reset Insight
+              Close
             </Button>
           </div>
 
@@ -546,7 +561,6 @@ const Reports = () => {
           )}
         </div>
       </Collapse>
-
       {/* Charts Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mt-6 px-3 pb-6">
         {/* ... (all charts from previous version – unchanged) ... */}

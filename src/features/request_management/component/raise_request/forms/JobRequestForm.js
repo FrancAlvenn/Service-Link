@@ -191,9 +191,14 @@ const JobRequestForm = ({ setSelectedRequest }) => {
   };
 
   // AI: Generate Purpose from Title
-  const generatePurpose = async () => {
+  const generatePurpose = async (retryCount = 0) => {
     if (!request.title.trim()) return;
+
+    const MAX_RETRIES = 2;
+    const RETRY_DELAY = 1500; // ms
+
     setAiLoading(true);
+
     try {
       const prompt = `As the requester, write a clear and concise purpose statement (under 80 words) explaining why I am submitting this job request and what I aim to accomplish through it, based on the title: “${request.title}”.`;
 
@@ -207,34 +212,82 @@ const JobRequestForm = ({ setSelectedRequest }) => {
         setRequest((prev) => ({ ...prev, purpose: text }));
       }
     } catch (err) {
-      ToastNotification.error("AI Error", "Failed to generate purpose.");
+      console.error("Gemini Error:", err);
+
+      // Check if it's a 503 or network-related error
+      const isUnavailable =
+        err?.status === 503 ||
+        err?.code === "ECONNABORTED" ||
+        err?.message?.includes("network") ||
+        err?.message?.includes("timeout") ||
+        err?.message?.includes("unavailable");
+
+      if (isUnavailable && retryCount < MAX_RETRIES) {
+        // Auto-retry with delay
+        setTimeout(() => {
+          generatePurpose(retryCount + 1);
+        }, RETRY_DELAY);
+        return;
+      }
+
+      // Final failure — show friendly message
+      const message = isUnavailable
+        ? "AI service is temporarily unavailable. Please try again later."
+        : "Failed to generate purpose. Please try again.";
+
+      ToastNotification.error("AI Unavailable", message);
     } finally {
       setAiLoading(false);
     }
   };
 
   // AI: Rephrase Purpose
-  const rephrasePurpose = async () => {
-    if (!request.purpose.trim()) return;
-    setAiLoading(true);
-    try {
-      const prompt = `Rephrase this purpose professionally and concisely (under 80 words):\n"${request.purpose}"`;
-
-      const result = await genAI.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-      });
-
-      const text = result.text?.trim();
-      if (text) {
-        setRequest((prev) => ({ ...prev, purpose: text }));
+  const rephrasePurpose = async (retryCount = 0) => {
+      if (!request.purpose.trim()) return;
+  
+      const MAX_RETRIES = 2;
+      const RETRY_DELAY = 1500;
+  
+      setAiLoading(true);
+      try {
+        const prompt = `Rephrase professionally and concisely (under 80 words):\n"${request.purpose}"`;
+  
+        const result = await genAI.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents: prompt,
+        });
+  
+        const text = result.text?.trim();
+        if (text) setRequest((prev) => ({ ...prev, purpose: text }));
+      } catch (err) {
+        console.error("Gemini Error:", err);
+  
+        // Check if it's a 503 or network-related error
+        const isUnavailable =
+          err?.status === 503 ||
+          err?.code === "ECONNABORTED" ||
+          err?.message?.includes("network") ||
+          err?.message?.includes("timeout") ||
+          err?.message?.includes("unavailable");
+  
+        if (isUnavailable && retryCount < MAX_RETRIES) {
+          // Auto-retry with delay
+          setTimeout(() => {
+            generatePurpose(retryCount + 1);
+          }, RETRY_DELAY);
+          return;
+        }
+  
+        // Final failure — show friendly message
+        const message = isUnavailable
+          ? "AI service is temporarily unavailable. Please try again later."
+          : "Failed to generate purpose. Please try again.";
+  
+        ToastNotification.error("AI Unavailable", message);
+      } finally {
+        setAiLoading(false);
       }
-    } catch (err) {
-      ToastNotification.error("AI Error", "Failed to rephrase purpose.");
-    } finally {
-      setAiLoading(false);
-    }
-  };
+    };
 
 const [isDataReady, setIsDataReady] = useState(false);
 

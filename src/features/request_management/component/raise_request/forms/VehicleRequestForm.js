@@ -149,49 +149,115 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
   };
 
   // AI: Generate Purpose
-  const generatePurpose = async () => {
+  const generatePurpose = async (retryCount = 0) => {
     if (!request.title.trim()) return;
+
+    const MAX_RETRIES = 2;
+    const RETRY_DELAY = 1500; // ms
+
     setAiLoading(true);
+
     try {
       const prompt = `Generate a clear, professional purpose (under 80 words) from the requester’s point of view, explaining the reason, destination, and objective of the vehicle request titled: "${request.title}".`;
+
       const result = await genAI.models.generateContent({
         model: "gemini-2.5-flash",
         contents: prompt,
       });
+
       const text = result.text?.trim();
-      if (text) setRequest((prev) => ({ ...prev, purpose: text }));
+      if (text) {
+        setRequest((prev) => ({ ...prev, purpose: text }));
+      }
     } catch (err) {
-      ToastNotification.error("AI Error", "Failed to generate purpose.");
+      console.error("Gemini Error:", err);
+
+      // Check if it's a 503 or network-related error
+      const isUnavailable =
+        err?.status === 503 ||
+        err?.code === "ECONNABORTED" ||
+        err?.message?.includes("network") ||
+        err?.message?.includes("timeout") ||
+        err?.message?.includes("unavailable");
+
+      if (isUnavailable && retryCount < MAX_RETRIES) {
+        // Auto-retry with delay
+        setTimeout(() => {
+          generatePurpose(retryCount + 1);
+        }, RETRY_DELAY);
+        return;
+      }
+
+      // Final failure — show friendly message
+      const message = isUnavailable
+        ? "AI service is temporarily unavailable. Please try again later."
+        : "Failed to generate purpose. Please try again.";
+
+      ToastNotification.error("AI Unavailable", message);
     } finally {
       setAiLoading(false);
     }
   };
 
   // AI: Rephrase Purpose
-  const rephrasePurpose = async () => {
+  const rephrasePurpose = async (retryCount = 0) => {
     if (!request.purpose.trim()) return;
+
+    const MAX_RETRIES = 2;
+    const RETRY_DELAY = 1500;
+
     setAiLoading(true);
     try {
       const prompt = `Rephrase professionally and concisely (under 80 words):\n"${request.purpose}"`;
+
       const result = await genAI.models.generateContent({
         model: "gemini-2.5-flash",
         contents: prompt,
       });
+
       const text = result.text?.trim();
       if (text) setRequest((prev) => ({ ...prev, purpose: text }));
     } catch (err) {
-      ToastNotification.error("AI Error", "Failed to rephrase purpose.");
+      console.error("Gemini Error:", err);
+
+      // Check if it's a 503 or network-related error
+      const isUnavailable =
+        err?.status === 503 ||
+        err?.code === "ECONNABORTED" ||
+        err?.message?.includes("network") ||
+        err?.message?.includes("timeout") ||
+        err?.message?.includes("unavailable");
+
+      if (isUnavailable && retryCount < MAX_RETRIES) {
+        // Auto-retry with delay
+        setTimeout(() => {
+          generatePurpose(retryCount + 1);
+        }, RETRY_DELAY);
+        return;
+      }
+
+      // Final failure — show friendly message
+      const message = isUnavailable
+        ? "AI service is temporarily unavailable. Please try again later."
+        : "Failed to generate purpose. Please try again.";
+
+      ToastNotification.error("AI Unavailable", message);
     } finally {
       setAiLoading(false);
     }
   };
 
   // AI: Travel Analytics (triggered by button)
-  const generateTravelAnalytics = async () => {
+
+  const generateTravelAnalytics = async (retryCount = 0) => {
     if (!selectedLocation || !request.time_of_departure || !request.date_of_trip) return;
+
+    const MAX_RETRIES = 2;
+    const RETRY_DELAY = 1500; // ms
 
     setAiLoading(true);
     setShowAnalytics(true);
+
     try {
       const prompt = `
         You are a travel logistics assistant. Analyze a trip from:
@@ -210,7 +276,7 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
           * **Traffic:** [detailed traffic note]
           * **Weather:** [detailed weather note]
 
-        Use real‑time traffic logic for the given time and date.`;
+        Use real-time traffic logic for the given time and date.`;
 
       const result = await genAI.models.generateContent({
         model: "gemini-2.5-flash",
@@ -221,11 +287,28 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
       const html = formatResponse(raw || "No insights available.");
       setTravelAnalytics(html);
     } catch (err) {
-      setTravelAnalytics(formatResponse("Failed to retrieve travel insights."));
+      console.error("Gemini Travel Analytics Error:", err);
+      const isUnavailable =
+        err?.status === 503 ||
+        err?.code === "ECONNABORTED" ||
+        /network|timeout|unavailable/i.test(err?.message ?? "");
+
+      if (isUnavailable && retryCount < MAX_RETRIES) {
+        setTimeout(() => generateTravelAnalytics(retryCount + 1), RETRY_DELAY);
+        return;
+      }
+
+      const message = isUnavailable
+        ? "AI travel service is temporarily unavailable. Please try again later."
+        : "Failed to retrieve travel insights. Please try again.";
+
+      ToastNotification.error("AI Unavailable", message);
+      setTravelAnalytics(formatResponse(message));
     } finally {
       setAiLoading(false);
     }
   };
+
 const [isDataReady, setIsDataReady] = useState(false);
 
 useEffect(() => {

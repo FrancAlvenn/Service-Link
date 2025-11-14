@@ -44,6 +44,7 @@ import {
   Filter,
 } from "@phosphor-icons/react";
 import dayjs from "dayjs";
+import ToastNotification from "../../../../utils/ToastNotification";
 
 /* --------------------------------------------------------------
    Gemini init
@@ -281,7 +282,7 @@ const Reports = () => {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiInsights, setAiInsights] = useState(null);
 
-  const generateAIInsights = async () => {
+  const generateAIInsights = async (retryCount = 0) => {
     setAiLoading(true);
     setShowAI(true);
 
@@ -310,23 +311,42 @@ const Reports = () => {
 
   Give **actionable recommendations** (bottlenecks, trends, suggestions). Use **bold** for key numbers.`;
 
+    const MAX_RETRIES = 2;
+    const RETRY_DELAY = 1500;
+
     try {
-      // Use v1 API format (same as VenueRequestForm but with correct path)
       const result = await genAI.models.generateContent({
         model: "gemini-2.5-flash",
         contents: [{ role: "user", parts: [{ text: prompt }] }],
       });
 
-      // v1 response path
       const raw =
         result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ||
         "No insight generated.";
 
-      console.log("Gemini Response:", result); // Debug
       setAiInsights(formatResponse(raw));
     } catch (err) {
-      console.error("Gemini Error:", err);
-      setAiInsights(formatResponse("**AI Error:** Failed to generate insights."));
+      console.error("Gemini Insights Error:", err);
+
+      // Detect 503 / network / timeout
+      const isUnavailable =
+        err?.status === 503 ||
+        err?.code === "ECONNABORTED" ||
+        /network|timeout|unavailable/i.test(err?.message ?? "");
+
+      // Auto-retry
+      if (isUnavailable && retryCount < MAX_RETRIES) {
+        setTimeout(() => generateAIInsights(retryCount + 1), RETRY_DELAY);
+        return;
+      }
+
+      // Final failure — user-friendly
+      const message = isUnavailable
+        ? "AI insights are temporarily unavailable. Please try again later."
+        : "Failed to generate insights. Please try again.";
+
+      ToastNotification.error("AI Unavailable", message);
+      setAiInsights(formatResponse(`**AI Unavailable:** ${message}`));
     } finally {
       setAiLoading(false);
     }

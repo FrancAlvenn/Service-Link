@@ -147,9 +147,15 @@ export function KanbanBoard() {
   };
 
   /* ------------------- AI Helpers ------------------- */
-  const generateReason = async () => {
+  // AI: Generate Reason
+  const generateReason = async (retryCount = 0) => {
     if (!selectedStatus) return;
+
+    const MAX_RETRIES = 2;
+    const RETRY_DELAY = 1500;
+
     setAiLoading(true);
+
     try {
       const prompt = `You are a professional admin. Write a short, polite reason for changing a request status to "${selectedStatus}". Keep under 50 words.`;
 
@@ -164,15 +170,37 @@ export function KanbanBoard() {
         setActionTaken(selectedReason ? `${selectedReason}: ${text}` : text);
       }
     } catch (err) {
-      ToastNotification.error("AI Error", "Failed to generate reason.");
+      console.error("Gemini Reason Error:", err);
+
+      const isUnavailable =
+        err?.status === 503 ||
+        err?.code === "ECONNABORTED" ||
+        /network|timeout|unavailable/i.test(err?.message ?? "");
+
+      if (isUnavailable && retryCount < MAX_RETRIES) {
+        setTimeout(() => generateReason(retryCount + 1), RETRY_DELAY);
+        return;
+      }
+
+      const message = isUnavailable
+        ? "AI service is temporarily unavailable. Please try again later."
+        : "Failed to generate reason. Please try again.";
+
+      ToastNotification.error("AI Unavailable", message);
     } finally {
       setAiLoading(false);
     }
   };
 
-  const rephraseComment = async () => {
+  // AI: Rephrase Comment
+  const rephraseComment = async (retryCount = 0) => {
     if (!additionalComment.trim()) return;
+
+    const MAX_RETRIES = 2;
+    const RETRY_DELAY = 1500;
+
     setAiLoading(true);
+
     try {
       const prompt = `Rephrase this comment professionally and concisely (under 60 words):\n"${additionalComment}"`;
 
@@ -187,7 +215,23 @@ export function KanbanBoard() {
         setActionTaken(selectedReason ? `${selectedReason}: ${text}` : text);
       }
     } catch (err) {
-      ToastNotification.error("AI Error", "Failed to rephrase.");
+      console.error("Gemini Rephrase Error:", err);
+
+      const isUnavailable =
+        err?.status === 503 ||
+        err?.code === "ECONNABORTED" ||
+        /network|timeout|unavailable/i.test(err?.message ?? "");
+
+      if (isUnavailable && retryCount < MAX_RETRIES) {
+        setTimeout(() => rephraseComment(retryCount + 1), RETRY_DELAY);
+        return;
+      }
+
+      const message = isUnavailable
+        ? "AI service is temporarily unavailable. Please try again later."
+        : "Failed to rephrase comment. Please try again.";
+
+      ToastNotification.error("AI Unavailable", message);
     } finally {
       setAiLoading(false);
     }

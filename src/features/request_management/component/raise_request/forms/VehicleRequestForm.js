@@ -26,6 +26,7 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
   const purposeTextareaRef = useRef(null);
 
   const [selectedLocation, setSelectedLocation] = useState(null);
+  const [aiLoadingAnalytics, setAiLoadingAnalytics] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [travelAnalytics, setTravelAnalytics] = useState(null);
   const [showAnalytics, setShowAnalytics] = useState(false);
@@ -480,10 +481,10 @@ useEffect(() => {
                 color="indigo"
                 variant="outlined"
                 onClick={generateTravelAnalytics}
-                disabled={!canShowAnalytics || aiLoading}
+                disabled={!canShowAnalytics || aiLoadingAnalytics}
                 className="flex items-center gap-1 text-xs normal-case"
               >
-                {aiLoading ? (
+                {aiLoadingAnalytics ? (
                   <>
                     <Spinner className="h-4 w-4" />
                     Analyzing...
@@ -520,7 +521,7 @@ useEffect(() => {
                 </div>
               </div>
 
-              {aiLoading ? (
+              {aiLoadingAnalytics ? (
                 <div className="flex items-center gap-2 text-xs text-gray-600">
                   <Spinner className="h-4 w-4" />
                   Analyzing route...

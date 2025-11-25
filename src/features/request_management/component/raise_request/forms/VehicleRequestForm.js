@@ -129,10 +129,27 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
     }
 
     if (name === "time_of_departure" || name === "time_of_arrival") {
+      if (value) {
+        const [hours, minutes] = value.split(":").map(Number);
+        const totalMinutes = hours * 60 + minutes;
+
+        const minMinutes = 4 * 60;     // 04:00
+        const maxMinutes = 19 * 60;    // 19:00
+
+        if (totalMinutes < minMinutes || totalMinutes > maxMinutes) {
+          newErrors.time = "Time must be between 4:00 AM and 7:00 PM.";
+        } else {
+          delete newErrors.time;
+        }
+      }
+
+      // Existing departure < arrival check
       const temp = { ...request, [name]: value };
-      if (temp.time_of_departure && temp.time_of_arrival && temp.time_of_departure >= temp.time_of_arrival) {
-        newErrors.time = "Departure must be earlier than arrival.";
-      } else delete newErrors.time;
+      if (temp.time_of_departure && temp.time_of_arrival) {
+        if (temp.time_of_departure >= temp.time_of_arrival) {
+          newErrors.time = "Departure must be earlier than arrival.";
+        }
+      }
     }
 
     setFormErrors(newErrors);
@@ -544,6 +561,11 @@ useEffect(() => {
               <input
                 type="date"
                 name="date_of_trip"
+                min={
+                  user.access_level === "admin"
+                    ? new Date().toISOString().split("T")[0]
+                    : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]
+                }
                 value={request.date_of_trip || ""}
                 onChange={handleChange}
                 className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
@@ -560,6 +582,8 @@ useEffect(() => {
               <input
                 type="time"
                 name="time_of_departure"
+                min="04:00"
+                max="19:00"
                 value={request.time_of_departure || ""}
                 onChange={handleChange}
                 className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
@@ -573,6 +597,8 @@ useEffect(() => {
               <input
                 type="time"
                 name="time_of_arrival"
+                min="04:00"
+                max="19:00"
                 value={request.time_of_arrival || ""}
                 onChange={handleChange}
                 className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"

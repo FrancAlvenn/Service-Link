@@ -170,10 +170,28 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
   }, []);
 
   useEffect(() => {
-    axios.get(`${process.env.REACT_APP_API_URL}/assets/`, { withCredentials: true }).then((response) => {
-      const venues = response.data?.filter((a) => a.category === "Venue") || [];
-      setVenueOptions(venues);
-    });
+    const fetchVenues = async () => {
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/assets/`, {
+          withCredentials: true,
+        });
+
+        // Safely extract and filter venues
+        const data = response?.data;
+        const venues = Array.isArray(data)
+          ? data.filter((asset) => asset?.category === "Venue")
+          : [];
+
+        setVenueOptions(venues);
+      } catch (error) {
+        console.error("Failed to fetch venues:", error);
+        // Optional: show user-friendly message
+        // ToastNotification.error("Could not load venues. Using offline mode.");
+        setVenueOptions([]); // Ensure state is always an array
+      }
+    };
+
+    fetchVenues();
   }, []);
 
   const checkBookingConflicts = () => {
@@ -245,6 +263,7 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     const updatedRequest = { ...request, [name]: value };
+    let newErrors = { ...formErrors };
 
     if (name === "event_dates") {
       const today = new Date(); today.setHours(0, 0, 0, 0);
@@ -264,20 +283,40 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
     }
 
     if (name === "event_start_time" || name === "event_end_time") {
-      const start = new Date(`1970-01-01T${updatedRequest.event_start_time}`);
-      const end = new Date(`1970-01-01T${updatedRequest.event_end_time}`);
+      if (value) {
+        const [hours, minutes] = value.split(":").map(Number);
+        const totalMinutes = hours * 60 + minutes;
 
-      if (updatedRequest.event_start_time && updatedRequest.event_end_time) {
-        if (start >= end) {
-          setFormErrors((prev) => ({ ...prev, time: "End time must be later than start time." }));
-        } else if ((end - start) / (1000 * 60) < 60) {
-          setFormErrors((prev) => ({ ...prev, time: "Event duration must be at least 1 hour." }));
+        const minMinutes = 6 * 60;    // 06:00
+        const maxMinutes = 17 * 60;   // 17:00
+
+        if (totalMinutes < minMinutes) {
+          newErrors.time = "Start time cannot be earlier than 6:00 AM.";
+        } else if (totalMinutes > maxMinutes) {
+          newErrors.time = "End time cannot be later than 5:00 PM.";
         } else {
-          setFormErrors((prev) => ({ ...prev, time: "" }));
+          delete newErrors.time;
+        }
+      }
+
+      // Existing end > start + duration check
+      const start = updatedRequest.event_start_time
+        ? new Date(`1970-01-01T${updatedRequest.event_start_time}`)
+        : null;
+      const end = updatedRequest.event_end_time
+        ? new Date(`1970-01-01T${updatedRequest.event_end_time}`)
+        : null;
+
+      if (start && end) {
+        if (start >= end) {
+          newErrors.time = "End time must be later than start time.";
+        } else if ((end - start) / (1000 * 60) < 60) {
+          newErrors.time = "Event duration must be at least 1 hour.";
         }
       }
     }
 
+    setFormErrors(newErrors);
     setRequest(updatedRequest);
   };
 
@@ -617,6 +656,11 @@ useEffect(() => {
               <input
                 type="date"
                 name="event_dates"
+                min={
+                  user.access_level === "admin"
+                    ? new Date().toISOString().split("T")[0]
+                    : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]
+                }
                 value={request.event_dates}
                 onChange={handleChange}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
@@ -628,6 +672,8 @@ useEffect(() => {
               <input
                 type="time"
                 name="event_start_time"
+                min="06:00"
+                max="17:00"
                 value={request.event_start_time}
                 onChange={handleChange}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
@@ -638,6 +684,8 @@ useEffect(() => {
               <input
                 type="time"
                 name="event_end_time"
+                min="07:00"
+                max="24:00"
                 value={request.event_end_time}
                 onChange={handleChange}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"

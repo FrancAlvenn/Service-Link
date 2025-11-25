@@ -18,6 +18,8 @@ import {
 import { SettingsContext } from "../../../../settings/context/SettingsContext";
 import assignApproversToRequest from "../../../utils/assignApproversToRequest";
 import { GoogleGenAI } from "@google/genai";
+import { renderDetailsTable } from "../../../../../utils/emailsTempalte";
+import { sendBrevoEmail } from "../../../../../utils/brevo";
 
 // ---------------------------------------------------------------------
 // Gemini initialisation
@@ -487,6 +489,33 @@ useEffect(() => {
         ToastNotification.success("Success!", response.data.message);
         fetchVenueRequests();
         setSelectedRequest("");
+
+        const venueName = venueOptions.find(v => v.asset_id === Number(request.venue_id))?.name || "Unknown Venue";
+        const detailsHtml = renderDetailsTable(request.details);
+
+        try {
+          await sendBrevoEmail({
+            to: ["servicelink.dyci@gmail.com", user?.email],
+            templateId: 8,
+            params: {
+              requester_name: `${requestData.first_name} ${request.last_name}`,
+              title: request.title,
+              organization: request.organization,
+              venue_name: venueName,
+              event_dates: request.event_dates,
+              event_start_time: request.event_start_time,
+              event_end_time: request.event_end_time,
+              participants: request.participants,
+              pax_estimation: request.pax_estimation,
+              event_nature: request.event_nature,
+              purpose: request.purpose,
+              details_table: detailsHtml || "", // will show "No items" if empty
+            },
+          });
+        } catch (emailErr) {
+          console.warn("Venue email failed:", emailErr);
+        }
+
         setRequest({
           requester: user.reference_number,
           organization: "",

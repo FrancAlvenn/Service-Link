@@ -18,6 +18,8 @@ import { SettingsContext } from "../../../../settings/context/SettingsContext";
 import assignApproversToRequest from "../../../utils/assignApproversToRequest";
 import { classifyJobRequest } from "../../../utils/classifyJobRequest";
 import { GoogleGenAI } from "@google/genai";
+import { sendBrevoEmail } from "../../../../../utils/brevo";
+import { renderDetailsTable } from "../../../../../utils/emailsTempalte";
 
 // ---------------------------------------------------------------------
 // Gemini initialisation (frontend only)
@@ -356,6 +358,32 @@ useEffect(() => {
         ToastNotification.success("Success!", response.data.message);
         fetchJobRequests();
         setSelectedRequest("");
+
+        const detailsHtml = renderDetailsTable(request.details);
+
+        try {
+          await sendBrevoEmail({
+            to: [
+              {email: "servicelink.dyci@gmail.com"},
+              {email: user?.email}
+            ],
+            templateId: 5, // ← Your Job Request Template ID
+            params: {
+              requester_name: `${request.first_name} ${request.last_name}`,
+              department: request.department_name || "N/A",
+              designation: request.designation_name || "N/A",
+              title: request.title,
+              date_required: formattedDate,
+              job_category: request.job_category || "General",
+              purpose: request.purpose,
+              remarks: request.remarks || "None",
+              details_table: detailsHtml,
+            },
+          });
+        } catch (emailErr) {
+          console.warn("Request saved, but email failed:", emailErr);
+        }
+
         setRequest({
           requester: user.reference_number,
           title: "",
@@ -440,6 +468,11 @@ useEffect(() => {
             <input
               type="date"
               name="date_required"
+              min={
+                user.access_level === "admin"
+                  ? new Date().toISOString().split("T")[0]
+                  : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]
+              }
               value={request.date_required || ""}
               onChange={handleChange}
               className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"

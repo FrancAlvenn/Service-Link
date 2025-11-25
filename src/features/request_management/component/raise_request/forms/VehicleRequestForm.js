@@ -10,6 +10,8 @@ import assignApproversToRequest from "../../../utils/assignApproversToRequest";
 import MapboxAddressPicker from "../../../../../components/map_address_picker/MapboxAddressPicker";
 import { GoogleGenAI } from "@google/genai";
 import { Sparkle, ArrowClockwise, MapPin, Info, X } from "@phosphor-icons/react";
+import { renderDetailsTable } from "../../../../../utils/emailsTempalte";
+import { sendBrevoEmail } from "../../../../../utils/brevo";
 
 // ---------------------------------------------------------------------
 // Gemini initialisation
@@ -387,6 +389,29 @@ useEffect(() => {
         ToastNotification.success("Success!", response.data.message);
         fetchVehicleRequests();
         setSelectedRequest("");
+        
+        const detailsHtml = renderDetailsTable(request.details);
+
+        try {
+          await sendBrevoEmail({
+            to: ["servicelink.dyci@gmail.com", user?.email],
+            templateId: 7,
+            params: {
+              requester_name: `${request.first_name} ${request.last_name}`,
+              title: request.title,
+              destination: request.destination,
+              date_of_trip: request.date_of_trip,
+              time_of_departure: request.time_of_departure,
+              time_of_arrival: request.time_of_arrival,
+              number_of_passengers: request.number_of_passengers,
+              purpose: request.purpose,
+              remarks: request.remarks || "None",
+            },
+          });
+        } catch (emailErr) {
+          console.warn("Request saved, but email failed:", emailErr);
+        }
+
         setRequest({
           requester: user.reference_number,
           title: "",

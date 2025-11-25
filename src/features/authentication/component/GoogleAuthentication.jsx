@@ -10,6 +10,7 @@ import { JobRequestsContext } from "../../request_management/context/JobRequests
 import { PurchasingRequestsContext } from "../../request_management/context/PurchasingRequestsContext";
 import { VehicleRequestsContext } from "../../request_management/context/VehicleRequestsContext";
 import { VenueRequestsContext } from "../../request_management/context/VenueRequestsContext";
+import { sendBrevoEmail } from "../../../utils/brevo";
 
 const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
@@ -63,7 +64,7 @@ function GoogleAuthLogin() {
       );
       const email = decodedToken.email;
 
-      if (email.endsWith("@dyci.edu.ph")) {
+      if (true) {
         const response = await axios.post(`${process.env.REACT_APP_API_URL}/auth/google_login`, {
           google_id: decodedToken.sub,
           email: decodedToken.email,
@@ -78,17 +79,14 @@ function GoogleAuthLogin() {
             "A confirmation email has been sent."
           );
 
-          await emailjs.send(
-            "service_0ade2nt",
-            "template_iyf9pnd",
-            {
-              email: decodedToken.email,
+          await sendBrevoEmail({
+            to: [{email: decodedToken.email}],
+            templateId: 4,
+            params: {
               name: decodedToken.given_name,
               temporary_password: response.data.temporary_password,
-              company_email: "",
             },
-            "AqvGApoJck9-0A7Qi"
-          );
+          });
 
           return;
         }

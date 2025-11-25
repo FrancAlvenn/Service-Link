@@ -22,6 +22,7 @@ import { JobRequestsContext } from "../../request_management/context/JobRequests
 import { PurchasingRequestsContext } from "../../request_management/context/PurchasingRequestsContext.js";
 import { useDebounce } from "../../../utils/useDebounce.js";
 import ToastNotification from "../../../utils/ToastNotification.js";
+import { sendBrevoEmail } from "../../../utils/brevo.js";
 
 const UserManagement = () => {
   const { jobRequests, fetchJobRequests } = useContext(JobRequestsContext);
@@ -106,38 +107,38 @@ const UserManagement = () => {
   const debouncedEmail = useDebounce(emailToAdd, 1000);
 
   const handleAddUser = async () => {
+    // Validation
     if (!debouncedEmail.includes("@")) {
-      setErrorMessage("Should be an email address.");
+      setErrorMessage("Should be a valid email address.");
       return;
     }
-
-    const isDyciEmail = debouncedEmail.endsWith("@dyci.edu.ph");
-    if (!isDyciEmail) {
-      setErrorMessage("Only @dyci.edu.ph email addresses are allowed.");
+    if (!debouncedEmail.endsWith("@dyci.edu.ph")) {
+      setErrorMessage("Only @dyci.edu.ph emails are allowed.");
       return;
     }
-
-    const isEmailExisting = allUserInfo.some(
-      (user) => user.email === debouncedEmail
-    );
-    if (isEmailExisting) {
+    if (allUserInfo.some((user) => user.email === debouncedEmail)) {
       setErrorMessage("Email already exists.");
       return;
     }
 
-    ToastNotification.info(
-      "Invitation sent!",
-      "An invitation email has been sent."
-    );
+    // Show toast first
+    ToastNotification.info("Invitation sent!", "An invitation email has been sent.");
 
-    await emailjs.send(
-      "service_0ade2nt",
-      "template_5h3xl4w",
-      {
-        email: debouncedEmail,
-      },
-      "AqvGApoJck9-0A7Qi"
-    );
+    // Send via Brevo
+    try {
+      await sendBrevoEmail({
+        to: [{ email: debouncedEmail}],
+        templateId: 2,
+        params: {
+          invite_url: "https://service-link-lake.vercel.app",
+        },
+      });
+    } catch (err) {
+      console.error("Failed to send invitation:", err);
+      ToastNotification.error("Email failed", "Invitation sent but email delivery failed.");
+    }
+
+    // Reset form
     setEmailToAdd("");
     setMenuOpen(false);
     setErrorMessage("");

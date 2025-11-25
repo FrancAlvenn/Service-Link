@@ -17,6 +17,8 @@ import { PurchasingRequestsContext } from "../../../context/PurchasingRequestsCo
 import { SettingsContext } from "../../../../settings/context/SettingsContext";
 import assignApproversToRequest from "../../../utils/assignApproversToRequest";
 import { GoogleGenAI } from "@google/genai";
+import { renderDetailsTable } from "../../../../../utils/emailsTempalte";
+import { sendBrevoEmail } from "../../../../../utils/brevo";
 
 // ---------------------------------------------------------------------
 // Gemini initialisation (frontend only)
@@ -354,6 +356,28 @@ useEffect(() => {
         ToastNotification.success("Success!", response.data.message);
         fetchPurchasingRequests();
         setSelectedRequest("");
+
+        const detailsHtml = renderDetailsTable(request.details);
+
+        try {
+          await sendBrevoEmail({
+            to: ["servicelink.dyci@gmail.com", user?.email],
+            templateId: 6,
+            params: {
+              requester_name: `${request.first_name} ${request.last_name}`,
+              department: request?.department_name || "N/A",
+              title: request.title,
+              date_required: formattedDate,
+              supply_category: request.supply_category,
+              purpose: request.purpose,
+              remarks: request.remarks || "None",
+              details_table: detailsHtml,
+            },
+          });
+        } catch (emailErr) {
+          console.warn("Request saved, but email failed:", emailErr);
+        }
+        
         setRequest({
           requester: user.reference_number,
           title: "",
@@ -440,6 +464,11 @@ useEffect(() => {
             <input
               type="date"
               name="date_required"
+              min={
+                user.access_level === "admin"
+                  ? new Date().toISOString().split("T")[0]
+                  : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]
+              }
               value={request.date_required || ""}
               onChange={handleChange}
               className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"

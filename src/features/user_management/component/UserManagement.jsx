@@ -112,10 +112,10 @@ const UserManagement = () => {
       setErrorMessage("Should be a valid email address.");
       return;
     }
-    if (!debouncedEmail.endsWith("@dyci.edu.ph")) {
-      setErrorMessage("Only @dyci.edu.ph emails are allowed.");
-      return;
-    }
+    // if (!debouncedEmail.endsWith("@dyci.edu.ph")) {
+    //   setErrorMessage("Only @dyci.edu.ph emails are allowed.");
+    //   return;
+    // }
     if (allUserInfo.some((user) => user.email === debouncedEmail)) {
       setErrorMessage("Email already exists.");
       return;
@@ -152,8 +152,8 @@ const UserManagement = () => {
 
     if (!debouncedEmail.includes("@")) {
       setErrorMessage("Should be an email address.");
-    } else if (!debouncedEmail.endsWith("@dyci.edu.ph")) {
-      setErrorMessage("Only @dyci.edu.ph email addresses are allowed.");
+    // } else if (!debouncedEmail.endsWith("@dyci.edu.ph")) {
+    //   setErrorMessage("Only @dyci.edu.ph email addresses are allowed.");
     } else {
       setErrorMessage(""); // valid email
     }
@@ -209,7 +209,7 @@ const UserManagement = () => {
                   value={emailToAdd}
                   onChange={(e) => setEmailToAdd(e.target.value)}
                   className="w-full mb-2 border border-slate-200 rounded-md px-3 py-2 focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
-                  placeholder="Email Address (@dyci.edu.ph)"
+                  placeholder="Email Address"
                 />
                 {errorMessage && (
                   <Typography

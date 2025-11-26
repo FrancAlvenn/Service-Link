@@ -255,7 +255,7 @@ function RequestDetailsPage({
       </div>
 
       {/* Insert Stepper Here */}
-      <div className="mb-6">{request?.approvers && <DynamicStepper approvers={request.approvers} />}</div>
+      {/* <div className="mb-6">{request?.approvers && <DynamicStepper approvers={request.approvers} />}</div> */}
 
       {/* Tab Navigation */}
       <div className="mb-6 overflow-x-auto">

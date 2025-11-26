@@ -282,14 +282,36 @@ const Assignment = ({
         )
       : [];
 
-  const filteredAssets =
-    assets.length > 0
-      ? assets.filter((asset) =>
-          `${asset.name} ${asset.tag_number}`
-            .toLowerCase()
-            .includes(assetSearchQuery.toLowerCase())
-        )
-      : [];
+  const ASSET_CATEGORY_BY_REQUEST_TYPE = {
+    Vehicle: ["Vehicle"],
+    Venue: ["Venue"],
+    Job: ["Furniture", "Computer", "Equipment", "Machinery", "Appliance", "Tools", "Software", "Others"],
+    Purchasing: ["Furniture", "Computer", "Equipment", "Machinery", "Appliance", "Tools", "Software", "Others"],
+  };
+
+  // Default fallback: allow everything except Vehicle/Venue unless explicitly allowed
+  const getAllowedCategories = (type) => {
+    return ASSET_CATEGORY_BY_REQUEST_TYPE[type] || 
+          ["Furniture", "Computer", "Equipment", "Machinery", "Appliance", "Tools", "Software", "Others"];
+  };
+
+  const allowedCategories = getAllowedCategories(requestType);
+
+  const filteredAssets = assets.length > 0
+    ? assets.filter((asset) => {
+        const matchesSearch = `${asset.name} ${asset.tag_number || ""}`
+          .toLowerCase()
+          .includes(assetSearchQuery.toLowerCase());
+
+        const matchesCategory = requestType === "vehicle_request"
+          ? asset.category === "Vehicle"
+          : requestType === "venue_request"
+          ? asset.category === "Venue"
+          : allowedCategories.includes(asset.category);
+
+        return matchesSearch && matchesCategory;
+      })
+    : [];
 
   return (
     <div className="flex flex-col gap-4">
@@ -394,6 +416,18 @@ const Assignment = ({
               value={assetSearchQuery}
               onChange={(e) => setAssetSearchQuery(e.target.value)}
             />
+
+            {requestType === "vehicle_request" && (
+              <div className="px-3 py-1 text-xs text-gray-500 italic">
+                Only Vehicle assets are available for Vehicle requests
+              </div>
+            )}
+            {requestType === "venue_request" && (
+              <div className="px-3 py-1 text-xs text-gray-500 italic">
+                Only Venue assets are available for Venue requests
+              </div>
+            )}
+
             {filteredAssets.length > 0 ? (
               filteredAssets.map((asset) => {
                 const isSelected = selectedRequest?.assigned_assets?.some(

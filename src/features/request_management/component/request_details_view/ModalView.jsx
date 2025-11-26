@@ -379,10 +379,10 @@ const ModalView = ({ open, onClose, referenceNumber, asModal = false }) => {
               </h2>
 
               {/* Status & Approvals */}
-              <div className="flex items-center gap-3 mb-5">
-                {/* Dynamic Stepper for Approvers */}
+              {/* <div className="flex items-center gap-3 mb-5">
+                * Dynamic Stepper for Approvers *
                 {request?.approvers && <DynamicStepper approvers={request.approvers} />}
-              </div>
+              </div> */}
 
               {/* Purpose */}
               <div className="flex flex-col p-3 gap-2 border-gray-400 border rounded-lg mb-4">

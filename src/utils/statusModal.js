@@ -222,13 +222,14 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
   return (
     <div className="flex flex-col gap-2 z-50">
       {/* Status Dropdown */}
+      {currentStatus !== "Completed" ? (
       <Menu placement="bottom-start">
         <MenuHandler>
           <Chip
             size="sm"
             variant="ghost"
             value={currentStatus || "Select Status"}
-            className="text-center w-fit cursor-pointer px-4 py-2"
+            className="text-center w-fit cursor-pointer px-4 py-2 hover:opacity-80 transition"
             color={statusOptions.find((opt) => opt.status === currentStatus)?.color || "gray"}
           />
         </MenuHandler>
@@ -237,21 +238,23 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
           {statusOptions.length > 0 ? (
             <div className="flex flex-col">
               <div className="grid grid-cols-2 gap-2 p-2">
-                {statusOptions.map((option) => (
-                  <MenuItem
-                    key={option.id}
-                    className="flex justify-between items-center px-4 py-2 text-xs cursor-pointer"
-                    onClick={() => handleStatusClick(option.status)}
-                  >
-                    <Chip
-                      size="sm"
-                      variant="ghost"
-                      value={option.status}
-                      className="text-center w-fit px-4 py-2"
-                      color={option.color}
-                    />
-                  </MenuItem>
-                ))}
+                {statusOptions
+                  .filter(option => option.status !== currentStatus)
+                  .map((option) => (
+                    <MenuItem
+                      key={option.id}
+                      className="flex justify-between items-center px-4 py-2 text-xs cursor-pointer hover:bg-gray-50"
+                      onClick={() => handleStatusClick(option.status)}
+                    >
+                      <Chip
+                        size="sm"
+                        variant="ghost"
+                        value={option.status}
+                        className="text-center w-fit px-4 py-2"
+                        color={option.color}
+                      />
+                    </MenuItem>
+                  ))}
               </div>
 
               <div className="flex items-center mt-2 py-2 justify-center text-xs rounded-lg bg-gray-100">
@@ -270,6 +273,16 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
           )}
         </MenuList>
       </Menu>
+    ) : (
+      // When status is "Completed" → just show the chip, no dropdown
+      <Chip
+        size="sm"
+        variant="ghost"
+        value="Completed"
+        className="text-center w-fit px-4 py-2 font-bold"
+        color={statusOptions.find((opt) => opt.status === "Completed")?.color || "green"}
+      />
+    )}
 
       {/* Confirmation Dialog */}
       <Dialog open={openModal} handler={setOpenModal} size="sm">

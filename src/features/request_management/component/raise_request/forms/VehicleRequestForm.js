@@ -400,22 +400,31 @@ useEffect(() => {
 
         try {
           await sendBrevoEmail({
-            to: ["servicelink.dyci@gmail.com", user?.email],
-            templateId: 7,
+            to: [
+              {
+                email: user?.email,
+                name: `${user?.first_name || ""} ${user?.last_name || ""}`.trim() || "",
+              },
+            ],
+
+            templateId: 7, // Vehicle Request Notification Template
             params: {
-              requester_name: `${request.first_name} ${request.last_name}`,
-              title: request.title,
-              destination: request.destination,
-              date_of_trip: request.date_of_trip,
-              time_of_departure: request.time_of_departure,
-              time_of_arrival: request.time_of_arrival,
-              number_of_passengers: request.number_of_passengers,
-              purpose: request.purpose,
+              requester_name: `${request.first_name} ${request.last_name}`.trim(),
+              title: request.title || "Vehicle Request",
+              destination: request.destination || "N/A",
+              date_of_trip: request.date_of_trip || "Not specified",
+              time_of_departure: request.time_of_departure || "Not specified",
+              time_of_arrival: request.time_of_arrival || "Not specified",
+              number_of_passengers: request.number_of_passengers || "Not specified",
+              purpose: request.purpose || "N/A",
               remarks: request.remarks || "None",
             },
           });
+
+          console.log("Vehicle request email sent to:", user?.email);
         } catch (emailErr) {
-          console.warn("Request saved, but email failed:", emailErr);
+          console.warn("Vehicle request saved successfully, but email notification failed:", emailErr);
+          // Optional: toast.warning("Request submitted, but email could not be sent.");
         }
 
         setRequest({

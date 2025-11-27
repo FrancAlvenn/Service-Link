@@ -127,15 +127,27 @@ const UserManagement = () => {
     // Send via Brevo
     try {
       await sendBrevoEmail({
-        to: [{ email: debouncedEmail}],
-        templateId: 2,
+        to: [
+          {
+            email: debouncedEmail,
+            name: "New User", // You can enhance this later with actual name if available
+          },
+        ],
+
+        templateId: 2, // Invitation Email Template
         params: {
           invite_url: "https://service-link-lake.vercel.app",
         },
       });
+
+      console.log("Invitation email sent successfully to:", debouncedEmail);
+      ToastNotification.success("Invitation sent!", `Email delivered to ${debouncedEmail}`);
     } catch (err) {
-      console.error("Failed to send invitation:", err);
-      ToastNotification.error("Email failed", "Invitation sent but email delivery failed.");
+      console.error("Failed to send invitation email:", err);
+      ToastNotification.error(
+        "Email delivery failed",
+        "Invitation was processed, but the email could not be sent. Please try resending manually."
+      );
     }
 
     // Reset form

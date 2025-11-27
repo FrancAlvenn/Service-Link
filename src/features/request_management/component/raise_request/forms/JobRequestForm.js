@@ -367,28 +367,35 @@ useEffect(() => {
 
         const detailsHtml = renderDetailsTable(request.details);
 
-        try {
-          await sendBrevoEmail({
-            to: [
-              {email: "servicelink.dyci@gmail.com"},
-              {email: user?.email}
-            ],
-            templateId: 5, // ← Your Job Request Template ID
-            params: {
-              requester_name: `${request.first_name} ${request.last_name}`,
-              department: request.department_name || "N/A",
-              designation: request.designation_name || "N/A",
-              title: request.title,
-              date_required: formattedDate,
-              job_category: request.job_category || "General",
-              purpose: request.purpose,
-              remarks: request.remarks || "None",
-              details_table: detailsHtml,
-            },
-          });
-        } catch (emailErr) {
-          console.warn("Request saved, but email failed:", emailErr);
-        }
+          try {
+            await sendBrevoEmail({
+              to: [
+                { 
+                  email: user?.email, 
+                  name: `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || "" 
+                }
+              ],
+              templateId: 5, // Job Request Template ID
+              params: {
+                requester_name: `${request.first_name} ${request.last_name}`,
+                department: request.department_name || "N/A",
+                designation: request.designation_name || "N/A",
+                title: request.title,
+                date_required: formattedDate,
+                job_category: request.job_category || "General",
+                purpose: request.purpose,
+                remarks: request.remarks || "None",
+                details_table: detailsHtml,
+              },
+              // Optional: You can add extra CCs here if needed
+              // cc: [{ email: "manager@dyci.edu.ph", name: "Manager" }],
+            });
+
+            console.log("Notification email sent successfully to:", user?.email);
+          } catch (emailErr) {
+            console.warn("Request saved successfully, but email notification failed:", emailErr);
+            // Optional: Show toast to user: "Request submitted, but email failed to send."
+          }
 
         setRequest({
           requester: user.reference_number,

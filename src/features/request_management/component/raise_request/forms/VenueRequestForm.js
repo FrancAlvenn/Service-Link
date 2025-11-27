@@ -501,25 +501,33 @@ useEffect(() => {
 
         try {
           await sendBrevoEmail({
-            to: ["servicelink.dyci@gmail.com", user?.email],
-            templateId: 8,
+            to: [
+              {
+                email: user?.email,
+                name: `${user?.first_name || ""} ${user?.last_name || ""}`.trim() || "",
+              },
+            ],
+
+            templateId: 8, // Venue Request Notification Template
             params: {
-              requester_name: `${requestData.first_name} ${request.last_name}`,
-              title: request.title,
-              organization: request.organization,
-              venue_name: venueName,
-              event_dates: request.event_dates,
-              event_start_time: request.event_start_time,
-              event_end_time: request.event_end_time,
-              participants: request.participants,
-              pax_estimation: request.pax_estimation,
-              event_nature: request.event_nature,
-              purpose: request.purpose,
-              details_table: detailsHtml || "", // will show "No items" if empty
+              requester_name: `${requestData.first_name} ${request.last_name}`.trim(),
+              title: request.title || "Venue Reservation Request",
+              organization: request.organization || "N/A",
+              venue_name: venueName || "Not specified",
+              event_dates: request.event_dates || "Not specified",
+              event_start_time: request.event_start_time || "Not specified",
+              event_end_time: request.event_end_time || "Not specified",
+              participants: request.participants || "N/A",
+              pax_estimation: request.pax_estimation || "Not specified",
+              event_nature: request.event_nature || "General Event",
+              purpose: request.purpose || "N/A",
+              details_table: detailsHtml || "<p>No additional requirements specified.</p>",
             },
           });
+
+          console.log("Venue request email successfully sent to:", user?.email);
         } catch (emailErr) {
-          console.warn("Venue email failed:", emailErr);
+          console.warn("Venue request saved, but email notification failed:", emailErr);
         }
 
         setRequest({

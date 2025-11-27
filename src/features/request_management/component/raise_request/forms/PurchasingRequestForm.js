@@ -368,21 +368,29 @@ useEffect(() => {
 
         try {
           await sendBrevoEmail({
-            to: ["servicelink.dyci@gmail.com", user?.email],
-            templateId: 6,
+            to: [
+              {
+                email: user?.email,
+                name: `${user?.first_name || ""} ${user?.last_name || ""}`.trim() || "",
+              },
+            ],
+
+            templateId: 6, // Your Purchasing Request Template
             params: {
-              requester_name: `${request.first_name} ${request.last_name}`,
+              requester_name: `${request.first_name} ${request.last_name}`.trim(),
               department: request?.department_name || "N/A",
               title: request.title,
               date_required: formattedDate,
-              supply_category: request.supply_category,
-              purpose: request.purpose,
+              supply_category: request.supply_category || "N/A",
+              purpose: request.purpose || "N/A",
               remarks: request.remarks || "None",
-              details_table: detailsHtml,
+              details_table: detailsHtml || "<p>No details provided</p>",
             },
           });
+
+          console.log("Purchasing request email sent to:", user?.email);
         } catch (emailErr) {
-          console.warn("Request saved, but email failed:", emailErr);
+          console.warn("Purchasing request saved, but email notification failed:", emailErr);
         }
         
         setRequest({

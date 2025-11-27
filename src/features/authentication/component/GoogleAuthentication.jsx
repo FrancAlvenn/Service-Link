@@ -79,14 +79,28 @@ function GoogleAuthLogin() {
             "A confirmation email has been sent."
           );
 
-          await sendBrevoEmail({
-            to: [{email: decodedToken.email}],
-            templateId: 4,
-            params: {
-              name: decodedToken.given_name,
-              temporary_password: response.data.temporary_password,
-            },
-          });
+          try {
+            await sendBrevoEmail({
+              to: [
+                {
+                  email: decodedToken.email,
+                  name: decodedToken.given_name || decodedToken.name || "New User",
+                },
+              ],
+
+              templateId: 4, // Welcome + Temporary Password Template
+              params: {
+                name: decodedToken.given_name || decodedToken.name || "Valued User",
+                temporary_password: response.data.temporary_password,
+              },
+            });
+
+            console.log("Welcome email with temporary password sent to:", decodedToken.email);
+          } catch (emailErr) {
+            console.warn("Account created, but welcome email failed to send:", emailErr);
+            // Still continue — user was created successfully
+            // Optional: toast.info("Account created! Email notification failed, but user informed manually.");
+          }
 
           return;
         }

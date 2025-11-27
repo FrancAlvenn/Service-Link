@@ -146,7 +146,7 @@ export const getColumnConfig = (
             <Typography
               variant="small"
               color="blue-gray"
-              className={normalText}
+              className={normalText + " text-left"}
             >
               Purpose
             </Typography>
@@ -351,7 +351,7 @@ export const getColumnConfig = (
             <Typography
               variant="small"
               color="blue-gray"
-              className={normalText}
+              className={normalText + " text-left"}
             >
               Title
             </Typography>

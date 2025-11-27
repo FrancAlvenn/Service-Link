@@ -62,6 +62,7 @@ import ForVerification from "./portal/component/dashboard/ForVerification";
 import UserManagement from "./features/user_management/component/UserManagement";
 import SidebarView from "./components/sidebar/SidebarView";
 import NotFound from "./pages/NotFound";
+import SummaryReport from "./features/request_management/component/reporting_dashboard/SummaryReport";
 
 library.add(fas, fab, far); // Add all the icons needed
 
@@ -189,6 +190,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute requiredAccess={"admin"}>
             <Reports />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "requests-management/summary-report",
+        element: (
+          <ProtectedRoute requiredAccess={"admin"}>
+            <SummaryReport />
           </ProtectedRoute>
         ),
       },

@@ -31,7 +31,7 @@ const genAI = new GoogleGenAI({
   apiVersion: "v1",
 });
 
-function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
+function StatusModal({ input, referenceNumber, requestType, onStatusUpdate, editable = true }) {
   const navigate = useNavigate();
   const [statusOptions, setStatusOptions] = useState([]);
   const [currentStatus, setCurrentStatus] = useState(input);
@@ -222,7 +222,7 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
   return (
     <div className="flex flex-col gap-2 z-50">
       {/* Status Dropdown */}
-      {currentStatus !== "Completed" ? (
+      {currentStatus !== "Completed" && editable ? (
       <Menu placement="bottom-start">
         <MenuHandler>
           <Chip
@@ -278,9 +278,9 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate }) {
       <Chip
         size="sm"
         variant="ghost"
-        value="Completed"
+        value={currentStatus}
         className="text-center w-fit px-4 py-2 font-bold"
-        color={statusOptions.find((opt) => opt.status === "Completed")?.color || "green"}
+        color={statusOptions.find((opt) => opt.status === currentStatus)?.color || "gray"}
       />
     )}
 

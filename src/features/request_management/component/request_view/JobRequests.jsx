@@ -19,6 +19,7 @@ import ProfileModal from "../../../../layouts/component/navbar/ProfileModal.js";
 import NotificationModal from "../../../../layouts/component/navbar/NotificationModal";
 import Header from "../../../../layouts/header.js";
 import ModalView from "../request_details_view/ModalView";
+import { SettingsContext } from "../../../settings/context/SettingsContext.js";
 
 export function JobRequests() {
   const [modalOpen, setModalOpen] = useState(false);
@@ -78,7 +79,7 @@ export function JobRequests() {
     requestType,
     () => setModalOpen(true),
     setSelectedReferenceNumber,
-    getUserByReferenceNumber
+    getUserByReferenceNumber,
   );
 
   return (

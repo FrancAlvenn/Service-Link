@@ -13,7 +13,7 @@ import { JobRequestsContext } from "../features/request_management/context/JobRe
 import ToastNotification from "./ToastNotification";
 import AuthContext from "../features/authentication/context/AuthContext";
 
-function ArchiveStatusModal({ input, referenceNumber, requestType }) {
+function ArchiveStatusModal({ input, referenceNumber, requestType, editable = true }) {
   const { user } = useContext(AuthContext);
 
   const { fetchJobRequests } = useContext(JobRequestsContext);
@@ -87,6 +87,7 @@ function ArchiveStatusModal({ input, referenceNumber, requestType }) {
                     key={option.id}
                     className={`flex justify-between items-center px-4 py-2 text-xs`}
                     onClick={() => handleStatusChange(option.status)} // Handle status change
+                    disabled={editable === false}
                   >
                     <Chip
                       size="sm"

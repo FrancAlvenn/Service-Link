@@ -48,13 +48,34 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
   const purposeTextareaRef = useRef(null);
 
   const { user } = useContext(AuthContext);
-  const { allUserInfo, getUserByReferenceNumber, fetchUsers } = useContext(UserContext);
+  const { allUserInfo, getUserByReferenceNumber, fetchUsers, getUserDepartmentByReferenceNumber } = useContext(UserContext);
   const { venueRequests, fetchVenueRequests } = useContext(VenueRequestsContext);
+
+  const {
+    departments,
+    designations,
+    approvers,
+    approvalRulesByDepartment,
+    approvalRulesByRequestType,
+    approvalRulesByDesignation,
+    fetchDepartments,
+    fetchDesignations,
+    fetchApprovers,
+    fetchApprovalRulesByDepartment,
+    fetchApprovalRulesByRequestType,
+    fetchApprovalRulesByDesignation,
+  } = useContext(SettingsContext);
+  
+  const getDepartmentName = (departments ,departmentId) => {
+    const department = departments.find((dept) => dept.id === departmentId);
+    return department ? department.name : "";
+  }
 
   const [request, setRequest] = useState({
     requester: user.reference_number,
     organization: "",
     title: "",
+    department: getDepartmentName(departments, getUserDepartmentByReferenceNumber(user.reference_number)),
     event_nature: "",
     event_nature_other: "",
     event_dates: "",
@@ -145,21 +166,6 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
       return { ...prev, details: newDetails };
     });
   };
-
-  const {
-    departments,
-    designations,
-    approvers,
-    approvalRulesByDepartment,
-    approvalRulesByRequestType,
-    approvalRulesByDesignation,
-    fetchDepartments,
-    fetchDesignations,
-    fetchApprovers,
-    fetchApprovalRulesByDepartment,
-    fetchApprovalRulesByRequestType,
-    fetchApprovalRulesByDesignation,
-  } = useContext(SettingsContext);
 
   useEffect(() => {
     fetchDepartments();

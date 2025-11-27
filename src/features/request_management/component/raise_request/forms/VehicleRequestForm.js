@@ -34,13 +34,34 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
   const [showAnalytics, setShowAnalytics] = useState(false);
 
   const { user } = useContext(AuthContext);
-  const { allUserInfo, getUserByReferenceNumber, fetchUsers } = useContext(UserContext);
+  const { allUserInfo, getUserByReferenceNumber, fetchUsers, getUserDepartmentByReferenceNumber } = useContext(UserContext);
   const { fetchVehicleRequests } = useContext(VehicleRequestsContext);
+
+  const {
+    departments,
+    designations,
+    approvers,
+    approvalRulesByDepartment,
+    approvalRulesByRequestType,
+    approvalRulesByDesignation,
+    fetchDepartments,
+    fetchDesignations,
+    fetchApprovers,
+    fetchApprovalRulesByDepartment,
+    fetchApprovalRulesByRequestType,
+    fetchApprovalRulesByDesignation,
+  } = useContext(SettingsContext);
+
+  const getDepartmentName = (departments ,departmentId) => {
+    const department = departments.find((dept) => dept.id === departmentId);
+    return department ? department.name : "";
+  }
 
   const [request, setRequest] = useState({
     requester: user.reference_number,
     title: "",
     vehicle_requested: "",
+    department: getDepartmentName(departments, getUserDepartmentByReferenceNumber(user.reference_number)),
     date_filled: new Date().toISOString().split("T")[0],
     date_of_trip: "",
     time_of_departure: "",
@@ -58,21 +79,6 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
   const [departmentOptions, setDepartmentOptions] = useState([]);
   const [vehicleOptions, setVehicleOptions] = useState([]);
   const [formErrors, setFormErrors] = useState({});
-
-  const {
-    departments,
-    designations,
-    approvers,
-    approvalRulesByDepartment,
-    approvalRulesByRequestType,
-    approvalRulesByDesignation,
-    fetchDepartments,
-    fetchDesignations,
-    fetchApprovers,
-    fetchApprovalRulesByDepartment,
-    fetchApprovalRulesByRequestType,
-    fetchApprovalRulesByDesignation,
-  } = useContext(SettingsContext);
 
   useEffect(() => {
     fetchDepartments();

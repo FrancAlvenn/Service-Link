@@ -65,6 +65,16 @@ export const UserProvider = ({ children }) => {
     return user ? `${user.first_name} ${user.last_name}` : referenceNumber;
   };
 
+  // Get user department by reference number
+  const getUserDepartmentByReferenceNumber = (referenceNumber) => {
+    if (!allUserInfo) return referenceNumber; // If no user info available, return the reference number
+
+    const user = allUserInfo.find(
+      (user) => user.reference_number === referenceNumber
+    );
+    return user ? user.department_id : referenceNumber;
+  };
+
   //Get user email by reference number
   const getUserEmailByReferenceNumber = (referenceNumber) => {
     if (!allUserInfo) return referenceNumber; // If no user info available, return the email
@@ -127,6 +137,7 @@ export const UserProvider = ({ children }) => {
         fetchUserInfo,
         getUserByReferenceNumber,
         getUserEmailByReferenceNumber,
+        getUserDepartmentByReferenceNumber,
         updateUser,
         archiveUser,
         createUser,

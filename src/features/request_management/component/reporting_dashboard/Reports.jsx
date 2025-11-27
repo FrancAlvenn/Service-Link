@@ -358,7 +358,7 @@ Give **actionable recommendations** (bottlenecks, trends, suggestions). Use **bo
 
   /* ------------------- Render ------------------- */
   return (
-    <div className="flex flex-col bg-white dark:bg-gray-900 ">
+    <div className="p-3 flex flex-col bg-white dark:bg-gray-900 ">
       {/* Header */}
       <div className="rounded-none min-h-fit pb-2 mt-4 mx-4">
         <Header title="Reports" description="Actionable analytics" />

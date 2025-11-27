@@ -30,7 +30,7 @@ const genAI = new GoogleGenAI({
 
 const PurchasingRequestForm = ({ setSelectedRequest }) => {
   const { user } = useContext(AuthContext);
-  const { allUserInfo, getUserByReferenceNumber, fetchUsers } = useContext(UserContext);
+  const { allUserInfo, getUserByReferenceNumber, fetchUsers, getUserDepartmentByReferenceNumber } = useContext(UserContext);
   const { fetchPurchasingRequests } = useContext(PurchasingRequestsContext);
   const {
     departments,
@@ -47,12 +47,19 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
     fetchApprovalRulesByDesignation,
   } = useContext(SettingsContext);
 
+  
+  const getDepartmentName = (departments ,departmentId) => {
+    const department = departments.find((dept) => dept.id === departmentId);
+    return department ? department.name : "";
+  }
+
   const [errorMessage, setErrorMessage] = useState("");
   const [request, setRequest] = useState({
     requester: user.reference_number,
     title: "",
     date_required: "",
     supply_category: "",
+    department: getDepartmentName(departments, getUserDepartmentByReferenceNumber(user.reference_number)),
     purpose: "",
     remarks: "",
     details: [],

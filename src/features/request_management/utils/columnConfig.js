@@ -183,6 +183,28 @@ export const getColumnConfig = (
           ),
         },
         {
+          key: "department",
+          label: "Department",
+          header: (
+            <Typography
+              variant="small"
+              color="blue-gray"
+              className={normalText}
+            >
+              Department
+            </Typography>
+          ),
+          render: (row) => (
+            <Typography
+              variant="small"
+              color="blue-gray"
+              className={normalText}
+            >
+              {row.department}
+            </Typography>
+          ),
+        },
+        {
           key: "archived",
           label: "Archived",
           header: (
@@ -426,6 +448,28 @@ export const getColumnConfig = (
               className={normalText}
             >
               {getUserByReferenceNumber(row.requester)}
+            </Typography>
+          ),
+        },
+        {
+          key: "department",
+          label: "Department",
+          header: (
+            <Typography
+              variant="small"
+              color="blue-gray"
+              className={normalText}
+            >
+              Department
+            </Typography>
+          ),
+          render: (row) => (
+            <Typography
+              variant="small"
+              color="blue-gray"
+              className={normalText}
+            >
+              {row.department}
             </Typography>
           ),
         },
@@ -674,6 +718,28 @@ export const getColumnConfig = (
               className={normalText}
             >
               {row.requester}
+            </Typography>
+          ),
+        },
+        {
+          key: "department",
+          label: "Department",
+          header: (
+            <Typography
+              variant="small"
+              color="blue-gray"
+              className={normalText}
+            >
+              Department
+            </Typography>
+          ),
+          render: (row) => (
+            <Typography
+              variant="small"
+              color="blue-gray"
+              className={normalText}
+            >
+              {row.department}
             </Typography>
           ),
         },
@@ -1228,6 +1294,28 @@ export const getColumnConfig = (
               className={normalText}
             >
               {getUserByReferenceNumber(row.requester)}
+            </Typography>
+          ),
+        },
+        {
+          key: "department",
+          label: "Department",
+          header: (
+            <Typography
+              variant="small"
+              color="blue-gray"
+              className={normalText}
+            >
+              Department
+            </Typography>
+          ),
+          render: (row) => (
+            <Typography
+              variant="small"
+              color="blue-gray"
+              className={normalText}
+            >
+              {row.department}
             </Typography>
           ),
         },

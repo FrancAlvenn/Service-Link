@@ -377,7 +377,7 @@ useEffect(() => {
               ],
               templateId: 5, // Job Request Template ID
               params: {
-                requester_name: `${request.first_name} ${request.last_name}`,
+                requester_name: `${user.first_name} ${user.last_name}`,
                 department: request.department_name || "N/A",
                 designation: request.designation_name || "N/A",
                 title: request.title,

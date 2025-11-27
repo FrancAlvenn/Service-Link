@@ -510,7 +510,7 @@ useEffect(() => {
 
             templateId: 8, // Venue Request Notification Template
             params: {
-              requester_name: `${requestData.first_name} ${request.last_name}`.trim(),
+              requester_name: `${user.first_name} ${user.last_name}`.trim(),
               title: request.title || "Venue Reservation Request",
               organization: request.organization || "N/A",
               venue_name: venueName || "Not specified",

@@ -409,7 +409,7 @@ useEffect(() => {
 
             templateId: 7, // Vehicle Request Notification Template
             params: {
-              requester_name: `${request.first_name} ${request.last_name}`.trim(),
+              requester_name: `${user.first_name} ${user.last_name}`.trim(),
               title: request.title || "Vehicle Request",
               destination: request.destination || "N/A",
               date_of_trip: request.date_of_trip || "Not specified",

@@ -377,7 +377,7 @@ useEffect(() => {
 
             templateId: 6, // Your Purchasing Request Template
             params: {
-              requester_name: `${request.first_name} ${request.last_name}`.trim(),
+              requester_name: `${user.first_name} ${user.last_name}`.trim(),
               department: request?.department_name || "N/A",
               title: request.title,
               date_required: formattedDate,

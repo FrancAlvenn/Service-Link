@@ -63,13 +63,14 @@ import UserManagement from "./features/user_management/component/UserManagement"
 import SidebarView from "./components/sidebar/SidebarView";
 import NotFound from "./pages/NotFound";
 import SummaryReport from "./features/request_management/component/reporting_dashboard/SummaryReport";
+import Redirect from "./features/authentication/component/Redirect";
 
 library.add(fas, fab, far); // Add all the icons needed
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Login />,
+    element: <Redirect />,
   },
   {
     path: "/home",

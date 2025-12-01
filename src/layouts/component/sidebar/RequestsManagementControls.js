@@ -25,6 +25,7 @@ import {
   Gear,
   Notebook,
   UsersThree,
+  Car,
 } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 
@@ -189,6 +190,32 @@ function RequestsManagementControls() {
       <ListItem onClick={() => navigate("/workspace/employee-management/board")}>
         <ListItemPrefix>
           <ChalkboardTeacher size={20} />
+        </ListItemPrefix>
+        Board
+      </ListItem>
+
+      <hr className="my-2 border-t border-gray-300" />
+
+      {/* Venue Management */}
+      <Typography className="text-xs font-semibold text-gray-700 pb-1">
+        Venue Management
+      </Typography>
+      <ListItem onClick={() => navigate("/workspace/venue-management/board")}>
+        <ListItemPrefix>
+          <ChalkboardSimple size={20} />
+        </ListItemPrefix>
+        Board
+      </ListItem>
+
+      <hr className="my-2 border-t border-gray-300" />
+
+      {/* Vehicle Management */}
+      <Typography className="text-xs font-semibold text-gray-700 pb-1">
+        Vehicle Management
+      </Typography>
+      <ListItem onClick={() => navigate("/workspace/vehicle-management/board")}>
+        <ListItemPrefix>
+          <Car size={20} />
         </ListItemPrefix>
         Board
       </ListItem>

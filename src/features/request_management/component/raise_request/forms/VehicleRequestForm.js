@@ -9,7 +9,7 @@ import { SettingsContext } from "../../../../settings/context/SettingsContext";
 import assignApproversToRequest from "../../../utils/assignApproversToRequest";
 import MapboxAddressPicker from "../../../../../components/map_address_picker/MapboxAddressPicker";
 import { GoogleGenAI } from "@google/genai";
-import { Sparkle, ArrowClockwise, MapPin, Info, X } from "@phosphor-icons/react";
+import { Sparkle, ArrowClockwise, MapPin, Info, X, CaretLeft, CaretRight, Calendar } from "@phosphor-icons/react";
 import { renderDetailsTable } from "../../../../../utils/emailsTempalte";
 import { sendBrevoEmail } from "../../../../../utils/brevo";
 
@@ -35,7 +35,7 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
 
   const { user } = useContext(AuthContext);
   const { allUserInfo, getUserByReferenceNumber, fetchUsers, getUserDepartmentByReferenceNumber } = useContext(UserContext);
-  const { fetchVehicleRequests } = useContext(VehicleRequestsContext);
+  const { vehicleRequests, fetchVehicleRequests } = useContext(VehicleRequestsContext);
 
   const {
     departments,
@@ -60,7 +60,7 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
   const [request, setRequest] = useState({
     requester: user.reference_number,
     title: "",
-    vehicle_requested: "",
+    vehicle_id: "",
     department: getDepartmentName(departments, getUserDepartmentByReferenceNumber(user.reference_number)),
     date_filled: new Date().toISOString().split("T")[0],
     date_of_trip: "",
@@ -79,6 +79,17 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
   const [departmentOptions, setDepartmentOptions] = useState([]);
   const [vehicleOptions, setVehicleOptions] = useState([]);
   const [formErrors, setFormErrors] = useState({});
+  const [formWarnings, setFormWarnings] = useState({});
+  
+  const [vehicleBookings, setVehicleBookings] = useState([]);
+  const [vehicleUnavailability, setVehicleUnavailability] = useState([]);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [calendarView, setCalendarView] = useState("month"); // "month" or "day"
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [dragging, setDragging] = useState(false);
+  const [dragStart, setDragStart] = useState(null);
+  const [dragEnd, setDragEnd] = useState(null);
 
   useEffect(() => {
     fetchDepartments();
@@ -88,20 +99,71 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
     fetchApprovalRulesByRequestType();
     fetchApprovalRulesByDesignation();
     fetchUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Fetch vehicles from vehicles API
   useEffect(() => {
-    axios({
-      method: "GET",
-      url: `${process.env.REACT_APP_API_URL}/assets/`,
-      withCredentials: true,
-    })
-      .then((res) => {
-        const vehicles = res.data.filter((a) => a.asset_type === "Vehicle");
-        setVehicleOptions(vehicles);
-      })
-      .catch(console.error);
+    const fetchVehicles = async () => {
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/vehicles`, {
+          withCredentials: true,
+        });
+
+        // Filter only available vehicles
+        const data = response?.data || [];
+        const availableVehicles = Array.isArray(data)
+          ? data.filter((vehicle) => vehicle?.status === "Available")
+          : [];
+
+        setVehicleOptions(availableVehicles);
+      } catch (error) {
+        console.error("Failed to fetch vehicles:", error);
+        setVehicleOptions([]);
+      }
+    };
+
+    fetchVehicles();
   }, []);
+  
+  // Fetch vehicle requests once when component mounts
+  useEffect(() => {
+    fetchVehicleRequests();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Fetch bookings and unavailability when vehicle is selected
+  useEffect(() => {
+    const fetchVehicleSchedule = async () => {
+      if (!request.vehicle_id) {
+        setVehicleBookings([]);
+        setVehicleUnavailability([]);
+        return;
+      }
+
+      try {
+        // Fetch bookings
+        const bookingsResponse = await axios.get(
+          `${process.env.REACT_APP_API_URL}/vehicles/bookings/vehicle/${request.vehicle_id}`,
+          { withCredentials: true }
+        );
+        setVehicleBookings(bookingsResponse.data || []);
+
+        // Fetch unavailability
+        const unavailabilityResponse = await axios.get(
+          `${process.env.REACT_APP_API_URL}/vehicles/unavailability/vehicle/${request.vehicle_id}`,
+          { withCredentials: true }
+        );
+        setVehicleUnavailability(unavailabilityResponse.data || []);
+      } catch (error) {
+        console.error("Failed to fetch vehicle schedule:", error);
+        setVehicleBookings([]);
+        setVehicleUnavailability([]);
+      }
+    };
+
+    fetchVehicleSchedule();
+  }, [request.vehicle_id]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -118,6 +180,88 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
     };
     fetchData();
   }, []);
+
+  const checkBookingConflicts = () => {
+    if (!request.vehicle_id || !request.date_of_trip || !request.time_of_departure || !request.time_of_arrival) {
+      setFormErrors((prev) => ({ ...prev, booking: "" }));
+      setFormWarnings((prev) => ({ ...prev, booking: "" }));
+      return;
+    }
+
+    setFormErrors((prev) => ({ ...prev, booking: "" }));
+    setFormWarnings((prev) => ({ ...prev, booking: "" }));
+
+    const targetDate = request.date_of_trip;
+    const newStart = new Date(`${targetDate}T${request.time_of_departure}`);
+    const newEnd = new Date(`${targetDate}T${request.time_of_arrival}`);
+
+    // Check against confirmed bookings
+    const bookingConflict = Array.isArray(vehicleBookings) && vehicleBookings.some((booking) => {
+      if (booking.booking_date !== targetDate) return false;
+      const bookingStart = new Date(`${booking.booking_date}T${booking.start_time}`);
+      const bookingEnd = new Date(`${booking.booking_date}T${booking.end_time || booking.start_time}`);
+      return newStart < bookingEnd && newEnd > bookingStart;
+    });
+
+    // Check against unavailability
+    const unavailabilityConflict = Array.isArray(vehicleUnavailability) && vehicleUnavailability
+      .filter((unav) => unav.status === "Active")
+      .some((unav) => {
+        const unavStart = new Date(unav.start_date);
+        unavStart.setHours(0, 0, 0, 0);
+        const unavEnd = new Date(unav.end_date);
+        unavEnd.setHours(23, 59, 59, 999);
+        return newStart < unavEnd && newEnd > unavStart;
+      });
+
+    // Check against pending requests
+    const requestConflict = Array.isArray(vehicleRequests) ? vehicleRequests.filter((existing) => {
+      const existingVehicleId = Number(existing.vehicle_id);
+      const targetVehicleId = Number(request.vehicle_id);
+      if (existingVehicleId !== targetVehicleId || existing.date_of_trip !== targetDate) return false;
+
+      const existStart = new Date(`1970-01-01T${existing.time_of_departure}`);
+      const existEnd = new Date(`1970-01-01T${existing.time_of_arrival || existing.time_of_departure}`);
+      const hasOverlap = newStart < existEnd && newEnd > existStart;
+      return hasOverlap;
+    }) : [];
+
+    if (bookingConflict || unavailabilityConflict) {
+      setFormErrors((prev) => ({
+        ...prev,
+        booking: "Vehicle is already booked or unavailable for this date/time!",
+      }));
+    } else if (requestConflict.length > 0) {
+      const approvedConflict = requestConflict.some((c) => c.status === "Approved");
+      if (approvedConflict) {
+        setFormErrors((prev) => ({
+          ...prev,
+          booking: "Vehicle is already booked for this date/time!",
+        }));
+      } else {
+        setFormWarnings((prev) => ({
+          ...prev,
+          booking: "Warning: Pending booking might conflict with your request",
+        }));
+      }
+    }
+  };
+
+  useEffect(() => {
+    checkBookingConflicts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [request, vehicleRequests, vehicleBookings, vehicleUnavailability]);
+
+  // Add event listeners for mouse up outside when dragging
+  useEffect(() => {
+    if (dragging) {
+      const handleMouseUp = () => {
+        setDragging(false);
+      };
+      window.addEventListener("mouseup", handleMouseUp);
+      return () => window.removeEventListener("mouseup", handleMouseUp);
+    }
+  }, [dragging]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -430,18 +574,22 @@ useEffect(() => {
         setRequest({
           requester: user.reference_number,
           title: "",
-          vehicle_requested: "",
+          vehicle_id: "",
           date_filled: new Date().toISOString().split("T")[0],
           date_of_trip: "",
           time_of_departure: "",
           time_of_arrival: "",
           number_of_passengers: "",
           destination: "",
+          destination_coordinates: "",
           purpose: "",
           remarks: "",
         });
         setTravelAnalytics(null);
         setShowAnalytics(false);
+        setShowCalendar(false);
+        setCalendarView("month");
+        setSelectedDay(null);
       }
     } catch (error) {
       console.error("Error submitting vehicle request:", error);
@@ -455,6 +603,483 @@ useEffect(() => {
     !!request.time_of_departure &&
     !!request.date_of_trip;
 
+  // Custom Calendar Component
+  const CustomCalendar = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+    const startDate = new Date(monthStart);
+    startDate.setDate(startDate.getDate() - startDate.getDay()); // Start from Sunday
+    
+    const days = [];
+    const currentDate = new Date(startDate);
+    
+    // Generate 42 days (6 weeks)
+    for (let i = 0; i < 42; i++) {
+      days.push(new Date(currentDate));
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    
+    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    
+    // Helper function to format date as YYYY-MM-DD in local timezone
+    const formatDateLocal = (date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    };
+    
+    const isDateBooked = (date) => {
+      if (!request.vehicle_id) return false;
+      const dateStr = formatDateLocal(date);
+      const vehicleId = Number(request.vehicle_id);
+      
+      // Check confirmed and pending bookings
+      const hasBooking = Array.isArray(vehicleBookings) && vehicleBookings.some(booking => 
+        booking.booking_date === dateStr && 
+        (booking.status === "Confirmed" || booking.status === "Pending")
+      );
+      
+      // Also check pending vehicle requests
+      const hasPendingRequest = Array.isArray(vehicleRequests) && vehicleRequests.some(req => {
+        const reqVehicleId = Number(req.vehicle_id);
+        return reqVehicleId === vehicleId && 
+               req.date_of_trip === dateStr && 
+               (req.status === "Pending" || req.status === "Approved");
+      });
+      
+      return hasBooking || hasPendingRequest;
+    };
+    
+    const isDateUnavailable = (date) => {
+      if (!Array.isArray(vehicleUnavailability)) return false;
+      return vehicleUnavailability
+        .filter(unav => unav.status === "Active")
+        .some(unav => {
+          const start = new Date(unav.start_date);
+          start.setHours(0, 0, 0, 0);
+          const end = new Date(unav.end_date);
+          end.setHours(23, 59, 59, 999);
+          return date >= start && date <= end;
+        });
+    };
+    
+    const isDateInPast = (date) => {
+      return date < today;
+    };
+    
+    const isDateSelected = (date) => {
+      if (!request.date_of_trip) return false;
+      return formatDateLocal(date) === request.date_of_trip;
+    };
+    
+    const handleDateClick = (date) => {
+      if (isDateInPast(date)) return;
+      
+      const dateStr = formatDateLocal(date);
+      
+      // Update the date_of_trip field
+      setRequest((prev) => ({
+        ...prev,
+        date_of_trip: dateStr,
+      }));
+      
+      // Switch to day view when clicking on a date
+      setSelectedDay(new Date(date));
+      setCalendarView("day");
+      
+      // Auto-scroll to time inputs after a short delay
+      setTimeout(() => {
+        const timeInputs = document.querySelectorAll('input[name="time_of_departure"], input[name="time_of_arrival"]');
+        if (timeInputs.length > 0) {
+          timeInputs[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+    };
+    
+    const getDateStatus = (date) => {
+      if (isDateInPast(date)) return "past";
+      if (isDateBooked(date)) return "booked";
+      if (isDateUnavailable(date)) return "unavailable";
+      if (isDateSelected(date)) return "selected";
+      return "available";
+    };
+    
+    const prevMonth = () => {
+      setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
+    };
+    
+    const nextMonth = () => {
+      setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
+    };
+    
+    // Day View Component
+    const DayView = () => {
+      if (!selectedDay) return null;
+      
+      const dayDateStr = formatDateLocal(selectedDay);
+      const dayName = dayNames[selectedDay.getDay()];
+      const dayNumber = selectedDay.getDate();
+      const monthName = monthNames[selectedDay.getMonth()];
+      const year = selectedDay.getFullYear();
+      
+      // Get bookings for this day
+      const dayBookings = Array.isArray(vehicleBookings) 
+        ? vehicleBookings.filter(booking => booking.booking_date === dayDateStr && (booking.status === "Confirmed" || booking.status === "Pending"))
+        : [];
+      
+      // Also get pending vehicle requests for this day and convert them to booking-like objects
+      const dayPendingRequests = Array.isArray(vehicleRequests) && request.vehicle_id
+        ? vehicleRequests
+            .filter(req => {
+              const reqVehicleId = Number(req.vehicle_id);
+              const targetVehicleId = Number(request.vehicle_id);
+              return reqVehicleId === targetVehicleId && 
+                     req.date_of_trip === dayDateStr && 
+                     (req.status === "Pending" || req.status === "Approved");
+            })
+            .map(req => ({
+              booking_date: req.date_of_trip,
+              start_time: req.time_of_departure || "00:00",
+              end_time: req.time_of_arrival || req.time_of_departure || "00:00",
+              event_title: req.title || "Pending Request",
+              status: "Pending",
+              organization: req.department || null,
+              isPendingRequest: true, // Flag to identify pending requests
+            }))
+        : [];
+      
+      // Combine bookings and pending requests
+      const allDayBookings = [...dayBookings, ...dayPendingRequests];
+      
+      // Check if day is unavailable
+      const isDayUnavailable = Array.isArray(vehicleUnavailability) && vehicleUnavailability
+        .filter(unav => unav.status === "Active")
+        .some(unav => {
+          const start = new Date(unav.start_date);
+          start.setHours(0, 0, 0, 0);
+          const end = new Date(unav.end_date);
+          end.setHours(23, 59, 59, 999);
+          return selectedDay >= start && selectedDay <= end;
+        });
+      
+      // Generate time slots (4 AM to 7 PM)
+      const timeSlots = [];
+      for (let hour = 4; hour <= 19; hour++) {
+        timeSlots.push({
+          hour,
+          time: `${String(hour).padStart(2, "0")}:00`,
+          displayTime: hour <= 12 ? `${hour === 12 ? 12 : hour}:00 ${hour < 12 ? "AM" : "PM"}` : `${hour - 12}:00 PM`,
+        });
+      }
+      
+      // Check if a time slot is booked
+      const isTimeSlotBooked = (hour) => {
+        return allDayBookings.some(booking => {
+          const [startHour] = booking.start_time.split(":").map(Number);
+          const endTime = booking.end_time || booking.start_time;
+          const [endHour] = endTime.split(":").map(Number);
+          return hour >= startHour && hour < endHour;
+        });
+      };
+      
+      // Get booking for a specific hour
+      const getBookingForHour = (hour) => {
+        return allDayBookings.find(booking => {
+          const [startHour] = booking.start_time.split(":").map(Number);
+          const endTime = booking.end_time || booking.start_time;
+          const [endHour] = endTime.split(":").map(Number);
+          return hour >= startHour && hour < endHour;
+        });
+      };
+      
+      // Format time for display
+      const formatTime = (timeStr) => {
+        const [hours, minutes] = timeStr.split(":").map(Number);
+        const hour12 = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+        const ampm = hours < 12 ? "AM" : "PM";
+        return `${hour12}:${String(minutes).padStart(2, "0")} ${ampm}`;
+      };
+      
+      // Check if hour is in selected range
+      const isHourInRange = (hour) => {
+        if (!request.time_of_departure || !request.time_of_arrival) {
+          if (dragStart !== null && dragEnd !== null) {
+            const min = Math.min(dragStart, dragEnd);
+            const max = Math.max(dragStart, dragEnd);
+            return hour >= min && hour < max;
+          }
+          return false;
+        }
+        const start = Number(request.time_of_departure.split(":")[0]);
+        const end = Number(request.time_of_arrival.split(":")[0]);
+        return hour >= start && hour < end;
+      };
+      
+      // Handle time slot click/drag
+      const handleTimeSlotMouseDown = (hour) => {
+        if (isTimeSlotBooked(hour) || isDayUnavailable) return;
+        
+        const timeStr = `${String(hour).padStart(2, "0")}:00`;
+        setDragStart(hour);
+        setDragEnd(hour);
+        setDragging(true);
+        
+        setRequest((prev) => ({
+          ...prev,
+          time_of_departure: timeStr,
+          time_of_arrival: timeStr,
+        }));
+      };
+      
+      const handleTimeSlotMouseEnter = (hour) => {
+        if (!dragging || isTimeSlotBooked(hour) || isDayUnavailable) return;
+        
+        setDragEnd(hour);
+        
+        const startHour = dragStart;
+        const endHour = hour;
+        const minHour = Math.min(startHour, endHour);
+        const maxHour = Math.max(startHour, endHour);
+        
+        setRequest((prev) => ({
+          ...prev,
+          time_of_departure: `${String(minHour).padStart(2, "0")}:00`,
+          time_of_arrival: `${String(maxHour + 1).padStart(2, "0")}:00`,
+        }));
+      };
+      
+      const handleTimeSlotMouseUp = () => {
+        setDragging(false);
+      };
+      
+      return (
+        <div className="w-full">
+          {/* Day View Header */}
+          <div className="flex items-center justify-between mb-4">
+            <button
+              onClick={() => {
+                setCalendarView("month");
+                setSelectedDay(null);
+              }}
+              className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            >
+              <CaretLeft size={18} />
+              <span>Back to Calendar</span>
+            </button>
+            <div className="text-center">
+              <h3 className="text-base font-semibold text-gray-700 dark:text-gray-300">
+                {dayName}, {monthName} {dayNumber}, {year}
+              </h3>
+              {isDayUnavailable && (
+                <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">Day is unavailable</p>
+              )}
+            </div>
+            <div className="w-24"></div> {/* Spacer for centering */}
+          </div>
+          
+          {/* Time Slots */}
+          <div className="space-y-2 max-h-96 overflow-y-auto">
+            {timeSlots.map((slot, idx) => {
+              const isBooked = isTimeSlotBooked(slot.hour);
+              const booking = getBookingForHour(slot.hour);
+              const isFirstHourOfBooking = booking && Number(booking.start_time.split(":")[0]) === slot.hour;
+              const isSelected = isHourInRange(slot.hour);
+              
+              return (
+                <div
+                  key={idx}
+                  onMouseDown={() => handleTimeSlotMouseDown(slot.hour)}
+                  onMouseEnter={() => handleTimeSlotMouseEnter(slot.hour)}
+                  onMouseUp={handleTimeSlotMouseUp}
+                  className={`
+                    relative p-3 rounded-lg border-2 transition-all cursor-pointer
+                    ${isSelected
+                      ? "bg-blue-100 dark:bg-blue-900/30 border-blue-400 dark:border-blue-600"
+                      : isBooked
+                      ? "bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700 cursor-not-allowed"
+                      : isDayUnavailable
+                      ? "bg-orange-50 dark:bg-orange-900/20 border-orange-300 dark:border-orange-700 opacity-60 cursor-not-allowed"
+                      : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/10"
+                    }
+                  `}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className={`text-sm font-semibold w-20 ${
+                        isSelected 
+                          ? "text-blue-700 dark:text-blue-300" 
+                          : "text-gray-700 dark:text-gray-300"
+                      }`}>
+                        {slot.displayTime}
+                      </span>
+                      {isBooked && booking && isFirstHourOfBooking && (
+                        <div className="flex-1">
+                          <div className="text-xs font-medium text-red-700 dark:text-red-300">
+                            {booking.event_title || "Booked"}
+                          </div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400">
+                            {formatTime(booking.start_time)} - {formatTime(booking.end_time || booking.start_time)}
+                            {booking.status === "Pending" && (
+                              <span className="ml-2 px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded text-xs font-medium">
+                                Pending
+                              </span>
+                            )}
+                          </div>
+                          {booking.organization && (
+                            <div className="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
+                              {booking.organization}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {isBooked && !isFirstHourOfBooking && (
+                        <div className="text-xs text-gray-500 dark:text-gray-400 italic">
+                          (Continued from {formatTime(booking.start_time)})
+                        </div>
+                      )}
+                      {isSelected && !isBooked && (
+                        <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                          Selected
+                        </div>
+                      )}
+                      {!isSelected && !isBooked && !isDayUnavailable && (
+                        <div className="text-xs text-green-600 dark:text-green-400 font-medium">
+                          Available - Click & drag to select
+                        </div>
+                      )}
+                      {isDayUnavailable && !isBooked && (
+                        <div className="text-xs text-orange-600 dark:text-orange-400 font-medium">
+                          Unavailable
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          
+          {/* Selected Time Range Display */}
+          {(request.time_of_departure || request.time_of_arrival) && (
+            <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+              <p className="text-xs font-semibold text-blue-700 dark:text-blue-300 mb-1">
+                Selected Time Range:
+              </p>
+              <p className="text-sm text-blue-600 dark:text-blue-400">
+                {request.time_of_departure || "Not set"} - {request.time_of_arrival || "Not set"}
+              </p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                Click and drag on available time slots to select your trip time
+              </p>
+            </div>
+          )}
+          
+          {/* Summary */}
+          {allDayBookings.length > 0 && (
+            <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Summary: {allDayBookings.length} booking{allDayBookings.length !== 1 ? "s" : ""} on this day
+                {dayPendingRequests.length > 0 && (
+                  <span className="ml-2 text-amber-600 dark:text-amber-400">
+                    ({dayPendingRequests.length} pending request{dayPendingRequests.length !== 1 ? "s" : ""})
+                  </span>
+                )}
+              </p>
+            </div>
+          )}
+        </div>
+      );
+    };
+    
+    // Month View Component
+    const MonthView = () => (
+      <div className="w-full">
+        {/* Calendar Header */}
+        <div className="flex items-center justify-between mb-3 px-2">
+          <button
+            onClick={prevMonth}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            aria-label="Previous month"
+          >
+            <CaretLeft size={20} />
+          </button>
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+          </h3>
+          <button
+            onClick={nextMonth}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            aria-label="Next month"
+          >
+            <CaretRight size={20} />
+          </button>
+        </div>
+        
+        {/* Day Names */}
+        <div className="grid grid-cols-7 gap-1 mb-2">
+          {dayNames.map((day) => (
+            <div
+              key={day}
+              className="text-center text-xs font-semibold text-gray-600 dark:text-gray-400 py-1"
+            >
+              {day}
+            </div>
+          ))}
+        </div>
+        
+        {/* Calendar Days */}
+        <div className="grid grid-cols-7 gap-1">
+          {days.map((date, idx) => {
+            const isCurrentMonth = date.getMonth() === currentMonth.getMonth();
+            const status = getDateStatus(date);
+            const isToday = formatDateLocal(date) === formatDateLocal(today);
+            
+            return (
+              <button
+                key={idx}
+                onClick={() => handleDateClick(date)}
+                disabled={status === "past"}
+                className={`
+                  aspect-square text-xs font-medium rounded-lg transition-all
+                  ${!isCurrentMonth ? "text-gray-300 dark:text-gray-600" : ""}
+                  ${status === "past" 
+                    ? "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50" 
+                    : status === "booked"
+                    ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-2 border-red-400 dark:border-red-600 hover:bg-red-200 dark:hover:bg-red-900/40"
+                    : status === "unavailable"
+                    ? "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border-2 border-orange-400 dark:border-orange-600 hover:bg-orange-200 dark:hover:bg-orange-900/40"
+                    : status === "selected"
+                    ? "bg-blue-500 text-white font-semibold shadow-md"
+                    : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700"
+                  }
+                  ${isToday && status !== "selected" ? "ring-2 ring-blue-400" : ""}
+                `}
+                title={
+                  status === "booked" ? "Click to view day schedule" :
+                  status === "unavailable" ? "Click to view day schedule" :
+                  status === "past" ? "Past date" :
+                  isToday ? "Today - Click to view schedule" : "Click to view schedule"
+                }
+              >
+                {date.getDate()}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+    
+    return calendarView === "day" ? <DayView /> : <MonthView />;
+  };
+
   return (
     <div className="py-2 text-sm space-y-4">
       {!isDataReady ? (
@@ -466,8 +1091,8 @@ useEffect(() => {
         </div>
       ) : (
         <>
-          {/* Requester */}
-          <div className="grid grid-cols-1 gap-4">
+          {/* Requester & Vehicle */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Requester
@@ -499,7 +1124,154 @@ useEffect(() => {
                 </>
               )}
             </div>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
+                Vehicle
+              </label>
+              <select
+                name="vehicle_id"
+                value={request.vehicle_id}
+                onChange={(e) => {
+                  handleChange(e);
+                  setShowCalendar(false);
+                }}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
+                required
+              >
+                <option value="">Select Vehicle</option>
+                {vehicleOptions.map((v) => (
+                  <option key={v.vehicle_id} value={v.vehicle_id}>
+                    {v.name} {v.license_plate ? `- ${v.license_plate}` : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
+
+          {/* Calendar View - Mobile First - Right after vehicle selection */}
+          {request.vehicle_id && (
+            <div className="space-y-4">
+              <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
+                <div className="flex items-center justify-between mb-3">
+                  <Typography variant="small" className="font-semibold text-gray-700 dark:text-gray-300">
+                    Select Date & Time
+                  </Typography>
+                  <Button
+                    type="button"
+                    variant="text"
+                    size="sm"
+                    className="p-1"
+                    onClick={() => setShowCalendar(!showCalendar)}
+                  >
+                    <Calendar size={18} />
+                  </Button>
+                </div>
+                
+                {showCalendar && (
+                  <>
+                    {/* Legend */}
+                    <div className="flex flex-wrap gap-3 text-xs mb-4 pb-3 border-b border-gray-200 dark:border-gray-700">
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-3 h-3 rounded bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"></div>
+                        <span className="text-gray-600 dark:text-gray-400">Available</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-3 h-3 rounded bg-red-100 dark:bg-red-900/30 border-2 border-red-400 dark:border-red-600"></div>
+                        <span className="text-gray-600 dark:text-gray-400">Booked/Pending</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-3 h-3 rounded bg-orange-100 dark:bg-orange-900/30 border-2 border-orange-400 dark:border-orange-600"></div>
+                        <span className="text-gray-600 dark:text-gray-400">Unavailable</span>
+                      </div>
+                    </div>
+                    
+                    {/* Custom Calendar */}
+                    <CustomCalendar />
+                  </>
+                )}
+                
+                {/* Date & Time Inputs */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
+                      Date of Trip
+                    </label>
+                    <input
+                      type="date"
+                      name="date_of_trip"
+                      min={
+                        user.access_level === "admin"
+                          ? new Date().toISOString().split("T")[0]
+                          : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]
+                      }
+                      value={request.date_of_trip || ""}
+                      onChange={handleChange}
+                      className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
+                    />
+                    {formErrors.date_of_trip && <p className="text-red-500 text-xs mt-1">{formErrors.date_of_trip}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
+                      Time of Departure
+                    </label>
+                    <input
+                      type="time"
+                      name="time_of_departure"
+                      min="04:00"
+                      max="19:00"
+                      value={request.time_of_departure || ""}
+                      onChange={handleChange}
+                      className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
+                      Time of Arrival
+                    </label>
+                    <input
+                      type="time"
+                      name="time_of_arrival"
+                      min="04:00"
+                      max="19:00"
+                      value={request.time_of_arrival || ""}
+                      onChange={handleChange}
+                      className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
+                    />
+                    {formErrors.time && <p className="text-red-500 text-xs mt-1">{formErrors.time}</p>}
+                  </div>
+                </div>
+                
+                {/* Booking Conflicts */}
+                <div className="space-y-2 mt-3">
+                  {formErrors.booking && (
+                    <p className="text-red-500 text-xs mt-2 flex items-start gap-1">
+                      {formErrors.booking}
+                      <span className="relative flex group">
+                        <Info size={14} className="text-red-500 cursor-pointer mt-0.5" weight="duotone" />
+                        <div className="absolute bottom-full right-0 mb-2 w-64 bg-white text-gray-700 text-xs border border-red-200 rounded-lg shadow-lg p-3 opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
+                          <div className="absolute -bottom-1.5 right-2 w-3 h-3 bg-white border-b border-r border-red-200 rotate-45"></div>
+                          This means the vehicle has already been booked for this date and time.
+                        </div>
+                      </span>
+                    </p>
+                  )}
+                  {formWarnings.booking && (
+                    <p className="text-amber-500 text-xs mt-2 flex items-start gap-1">
+                      {formWarnings.booking}
+                      <span className="relative flex group">
+                        <Info size={14} className="text-amber-500 cursor-pointer mt-0.5" weight="duotone" />
+                        <div className="absolute bottom-full right-0 mb-2 w-64 bg-white text-gray-700 text-xs border border-amber-200 rounded-lg shadow-lg p-3 opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
+                          <div className="absolute -bottom-1.5 right-2 w-3 h-3 bg-white border-b border-r border-amber-200 rotate-45"></div>
+                          A pending request might conflict with your selected schedule.
+                        </div>
+                      </span>
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Title */}
           <div>
@@ -592,62 +1364,6 @@ useEffect(() => {
             </div>
           </Collapse>
 
-          {/* Date, Time */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Date of Trip
-              </label>
-              <input
-                type="date"
-                name="date_of_trip"
-                min={
-                  user.access_level === "admin"
-                    ? new Date().toISOString().split("T")[0]
-                    : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]
-                }
-                value={request.date_of_trip || ""}
-                onChange={handleChange}
-                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-                required
-              />
-              {formErrors.date_of_trip && (
-                <p className="text-xs text-red-500">{formErrors.date_of_trip}</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Time of Departure
-              </label>
-              <input
-                type="time"
-                name="time_of_departure"
-                min="04:00"
-                max="19:00"
-                value={request.time_of_departure || ""}
-                onChange={handleChange}
-                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Time of Arrival
-              </label>
-              <input
-                type="time"
-                name="time_of_arrival"
-                min="04:00"
-                max="19:00"
-                value={request.time_of_arrival || ""}
-                onChange={handleChange}
-                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-              />
-              {formErrors.time && (
-                <p className="text-xs text-red-500 col-span-3">{formErrors.time}</p>
-              )}
-            </div>
-          </div>
 
           {/* Passengers */}
           <div>
@@ -726,8 +1442,9 @@ useEffect(() => {
               !request.time_of_departure ||
               !request.time_of_arrival ||
               !request.number_of_passengers ||
-              !request.purpose ||
-              Object.keys(formErrors).length > 0
+              !request.purpose 
+              // Object.keys(formErrors).length > 0 ||
+              // formErrors.booking
             }
             className="dark:bg-blue-600 dark:hover:bg-blue-500 w-full md:w-auto"
           >

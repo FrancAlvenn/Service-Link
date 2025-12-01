@@ -38,6 +38,9 @@ import RaiseRequest from "./features/request_management/component/raise_request/
 import AssetTable from "./features/asset_management/component/AssetTable";
 import { AssetProvider } from "./features/asset_management/context/AssetContext";
 import AssetForm from "./features/asset_management/component/AssetForm";
+import VenueTable from "./features/venue_management/component/VenueTable";
+import { VenueProvider } from "./features/venue_management/context/VenueContext";
+import { VehicleProvider } from "./features/vehicle_management/context/VehicleContext";
 import EmployeeTable from "./features/employee_management/component/EmployeeTable";
 import EmployeeForm from "./features/employee_management/component/EmployeeForm";
 import { EmployeeProvider } from "./features/employee_management/context/EmployeeContext";
@@ -64,6 +67,7 @@ import SidebarView from "./components/sidebar/SidebarView";
 import NotFound from "./pages/NotFound";
 import SummaryReport from "./features/request_management/component/reporting_dashboard/SummaryReport";
 import Redirect from "./features/authentication/component/Redirect";
+import VehicleTable from "./features/vehicle_management/component/VehicleTable";
 
 library.add(fas, fab, far); // Add all the icons needed
 
@@ -243,6 +247,22 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: "venue-management/board",
+        element: (
+          <ProtectedRoute requiredAccess={"admin"}>
+            <VenueTable />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "vehicle-management/board",
+        element: (
+          <ProtectedRoute requiredAccess={"admin"}>
+            <VehicleTable />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: "employee-management/board",
         element: (
           <ProtectedRoute requiredAccess={"admin"}>
@@ -373,16 +393,20 @@ function App() {
             <SettingsProvider>
               <TicketProvider>
                 <AssetProvider>
-                  <AssetAssignmentLogProvider>
-                    <EmployeeProvider>
-                      <RequestsProviderWrapper>
-                        <div className="App font-sans ">
-                          <RouterProvider router={router} />
-                          <CustomToastContainer />
-                        </div>
-                      </RequestsProviderWrapper>
-                    </EmployeeProvider>
-                  </AssetAssignmentLogProvider>
+                  <VenueProvider>
+                    <VehicleProvider>
+                      <AssetAssignmentLogProvider>
+                        <EmployeeProvider>
+                          <RequestsProviderWrapper>
+                            <div className="App font-sans ">
+                              <RouterProvider router={router} />
+                              <CustomToastContainer />
+                            </div>
+                          </RequestsProviderWrapper>
+                        </EmployeeProvider>
+                      </AssetAssignmentLogProvider>
+                    </VehicleProvider>
+                  </VenueProvider>
                 </AssetProvider>
               </TicketProvider>
             </SettingsProvider>

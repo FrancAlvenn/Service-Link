@@ -29,6 +29,12 @@ const Department = () => {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deptToDelete, setDeptToDelete] = useState(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [savingCreate, setSavingCreate] = useState(false);
+  const [savingUpdate, setSavingUpdate] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [createError, setCreateError] = useState("");
+  const [updateError, setUpdateError] = useState("");
 
   const [selectedRowId, setSelectedRowId] = useState(null);
 
@@ -95,7 +101,9 @@ const Department = () => {
 
   const confirmDeleteDepartment = async () => {
     if (deptToDelete !== null) {
+      setDeleting(true);
       await deleteDepartment(deptToDelete);
+      setDeleting(false);
       fetchDepartments();
     }
     setDeleteDialogOpen(false);
@@ -162,7 +170,7 @@ const Department = () => {
   return (
     <>
       <Card className="shadow-none">
-        <CardHeader floated={false} shadow={false} className="rounded-none ">
+        <CardHeader floated={false} shadow={false} className="rounded-none flex justify-between items-center flex-wrap gap-2">
           <div>
             <Typography color="black" className="text-md font-bold">
               Manage Departments
@@ -173,7 +181,99 @@ const Department = () => {
           </div>
         </CardHeader>
         <CardBody className="overflow-x-auto px-4 py-2" ref={tableRef}>
-          <div className="overflow-y-auto max-h-[300px]">
+          <div className="flex flex-col gap-6 mb-6">
+            <div>
+              <Typography className="text-sm font-semibold text-gray-700">Department</Typography>
+              <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-md flex flex-wrap items-center gap-3">
+                <span className="text-sm text-gray-700">Name</span>
+                <input
+                  type="text"
+                  name="name"
+                  value={editValues.name}
+                  onChange={handleChange}
+                  className="w-fit px-3 py-2 text-sm bg-white border rounded-md"
+                  aria-label="Name"
+                />
+                <span className="text-sm text-gray-700">Description</span>
+                <input
+                  type="text"
+                  name="description"
+                  value={editValues.description}
+                  onChange={handleChange}
+                  className="w-fit px-3 py-2 text-sm bg-white border rounded-md"
+                  aria-label="Description"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="text" color="gray" onClick={handleCancelEdit}>Reset</Button>
+              <Button
+                color="green"
+                onClick={async () => {
+                  if (editValues.name.trim() === "" || editValues.description.trim() === "") return;
+                  setSavingCreate(true);
+                  setCreateError("");
+                  try {
+                    await createDepartment(editValues);
+                  } catch (e) {
+                    setCreateError("Failed to save department. Please try again.");
+                  }
+                  setSavingCreate(false);
+                  resetEditState();
+                  fetchDepartments();
+                }}
+                disabled={editValues.name.trim() === "" || editValues.description.trim() === ""}
+              >
+                {savingCreate ? "Saving..." : "Save Department"}
+              </Button>
+            </div>
+            {createError && (
+              <Typography className="text-sm text-red-600" role="alert">{createError}</Typography>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-3" role="list" aria-label="Existing departments">
+            {departments.length === 0 ? (
+              <Typography className="text-sm text-gray-500">No departments found.</Typography>
+            ) : (
+              departments.map((dept) => (
+                <div
+                  key={dept.id}
+                  role="listitem"
+                  className="flex items-center justify-between p-3 border border-gray-200 rounded-md hover:bg-gray-50"
+                >
+                  <div className="flex flex-col">
+                    <span className="text-sm text-gray-700">Department: <span className="font-semibold">{dept.name}</span></span>
+                    <span className="text-sm text-gray-700">Description: <span className="font-semibold">{dept.description}</span></span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outlined"
+                      color="blue"
+                      className="flex items-center gap-1 hover:bg-blue-50"
+                      onClick={() => {
+                        setEditIndex(dept.id);
+                        setEditValues({ name: dept.name, description: dept.description });
+                        setEditDialogOpen(true);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      color="red"
+                      className="flex items-center gap-1 hover:bg-red-50"
+                      onClick={() => openDeleteDialog(dept.id)}
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="overflow-y-auto max-h-[300px] hidden">
             <table className="min-w-full text-left border-l border-r border-b border-gray-300 rounded-md ">
               <thead className="sticky top-0 bg-gray-50 z-10">
                 <tr className="bg-gray-50 text-sm font-semibold text-gray-600">
@@ -301,7 +401,7 @@ const Department = () => {
               )}
             </div>
           </div>
-        </CardBody>
+      </CardBody>
       </Card>
 
       {/* Delete Confirmation Dialog */}
@@ -320,8 +420,62 @@ const Department = () => {
             color="red"
             onClick={confirmDeleteDepartment}
           >
-            Delete
+            {deleting ? "Deleting..." : "Delete"}
           </Button>
+        </DialogFooter>
+      </Dialog>
+
+      <Dialog open={editDialogOpen} handler={() => setEditDialogOpen(false)}>
+        <DialogHeader>Edit Department</DialogHeader>
+        <DialogBody>
+          <div className="flex flex-col gap-6">
+            <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-md flex flex-wrap items-center gap-3">
+              <span className="text-sm text-gray-700">Name</span>
+              <input
+                type="text"
+                name="name"
+                value={editValues.name}
+                onChange={handleChange}
+                className="w-fit px-3 py-2 text-sm bg-white border rounded-md"
+                aria-label="Name"
+              />
+              <span className="text-sm text-gray-700">Description</span>
+              <input
+                type="text"
+                name="description"
+                value={editValues.description}
+                onChange={handleChange}
+                className="w-fit px-3 py-2 text-sm bg-white border rounded-md"
+                aria-label="Description"
+              />
+            </div>
+          </div>
+        </DialogBody>
+        <DialogFooter className="flex gap-2">
+          <Button variant="text" color="gray" onClick={() => setEditDialogOpen(false)}>Cancel</Button>
+          <Button
+            color="green"
+            onClick={async () => {
+              if (editValues.name.trim() === "" || editValues.description.trim() === "") return;
+              setSavingUpdate(true);
+              setUpdateError("");
+              try {
+                await updateDepartment(editIndex, editValues);
+              } catch (e) {
+                setUpdateError("Failed to save changes. Please try again.");
+              }
+              setSavingUpdate(false);
+              setEditDialogOpen(false);
+              setEditIndex(null);
+              fetchDepartments();
+            }}
+            disabled={editValues.name.trim() === "" || editValues.description.trim() === "" || savingUpdate}
+          >
+            {savingUpdate ? "Saving..." : "Save"}
+          </Button>
+          {updateError && (
+            <Typography className="text-sm text-red-600" role="alert">{updateError}</Typography>
+          )}
         </DialogFooter>
       </Dialog>
     </>

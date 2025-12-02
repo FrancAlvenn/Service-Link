@@ -31,6 +31,11 @@ const Status = () => {
   const [addingNew, setAddingNew] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [statusToDelete, setStatusToDelete] = useState(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [savingCreate, setSavingCreate] = useState(false);
+  const [savingUpdate, setSavingUpdate] = useState(false);
+  const [createError, setCreateError] = useState("");
+  const [updateError, setUpdateError] = useState("");
 
   const [selectedRowId, setSelectedRowId] = useState(null);
 
@@ -81,6 +86,7 @@ const Status = () => {
       description: status.description,
       color: status.color || "",
     });
+    setEditDialogOpen(true);
   };
 
   const handleChange = (e) => {
@@ -88,10 +94,25 @@ const Status = () => {
   };
 
   const handleUpdateStatus = async (id) => {
-    if (addingNew) {
-      await createStatus(editValues);
+    if (id === null || addingNew) {
+      setSavingCreate(true);
+      setCreateError("");
+      try {
+        await createStatus(editValues);
+      } catch (e) {
+        setCreateError("Failed to save status. Please try again.");
+      }
+      setSavingCreate(false);
     } else {
-      await updateStatus(id, editValues);
+      setSavingUpdate(true);
+      setUpdateError("");
+      try {
+        await updateStatus(id, editValues);
+      } catch (e) {
+        setUpdateError("Failed to update status. Please try again.");
+      }
+      setSavingUpdate(false);
+      setEditDialogOpen(false);
     }
     resetEditState();
     fetchStatuses();
@@ -99,6 +120,7 @@ const Status = () => {
 
   const handleCancelEdit = () => {
     resetEditState();
+    setEditDialogOpen(false);
   };
 
   const resetEditState = () => {
@@ -239,7 +261,97 @@ const Status = () => {
           </div>
         </CardHeader>
         <CardBody className="overflow-x-auto px-4 py-2" ref={tableRef}>
-          <div className="overflow-y-auto max-h-[300px]">
+          <div className="flex flex-col gap-6 mb-6">
+            <div>
+              <Typography className="text-sm font-semibold text-gray-700">Status</Typography>
+              <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-md flex flex-wrap items-center gap-3">
+                <span className="text-sm text-gray-700">Name</span>
+                <input
+                  type="text"
+                  name="status"
+                  value={editValues.status}
+                  onChange={handleChange}
+                  className="w-fit px-3 py-2 text-sm bg-white border rounded-md"
+                  aria-label="Status"
+                />
+                <span className="text-sm text-gray-700">Description</span>
+                <input
+                  type="text"
+                  name="description"
+                  value={editValues.description}
+                  onChange={handleChange}
+                  className="w-fit px-3 py-2 text-sm bg-white border rounded-md"
+                  aria-label="Description"
+                />
+                <span className="text-sm text-gray-700">Color</span>
+                <ColorPickerMenu
+                  selectedColor={editValues.color}
+                  onSelect={(color) => setEditValues({ ...editValues, color })}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="text" color="gray" onClick={handleCancelEdit}>Reset</Button>
+              <Button
+                color="green"
+                onClick={() => {
+                  handleUpdateStatus(null);
+                }}
+                disabled={
+                  editValues.status.trim() === "" ||
+                  editValues.description.trim() === "" ||
+                  editValues.color.trim() === ""
+                }
+              >
+                {savingCreate ? "Saving..." : "Save Status"}
+              </Button>
+            </div>
+            {createError && (
+              <Typography className="text-sm text-red-600" role="alert">{createError}</Typography>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-3" role="list" aria-label="Existing statuses">
+            {statuses.length === 0 ? (
+              <Typography className="text-sm text-gray-500">No statuses found.</Typography>
+            ) : (
+              statuses.map((st) => (
+                <div
+                  key={st.id}
+                  role="listitem"
+                  className="flex items-center justify-between p-3 border border-gray-200 rounded-md hover:bg-gray-50"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="w-4 h-4 inline-block rounded-full" style={{ backgroundColor: st.color }}></span>
+                    <div className="flex flex-col">
+                      <span className="text-sm text-gray-700">Status: <span className="font-semibold">{st.status}</span></span>
+                      <span className="text-sm text-gray-700">Description: <span className="font-semibold">{st.description}</span></span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outlined"
+                      color="blue"
+                      className="flex items-center gap-1 hover:bg-blue-50"
+                      onClick={() => handleEditStatus(st)}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      color="red"
+                      className="flex items-center gap-1 hover:bg-red-50"
+                      onClick={() => openDeleteDialog(st.id)}
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="overflow-y-auto max-h-[300px] hidden">
             <table className="min-w-full text-left border-l border-r border-b border-gray-300 rounded-md ">
               <thead className="sticky top-0 bg-gray-50 z-10">
                 <tr className="bg-gray-50 text-sm font-semibold text-gray-600">
@@ -252,40 +364,7 @@ const Status = () => {
               <tbody>
                 {statuses.length > 0 &&
                   statuses.map((status, idx) => renderRow(status, idx))}
-
-                {editIndex === "new" && (
-                  <tr className="hover:bg-gray-50 text-sm text-gray-700 border-b border-gray-300">
-                    <td className="py-3 px-4">{statuses.length + 1}</td>
-                    <td className="py-3 px-4">
-                      <input
-                        type="text"
-                        name="status"
-                        value={editValues.status}
-                        onChange={handleChange}
-                        className="w-full px-2 py-1 rounded-md border"
-                      />
-                    </td>
-                    <td className="py-3 px-4">
-                      <input
-                        type="text"
-                        name="description"
-                        value={editValues.description}
-                        onChange={handleChange}
-                        className="w-full px-2 py-1 rounded-md border"
-                      />
-                    </td>
-                    <td className="py-3 px-4">
-                      <ColorPickerMenu
-                        selectedColor={editValues.color}
-                        onSelect={(color) =>
-                          setEditValues({ ...editValues, color })
-                        }
-                      />
-                    </td>
-                  </tr>
-                )}
-
-                {statuses.length === 0 && editIndex !== "new" && (
+                {statuses.length === 0 && (
                   <tr>
                     <td colSpan="5" className="py-4 text-center text-gray-400">
                       No statuses found.
@@ -306,75 +385,6 @@ const Status = () => {
             >
               <Plus size={16} /> Add Status
             </Button>
-
-            <div className="flex gap-2">
-              {editIndex === "new" && (
-                <>
-                  <Button
-                    color="green"
-                    onClick={() => handleUpdateStatus(null)}
-                    className="py-2 px-4"
-                    disabled={
-                      editValues.name === "" ||
-                      editValues.description === "" ||
-                      editValues.color === ""
-                    }
-                  >
-                    Save
-                  </Button>
-                  <Button
-                    color="red"
-                    onClick={handleCancelEdit}
-                    className="py-2 px-4"
-                  >
-                    Cancel
-                  </Button>
-                </>
-              )}
-
-              {selectedRowId && editIndex !== null && editIndex !== "new" && (
-                <>
-                  <Button
-                    color="green"
-                    onClick={() => handleUpdateStatus(selectedRowId)}
-                    className="py-2 px-4"
-                  >
-                    Update
-                  </Button>
-                  <Button
-                    color="red"
-                    onClick={handleCancelEdit}
-                    className="py-2 px-4"
-                  >
-                    Cancel
-                  </Button>
-                </>
-              )}
-
-              {selectedRowId && editIndex === null && (
-                <>
-                  <Button
-                    color="blue"
-                    onClick={() => {
-                      const selected = statuses.find(
-                        (p) => p.id === selectedRowId
-                      );
-                      handleEditStatus(selected);
-                    }}
-                    className="py-2 px-4"
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    color="red"
-                    onClick={() => openDeleteDialog(selectedRowId)}
-                    className="py-2 px-4"
-                  >
-                    Delete
-                  </Button>
-                </>
-              )}
-            </div>
           </div>
         </CardBody>
       </Card>
@@ -391,6 +401,56 @@ const Status = () => {
           </Button>
           <Button variant="filled" color="red" onClick={confirmDeleteStatus}>
             Delete
+          </Button>
+        </DialogFooter>
+      </Dialog>
+
+      <Dialog open={editDialogOpen} handler={() => setEditDialogOpen(false)}>
+        <DialogHeader>Edit Status</DialogHeader>
+        <DialogBody>
+          <div className="flex flex-col gap-3">
+            <label className="text-sm text-gray-700">Status</label>
+            <input
+              type="text"
+              name="status"
+              value={editValues.status}
+              onChange={handleChange}
+              className="w-full px-3 py-2 text-sm bg-white border rounded-md"
+              aria-label="Edit Status"
+            />
+            <label className="text-sm text-gray-700">Description</label>
+            <input
+              type="text"
+              name="description"
+              value={editValues.description}
+              onChange={handleChange}
+              className="w-full px-3 py-2 text-sm bg-white border rounded-md"
+              aria-label="Edit Description"
+            />
+            <label className="text-sm text-gray-700">Color</label>
+            <ColorPickerMenu
+              selectedColor={editValues.color}
+              onSelect={(color) => setEditValues({ ...editValues, color })}
+            />
+            {updateError && (
+              <Typography className="text-sm text-red-600" role="alert">{updateError}</Typography>
+            )}
+          </div>
+        </DialogBody>
+        <DialogFooter>
+          <Button variant="text" color="gray" onClick={() => setEditDialogOpen(false)}>
+            Cancel
+          </Button>
+          <Button
+            color="green"
+            onClick={() => handleUpdateStatus(editIndex)}
+            disabled={
+              editValues.status.trim() === "" ||
+              editValues.description.trim() === "" ||
+              editValues.color.trim() === ""
+            }
+          >
+            {savingUpdate ? "Saving..." : "Save"}
           </Button>
         </DialogFooter>
       </Dialog>

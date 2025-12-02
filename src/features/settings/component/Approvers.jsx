@@ -46,6 +46,13 @@ const Approvers = () => {
   const [addingNew, setAddingNew] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [approverToDelete, setApproverToDelete] = useState(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [savingCreate, setSavingCreate] = useState(false);
+  const [savingUpdate, setSavingUpdate] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [createError, setCreateError] = useState("");
+  const [updateError, setUpdateError] = useState("");
+  const [userSelectError, setUserSelectError] = useState("");
 
   const [selectedRowId, setSelectedRowId] = useState(null);
 
@@ -141,7 +148,9 @@ const Approvers = () => {
 
   const confirmDeleteApprover = async () => {
     if (approverToDelete !== null) {
+      setDeleting(true);
       await deleteApprover(approverToDelete);
+      setDeleting(false);
       fetchApprovers();
     }
     setDeleteDialogOpen(false);
@@ -287,11 +296,11 @@ const Approvers = () => {
     const { reference_number, name, email, position_id, department_id } =
       editValues;
     return (
-      reference_number.trim() !== "" &&
-      name.trim() !== "" &&
-      email.trim() !== "" &&
-      position_id.trim() !== "" &&
-      department_id.trim() !== ""
+      reference_number!== "" &&
+      name !== "" &&
+      email !== "" &&
+      position_id !== "" &&
+      department_id !== ""
     );
   };
 
@@ -391,7 +400,130 @@ const Approvers = () => {
           </div>
         </CardHeader>
         <CardBody className="overflow-x-auto px-4 py-2" ref={tableRef}>
-          <div className="overflow-y-auto max-h-[300px]">
+          <div className="flex flex-col gap-6 mb-6">
+            <div>
+              <Typography className="text-sm font-semibold text-gray-700">Approver</Typography>
+              <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-md flex flex-wrap items-center gap-3">
+                <span className="text-sm text-gray-700">User</span>
+                <select disabled className="px-3 py-2 text-sm bg-white border rounded-md cursor-not-allowed" aria-label="Equals operator">
+                  <option>equals</option>
+                </select>
+                <UserPicker
+                  onSelect={(user) => {
+                    if (!user || !user.reference_number || !user.first_name || !user.last_name || !user.email) {
+                      setUserSelectError("Approver data unavailable.");
+                      return;
+                    }
+                    setUserSelectError("");
+                    setEditValues({
+                      reference_number: user.reference_number,
+                      name: `${user.first_name} ${user.last_name}`,
+                      email: user.email,
+                      position_id: editValues.position_id,
+                      department_id: editValues.department_id,
+                    });
+                  }}
+                />
+                <Chip
+                  value={editValues.name || "No user selected"}
+                  variant={editValues.name ? "filled" : "ghost"}
+                  color={editValues.name ? "blue" : "gray"}
+                  className="w-fit"
+                  aria-label="Selected approver"
+                />
+                {userSelectError && (
+                  <Typography className="text-sm text-red-600" role="alert">{userSelectError}</Typography>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <Typography className="text-sm font-semibold text-gray-700">Assignment</Typography>
+              <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-md flex flex-wrap items-center gap-3">
+                <span className="text-sm text-gray-700">Position</span>
+                <PositionSelect value={editValues.position_id} onChange={handleChange} />
+                <span className="text-sm text-gray-700">Department</span>
+                <DepartmentSelect value={editValues.department_id} onChange={handleChange} />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button variant="text" color="gray" onClick={handleCancelEdit} aria-label="Reset assignment">Reset</Button>
+              <Button
+                color="green"
+                onClick={async () => {
+                  if (!isValidApprover()) return;
+                  setSavingCreate(true);
+                  setCreateError("");
+                  try {
+                    await createApprover(editValues);
+                  } catch (e) {
+                    setCreateError("Failed to save approver. Please try again.");
+                  }
+                  setSavingCreate(false);
+                  resetEditState();
+                  fetchApprovers();
+                }}
+                disabled={!isValidApprover()}
+              >
+                {savingCreate ? "Saving..." : "Save Approver"}
+              </Button>
+            </div>
+            {createError && (
+              <Typography className="text-sm text-red-600 mt-1" role="alert">{createError}</Typography>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-3" role="list" aria-label="Existing approvers">
+            {filteredApprovers.length === 0 ? (
+              <Typography className="text-sm text-gray-500">No approvers match the filter.</Typography>
+            ) : (
+              filteredApprovers.map((approver) => (
+                <div
+                  key={approver.id}
+                  role="listitem"
+                  className="flex items-center justify-between p-3 border border-gray-200 rounded-md hover:bg-gray-50"
+                >
+                  <div className="flex flex-col">
+                    <span className="text-sm text-gray-700">Approver: <span className="font-semibold">{approver.name}</span> ({approver.reference_number})</span>
+                    <span className="text-sm text-gray-700">Assignment: Position <span className="font-semibold">{approver.position?.position || approver.position_id}</span>, Department <span className="font-semibold">{approver.department?.name || approver.department_id}</span></span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outlined"
+                      color="blue"
+                      aria-label="Edit approver assignment"
+                      className="flex items-center gap-1 hover:bg-blue-50"
+                      onClick={() => {
+                        setEditValues({
+                          reference_number: approver.reference_number,
+                          name: approver.name,
+                          email: approver.email,
+                          position_id: approver.position_id,
+                          department_id: approver.department_id,
+                        });
+                        setEditIndex(approver.id);
+                        setEditDialogOpen(true);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      color="red"
+                      aria-label="Delete approver"
+                      className="flex items-center gap-1 hover:bg-red-50"
+                      onClick={() => openDeleteDialog(approver.id)}
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="overflow-y-auto max-h-[300px] hidden">
             <table className="min-w-full text-left border-l border-r border-b border-gray-300 rounded-md">
               <thead className="sticky top-0 bg-gray-50 z-10">
                 <tr className="bg-gray-50 text-sm font-semibold text-gray-600">
@@ -455,7 +587,7 @@ const Approvers = () => {
             </table>
           </div>
 
-          <div className="flex justify-between items-center mt-4">
+          <div className="flex justify-between items-center mt-4 hidden">
             <div className="flex gap-2">
               <Button
                 variant="outlined"
@@ -477,19 +609,7 @@ const Approvers = () => {
                 <ArrowClockwise size={16} /> Sync Approvers
               </Button> */}
 
-              {(editIndex === "new" || editIndex !== null) && (
-                <UserPicker
-                  onSelect={(user) =>
-                    setEditValues({
-                      reference_number: user.reference_number,
-                      name: `${user.first_name} ${user.last_name}`,
-                      email: user.email,
-                      position_id: "",
-                      department_id: "",
-                    })
-                  }
-                />
-              )}
+              {(editIndex === "new" || editIndex !== null) && null}
             </div>
 
             <div className="flex gap-2">
@@ -575,16 +695,95 @@ const Approvers = () => {
       <Dialog open={deleteDialogOpen} handler={cancelDelete}>
         <DialogHeader>Confirm Deletion</DialogHeader>
         <DialogBody>
-          Are you sure you want to delete this approver? This action cannot be
-          undone.
+          Are you sure you want to delete this approver? This action cannot be undone.
         </DialogBody>
         <DialogFooter className="flex gap-2">
           <Button variant="text" color="gray" onClick={cancelDelete}>
             Cancel
           </Button>
           <Button variant="filled" color="red" onClick={confirmDeleteApprover}>
-            Delete
+            {deleting ? "Deleting..." : "Delete"}
           </Button>
+        </DialogFooter>
+      </Dialog>
+
+      <Dialog open={editDialogOpen} handler={() => setEditDialogOpen(false)}>
+        <DialogHeader>Edit Approver</DialogHeader>
+        <DialogBody>
+          <div className="flex flex-col gap-6">
+            <div>
+              <Typography className="text-sm font-semibold text-gray-700">Approver</Typography>
+              <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-md flex flex-wrap items-center gap-3">
+                <span className="text-sm text-gray-700">User</span>
+                <select disabled className="px-3 py-2 text-sm bg-white border rounded-md cursor-not-allowed" aria-label="Equals operator">
+                  <option>equals</option>
+                </select>
+                <UserPicker
+                  onSelect={(user) => {
+                    if (!user || !user.reference_number || !user.first_name || !user.last_name || !user.email) {
+                      setUserSelectError("Approver data unavailable.");
+                      return;
+                    }
+                    setUserSelectError("");
+                    setEditValues({
+                      reference_number: user.reference_number,
+                      name: `${user.first_name} ${user.last_name}`,
+                      email: user.email,
+                      position_id: editValues.position_id,
+                      department_id: editValues.department_id,
+                    });
+                  }}
+                />
+                <Chip
+                  value={editValues.name || "No user selected"}
+                  variant={editValues.name ? "filled" : "ghost"}
+                  color={editValues.name ? "blue" : "gray"}
+                  className="w-fit"
+                  aria-label="Selected approver"
+                />
+                {userSelectError && (
+                  <Typography className="text-sm text-red-600" role="alert">{userSelectError}</Typography>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <Typography className="text-sm font-semibold text-gray-700">Assignment</Typography>
+              <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-md flex flex-wrap items-center gap-3">
+                <span className="text-sm text-gray-700">Position</span>
+                <PositionSelect value={editValues.position_id} onChange={handleChange} />
+                <span className="text-sm text-gray-700">Department</span>
+                <DepartmentSelect value={editValues.department_id} onChange={handleChange} />
+              </div>
+            </div>
+          </div>
+        </DialogBody>
+        <DialogFooter className="flex gap-2">
+          <Button variant="text" color="gray" onClick={() => setEditDialogOpen(false)}>Cancel</Button>
+          <Button
+            color="green"
+            aria-label="Save edits"
+            onClick={async () => {
+              if (!isValidApprover()) return;
+              setSavingUpdate(true);
+              setUpdateError("");
+              try {
+                await updateApprover(editIndex, editValues);
+              } catch (e) {
+                setUpdateError("Failed to save changes. Please try again.");
+              }
+              setSavingUpdate(false);
+              setEditDialogOpen(false);
+              setEditIndex(null);
+              fetchApprovers();
+            }}
+            disabled={!isValidApprover() || savingUpdate}
+          >
+            {savingUpdate ? "Saving..." : "Save"}
+          </Button>
+          {updateError && (
+            <Typography className="text-sm text-red-600" role="alert">{updateError}</Typography>
+          )}
         </DialogFooter>
       </Dialog>
     </>

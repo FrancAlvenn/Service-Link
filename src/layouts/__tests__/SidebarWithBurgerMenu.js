@@ -146,3 +146,7 @@ export function SidebarWithBurgerMenu() {
     </Card>
   );
 }
+
+// test("renders sidebar component", () => {
+//   expect(true).toBe(true);
+// });

@@ -62,7 +62,7 @@ function AccountSetting({ onClose }) {
         }
         await axios.put(`${process.env.REACT_APP_API_URL}/users/${currentUser.reference_number}`, {
           password: passwords.password,
-        });
+        }, { withCredentials: true });
         ToastNotification.success("Success!", "Password updated.");
         setPasswords({ password: "", confirmPassword: "" });
       } else {

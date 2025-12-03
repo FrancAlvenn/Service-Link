@@ -317,7 +317,7 @@ const ApprovalRuleByDesignation = () => {
                   icon={<FunnelSimple size={16} />}
                 />
               </MenuHandler>
-              <MenuList className="mt-2 p-2 max-h-[40vh] overflow-y-auto gap-2 flex flex-col">
+              <MenuList className="mt-2 p-2 max-h-[40vh] overflow-y-auto gap-2 flex flex-col scrollbar-thin scrollbar-thumb-gray-300 focus:outline-none">
                 <Typography variant="small" className="mb-2 font-semibold">
                   Position
                 </Typography>
@@ -355,7 +355,7 @@ const ApprovalRuleByDesignation = () => {
                   icon={<FunnelSimple size={16} />}
                 />
               </MenuHandler>
-              <MenuList className="mt-2 p-2 max-h-[40vh] overflow-y-auto gap-2 flex flex-col">
+              <MenuList className="mt-2 p-2 max-h-[40vh] overflow-y-auto gap-2 flex flex-col scrollbar-thin scrollbar-thumb-gray-300 focus:outline-none">
                 <Typography variant="small" className="mb-2 font-semibold">
                   Designation
                 </Typography>
@@ -398,7 +398,7 @@ const ApprovalRuleByDesignation = () => {
                   icon={<FunnelSimple size={16} />}
                 />
               </MenuHandler>
-              <MenuList className="mt-2 p-2 max-h-[40vh] overflow-y-auto gap-2 flex flex-col">
+              <MenuList className="mt-2 p-2 max-h-[40vh] overflow-y-auto gap-2 flex flex-col scrollbar-thin scrollbar-thumb-gray-300 focus:outline-none">
                 <Typography variant="small" className="mb-2 font-semibold">
                   Required
                 </Typography>

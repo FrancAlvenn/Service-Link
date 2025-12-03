@@ -353,7 +353,7 @@ const Approvers = () => {
                   icon={<FunnelSimple size={16} />}
                 />
               </MenuHandler>
-              <MenuList className="mt-2 p-2 max-h-[40vh] overflow-y-auto gap-2 flex flex-col">
+              <MenuList className="mt-2 p-2 max-h-[35vh] overflow-y-auto gap-2 flex flex-col">
                 <Typography variant="small" className="mb-2 font-semibold">
                   Position
                 </Typography>
@@ -391,7 +391,7 @@ const Approvers = () => {
                   icon={<FunnelSimple size={16} />}
                 />
               </MenuHandler>
-              <MenuList className="mt-2 p-2 max-h-[40vh] overflow-y-auto gap-2 flex flex-col">
+              <MenuList className="mt-2 p-2 max-h-[35vh] overflow-y-auto gap-2 flex flex-col">
                 <Typography variant="small" className="mb-2 font-semibold">
                   Department
                 </Typography>
@@ -495,7 +495,7 @@ const Approvers = () => {
             <div aria-hidden="true" className="absolute top-0 left-0 right-0 h-4 pointer-events-none bg-gradient-to-b from-white to-transparent" />
             <div aria-hidden="true" className="absolute bottom-0 left-0 right-0 h-4 pointer-events-none bg-gradient-to-t from-white to-transparent" />
             <div
-              className="flex flex-col gap-3 overflow-y-auto max-h-[40vh] scrollbar-thin scrollbar-thumb-gray-300 focus:outline-none"
+              className="flex flex-col gap-3 overflow-y-auto max-h-[35vh] scrollbar-thin scrollbar-thumb-gray-300 focus:outline-none"
               role="list"
               aria-label="Existing approvers"
               tabIndex={0}

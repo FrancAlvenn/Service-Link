@@ -48,6 +48,7 @@ const ApprovalRuleByDepartment = () => {
   const [selectedRowId, setSelectedRowId] = useState(null);
 
   const tableRef = useRef(null);
+  const listRef = useRef(null);
 
   useEffect(() => {
     fetchApprovalRulesByDepartment();
@@ -66,6 +67,22 @@ const ApprovalRuleByDepartment = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  const handleListKeyDown = (e) => {
+    const container = listRef.current;
+    if (!container) return;
+    const items = Array.from(container.querySelectorAll('[role="listitem"]'));
+    const currentIndex = items.findIndex((el) => el === document.activeElement);
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      const next = items[Math.min(currentIndex + 1, items.length - 1)] || items[0];
+      next && next.focus();
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      const prev = items[Math.max(currentIndex - 1, 0)] || items[items.length - 1];
+      prev && prev.focus();
+    }
+  };
 
   const handleAddApprovalRule = () => {
     setEditIndex("new");
@@ -320,7 +337,7 @@ const ApprovalRuleByDepartment = () => {
                   icon={<FunnelSimple size={16} />}
                 />
               </MenuHandler>
-              <MenuList className="mt-2 p-2 max-h-[40vh] overflow-y-auto gap-2 flex flex-col">
+              <MenuList className="mt-2 p-2 max-h-[35vh] overflow-y-auto gap-2 flex flex-col">
                 <Typography variant="small" className="mb-2 font-semibold">
                   Position
                 </Typography>
@@ -358,7 +375,7 @@ const ApprovalRuleByDepartment = () => {
                   icon={<FunnelSimple size={16} />}
                 />
               </MenuHandler>
-              <MenuList className="mt-2 p-2 max-h-[40vh] overflow-y-auto gap-2 flex flex-col">
+              <MenuList className="mt-2 p-2 max-h-[35vh] overflow-y-auto gap-2 flex flex-col">
                 <Typography variant="small" className="mb-2 font-semibold">
                   Department
                 </Typography>
@@ -401,7 +418,7 @@ const ApprovalRuleByDepartment = () => {
                   icon={<FunnelSimple size={16} />}
                 />
               </MenuHandler>
-              <MenuList className="mt-2 p-2 max-h-[40vh] overflow-y-auto gap-2 flex flex-col scrollbar-thin scrollbar-thumb-gray-300 focus:outline-none">
+              <MenuList className="mt-2 p-2 max-h-[35vh] overflow-y-auto gap-2 flex flex-col scrollbar-thin scrollbar-thumb-gray-300 focus:outline-none">
                 <Typography variant="small" className="mb-2 font-semibold">
                   Required
                 </Typography>
@@ -475,51 +492,63 @@ const ApprovalRuleByDepartment = () => {
             )}
           </div>
 
-          <div className="flex flex-col gap-3" role="list" aria-label="Existing approver rules">
-            {filteredApprovalRule.length === 0 ? (
-              <Typography className="text-sm text-gray-500">No approval rules match the filter.</Typography>
-            ) : (
-              filteredApprovalRule.map((rule) => (
-                <div
-                  key={rule.id}
-                  role="listitem"
-                  className="flex items-center justify-between p-3 border border-gray-200 rounded-md hover:bg-gray-50"
-                >
-                  <div className="flex flex-col">
-                    <span className="text-sm text-gray-700">If: Department equals <span className="font-semibold">{rule.department?.name || rule.department_id}</span></span>
-                    <span className="text-sm text-gray-700">Then: Position <span className="font-semibold">{rule.position?.position || rule.position_id}</span> {rule.required ? "is required" : "is not required"}</span>
+          <div className="relative">
+            <div aria-hidden="true" className="absolute top-0 left-0 right-0 h-4 pointer-events-none bg-gradient-to-b from-white to-transparent" />
+            <div aria-hidden="true" className="absolute bottom-0 left-0 right-0 h-4 pointer-events-none bg-gradient-to-t from-white to-transparent" />
+            <div
+              className="flex flex-col gap-3 overflow-y-auto max-h-[35vh] scrollbar-thin scrollbar-thumb-gray-300 focus:outline-none"
+              role="list"
+              aria-label="Existing approver rules"
+              tabIndex={0}
+              onKeyDown={handleListKeyDown}
+              ref={listRef}
+            >
+              {filteredApprovalRule.length === 0 ? (
+                <Typography className="text-sm text-gray-500">No approval rules match the filter.</Typography>
+              ) : (
+                filteredApprovalRule.map((rule) => (
+                  <div
+                    key={rule.id}
+                    role="listitem"
+                    tabIndex={-1}
+                    className="flex items-center justify-between p-3 border border-gray-200 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  >
+                    <div className="flex flex-col">
+                      <span className="text-sm text-gray-700">If: Department equals <span className="font-semibold">{rule.department?.name || rule.department_id}</span></span>
+                      <span className="text-sm text-gray-700">Then: Position <span className="font-semibold">{rule.position?.position || rule.position_id}</span> {rule.required ? "is required" : "is not required"}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outlined"
+                        color="blue"
+                        aria-label="Edit approver rule"
+                        className="flex items-center gap-1 hover:bg-blue-50"
+                        onClick={() => {
+                          setEditValues({
+                            department_id: rule.department_id,
+                            position_id: rule.position_id,
+                            required: !!rule.required,
+                          });
+                          setEditIndex(rule.id);
+                          setEditDialogOpen(true);
+                        }}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        color="red"
+                        aria-label="Delete approver rule"
+                        className="flex items-center gap-1 hover:bg-red-50"
+                        onClick={() => openDeleteDialog(rule.id)}
+                      >
+                        Delete
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outlined"
-                      color="blue"
-                      aria-label="Edit approver rule"
-                      className="flex items-center gap-1 hover:bg-blue-50"
-                      onClick={() => {
-                        setEditValues({
-                          department_id: rule.department_id,
-                          position_id: rule.position_id,
-                          required: !!rule.required,
-                        });
-                        setEditIndex(rule.id);
-                        setEditDialogOpen(true);
-                      }}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      color="red"
-                      aria-label="Delete approver rule"
-                      className="flex items-center gap-1 hover:bg-red-50"
-                      onClick={() => openDeleteDialog(rule.id)}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </div>
-              ))
-            )}
+                ))
+              )}
+            </div>
           </div>
 
           <div className="overflow-y-auto max-h-[300px] hidden">

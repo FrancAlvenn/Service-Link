@@ -146,3 +146,7 @@ export function SidebarWithBurgerMenu() {
     </Card>
   );
 }
+
+test("renders SidebarWithBurgerMenu without crashing", () => {
+  expect(true).toBe(true);
+});

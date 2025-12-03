@@ -36,10 +36,16 @@ const Priority = () => {
   const [addingNew, setAddingNew] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [priorityToDelete, setPriorityToDelete] = useState(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [savingCreate, setSavingCreate] = useState(false);
+  const [savingUpdate, setSavingUpdate] = useState(false);
+  const [createError, setCreateError] = useState("");
+  const [updateError, setUpdateError] = useState("");
 
   const [selectedRowId, setSelectedRowId] = useState(null);
 
   const tableRef = useRef(null);
+  const listRef = useRef(null);
 
   const colorOptions = [
     "red",
@@ -59,6 +65,22 @@ const Priority = () => {
     fetchPriorities();
   }, []);
 
+  const handleListKeyDown = (e) => {
+    const container = listRef.current;
+    if (!container) return;
+    const items = Array.from(container.querySelectorAll('[role="listitem"]'));
+    const currentIndex = items.findIndex((el) => el === document.activeElement);
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      const next = items[Math.min(currentIndex + 1, items.length - 1)] || items[0];
+      next && next.focus();
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      const prev = items[Math.max(currentIndex - 1, 0)] || items[items.length - 1];
+      prev && prev.focus();
+    }
+  };
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (tableRef.current && !tableRef.current.contains(event.target)) {
@@ -75,7 +97,7 @@ const Priority = () => {
 
   const handleAddPriority = () => {
     setEditIndex("new");
-    setEditValues({ priority: "", description: "" });
+    setEditValues({ priority: "", description: "", color: "" });
     setAddingNew(true);
   };
 
@@ -86,6 +108,7 @@ const Priority = () => {
       description: priority.description,
       color: priority.color || "",
     });
+    setEditDialogOpen(true);
   };
 
   const handleChange = (e) => {
@@ -93,10 +116,25 @@ const Priority = () => {
   };
 
   const handleUpdatePriority = async (id) => {
-    if (addingNew) {
-      await createPriority(editValues);
+    if (id === null || addingNew) {
+      setSavingCreate(true);
+      setCreateError("");
+      try {
+        await createPriority(editValues);
+      } catch (e) {
+        setCreateError("Failed to save priority. Please try again.");
+      }
+      setSavingCreate(false);
     } else {
-      await updatePriority(id, editValues);
+      setSavingUpdate(true);
+      setUpdateError("");
+      try {
+        await updatePriority(id, editValues);
+      } catch (e) {
+        setUpdateError("Failed to update priority. Please try again.");
+      }
+      setSavingUpdate(false);
+      setEditDialogOpen(false);
     }
     resetEditState();
     fetchPriorities();
@@ -104,11 +142,12 @@ const Priority = () => {
 
   const handleCancelEdit = () => {
     resetEditState();
+    setEditDialogOpen(false);
   };
 
   const resetEditState = () => {
     setEditIndex(null);
-    setEditValues({ priority: "", description: "" });
+    setEditValues({ priority: "", description: "", color: "" });
     setAddingNew(false);
   };
 
@@ -232,7 +271,7 @@ const Priority = () => {
   };
 
   return (
-    <>
+    <div className="w-full p-4 border border-gray-200 rounded-lg bg-white shadow-sm mb-4 h-full">
       <Card className="shadow-none">
         <CardHeader floated={false} shadow={false} className="rounded-none ">
           <div>
@@ -245,7 +284,109 @@ const Priority = () => {
           </div>
         </CardHeader>
         <CardBody className="overflow-x-auto px-4 py-2" ref={tableRef}>
-          <div className="overflow-y-auto max-h-[300px]">
+          <div className="flex flex-col gap-6 mb-6">
+            <div>
+              <Typography className="text-sm font-semibold text-gray-700">Priority</Typography>
+              <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-md flex flex-wrap items-center gap-3">
+                <span className="text-sm text-gray-700">Name</span>
+                <input
+                  type="text"
+                  name="priority"
+                  value={editValues.priority}
+                  onChange={handleChange}
+                  className="w-fit px-3 py-2 text-sm bg-white border rounded-md"
+                  aria-label="Priority"
+                />
+                <span className="text-sm text-gray-700">Description</span>
+                <input
+                  type="text"
+                  name="description"
+                  value={editValues.description}
+                  onChange={handleChange}
+                  className="w-fit px-3 py-2 text-sm bg-white border rounded-md"
+                  aria-label="Description"
+                />
+                <span className="text-sm text-gray-700">Color</span>
+                <ColorPickerMenu
+                  selectedColor={editValues.color}
+                  onSelect={(color) => setEditValues({ ...editValues, color })}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="text" color="gray" onClick={handleCancelEdit}>Reset</Button>
+              <Button
+                color="green"
+                onClick={() => {
+                  handleUpdatePriority(null);
+                }}
+                disabled={
+                  editValues.priority.trim() === "" ||
+                  editValues.description.trim() === "" ||
+                  editValues.color.trim() === ""
+                }
+              >
+                {savingCreate ? "Saving..." : "Save Priority"}
+              </Button>
+            </div>
+            {createError && (
+              <Typography className="text-sm text-red-600" role="alert">{createError}</Typography>
+            )}
+          </div>
+
+          <div className="relative">
+            <div aria-hidden="true" className="absolute top-0 left-0 right-0 h-4 pointer-events-none bg-gradient-to-b from-white to-transparent" />
+            <div aria-hidden="true" className="absolute bottom-0 left-0 right-0 h-4 pointer-events-none bg-gradient-to-t from-white to-transparent" />
+            <div
+              className="flex flex-col gap-3 overflow-y-auto max-h-[40vh] scrollbar-thin scrollbar-thumb-gray-300 focus:outline-none"
+              role="list"
+              aria-label="Existing priorities"
+              tabIndex={0}
+              onKeyDown={handleListKeyDown}
+              ref={listRef}
+            >
+              {priorities.length === 0 ? (
+                <Typography className="text-sm text-gray-500">No priorities found.</Typography>
+              ) : (
+                priorities.map((pr) => (
+                  <div
+                    key={pr.id}
+                    role="listitem"
+                    tabIndex={-1}
+                    className="flex items-center justify-between p-3 border border-gray-200 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="w-4 h-4 inline-block rounded-full" style={{ backgroundColor: pr.color }}></span>
+                      <div className="flex flex-col">
+                        <span className="text-sm text-gray-700">Priority: <span className="font-semibold">{pr.priority}</span></span>
+                        <span className="text-sm text-gray-700">Description: <span className="font-semibold">{pr.description}</span></span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outlined"
+                        color="blue"
+                        className="flex items_center gap-1 hover:bg-blue-50"
+                        onClick={() => handleEditPriority(pr)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        color="red"
+                        className="flex items_center gap-1 hover:bg-red-50"
+                        onClick={() => openDeleteDialog(pr.id)}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="overflow-y-auto max-h-[300px] hidden">
             <table className="min-w-full text-left border-l border-r border-b border-gray-300 rounded-md ">
               <thead className="sticky top-0 bg-gray-50 z-10">
                 <tr className="bg-gray-50 text-sm font-semibold text-gray-600">
@@ -258,40 +399,7 @@ const Priority = () => {
               <tbody>
                 {priorities.length > 0 &&
                   priorities.map((priority, idx) => renderRow(priority, idx))}
-
-                {editIndex === "new" && (
-                  <tr className="hover:bg-gray-50 text-sm text-gray-700 border-b border-gray-300">
-                    <td className="py-3 px-4">{priorities.length + 1}</td>
-                    <td className="py-3 px-4">
-                      <input
-                        type="text"
-                        name="priority"
-                        value={editValues.priority}
-                        onChange={handleChange}
-                        className="w-full px-2 py-1 rounded-md border"
-                      />
-                    </td>
-                    <td className="py-3 px-4">
-                      <input
-                        type="text"
-                        name="description"
-                        value={editValues.description}
-                        onChange={handleChange}
-                        className="w-full px-2 py-1 rounded-md border"
-                      />
-                    </td>
-                    <td className="py-3 px-4">
-                      <ColorPickerMenu
-                        selectedColor={editValues.color}
-                        onSelect={(color) =>
-                          setEditValues({ ...editValues, color })
-                        }
-                      />
-                    </td>
-                  </tr>
-                )}
-
-                {priorities.length === 0 && editIndex !== "new" && (
+                {priorities.length === 0 && (
                   <tr>
                     <td colSpan="4" className="py-4 text-center text-gray-400">
                       No priorities found.
@@ -303,7 +411,7 @@ const Priority = () => {
           </div>
 
           <div className="flex justify-between items-center mt-4">
-            <Button
+            {/* <Button
               variant="outlined"
               color="blue"
               className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 flex items-center gap-2"
@@ -311,76 +419,7 @@ const Priority = () => {
               disabled={editIndex !== null}
             >
               <Plus size={16} /> Add Priority
-            </Button>
-
-            <div className="flex gap-2">
-              {editIndex === "new" && (
-                <>
-                  <Button
-                    color="green"
-                    onClick={() => handleUpdatePriority(null)}
-                    className="py-2 px-4"
-                    disabled={
-                      editValues.priority === "" ||
-                      editValues.description === "" ||
-                      editValues.color === ""
-                    }
-                  >
-                    Save
-                  </Button>
-                  <Button
-                    color="red"
-                    onClick={handleCancelEdit}
-                    className="py-2 px-4"
-                  >
-                    Cancel
-                  </Button>
-                </>
-              )}
-
-              {selectedRowId && editIndex !== null && editIndex !== "new" && (
-                <>
-                  <Button
-                    color="green"
-                    onClick={() => handleUpdatePriority(selectedRowId)}
-                    className="py-2 px-4"
-                  >
-                    Update
-                  </Button>
-                  <Button
-                    color="red"
-                    onClick={handleCancelEdit}
-                    className="py-2 px-4"
-                  >
-                    Cancel
-                  </Button>
-                </>
-              )}
-
-              {selectedRowId && editIndex === null && (
-                <>
-                  <Button
-                    color="blue"
-                    onClick={() => {
-                      const selected = priorities.find(
-                        (p) => p.id === selectedRowId
-                      );
-                      handleEditPriority(selected);
-                    }}
-                    className="py-2 px-4"
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    color="red"
-                    onClick={() => openDeleteDialog(selectedRowId)}
-                    className="py-2 px-4"
-                  >
-                    Delete
-                  </Button>
-                </>
-              )}
-            </div>
+            </Button> */}
           </div>
         </CardBody>
       </Card>
@@ -401,7 +440,57 @@ const Priority = () => {
           </Button>
         </DialogFooter>
       </Dialog>
-    </>
+
+      <Dialog open={editDialogOpen} handler={() => setEditDialogOpen(false)}>
+        <DialogHeader>Edit Priority</DialogHeader>
+        <DialogBody>
+          <div className="flex flex-col gap-3">
+            <label className="text-sm text-gray-700">Priority</label>
+            <input
+              type="text"
+              name="priority"
+              value={editValues.priority}
+              onChange={handleChange}
+              className="w-full px-3 py-2 text-sm bg-white border rounded-md"
+              aria-label="Edit Priority"
+            />
+            <label className="text-sm text-gray-700">Description</label>
+            <input
+              type="text"
+              name="description"
+              value={editValues.description}
+              onChange={handleChange}
+              className="w-full px-3 py-2 text-sm bg-white border rounded-md"
+              aria-label="Edit Description"
+            />
+            <label className="text-sm text-gray-700">Color</label>
+            <ColorPickerMenu
+              selectedColor={editValues.color}
+              onSelect={(color) => setEditValues({ ...editValues, color })}
+            />
+            {updateError && (
+              <Typography className="text-sm text-red-600" role="alert">{updateError}</Typography>
+            )}
+          </div>
+        </DialogBody>
+        <DialogFooter>
+          <Button variant="text" color="gray" onClick={() => setEditDialogOpen(false)}>
+            Cancel
+          </Button>
+          <Button
+            color="green"
+            onClick={() => handleUpdatePriority(editIndex)}
+            disabled={
+              editValues.priority.trim() === "" ||
+              editValues.description.trim() === "" ||
+              editValues.color.trim() === ""
+            }
+          >
+            {savingUpdate ? "Saving..." : "Save"}
+          </Button>
+        </DialogFooter>
+      </Dialog>
+    </div>
   );
 };
 

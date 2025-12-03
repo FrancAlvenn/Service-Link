@@ -1,62 +1,46 @@
-import { createContext, useEffect, useState } from "react";
+import React, { createContext, useState, useEffect } from "react";
 import axios from "axios";
 
 export const VenueContext = createContext();
 
-/**
- * The VenueProvider component is a context provider that provides
- * the following values to its children components:
- *
- *   - venues: an array of venue records
- *   - fetchVenues: a function that fetches venues from the server
- *   - createVenue: a function to create a new venue
- *   - updateVenue: a function to update an existing venue
- *   - deleteVenue: a function to delete/archive a venue
- *   - venueUnavailability: an array of unavailability records
- *   - fetchVenueUnavailability: a function to fetch unavailability records
- *   - createVenueUnavailability: a function to create unavailability
- *   - deleteVenueUnavailability: a function to delete unavailability
- *
- * The component fetches venues from the server when mounted and
- * makes them available to its children components.
- *
- * @param {{ children: React.ReactNode }} props
- * @returns {React.ReactElement}
- */
 export const VenueProvider = ({ children }) => {
   const [venues, setVenues] = useState([]);
   const [venueUnavailability, setVenueUnavailability] = useState([]);
+  const [venueBookings, setVenueBookings] = useState([]); // ← NEW
+  const [loading, setLoading] = useState(false);
 
-  // Fetch venues from the database on mount
+  // Fetch on mount
   useEffect(() => {
     fetchVenues();
     fetchVenueUnavailability();
+    fetchVenueBookings();
   }, []);
 
   // Fetch all venues
   const fetchVenues = async () => {
     try {
-      const { data } = await axios({
-        method: "get",
-        url: `${process.env.REACT_APP_API_URL}/venues`,
+      setLoading(true);
+      const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/venues`, {
         withCredentials: true,
       });
-      setVenues(data);
+      setVenues(data || []);
     } catch (error) {
       console.error("Error fetching venues:", error);
+      setVenues([]);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Create a new venue
-  const createVenue = async (newVenue) => {
+  // Create venue
+  const createVenue = async (venueData) => {
     try {
-      const { data } = await axios({
-        method: "post",
-        url: `${process.env.REACT_APP_API_URL}/venues/`,
-        data: newVenue,
-        withCredentials: true,
-      });
-      setVenues((prevVenues) => [...prevVenues, data.newVenue]);
+      const { data } = await axios.post(
+        `${process.env.REACT_APP_API_URL}/venues`,
+        venueData,
+        { withCredentials: true }
+      );
+      await fetchVenues();
       return data;
     } catch (error) {
       console.error("Error creating venue:", error);
@@ -64,22 +48,15 @@ export const VenueProvider = ({ children }) => {
     }
   };
 
-  // Update an existing venue
-  const updateVenue = async (referenceNumber, updatedVenue) => {
+  // Update venue
+  const updateVenue = async (referenceNumber, venueData) => {
     try {
-      const { data } = await axios({
-        method: "put",
-        url: `${process.env.REACT_APP_API_URL}/venues/${referenceNumber}`,
-        data: updatedVenue,
-        withCredentials: true,
-      });
-      setVenues((prevVenues) =>
-        prevVenues.map((venue) =>
-          venue.reference_number === referenceNumber
-            ? { ...venue, ...updatedVenue }
-            : venue
-        )
+      const { data } = await axios.put(
+        `${process.env.REACT_APP_API_URL}/venues/${referenceNumber}`,
+        venueData,
+        { withCredentials: true }
       );
+      await fetchVenues();
       return data;
     } catch (error) {
       console.error("Error updating venue:", error);
@@ -87,52 +64,52 @@ export const VenueProvider = ({ children }) => {
     }
   };
 
-  // Delete/Archive a venue
+  // Delete/Archive venue
   const deleteVenue = async (referenceNumber) => {
     try {
-      await axios({
-        method: "delete",
-        url: `${process.env.REACT_APP_API_URL}/venues/${referenceNumber}`,
-        withCredentials: true,
-      });
-      setVenues((prevVenues) =>
-        prevVenues.filter((venue) => venue.reference_number !== referenceNumber)
+      await axios.delete(
+        `${process.env.REACT_APP_API_URL}/venues/${referenceNumber}`,
+        { withCredentials: true }
       );
+      await fetchVenues();
     } catch (error) {
       console.error("Error deleting venue:", error);
       throw error;
     }
   };
 
-  // Fetch all venue unavailability records
+  // ================================
+  // UNVAILABILITY
+  // ================================
+
   const fetchVenueUnavailability = async (venueId = null) => {
     try {
+      setLoading(true);
       const url = venueId
         ? `${process.env.REACT_APP_API_URL}/venues/unavailability/venue/${venueId}`
         : `${process.env.REACT_APP_API_URL}/venues/unavailability`;
-      const { data } = await axios({
-        method: "get",
-        url,
-        withCredentials: true,
-      });
-      setVenueUnavailability(data);
-      return data;
+      const { data } = await axios.get(url, { withCredentials: true });
+
+      const records = data || [];
+      setVenueUnavailability(records);
+      return records; // ← Important: return data!
     } catch (error) {
       console.error("Error fetching venue unavailability:", error);
+      setVenueUnavailability([]);
       return [];
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Create a new venue unavailability
   const createVenueUnavailability = async (unavailabilityData) => {
     try {
-      const { data } = await axios({
-        method: "post",
-        url: `${process.env.REACT_APP_API_URL}/venues/unavailability`,
-        data: unavailabilityData,
-        withCredentials: true,
-      });
-      await fetchVenueUnavailability();
+      const { data } = await axios.post(
+        `${process.env.REACT_APP_API_URL}/venues/unavailability`,
+        unavailabilityData,
+        { withCredentials: true }
+      );
+      await fetchVenueUnavailability(unavailabilityData.venue_id);
       return data;
     } catch (error) {
       console.error("Error creating venue unavailability:", error);
@@ -140,19 +117,91 @@ export const VenueProvider = ({ children }) => {
     }
   };
 
-  // Delete venue unavailability
-  const deleteVenueUnavailability = async (unavailabilityId) => {
+  const deleteVenueUnavailability = async (unavailabilityId, venueId = null) => {
     try {
-      await axios({
-        method: "delete",
-        url: `${process.env.REACT_APP_API_URL}/venues/unavailability/${unavailabilityId}`,
-        withCredentials: true,
-      });
-      setVenueUnavailability((prev) =>
-        prev.filter((item) => item.unavailability_id !== unavailabilityId)
+      await axios.delete(
+        `${process.env.REACT_APP_API_URL}/venues/unavailability/${unavailabilityId}`,
+        { withCredentials: true }
       );
+      if (venueId) {
+        await fetchVenueUnavailability(venueId);
+      } else {
+        await fetchVenueUnavailability();
+      }
     } catch (error) {
       console.error("Error deleting venue unavailability:", error);
+      throw error;
+    }
+  };
+
+  // ================================
+  // BOOKINGS - NEW SECTION
+  // ================================
+
+  const fetchVenueBookings = async (venueId = null) => {
+    try {
+      setLoading(true);
+      const url = venueId
+        ? `${process.env.REACT_APP_API_URL}/venues/bookings/venue/${venueId}`
+        : `${process.env.REACT_APP_API_URL}/venues/bookings`;
+      const { data } = await axios.get(url, { withCredentials: true });
+
+      const records = data || [];
+      setVenueBookings(records);
+      return records;
+    } catch (error) {
+      console.error("Error fetching venue bookings:", error);
+      setVenueBookings([]);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createVenueBooking = async (bookingData) => {
+    try {
+      const { data } = await axios.post(
+        `${process.env.REACT_APP_API_URL}/venues/bookings`,
+        bookingData,
+        { withCredentials: true }
+      );
+      await fetchVenueBookings(bookingData.venue_id);
+      return data;
+    } catch (error) {
+      console.error("Error creating venue booking:", error);
+      throw error;
+    }
+  };
+
+  const updateVenueBooking = async (bookingId, bookingData) => {
+    try {
+      const { data } = await axios.put(
+        `${process.env.REACT_APP_API_URL}/venues/bookings/${bookingId}`,
+        bookingData,
+        { withCredentials: true }
+      );
+      if (bookingData.venue_id) {
+        await fetchVenueBookings(bookingData.venue_id);
+      }
+      return data;
+    } catch (error) {
+      console.error("Error updating venue booking:", error);
+      throw error;
+    }
+  };
+
+  const deleteVenueBooking = async (bookingId, venueId = null) => {
+    try {
+      await axios.delete(
+        `${process.env.REACT_APP_API_URL}/venues/bookings/${bookingId}`,
+        { withCredentials: true }
+      );
+      if (venueId) {
+        await fetchVenueBookings(venueId);
+      }
+      return { success: true };
+    } catch (error) {
+      console.error("Error deleting venue booking:", error);
       throw error;
     }
   };
@@ -161,14 +210,22 @@ export const VenueProvider = ({ children }) => {
     <VenueContext.Provider
       value={{
         venues,
+        loading,
         fetchVenues,
         createVenue,
         updateVenue,
         deleteVenue,
+
         venueUnavailability,
         fetchVenueUnavailability,
         createVenueUnavailability,
         deleteVenueUnavailability,
+
+        venueBookings,
+        fetchVenueBookings,
+        createVenueBooking,
+        updateVenueBooking,
+        deleteVenueBooking,
       }}
     >
       {children}
@@ -177,4 +234,3 @@ export const VenueProvider = ({ children }) => {
 };
 
 export default VenueContext;
-

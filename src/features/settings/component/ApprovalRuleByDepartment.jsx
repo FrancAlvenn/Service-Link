@@ -38,6 +38,12 @@ const ApprovalRuleByDepartment = () => {
   const [addingNew, setAddingNew] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [approvalRuleToDelete, setApprovalRuleToDelete] = useState(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [savingCreate, setSavingCreate] = useState(false);
+  const [savingUpdate, setSavingUpdate] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [createError, setCreateError] = useState("");
+  const [updateError, setUpdateError] = useState("");
 
   const [selectedRowId, setSelectedRowId] = useState(null);
 
@@ -112,7 +118,9 @@ const ApprovalRuleByDepartment = () => {
 
   const confirmDeleteApprovalRule = async () => {
     if (approvalRuleToDelete !== null) {
+      setDeleting(true);
       await deleteApprovalRuleByDepartment(approvalRuleToDelete);
+      setDeleting(false);
       fetchApprovalRulesByDepartment();
     }
     setDeleteDialogOpen(false);
@@ -281,7 +289,7 @@ const ApprovalRuleByDepartment = () => {
   };
 
   return (
-    <>
+    <div className="w-full p-4 border border-gray-200 rounded-lg bg-white shadow-sm mb-4 h-full">
       <Card className="shadow-none">
         <CardHeader
           floated={false}
@@ -312,7 +320,7 @@ const ApprovalRuleByDepartment = () => {
                   icon={<FunnelSimple size={16} />}
                 />
               </MenuHandler>
-              <MenuList className="mt-2 p-2 max-h-[50vh] overflow-y-auto gap-2 flex flex-col">
+              <MenuList className="mt-2 p-2 max-h-[40vh] overflow-y-auto gap-2 flex flex-col">
                 <Typography variant="small" className="mb-2 font-semibold">
                   Position
                 </Typography>
@@ -350,7 +358,7 @@ const ApprovalRuleByDepartment = () => {
                   icon={<FunnelSimple size={16} />}
                 />
               </MenuHandler>
-              <MenuList className="mt-2 p-2 max-h-[50vh] overflow-y-auto gap-2 flex flex-col">
+              <MenuList className="mt-2 p-2 max-h-[40vh] overflow-y-auto gap-2 flex flex-col">
                 <Typography variant="small" className="mb-2 font-semibold">
                   Department
                 </Typography>
@@ -393,7 +401,7 @@ const ApprovalRuleByDepartment = () => {
                   icon={<FunnelSimple size={16} />}
                 />
               </MenuHandler>
-              <MenuList className="mt-2 p-2 max-h-[50vh] overflow-y-auto gap-2 flex flex-col">
+              <MenuList className="mt-2 p-2 max-h-[40vh] overflow-y-auto gap-2 flex flex-col">
                 <Typography variant="small" className="mb-2 font-semibold">
                   Required
                 </Typography>
@@ -412,7 +420,109 @@ const ApprovalRuleByDepartment = () => {
           </div>
         </CardHeader>
         <CardBody className="overflow-x-auto px-4 py-2" ref={tableRef}>
-          <div className="overflow-y-auto max-h-[300px]">
+          <div className="flex flex-col gap-6 mb-6">
+            <div>
+              <Typography className="text-sm font-semibold text-gray-700">If</Typography>
+              <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-md flex flex-wrap items-center gap-3">
+                <span className="text-sm text-gray-700">Department</span>
+                <select disabled className="px-3 py-2 text-sm bg-white border rounded-md cursor-not-allowed">
+                  <option>equals</option>
+                </select>
+                <DepartmentSelect value={editValues.department_id} onChange={handleChange} />
+              </div>
+            </div>
+
+            <div>
+              <Typography className="text-sm font-semibold text-gray-700">Then</Typography>
+              <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-md flex flex-wrap items-center gap-3">
+                <span className="text-sm text-gray-700">Position</span>
+                <PositionSelect value={editValues.position_id} onChange={handleChange} />
+                <select
+                  value={editValues.required ? "required" : "not_required"}
+                  onChange={(e) => setEditValues({ ...editValues, required: e.target.value === "required" })}
+                  className="px-3 py-2 text-sm bg-white border rounded-md"
+                >
+                  <option value="required">is required</option>
+                  <option value="not_required">is not required</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button variant="text" color="gray" onClick={handleCancelEdit} aria-label="Reset rule">Reset</Button>
+              <Button
+                color="green"
+                onClick={async () => {
+                  if (editValues.department_id === "" || editValues.position_id === "") return;
+                  setSavingCreate(true);
+                  setCreateError("");
+                  try {
+                    await createApprovalRuleByDepartment(editValues);
+                  } catch (e) {
+                    setCreateError("Failed to save rule. Please try again.");
+                  }
+                  setSavingCreate(false);
+                  resetEditState();
+                  fetchApprovalRulesByDepartment();
+                }}
+                disabled={editValues.department_id === "" || editValues.position_id === ""}
+              >
+                {savingCreate ? "Saving..." : "Save Rule"}
+              </Button>
+            </div>
+            {createError && (
+              <Typography className="text-sm text-red-600 mt-1" role="alert">{createError}</Typography>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-3" role="list" aria-label="Existing approver rules">
+            {filteredApprovalRule.length === 0 ? (
+              <Typography className="text-sm text-gray-500">No approval rules match the filter.</Typography>
+            ) : (
+              filteredApprovalRule.map((rule) => (
+                <div
+                  key={rule.id}
+                  role="listitem"
+                  className="flex items-center justify-between p-3 border border-gray-200 rounded-md hover:bg-gray-50"
+                >
+                  <div className="flex flex-col">
+                    <span className="text-sm text-gray-700">If: Department equals <span className="font-semibold">{rule.department?.name || rule.department_id}</span></span>
+                    <span className="text-sm text-gray-700">Then: Position <span className="font-semibold">{rule.position?.position || rule.position_id}</span> {rule.required ? "is required" : "is not required"}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outlined"
+                      color="blue"
+                      aria-label="Edit approver rule"
+                      className="flex items-center gap-1 hover:bg-blue-50"
+                      onClick={() => {
+                        setEditValues({
+                          department_id: rule.department_id,
+                          position_id: rule.position_id,
+                          required: !!rule.required,
+                        });
+                        setEditIndex(rule.id);
+                        setEditDialogOpen(true);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      color="red"
+                      aria-label="Delete approver rule"
+                      className="flex items-center gap-1 hover:bg-red-50"
+                      onClick={() => openDeleteDialog(rule.id)}
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="overflow-y-auto max-h-[300px] hidden">
             <table className="min-w-full text-left border-l border-r border-b border-gray-300 rounded-md">
               <thead className="sticky top-0 bg-gray-50 z-10">
                 <tr className="bg-gray-50 text-sm font-semibold text-gray-600">
@@ -495,7 +605,7 @@ const ApprovalRuleByDepartment = () => {
             </table>
           </div>
 
-          <div className="flex justify-between items-center mt-4">
+          <div className="flex justify-between items-center mt-4 hidden">
             <div className="flex gap-2">
               <Button
                 variant="outlined"
@@ -598,8 +708,7 @@ const ApprovalRuleByDepartment = () => {
       <Dialog open={deleteDialogOpen} handler={cancelDelete}>
         <DialogHeader>Confirm Deletion</DialogHeader>
         <DialogBody>
-          Are you sure you want to delete this approver? This action cannot be
-          undone.
+          Are you sure you want to delete this rule? This action cannot be undone.
         </DialogBody>
         <DialogFooter className="flex gap-2">
           <Button variant="text" color="gray" onClick={cancelDelete}>
@@ -610,11 +719,73 @@ const ApprovalRuleByDepartment = () => {
             color="red"
             onClick={confirmDeleteApprovalRule}
           >
-            Delete
+            {deleting ? "Deleting..." : "Delete"}
           </Button>
         </DialogFooter>
       </Dialog>
-    </>
+
+      <Dialog open={editDialogOpen} handler={() => setEditDialogOpen(false)}>
+        <DialogHeader>Edit Rule</DialogHeader>
+        <DialogBody>
+          <div className="flex flex-col gap-6">
+            <div>
+              <Typography className="text-sm font-semibold text-gray-700">If</Typography>
+              <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-md flex flex-wrap items-center gap-3">
+                <span className="text-sm text-gray-700">Department</span>
+                <select disabled className="px-3 py-2 text-sm bg-white border rounded-md cursor-not-allowed" aria-label="Equals operator">
+                  <option>equals</option>
+                </select>
+                <DepartmentSelect value={editValues.department_id} onChange={handleChange} />
+              </div>
+            </div>
+
+            <div>
+              <Typography className="text-sm font-semibold text-gray-700">Then</Typography>
+              <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-md flex flex-wrap items-center gap-3">
+                <span className="text-sm text-gray-700">Position</span>
+                <PositionSelect value={editValues.position_id} onChange={handleChange} />
+                <select
+                  value={editValues.required ? "required" : "not_required"}
+                  onChange={(e) => setEditValues({ ...editValues, required: e.target.value === "required" })}
+                  className="px-3 py-2 text-sm bg-white border rounded-md"
+                  aria-label="Required selection"
+                >
+                  <option value="required">is required</option>
+                  <option value="not_required">is not required</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </DialogBody>
+        <DialogFooter className="flex gap-2">
+          <Button variant="text" color="gray" onClick={() => setEditDialogOpen(false)}>Cancel</Button>
+          <Button
+            color="green"
+            aria-label="Save edits"
+            onClick={async () => {
+              if (editValues.department_id === "" || editValues.position_id === "") return;
+              setSavingUpdate(true);
+              setUpdateError("");
+              try {
+                await updateApprovalRuleByDepartment(editIndex, editValues);
+              } catch (e) {
+                setUpdateError("Failed to save changes. Please try again.");
+              }
+              setSavingUpdate(false);
+              setEditDialogOpen(false);
+              setEditIndex(null);
+              fetchApprovalRulesByDepartment();
+            }}
+            disabled={editValues.department_id === "" || editValues.position_id === "" || savingUpdate}
+          >
+            {savingUpdate ? "Saving..." : "Save"}
+          </Button>
+          {updateError && (
+            <Typography className="text-sm text-red-600" role="alert">{updateError}</Typography>
+          )}
+        </DialogFooter>
+      </Dialog>
+    </div>
   );
 };
 

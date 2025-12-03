@@ -339,7 +339,7 @@ const ManualApprovalRule = () => {
                   icon={<FunnelSimple size={16} />}
                 />
               </MenuHandler>
-              <MenuList className="mt-2 p-2 max-h-[50vh] overflow-y-auto gap-2 flex flex-col">
+              <MenuList className="mt-2 p-2 max-h-[40vh] overflow-y-auto gap-2 flex flex-col">
                 <Typography variant="small" className="mb-2 font-semibold">
                   Position
                 </Typography>
@@ -374,7 +374,7 @@ const ManualApprovalRule = () => {
                   icon={<FunnelSimple size={16} />}
                 />
               </MenuHandler>
-              <MenuList className="mt-2 p-2 max-h-[50vh] overflow-y-auto gap-2 flex flex-col">
+              <MenuList className="mt-2 p-2 max-h-[40vh] overflow-y-auto gap-2 flex flex-col">
                 <Typography variant="small" className="mb-2 font-semibold">
                   Department
                 </Typography>

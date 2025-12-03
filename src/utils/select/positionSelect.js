@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { SettingsContext } from "../../features/settings/context/SettingsContext";
 
-const PositionSelect = ({ value = "", onChange }) => {
+const PositionSelect = ({ value = "", onChange, ariaLabel = "Position" }) => {
   const { positions } = useContext(SettingsContext);
   return (
     <select
@@ -9,6 +9,8 @@ const PositionSelect = ({ value = "", onChange }) => {
       value={value}
       onChange={onChange}
       className="w-fit px-2 py-1 rounded-md border "
+      aria-label={ariaLabel}
+      role="combobox"
       required
     >
       <option value="">Select position</option>

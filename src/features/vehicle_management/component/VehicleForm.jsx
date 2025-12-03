@@ -58,11 +58,6 @@ const VehicleForm = ({ mode = "add", initialValues, onClose, onSuccess }) => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [eventToDelete, setEventToDelete] = useState(null);
 
-  // const fetchVehicleUnavailability = async (vehicleId) => {
-  //   const res = await axios.get(`${process.env.REACT_APP_API_URL}/vehicles/unavailability/vehicle/${vehicleId}`);
-  //   return res.data;
-  // };
-
   // Fetch existing unavailability if editing
     useEffect(() => {
       if (mode === "edit" && initialValues?.vehicle_id) {

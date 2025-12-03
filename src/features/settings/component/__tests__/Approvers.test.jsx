@@ -190,3 +190,43 @@ test("Delete approver confirms and triggers delete", async () => {
   await waitFor(() => expect(ctx.deleteApprover).toHaveBeenCalledTimes(1));
   expect(ctx.deleteApprover).toHaveBeenCalledWith(77);
 });
+
+test("Approver list is keyboard navigable", () => {
+  const many = Array.from({ length: 25 }).map((_, i) => ({
+    id: i + 1,
+    reference_number: `U-${String(i + 1).padStart(3, "0")}`,
+    name: `User ${i + 1}`,
+    email: `user${i + 1}@example.com`,
+    position_id: "10",
+    department_id: "1",
+    position: { id: 10, position: "Manager" },
+    department: { id: 1, name: "IT" },
+  }));
+
+  const ctx = {
+    approvers: many,
+    fetchApprovers: jest.fn(),
+    createApprover: jest.fn(),
+    updateApprover: jest.fn(),
+    deleteApprover: jest.fn(),
+    departments: [{ id: 1, name: "IT" }],
+    positions: [{ id: 10, position: "Manager" }],
+    fetchDepartments: jest.fn(),
+    fetchPositions: jest.fn(),
+  };
+
+  renderWithSettings(<Approvers />, { contextValue: ctx });
+
+  const list = screen.getByRole("list", { name: /existing approvers/i });
+  expect(list.getAttribute("tabIndex")).toBe("0");
+
+  fireEvent.keyDown(list, { key: "ArrowDown" });
+  const items = screen.getAllByRole("listitem");
+  expect(items[0]).toHaveFocus();
+
+  fireEvent.keyDown(list, { key: "ArrowDown" });
+  expect(items[1]).toHaveFocus();
+
+  fireEvent.keyDown(list, { key: "ArrowUp" });
+  expect(items[0]).toHaveFocus();
+});

@@ -106,3 +106,35 @@ test("Delete priority confirms and triggers delete", async () => {
   await waitFor(() => expect(ctx.deletePriority).toHaveBeenCalledTimes(1));
   expect(ctx.deletePriority).toHaveBeenCalledWith(4);
 });
+
+test("Priorities list is keyboard navigable", () => {
+  const many = Array.from({ length: 20 }).map((_, i) => ({
+    id: i + 1,
+    priority: `P${i + 1}`,
+    description: `Desc ${i + 1}`,
+    color: "red",
+  }));
+
+  const ctx = {
+    priorities: many,
+    fetchPriorities: jest.fn(),
+    createPriority: jest.fn(),
+    updatePriority: jest.fn(),
+    deletePriority: jest.fn(),
+  };
+
+  renderWithSettings(<Priority />, { contextValue: ctx });
+
+  const list = screen.getByRole("list", { name: /existing priorities/i });
+  expect(list.getAttribute("tabIndex")).toBe("0");
+
+  fireEvent.keyDown(list, { key: "ArrowDown" });
+  const items = screen.getAllByRole("listitem");
+  expect(items[0]).toHaveFocus();
+
+  fireEvent.keyDown(list, { key: "ArrowDown" });
+  expect(items[1]).toHaveFocus();
+
+  fireEvent.keyDown(list, { key: "ArrowUp" });
+  expect(items[0]).toHaveFocus();
+});

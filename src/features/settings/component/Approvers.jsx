@@ -74,6 +74,7 @@ const Approvers = () => {
   // ];
 
   const tableRef = useRef(null);
+  const listRef = useRef(null);
 
   useEffect(() => {
     fetchApprovers();
@@ -280,6 +281,22 @@ const Approvers = () => {
     fetchPositions();
   }, []);
 
+  const handleListKeyDown = (e) => {
+    const container = listRef.current;
+    if (!container) return;
+    const items = Array.from(container.querySelectorAll('[role="listitem"]'));
+    const currentIndex = items.findIndex((el) => el === document.activeElement);
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      const next = items[Math.min(currentIndex + 1, items.length - 1)] || items[0];
+      next && next.focus();
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      const prev = items[Math.max(currentIndex - 1, 0)] || items[items.length - 1];
+      prev && prev.focus();
+    }
+  };
+
   const handleFilterChange = (key, value) => {
     // const updatedFilters = { ...filters, [key]: value };
 
@@ -305,7 +322,7 @@ const Approvers = () => {
   };
 
   return (
-    <>
+    <div className="w-full p-4 border border-gray-200 rounded-lg bg-white shadow-sm mb-4 h-full">
       <Card className="shadow-none">
         <CardHeader
           floated={false}
@@ -336,7 +353,7 @@ const Approvers = () => {
                   icon={<FunnelSimple size={16} />}
                 />
               </MenuHandler>
-              <MenuList className="mt-2 p-2 max-h-[50vh] overflow-y-auto gap-2 flex flex-col">
+              <MenuList className="mt-2 p-2 max-h-[40vh] overflow-y-auto gap-2 flex flex-col">
                 <Typography variant="small" className="mb-2 font-semibold">
                   Position
                 </Typography>
@@ -374,7 +391,7 @@ const Approvers = () => {
                   icon={<FunnelSimple size={16} />}
                 />
               </MenuHandler>
-              <MenuList className="mt-2 p-2 max-h-[50vh] overflow-y-auto gap-2 flex flex-col">
+              <MenuList className="mt-2 p-2 max-h-[40vh] overflow-y-auto gap-2 flex flex-col">
                 <Typography variant="small" className="mb-2 font-semibold">
                   Department
                 </Typography>
@@ -474,53 +491,65 @@ const Approvers = () => {
             )}
           </div>
 
-          <div className="flex flex-col gap-3" role="list" aria-label="Existing approvers">
-            {filteredApprovers.length === 0 ? (
-              <Typography className="text-sm text-gray-500">No approvers match the filter.</Typography>
-            ) : (
-              filteredApprovers.map((approver) => (
-                <div
-                  key={approver.id}
-                  role="listitem"
-                  className="flex items-center justify-between p-3 border border-gray-200 rounded-md hover:bg-gray-50"
-                >
-                  <div className="flex flex-col">
-                    <span className="text-sm text-gray-700">Approver: <span className="font-semibold">{approver.name}</span> ({approver.reference_number})</span>
-                    <span className="text-sm text-gray-700">Assignment: Position <span className="font-semibold">{approver.position?.position || approver.position_id}</span>, Department <span className="font-semibold">{approver.department?.name || approver.department_id}</span></span>
+          <div className="relative">
+            <div aria-hidden="true" className="absolute top-0 left-0 right-0 h-4 pointer-events-none bg-gradient-to-b from-white to-transparent" />
+            <div aria-hidden="true" className="absolute bottom-0 left-0 right-0 h-4 pointer-events-none bg-gradient-to-t from-white to-transparent" />
+            <div
+              className="flex flex-col gap-3 overflow-y-auto max-h-[40vh] scrollbar-thin scrollbar-thumb-gray-300 focus:outline-none"
+              role="list"
+              aria-label="Existing approvers"
+              tabIndex={0}
+              onKeyDown={handleListKeyDown}
+              ref={listRef}
+            >
+              {filteredApprovers.length === 0 ? (
+                <Typography className="text-sm text-gray-500">No approvers match the filter.</Typography>
+              ) : (
+                filteredApprovers.map((approver) => (
+                  <div
+                    key={approver.id}
+                    role="listitem"
+                    tabIndex={-1}
+                    className="flex items-center justify-between p-3 border border-gray-200 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  >
+                    <div className="flex flex-col">
+                      <span className="text-sm text-gray-700">Approver: <span className="font-semibold">{approver.name}</span> ({approver.reference_number})</span>
+                      <span className="text-sm text-gray-700">Assignment: Position <span className="font-semibold">{approver.position?.position || approver.position_id}</span>, Department <span className="font-semibold">{approver.department?.name || approver.department_id}</span></span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outlined"
+                        color="blue"
+                        aria-label="Edit approver assignment"
+                        className="flex items-center gap-1 hover:bg-blue-50"
+                        onClick={() => {
+                          setEditValues({
+                            reference_number: approver.reference_number,
+                            name: approver.name,
+                            email: approver.email,
+                            position_id: approver.position_id,
+                            department_id: approver.department_id,
+                          });
+                          setEditIndex(approver.id);
+                          setEditDialogOpen(true);
+                        }}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        color="red"
+                        aria-label="Delete approver"
+                        className="flex items-center gap-1 hover:bg-red-50"
+                        onClick={() => openDeleteDialog(approver.id)}
+                      >
+                        Delete
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outlined"
-                      color="blue"
-                      aria-label="Edit approver assignment"
-                      className="flex items-center gap-1 hover:bg-blue-50"
-                      onClick={() => {
-                        setEditValues({
-                          reference_number: approver.reference_number,
-                          name: approver.name,
-                          email: approver.email,
-                          position_id: approver.position_id,
-                          department_id: approver.department_id,
-                        });
-                        setEditIndex(approver.id);
-                        setEditDialogOpen(true);
-                      }}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      color="red"
-                      aria-label="Delete approver"
-                      className="flex items-center gap-1 hover:bg-red-50"
-                      onClick={() => openDeleteDialog(approver.id)}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </div>
-              ))
-            )}
+                ))
+              )}
+            </div>
           </div>
 
           <div className="overflow-y-auto max-h-[300px] hidden">
@@ -786,7 +815,7 @@ const Approvers = () => {
           )}
         </DialogFooter>
       </Dialog>
-    </>
+    </div>
   );
 };
 

@@ -41,10 +41,27 @@ const Organization = () => {
   const [selectedRowId, setSelectedRowId] = useState(null);
 
   const tableRef = useRef(null);
+  const listRef = useRef(null);
 
   useEffect(() => {
     fetchOrganizations();
   }, []);
+
+  const handleListKeyDown = (e) => {
+    const container = listRef.current;
+    if (!container) return;
+    const items = Array.from(container.querySelectorAll('[role="listitem"]'));
+    const currentIndex = items.findIndex((el) => el === document.activeElement);
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      const next = items[Math.min(currentIndex + 1, items.length - 1)] || items[0];
+      next && next.focus();
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      const prev = items[Math.max(currentIndex - 1, 0)] || items[items.length - 1];
+      prev && prev.focus();
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -187,7 +204,7 @@ const Organization = () => {
   };
 
   return (
-    <>
+    <div className="w-full p-4 border border-gray-200 rounded-lg bg-white shadow-sm mb-4 h-full">
       <Card className="shadow-none">
         <CardHeader floated={false} shadow={false} className="rounded-none ">
           <div>
@@ -241,43 +258,55 @@ const Organization = () => {
             )}
           </div>
 
-          <div className="flex flex-col gap-3" role="list" aria-label="Existing organizations">
-            {organizations.length === 0 ? (
-              <Typography className="text-sm text-gray-500">No organizations found.</Typography>
-            ) : (
-              organizations.map((org) => (
-                <div
-                  key={org.id}
-                  role="listitem"
-                  className="flex items-center justify-between p-3 border border-gray-200 rounded-md hover:bg-gray-50"
-                >
-                  <div className="flex flex-col">
-                    <span className="text-sm text-gray-700">Organization: <span className="font-semibold">{org.organization}</span></span>
-                    <span className="text-sm text-gray-700">Description: <span className="font-semibold">{org.description}</span></span>
+          <div className="relative">
+            <div aria-hidden="true" className="absolute top-0 left-0 right-0 h-4 pointer-events-none bg-gradient-to-b from-white to-transparent" />
+            <div aria-hidden="true" className="absolute bottom-0 left-0 right-0 h-4 pointer-events-none bg-gradient-to-t from-white to-transparent" />
+            <div
+              className="flex flex-col gap-3 overflow-y-auto max-h-[40vh] scrollbar-thin scrollbar-thumb-gray-300 focus:outline-none"
+              role="list"
+              aria-label="Existing organizations"
+              tabIndex={0}
+              onKeyDown={handleListKeyDown}
+              ref={listRef}
+            >
+              {organizations.length === 0 ? (
+                <Typography className="text-sm text-gray-500">No organizations found.</Typography>
+              ) : (
+                organizations.map((org) => (
+                  <div
+                    key={org.id}
+                    role="listitem"
+                    tabIndex={-1}
+                    className="flex items-center justify-between p-3 border border-gray-200 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  >
+                    <div className="flex flex-col">
+                      <span className="text-sm text-gray-700">Organization: <span className="font-semibold">{org.organization}</span></span>
+                      <span className="text-sm text-gray-700">Description: <span className="font-semibold">{org.description}</span></span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outlined"
+                        color="blue"
+                        className="flex items-center gap-1 hover:bg-blue-50"
+                        onClick={() => handleEditOrganization(org)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        color="red"
+                        className="flex items-center gap-1 hover:bg-red-50"
+                        onClick={() => openDeleteDialog(org.id)}
+                      >
+                        Delete
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outlined"
-                      color="blue"
-                      className="flex items-center gap-1 hover:bg-blue-50"
-                      onClick={() => handleEditOrganization(org)}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      color="red"
-                      className="flex items-center gap-1 hover:bg-red-50"
-                      onClick={() => openDeleteDialog(org.id)}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </div>
-              ))
-            )}
+                ))
+              )}
+            </div>
           </div>
-          <div className="overflow-y-auto max-h-[300px] hidden">
+          <div className="overflow-y-auto max-h-[350px] hidden">
             <table className="min-w-full text-left border-l border-r border-b border-gray-300 rounded-md ">
               <thead className="sticky top-0 bg-gray-50 z-10">
                 <tr className="text-sm font-semibold text-gray-600">
@@ -302,7 +331,7 @@ const Organization = () => {
           </div>
 
           <div className="flex justify-between items-center mt-4">
-            <Button
+            {/* <Button
               variant="outlined"
               color="blue"
               className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 flex items-center gap-2"
@@ -310,7 +339,7 @@ const Organization = () => {
               disabled={editIndex !== null}
             >
               <Plus size={16} /> Add Organization
-            </Button>
+            </Button> */}
           </div>
         </CardBody>
       </Card>
@@ -376,7 +405,7 @@ const Organization = () => {
           </Button>
         </DialogFooter>
       </Dialog>
-    </>
+    </div>
   );
 };
 

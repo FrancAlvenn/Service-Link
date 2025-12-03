@@ -106,3 +106,35 @@ test("Delete status confirms and triggers delete", async () => {
   await waitFor(() => expect(ctx.deleteStatus).toHaveBeenCalledTimes(1));
   expect(ctx.deleteStatus).toHaveBeenCalledWith(6);
 });
+
+test("Statuses list is keyboard navigable", () => {
+  const many = Array.from({ length: 20 }).map((_, i) => ({
+    id: i + 1,
+    status: `Status ${i + 1}`,
+    description: `Desc ${i + 1}`,
+    color: "blue",
+  }));
+
+  const ctx = {
+    statuses: many,
+    fetchStatuses: jest.fn(),
+    createStatus: jest.fn(),
+    updateStatus: jest.fn(),
+    deleteStatus: jest.fn(),
+  };
+
+  renderWithSettings(<Status />, { contextValue: ctx });
+
+  const list = screen.getByRole("list", { name: /existing statuses/i });
+  expect(list.getAttribute("tabIndex")).toBe("0");
+
+  fireEvent.keyDown(list, { key: "ArrowDown" });
+  const items = screen.getAllByRole("listitem");
+  expect(items[0]).toHaveFocus();
+
+  fireEvent.keyDown(list, { key: "ArrowDown" });
+  expect(items[1]).toHaveFocus();
+
+  fireEvent.keyDown(list, { key: "ArrowUp" });
+  expect(items[0]).toHaveFocus();
+});

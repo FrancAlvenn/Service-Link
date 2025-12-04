@@ -10,7 +10,7 @@ function Layout({ children }) {
       <div className="flex flex-1 mb-0 h-[90%] ">
         <Sidebar />
 
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto bg-white border-l">
           <Main>{children}</Main>
         </div>
       </div>

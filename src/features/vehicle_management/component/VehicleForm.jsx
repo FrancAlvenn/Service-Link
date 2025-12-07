@@ -561,7 +561,7 @@ const VehicleForm = ({ mode = "add", initialValues, onClose, onSuccess }) => {
                     ${isSelected
                       ? "bg-blue-100 dark:bg-blue-900/30 border-blue-400 dark:border-blue-600"
                       : isUnavailable
-                      ? "bg-orange-50 dark:bg-orange-900/20 border-orange-300 dark:border-orange-700 cursor-not-allowed opacity-60"
+                      ? "bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700 cursor-not-allowed opacity-60"
                       : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/10"
                     }
                   `}
@@ -577,13 +577,13 @@ const VehicleForm = ({ mode = "add", initialValues, onClose, onSuccess }) => {
                       </span>
                       {isUnavailable && unavailability && isFirstHourOfUnavailability && (
                         <div className="flex-1">
-                          <div className="text-xs font-medium text-orange-700 dark:text-orange-300">
+                          <div className="text-xs font-medium text-red-700 dark:text-red-300">
                             {unavailability.title || "Unavailable"}
                           </div>
                           <div className="text-xs text-gray-600 dark:text-gray-400">
                             {formatTime(new Date(unavailability.start).toTimeString().slice(0, 5))} - {formatTime(new Date(unavailability.end).toTimeString().slice(0, 5))}
                           </div>
-                          <div className="text-xs text-orange-600 dark:text-orange-400 mt-1 font-medium">
+                          <div className="text-xs text-red-600 dark:text-red-400 mt-1 font-medium">
                             Click to delete
                           </div>
                         </div>
@@ -677,7 +677,7 @@ const VehicleForm = ({ mode = "add", initialValues, onClose, onSuccess }) => {
                   ${status === "past" 
                     ? "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50" 
                     : status === "unavailable"
-                    ? "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border-2 border-orange-400 dark:border-orange-600 hover:bg-orange-200 dark:hover:bg-orange-900/40 cursor-pointer"
+                    ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-2 border-red-400 dark:border-red-600 hover:bg-red-200 dark:hover:bg-red-900/40 cursor-pointer"
                     : status === "selected"
                     ? "bg-blue-500 text-white font-semibold shadow-md"
                     : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700"
@@ -704,7 +704,7 @@ const VehicleForm = ({ mode = "add", initialValues, onClose, onSuccess }) => {
             <span className="text-gray-600 dark:text-gray-400">Available</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded bg-orange-100 dark:bg-orange-900/30 border-2 border-orange-400 dark:border-orange-600"></div>
+            <div className="w-3 h-3 rounded bg-red-100 dark:bg-red-900/30 border-2 border-red-400 dark:border-red-600"></div>
             <span className="text-gray-600 dark:text-gray-400">Unavailable (Click to delete)</span>
           </div>
           <div className="flex items-center gap-1.5">

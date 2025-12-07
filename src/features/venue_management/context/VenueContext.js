@@ -12,7 +12,7 @@ export const VenueProvider = ({ children }) => {
   // Fetch on mount
   useEffect(() => {
     fetchVenues();
-    fetchVenueUnavailability();
+    fetchAllVenueUnavailability();
     fetchVenueBookings();
   }, []);
 
@@ -25,7 +25,9 @@ export const VenueProvider = ({ children }) => {
       });
       setVenues(data || []);
     } catch (error) {
-      console.error("Error fetching venues:", error);
+      const status = error?.response?.status;
+      const url = error?.config?.url;
+      console.error(`Error fetching venues [${status}]: ${url}`, error);
       setVenues([]);
     } finally {
       setLoading(false);
@@ -82,19 +84,18 @@ export const VenueProvider = ({ children }) => {
   // UNVAILABILITY
   // ================================
 
-  const fetchVenueUnavailability = async (venueId = null) => {
+  const fetchAllVenueUnavailability = async () => {
     try {
       setLoading(true);
-      const url = venueId
-        ? `${process.env.REACT_APP_API_URL}/venues/unavailability/venue/${venueId}`
-        : `${process.env.REACT_APP_API_URL}/venues/unavailability`;
+      const url = `${process.env.REACT_APP_API_URL}/venue-unavailability`;
       const { data } = await axios.get(url, { withCredentials: true });
-
       const records = data || [];
       setVenueUnavailability(records);
-      return records; // ← Important: return data!
+      return records;
     } catch (error) {
-      console.error("Error fetching venue unavailability:", error);
+      const status = error?.response?.status;
+      const url = error?.config?.url;
+      console.error(`Error fetching venue unavailability [${status}]: ${url}` , error);
       setVenueUnavailability([]);
       return [];
     } finally {
@@ -102,14 +103,44 @@ export const VenueProvider = ({ children }) => {
     }
   };
 
+  const fetchVenueUnavailabilityById = async (venueId) => {
+    try {
+      setLoading(true);
+      if (venueId === undefined || venueId === null || venueId === "") {
+        console.error("Invalid venueId for unavailability fetch");
+        setVenueUnavailability([]);
+        return [];
+      }
+      const url = `${process.env.REACT_APP_API_URL}/venue-unavailability/venue/${venueId}`;
+      const { data } = await axios.get(url, { withCredentials: true });
+      const records = data || [];
+      setVenueUnavailability(records);
+      return records;
+    } catch (error) {
+      const status = error?.response?.status;
+      const url = error?.config?.url;
+      console.error(`Error fetching venue unavailability by id [${status}]: ${url}` , error);
+      setVenueUnavailability([]);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchVenueUnavailability = async (venueId = null) => {
+    if (venueId === null) return fetchAllVenueUnavailability();
+    return fetchVenueUnavailabilityById(venueId);
+  };
+
+
   const createVenueUnavailability = async (unavailabilityData) => {
     try {
       const { data } = await axios.post(
-        `${process.env.REACT_APP_API_URL}/venues/unavailability`,
+        `${process.env.REACT_APP_API_URL}/venue-unavailability`,
         unavailabilityData,
         { withCredentials: true }
       );
-      await fetchVenueUnavailability(unavailabilityData.venue_id);
+      await fetchVenueUnavailabilityById(unavailabilityData.venue_id);
       return data;
     } catch (error) {
       console.error("Error creating venue unavailability:", error);
@@ -120,13 +151,13 @@ export const VenueProvider = ({ children }) => {
   const deleteVenueUnavailability = async (unavailabilityId, venueId = null) => {
     try {
       await axios.delete(
-        `${process.env.REACT_APP_API_URL}/venues/unavailability/${unavailabilityId}`,
+        `${process.env.REACT_APP_API_URL}/venue-unavailability/${unavailabilityId}`,
         { withCredentials: true }
       );
       if (venueId) {
-        await fetchVenueUnavailability(venueId);
+        await fetchVenueUnavailabilityById(venueId);
       } else {
-        await fetchVenueUnavailability();
+        await fetchAllVenueUnavailability();
       }
     } catch (error) {
       console.error("Error deleting venue unavailability:", error);
@@ -142,15 +173,18 @@ export const VenueProvider = ({ children }) => {
     try {
       setLoading(true);
       const url = venueId
-        ? `${process.env.REACT_APP_API_URL}/venues/bookings/venue/${venueId}`
-        : `${process.env.REACT_APP_API_URL}/venues/bookings`;
+        ? `${process.env.REACT_APP_API_URL}/venue-bookings/venue/${venueId}`
+        : `${process.env.REACT_APP_API_URL}/venue-bookings`;
       const { data } = await axios.get(url, { withCredentials: true });
 
       const records = data || [];
+      console.log("Fetched venue bookings:", records);
       setVenueBookings(records);
       return records;
     } catch (error) {
-      console.error("Error fetching venue bookings:", error);
+      const status = error?.response?.status;
+      const url = error?.config?.url;
+      console.error(`Error fetching venue bookings [${status}]: ${url}`, error);
       setVenueBookings([]);
       return [];
     } finally {
@@ -161,7 +195,7 @@ export const VenueProvider = ({ children }) => {
   const createVenueBooking = async (bookingData) => {
     try {
       const { data } = await axios.post(
-        `${process.env.REACT_APP_API_URL}/venues/bookings`,
+        `${process.env.REACT_APP_API_URL}/venue-bookings`,
         bookingData,
         { withCredentials: true }
       );
@@ -176,7 +210,7 @@ export const VenueProvider = ({ children }) => {
   const updateVenueBooking = async (bookingId, bookingData) => {
     try {
       const { data } = await axios.put(
-        `${process.env.REACT_APP_API_URL}/venues/bookings/${bookingId}`,
+        `${process.env.REACT_APP_API_URL}/venue-bookings/${bookingId}`,
         bookingData,
         { withCredentials: true }
       );
@@ -193,7 +227,7 @@ export const VenueProvider = ({ children }) => {
   const deleteVenueBooking = async (bookingId, venueId = null) => {
     try {
       await axios.delete(
-        `${process.env.REACT_APP_API_URL}/venues/bookings/${bookingId}`,
+        `${process.env.REACT_APP_API_URL}/venue-bookings/${bookingId}`,
         { withCredentials: true }
       );
       if (venueId) {
@@ -217,6 +251,8 @@ export const VenueProvider = ({ children }) => {
         deleteVenue,
 
         venueUnavailability,
+        fetchAllVenueUnavailability,
+        fetchVenueUnavailabilityById,
         fetchVenueUnavailability,
         createVenueUnavailability,
         deleteVenueUnavailability,

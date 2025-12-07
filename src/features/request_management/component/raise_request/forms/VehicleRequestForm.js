@@ -144,14 +144,14 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
       try {
         // Fetch bookings
         const bookingsResponse = await axios.get(
-          `${process.env.REACT_APP_API_URL}/vehicles/bookings/vehicle/${request.vehicle_id}`,
+          `${process.env.REACT_APP_API_URL}/vehicle-bookings/vehicle/${request.vehicle_id}`,
           { withCredentials: true }
         );
         setVehicleBookings(bookingsResponse.data || []);
 
         // Fetch unavailability
         const unavailabilityResponse = await axios.get(
-          `${process.env.REACT_APP_API_URL}/vehicles/unavailability/vehicle/${request.vehicle_id}`,
+          `${process.env.REACT_APP_API_URL}/vehicle-unavailability/vehicle/${request.vehicle_id}`,
           { withCredentials: true }
         );
         setVehicleUnavailability(unavailabilityResponse.data || []);
@@ -879,7 +879,7 @@ useEffect(() => {
                 {dayName}, {monthName} {dayNumber}, {year}
               </h3>
               {isDayUnavailable && (
-                <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">Day is unavailable</p>
+                <p className="text-xs text-red-600 dark:text-red-400 mt-1">Day is unavailable</p>
               )}
             </div>
             <div className="w-24"></div> {/* Spacer for centering */}
@@ -904,9 +904,9 @@ useEffect(() => {
                     ${isSelected
                       ? "bg-blue-100 dark:bg-blue-900/30 border-blue-400 dark:border-blue-600"
                       : isBooked
-                      ? "bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700 cursor-not-allowed"
+                      ? "bg-orange-50 dark:bg-orange-900/20 border-orange-300 dark:border-orange-700 cursor-not-allowed"
                       : isDayUnavailable
-                      ? "bg-orange-50 dark:bg-orange-900/20 border-orange-300 dark:border-orange-700 opacity-60 cursor-not-allowed"
+                      ? "bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700 opacity-60 cursor-not-allowed"
                       : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/10"
                     }
                   `}
@@ -922,7 +922,7 @@ useEffect(() => {
                       </span>
                       {isBooked && booking && isFirstHourOfBooking && (
                         <div className="flex-1">
-                          <div className="text-xs font-medium text-red-700 dark:text-red-300">
+                          <div className="text-xs font-medium text-orange-700 dark:text-orange-300">
                             {booking.event_title || "Booked"}
                           </div>
                           <div className="text-xs text-gray-600 dark:text-gray-400">
@@ -956,7 +956,7 @@ useEffect(() => {
                         </div>
                       )}
                       {isDayUnavailable && !isBooked && (
-                        <div className="text-xs text-orange-600 dark:text-orange-400 font-medium">
+                        <div className="text-xs text-red-600 dark:text-red-400 font-medium">
                           Unavailable
                         </div>
                       )}
@@ -1053,9 +1053,9 @@ useEffect(() => {
                   ${status === "past" 
                     ? "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50" 
                     : status === "booked"
-                    ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-2 border-red-400 dark:border-red-600 hover:bg-red-200 dark:hover:bg-red-900/40"
-                    : status === "unavailable"
                     ? "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border-2 border-orange-400 dark:border-orange-600 hover:bg-orange-200 dark:hover:bg-orange-900/40"
+                    : status === "unavailable"
+                    ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-2 border-red-400 dark:border-red-600 hover:bg-red-200 dark:hover:bg-red-900/40"
                     : status === "selected"
                     ? "bg-blue-500 text-white font-semibold shadow-md"
                     : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700"
@@ -1171,17 +1171,18 @@ useEffect(() => {
                 {showCalendar && (
                   <>
                     {/* Legend */}
+                    {/* Color scheme: booked = orange (#FFA500), unavailable = red (#FF0000) */}
                     <div className="flex flex-wrap gap-3 text-xs mb-4 pb-3 border-b border-gray-200 dark:border-gray-700">
                       <div className="flex items-center gap-1.5">
                         <div className="w-3 h-3 rounded bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"></div>
                         <span className="text-gray-600 dark:text-gray-400">Available</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <div className="w-3 h-3 rounded bg-red-100 dark:bg-red-900/30 border-2 border-red-400 dark:border-red-600"></div>
+                        <div className="w-3 h-3 rounded bg-orange-100 dark:bg-orange-900/30 border-2 border-orange-400 dark:border-orange-600"></div>
                         <span className="text-gray-600 dark:text-gray-400">Booked/Pending</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <div className="w-3 h-3 rounded bg-orange-100 dark:bg-orange-900/30 border-2 border-orange-400 dark:border-orange-600"></div>
+                        <div className="w-3 h-3 rounded bg-red-100 dark:bg-red-900/30 border-2 border-red-400 dark:border-red-600"></div>
                         <span className="text-gray-600 dark:text-gray-400">Unavailable</span>
                       </div>
                     </div>

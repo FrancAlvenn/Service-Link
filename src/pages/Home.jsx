@@ -6,7 +6,6 @@ import { AuthContext } from '../features/authentication';
 import { useNavigate } from 'react-router-dom';
 // import StatusDropdown from '../components/dropdowns/StatusDropdown';
 import Navbar from '../layouts/Navbar';
-import { SidebarWithBurgerMenu } from '../layouts/__tests__/SidebarWithBurgerMenu';
 import Layout from '../layouts/Layout';
 
 function Home() {

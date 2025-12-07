@@ -26,6 +26,7 @@ import {
   Notebook,
   UsersThree,
   Car,
+  Calendar,
 } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 
@@ -206,6 +207,12 @@ function RequestsManagementControls() {
         </ListItemPrefix>
         Board
       </ListItem>
+      <ListItem onClick={() => navigate("/workspace/venue-management/calendar")}>
+        <ListItemPrefix>
+          <Calendar size={20} />
+        </ListItemPrefix>
+        Calendar
+      </ListItem>
 
       <hr className="my-2 border-t border-gray-300" />
 
@@ -218,6 +225,12 @@ function RequestsManagementControls() {
           <Car size={20} />
         </ListItemPrefix>
         Board
+      </ListItem>
+      <ListItem onClick={() => navigate("/workspace/vehicle-management/calendar")}>
+        <ListItemPrefix>
+          <Calendar size={20} />
+        </ListItemPrefix>
+        Calendar
       </ListItem>
 
       <hr className="my-2 border-t border-gray-300" />

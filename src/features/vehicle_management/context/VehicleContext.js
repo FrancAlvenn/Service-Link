@@ -79,14 +79,13 @@ export const VehicleProvider = ({ children }) => {
   };
 
   // Fetch vehicle unavailability records
-  const fetchVehicleUnavailability = async (vehicleId = null) => {
+  const fetchAllVehicleUnavailability = async () => {
     try {
       setLoading(true);
-      const url = vehicleId
-        ? `${process.env.REACT_APP_API_URL}/vehicles/unavailability/vehicle/${vehicleId}`
-        : `${process.env.REACT_APP_API_URL}/vehicles/unavailability`;
-      const response = await axios.get(url, { withCredentials: true });
-
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/vehicle-unavailability`,
+        { withCredentials: true }
+      );
       const data = response.data || [];
       setUnavailabilityRecords(data);
       return data;
@@ -99,15 +98,44 @@ export const VehicleProvider = ({ children }) => {
     }
   };
 
+  const fetchVehicleUnavailabilityById = async (vehicleId) => {
+    try {
+      setLoading(true);
+      if (vehicleId === undefined || vehicleId === null || vehicleId === "") {
+        setUnavailabilityRecords([]);
+        return [];
+      }
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/vehicle-unavailability/vehicle/${vehicleId}`,
+        { withCredentials: true }
+      );
+      const data = response.data || [];
+      setUnavailabilityRecords(data);
+      return data;
+    } catch (error) {
+      console.error("Error fetching vehicle unavailability:", error);
+      setUnavailabilityRecords([]);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchVehicleUnavailability = async (vehicleId = null) => {
+    return vehicleId === null
+      ? fetchAllVehicleUnavailability()
+      : fetchVehicleUnavailabilityById(vehicleId);
+  };
+
   // Create vehicle unavailability
   const createVehicleUnavailability = async (unavailabilityData) => {
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/vehicles/unavailability`,
+        `${process.env.REACT_APP_API_URL}/vehicle-unavailability`,
         unavailabilityData,
         { withCredentials: true }
       );
-      await fetchVehicleUnavailability();
+      await fetchVehicleUnavailabilityById(unavailabilityData.vehicle_id);
       return response.data;
     } catch (error) {
       console.error("Error creating vehicle unavailability:", error);
@@ -119,7 +147,7 @@ export const VehicleProvider = ({ children }) => {
   const updateVehicleUnavailability = async (unavailabilityId, unavailabilityData) => {
     try {
       const response = await axios.put(
-        `${process.env.REACT_APP_API_URL}/vehicles/unavailability/${unavailabilityId}`,
+        `${process.env.REACT_APP_API_URL}/vehicle-unavailability/${unavailabilityId}`,
         unavailabilityData,
         { withCredentials: true }
       );
@@ -137,11 +165,11 @@ export const VehicleProvider = ({ children }) => {
   const deleteVehicleUnavailability = async (unavailabilityId, vehicleId = null) => {
     try {
       const response = await axios.delete(
-        `${process.env.REACT_APP_API_URL}/vehicles/unavailability/${unavailabilityId}`,
+        `${process.env.REACT_APP_API_URL}/vehicle-unavailability/${unavailabilityId}`,
         { withCredentials: true }
       );
       if (vehicleId) {
-        await fetchVehicleUnavailability(vehicleId);
+        await fetchVehicleUnavailabilityById(vehicleId);
       }
       return response.data;
     } catch (error) {
@@ -155,8 +183,8 @@ export const VehicleProvider = ({ children }) => {
     try {
       setLoading(true);
       const url = vehicleId
-        ? `${process.env.REACT_APP_API_URL}/vehicles/bookings/vehicle/${vehicleId}`
-        : `${process.env.REACT_APP_API_URL}/vehicles/bookings`;
+        ? `${process.env.REACT_APP_API_URL}/vehicle-bookings/vehicle/${vehicleId}`
+        : `${process.env.REACT_APP_API_URL}/vehicle-bookings`;
       const response = await axios.get(url, { withCredentials: true });
       const data = response.data || [];
       setBookings(data);
@@ -174,7 +202,7 @@ export const VehicleProvider = ({ children }) => {
   const createVehicleBooking = async (bookingData) => {
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/vehicles/bookings`,
+        `${process.env.REACT_APP_API_URL}/vehicle-bookings`,
         bookingData,
         { withCredentials: true }
       );
@@ -190,7 +218,7 @@ export const VehicleProvider = ({ children }) => {
   const updateVehicleBooking = async (bookingId, bookingData) => {
     try {
       const response = await axios.put(
-        `${process.env.REACT_APP_API_URL}/vehicles/bookings/${bookingId}`,
+        `${process.env.REACT_APP_API_URL}/vehicle-bookings/${bookingId}`,
         bookingData,
         { withCredentials: true }
       );
@@ -208,7 +236,7 @@ export const VehicleProvider = ({ children }) => {
   const deleteVehicleBooking = async (bookingId, vehicleId = null) => {
     try {
       const response = await axios.delete(
-        `${process.env.REACT_APP_API_URL}/vehicles/bookings/${bookingId}`,
+        `${process.env.REACT_APP_API_URL}/vehicle-bookings/${bookingId}`,
         { withCredentials: true }
       );
       if (vehicleId) {
@@ -230,6 +258,8 @@ export const VehicleProvider = ({ children }) => {
         createVehicle,
         updateVehicle,
         deleteVehicle,
+        fetchAllVehicleUnavailability,
+        fetchVehicleUnavailabilityById,
         fetchVehicleUnavailability,
         createVehicleUnavailability,
         updateVehicleUnavailability,

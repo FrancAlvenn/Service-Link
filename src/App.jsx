@@ -39,6 +39,7 @@ import AssetTable from "./features/asset_management/component/AssetTable";
 import { AssetProvider } from "./features/asset_management/context/AssetContext";
 import AssetForm from "./features/asset_management/component/AssetForm";
 import VenueTable from "./features/venue_management/component/VenueTable";
+import { AdminVenueCalendar } from "./features/venue_management";
 import { VenueProvider } from "./features/venue_management/context/VenueContext";
 import { VehicleProvider } from "./features/vehicle_management/context/VehicleContext";
 import EmployeeTable from "./features/employee_management/component/EmployeeTable";
@@ -68,6 +69,7 @@ import NotFound from "./pages/NotFound";
 import SummaryReport from "./features/request_management/component/reporting_dashboard/SummaryReport";
 import Redirect from "./features/authentication/component/Redirect";
 import VehicleTable from "./features/vehicle_management/component/VehicleTable";
+import VehicleCalendar from "./features/vehicle_management/component/VehicleCalendar";
 
 library.add(fas, fab, far); // Add all the icons needed
 
@@ -255,10 +257,26 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: "venue-management/calendar",
+        element: (
+          <ProtectedRoute requiredAccess={"admin"}>
+            <AdminVenueCalendar />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: "vehicle-management/board",
         element: (
           <ProtectedRoute requiredAccess={"admin"}>
             <VehicleTable />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "vehicle-management/calendar",
+        element: (
+          <ProtectedRoute requiredAccess={"admin"}>
+            <VehicleCalendar />
           </ProtectedRoute>
         ),
       },

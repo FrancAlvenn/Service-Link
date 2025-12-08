@@ -29,7 +29,7 @@ const genAI = new GoogleGenAI({
   apiVersion: "v1",
 });
 
-const JobRequestForm = ({ setSelectedRequest }) => {
+const JobRequestForm = ({ setSelectedRequest, prefillData, renderConfidence }) => {
   const { user } = useContext(AuthContext);
   const { allUserInfo, getUserByReferenceNumber, fetchUsers, getUserDepartmentByReferenceNumber } = useContext(UserContext);
   const { fetchJobRequests } = useContext(JobRequestsContext);
@@ -54,7 +54,7 @@ const JobRequestForm = ({ setSelectedRequest }) => {
   }
 
   const [errorMessage, setErrorMessage] = useState("");
-  const [request, setRequest] = useState({
+  const [request, setRequest] = useState(() => ({
     requester: user.reference_number,
     title: "",
     job_category: "",
@@ -64,7 +64,8 @@ const JobRequestForm = ({ setSelectedRequest }) => {
     remarks: "",
     details: [],
     approvers: [],
-  });
+    ...(prefillData || {}),
+  }));
   const [showParticularForm, setShowParticularForm] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
   const [particularForm, setParticularForm] = useState({
@@ -88,6 +89,16 @@ const JobRequestForm = ({ setSelectedRequest }) => {
     fetchApprovalRulesByDesignation();
     fetchUsers();
   }, []);
+
+  // Handle AI prefilled data
+  useEffect(() => {
+    if (prefillData && Object.keys(prefillData).length > 0) {
+      setRequest(prev => ({
+        ...prev,
+        ...prefillData
+      }));
+    }
+  }, [prefillData]);
 
   useEffect(() => {
     const category = classifyJobRequest({
@@ -462,6 +473,7 @@ useEffect(() => {
           <div>
             <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
               Title
+              {renderConfidence && renderConfidence("title")}
             </label>
             <input
               type="text"
@@ -477,6 +489,7 @@ useEffect(() => {
           <div>
             <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
               Date Required
+              {renderConfidence && renderConfidence("date_required")}
             </label>
             <input
               type="date"
@@ -500,6 +513,7 @@ useEffect(() => {
           <div>
             <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
               Purpose
+              {renderConfidence && renderConfidence("purpose")}
             </label>
 
             <div className="relative">

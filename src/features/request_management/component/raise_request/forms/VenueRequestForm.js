@@ -27,7 +27,7 @@ const genAI = new GoogleGenAI({
 });
 
 
-const VenueRequestForm = ({ setSelectedRequest }) => {
+const VenueRequestForm = ({ setSelectedRequest, prefillData, renderConfidence }) => {
   const purposeTextareaRef = useRef(null);
 
   const { user } = useContext(AuthContext);
@@ -53,7 +53,7 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
     return department ? department.name : "";
   }
 
-  const [request, setRequest] = useState({
+  const [request, setRequest] = useState(() => ({
     requester: user.reference_number,
     organization: "",
     title: "",
@@ -70,7 +70,8 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
     remarks: "",
     details: [],
     approvers: [],
-  });
+    ...(prefillData || {}),
+  }));
 
   const requestType = "Venue Request";
 
@@ -152,6 +153,16 @@ const VenueRequestForm = ({ setSelectedRequest }) => {
     fetchUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Handle AI prefilled data
+  useEffect(() => {
+    if (prefillData && Object.keys(prefillData).length > 0) {
+      setRequest(prev => ({
+        ...prev,
+        ...prefillData
+      }));
+    }
+  }, [prefillData]);
 
   // Fetch venue requests once when component mounts
   useEffect(() => {

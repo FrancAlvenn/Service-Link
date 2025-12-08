@@ -8,6 +8,7 @@ import {
   House,
   DotsThreeCircle,
   Plus,
+  Sparkle,
 } from "@phosphor-icons/react";
 import { UserContext } from "../../context/UserContext";
 import { JobRequestsContext } from "../../features/request_management/context/JobRequestsContext";
@@ -120,9 +121,18 @@ function Portal() {
         </div>
       </div>
 
+      {/* AI Floating Action Button */}
+      <button
+        className="fixed inset-auto bottom-40 sm:bottom-40 right-8 sm:right-16 md:right-[25%] bg-indigo-600 dark:bg-indigo-500 text-white p-3 rounded-xl shadow-lg hover:bg-indigo-700 dark:hover:bg-indigo-600 transition z-30"
+        onClick={() => handleNavigation("/portal/ai-request")}
+        aria-label="Generate Request with AI"
+      >
+        <Sparkle size={24} />
+      </button>
+
       {/* Floating Action Button (Create Request) */}
       <button
-        className="fixed inset-auto bottom-24 sm:bottom-24 right-8 sm:right-16 md:right-[25%]  bg-blue-600 dark:bg-blue-500 text-white p-3 rounded-xl shadow-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition"
+        className="fixed inset-auto bottom-24 sm:bottom-24 right-8 sm:right-16 md:right-[25%] bg-blue-600 dark:bg-blue-500 text-white p-3 rounded-xl shadow-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition z-20"
         onClick={() => handleNavigation("/portal/create-request")}
         aria-label="Create New Request"
       >

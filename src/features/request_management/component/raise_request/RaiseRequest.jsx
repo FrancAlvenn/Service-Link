@@ -10,14 +10,22 @@ import {
   CalendarCheck,
   Car,
 } from "@phosphor-icons/react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import RequestForm from "./RequestForm";
 import { useContext } from "react";
 import { AuthContext } from "../../../authentication";
+import { useLocation } from "react-router-dom";
 
 const RaiseRequest = () => {
   const [selectedRequest, setSelectedRequest] = useState("");
   const { user } = useContext(AuthContext);
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.selectedRequest) {
+      setSelectedRequest(location.state.selectedRequest);
+    }
+  }, [location.state?.selectedRequest]);
 
   return (
     <div className="min-h-screen h-full w-full bg-white dark:bg-gray-900 rounded-lg mt-0 px-3 flex flex-col justify-between transition-colors">
@@ -134,6 +142,8 @@ const RaiseRequest = () => {
           <RequestForm
             selectedRequest={selectedRequest}
             setSelectedRequest={setSelectedRequest}
+            prefill={location.state?.prefill}
+            aiConfidences={location.state?.aiConfidences}
           />
         )}
       </div>

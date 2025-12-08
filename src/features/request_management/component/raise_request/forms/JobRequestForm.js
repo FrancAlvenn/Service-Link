@@ -14,6 +14,7 @@ import axios from "axios";
 import { UserContext } from "../../../../../context/UserContext";
 import ToastNotification from "../../../../../utils/ToastNotification";
 import { JobRequestsContext } from "../../../context/JobRequestsContext";
+import { EmployeeContext } from "../../../../employee_management/context/EmployeeContext";
 import { SettingsContext } from "../../../../settings/context/SettingsContext";
 import assignApproversToRequest from "../../../utils/assignApproversToRequest";
 import { classifyJobRequest } from "../../../utils/classifyJobRequest";
@@ -33,6 +34,7 @@ const JobRequestForm = ({ setSelectedRequest, prefillData, renderConfidence }) =
   const { user } = useContext(AuthContext);
   const { allUserInfo, getUserByReferenceNumber, fetchUsers, getUserDepartmentByReferenceNumber } = useContext(UserContext);
   const { fetchJobRequests } = useContext(JobRequestsContext);
+  const { matchEmployeesToJob } = useContext(EmployeeContext);
   const {
     departments,
     designations,
@@ -321,7 +323,7 @@ useEffect(() => {
     departmentOptions != null; 
 
   setIsDataReady(ready);
-}, [
+  }, [
   allUserInfo,
   departments,
   approvers,
@@ -329,7 +331,29 @@ useEffect(() => {
   approvalRulesByRequestType,
   approvalRulesByDesignation,
   departmentOptions,
-]);
+  ]);
+
+  const extractConstraints = (reqInfo) => {
+    const txt = `${reqInfo.title || ""} ${reqInfo.purpose || ""} ${(reqInfo.details || []).map((d) => `${d.particulars} ${d.description}`).join(" ")}`.toLowerCase();
+    const certs = [];
+    if (/(tesda|nc\s*II|nc\s*2)/i.test(txt)) certs.push("TESDA");
+    if (/(licensed|license)/i.test(txt)) certs.push("Licensed");
+    if (/certified/i.test(txt)) certs.push("Certified");
+
+    let required_experience = null;
+    if (/(major|structural|rewire|installation|hazard|urgent|critical)/i.test(txt)) {
+      required_experience = "Senior";
+    } else if (/(maintenance|routine|inspection|check|clean)/i.test(txt)) {
+      required_experience = "Mid";
+    }
+
+    return {
+      certifications_required: certs,
+      required_experience,
+      availability_window: reqInfo.date_required || null,
+      location_preference: reqInfo.department || null,
+    };
+  };
 
   const submitJobRequest = async () => {
     try {
@@ -363,6 +387,31 @@ useEffect(() => {
         department_id: requesterId?.department_id,
         designation_id: requesterId?.designation_id,
       });
+
+      // Auto-assign employee based on job requirements
+      const constraints = extractConstraints(requestData);
+      const matchPayload = {
+        title: requestData.title,
+        description: requestData.purpose,
+        details: requestData.details,
+        job_category: requestData.job_category,
+        department: requestData.department,
+        date_required: requestData.date_required,
+        ...constraints,
+      };
+      const matchResult = await matchEmployeesToJob(matchPayload);
+      const top = matchResult?.top_candidate;
+      if (top?.reference_number) {
+        requestData.assigned_to = [
+          {
+            reference_number: top.reference_number,
+            first_name: top.first_name,
+            last_name: top.last_name,
+            email: top.email,
+            department: top.department,
+          },
+        ];
+      }
 
       const response = await axios({
         method: "POST",
@@ -408,16 +457,41 @@ useEffect(() => {
             // Optional: Show toast to user: "Request submitted, but email failed to send."
           }
 
-        setRequest({
-          requester: user.reference_number,
-          title: "",
-          job_category: "",
-          date_required: "",
-          purpose: "",
-          remarks: "",
-          details: [],
-          approvers: [],
-        });
+        // Notify assigned employee if any
+        if (requestData.assigned_to && Array.isArray(requestData.assigned_to) && requestData.assigned_to[0]?.email) {
+          try {
+            await sendBrevoEmail({
+              to: [
+                {
+                  email: requestData.assigned_to[0].email,
+                  name: `${requestData.assigned_to[0].first_name || ''} ${requestData.assigned_to[0].last_name || ''}`.trim(),
+                },
+              ],
+              templateId: 7, // Assume template for assignment notification
+              params: {
+                employee_name: `${requestData.assigned_to[0].first_name} ${requestData.assigned_to[0].last_name}`,
+                title: request.title,
+                date_required: formattedDate,
+                job_category: request.job_category || "General",
+                purpose: request.purpose,
+                details_table: detailsHtml,
+              },
+            });
+          } catch (notifyErr) {
+            console.warn("Failed to notify assigned employee:", notifyErr);
+          }
+        }
+
+      setRequest({
+        requester: user.reference_number,
+        title: "",
+        job_category: "",
+        date_required: "",
+        purpose: "",
+        remarks: "",
+        details: [],
+        approvers: [],
+      });
       }
     } catch (error) {
       console.error("Error submitting job request:", error);

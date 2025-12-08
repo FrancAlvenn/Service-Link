@@ -36,10 +36,14 @@ export const EmployeeProvider = ({ children }) => {
   // Create a new employee
   const createEmployee = async (newEmployee) => {
     try {
-      const { data } = await axios.post(`${process.env.REACT_APP_API_URL}/employees/`, newEmployee, {
+      const { data, status } = await axios.post(`${process.env.REACT_APP_API_URL}/employees/`, newEmployee, {
         withCredentials: true,
       });
-      setEmployees((prev) => [...prev, data]);
+      if ([200, 201].includes(status)) {
+        const created = data.newEmployee || data;
+        setEmployees((prev) => [...prev, created]);
+        ToastNotification.success("Success", data.message || "Employee created successfully");
+      }
     } catch (error) {
       console.error("Error creating employee:", error);
     }
@@ -48,12 +52,15 @@ export const EmployeeProvider = ({ children }) => {
   // Update an employee by ID
   const updateEmployee = async (employeeId, updatedEmployee) => {
     try {
-      const { data } = await axios.put(`${process.env.REACT_APP_API_URL}/employees/${employeeId}`, updatedEmployee, {
+      const { data, status } = await axios.put(`${process.env.REACT_APP_API_URL}/employees/${employeeId}`, updatedEmployee, {
         withCredentials: true,
       });
-      setEmployees((prev) =>
-        prev.map((emp) => (emp.reference_number === employeeId ? { ...emp, ...data } : emp))
-      );
+      if (status === 200) {
+        setEmployees((prev) =>
+          prev.map((emp) => (emp.reference_number === employeeId ? { ...emp, ...updatedEmployee } : emp))
+        );
+        ToastNotification.success("Success", data.message || "Employee updated successfully");
+      }
     } catch (error) {
       console.error("Error updating employee:", error);
     }
@@ -70,6 +77,54 @@ export const EmployeeProvider = ({ children }) => {
     }
   };
 
+  // Update qualifications and availability
+  const updateEmployeeQualifications = async (employeeId, payload) => {
+    try {
+      const { data, status } = await axios.put(
+        `${process.env.REACT_APP_API_URL}/employees/${employeeId}/qualifications`,
+        payload,
+        { withCredentials: true }
+      );
+      if (status === 200) {
+        setEmployees((prev) =>
+          prev.map((emp) =>
+            emp.reference_number === employeeId ? { ...emp, ...payload } : emp
+          )
+        );
+        ToastNotification.success("Success", data.message || "Qualifications updated successfully");
+      }
+    } catch (error) {
+      console.error("Error updating qualifications:", error);
+    }
+  };
+
+  // Search employees by qualifications
+  const searchEmployeesByQualifications = async ({ skills = [], availability, experience, department }) => {
+    try {
+      const params = new URLSearchParams();
+      if (Array.isArray(skills)) skills.forEach((s) => params.append("skills", s));
+      if (availability) params.append("availability", availability);
+      if (experience) params.append("experience", experience);
+      if (department) params.append("department", department);
+      const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/employees/search?${params.toString()}`, { withCredentials: true });
+      return data;
+    } catch (error) {
+      console.error("Error searching employees:", error);
+      return [];
+    }
+  };
+
+  // Match employees to a job
+  const matchEmployeesToJob = async (payload) => {
+    try {
+      const { data } = await axios.post(`${process.env.REACT_APP_API_URL}/employees/match`, payload, { withCredentials: true });
+      return data;
+    } catch (error) {
+      console.error("Error matching employees:", error);
+      return { required_skills: [], candidates: [], top_candidate: null };
+    }
+  };
+
   return (
     <EmployeeContext.Provider
       value={{
@@ -78,6 +133,9 @@ export const EmployeeProvider = ({ children }) => {
         createEmployee,
         updateEmployee,
         deleteEmployee,
+        updateEmployeeQualifications,
+        searchEmployeesByQualifications,
+        matchEmployeesToJob,
       }}
     >
       {children}

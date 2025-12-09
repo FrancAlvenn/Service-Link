@@ -409,6 +409,7 @@ useEffect(() => {
             last_name: top.last_name,
             email: top.email,
             department: top.department,
+            type_of_assignment: "auto",
           },
         ];
       }

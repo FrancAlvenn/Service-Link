@@ -139,27 +139,27 @@ export const getColumnConfig = (
           ),
         },
 
-        {
-          key: "purpose",
-          label: "Purpose",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText + " text-left"}
-            >
-              Purpose
-            </Typography>
-          ),
-          render: (row) => (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-              dangerouslySetInnerHTML={{ __html: row.purpose }}
-            ></Typography>
-          ),
-        },
+        // {
+        //   key: "purpose",
+        //   label: "Purpose",
+        //   header: (
+        //     <Typography
+        //       variant="small"
+        //       color="blue-gray"
+        //       className={normalText + " text-left"}
+        //     >
+        //       Purpose
+        //     </Typography>
+        //   ),
+        //   render: (row) => (
+        //     <Typography
+        //       variant="small"
+        //       color="blue-gray"
+        //       className={normalText}
+        //       dangerouslySetInnerHTML={{ __html: row.purpose }}
+        //     ></Typography>
+        //   ),
+        // },
         {
           key: "requester",
           label: "Requester",
@@ -408,27 +408,27 @@ export const getColumnConfig = (
             </Typography>
           ),
         },
-        {
-          key: "purpose",
-          label: "Purpose",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              Purpose
-            </Typography>
-          ),
-          render: (row) => (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-              dangerouslySetInnerHTML={{ __html: row.purpose }}
-            ></Typography>
-          ),
-        },
+        // {
+        //   key: "purpose",
+        //   label: "Purpose",
+        //   header: (
+        //     <Typography
+        //       variant="small"
+        //       color="blue-gray"
+        //       className={normalText}
+        //     >
+        //       Purpose
+        //     </Typography>
+        //   ),
+        //   render: (row) => (
+        //     <Typography
+        //       variant="small"
+        //       color="blue-gray"
+        //       className={normalText}
+        //       dangerouslySetInnerHTML={{ __html: row.purpose }}
+        //     ></Typography>
+        //   ),
+        // },
         {
           key: "requester",
           label: "Requester",
@@ -765,27 +765,27 @@ export const getColumnConfig = (
             </Typography>
           ),
         },
-        {
-          key: "purpose",
-          label: "Purpose",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              Purpose
-            </Typography>
-          ),
-          render: (row) => (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-              dangerouslySetInnerHTML={{ __html: row.purpose }}
-            ></Typography>
-          ),
-        },
+        // {
+        //   key: "purpose",
+        //   label: "Purpose",
+        //   header: (
+        //     <Typography
+        //       variant="small"
+        //       color="blue-gray"
+        //       className={normalText}
+        //     >
+        //       Purpose
+        //     </Typography>
+        //   ),
+        //   render: (row) => (
+        //     <Typography
+        //       variant="small"
+        //       color="blue-gray"
+        //       className={normalText}
+        //       dangerouslySetInnerHTML={{ __html: row.purpose }}
+        //     ></Typography>
+        //   ),
+        // },
         {
           key: "event_nature",
           label: "Event Nature",
@@ -1254,27 +1254,27 @@ export const getColumnConfig = (
             </Typography>
           ),
         },
-        {
-          key: "purpose",
-          label: "Purpose",
-          header: (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-            >
-              Purpose
-            </Typography>
-          ),
-          render: (row) => (
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className={normalText}
-              dangerouslySetInnerHTML={{ __html: row.purpose }}
-            ></Typography>
-          ),
-        },
+        // {
+        //   key: "purpose",
+        //   label: "Purpose",
+        //   header: (
+        //     <Typography
+        //       variant="small"
+        //       color="blue-gray"
+        //       className={normalText}
+        //     >
+        //       Purpose
+        //     </Typography>
+        //   ),
+        //   render: (row) => (
+        //     <Typography
+        //       variant="small"
+        //       color="blue-gray"
+        //       className={normalText}
+        //       dangerouslySetInnerHTML={{ __html: row.purpose }}
+        //     ></Typography>
+        //   ),
+        // },
         {
           key: "requester",
           label: "Requester",

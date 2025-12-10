@@ -49,6 +49,7 @@ import { TicketProvider } from "./features/ticket_management/context/TicketConte
 import TicketTable from "./features/ticket_management/component/TicketTable";
 import TicketForm from "./features/ticket_management/component/TicketForm";
 import Portal from "./portal/pages/Portal";
+import AIPrompt from "./portal/pages/AIPrompt";
 import PortalDashboard from "./portal/component/dashboard/PortalDashboard";
 import RequestDetailsPage from "./portal/component/request_view/RequestDetailsPage";
 import Notifications from "./portal/pages/Notifications";
@@ -381,6 +382,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute requiredAccess={"user"}>
             <RaiseRequest />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "ai-request",
+        element: (
+          <ProtectedRoute requiredAccess={"user"}>
+            <AIPrompt />
           </ProtectedRoute>
         ),
       },

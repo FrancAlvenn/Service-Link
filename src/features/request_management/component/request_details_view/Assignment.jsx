@@ -19,9 +19,16 @@ import AssetContext from "../../../asset_management/context/AssetContext";
 import { AuthContext } from "../../../authentication";
 import AssetAssignmentLogContext from "../../../asset_management/context/AssetAssignmentLogContext";
 import ToastNotification from "../../../../utils/ToastNotification";
-import { UserCircle } from "@phosphor-icons/react";
+import { UserCircle, CheckCircle } from "@phosphor-icons/react";
 import { HardDrive } from "react-feather";
 import { useRequestActivity } from "../../../../context/RequestActivityContext";
+
+/*
+  Dual-assignment support:
+  - Auto-assignment is created during request creation (JobRequestForm) using matching logic
+  - Manual assignment is performed here by users
+  - This component distinguishes both types for UI and validations
+*/
 
 const Assignment = ({
   selectedRequest,
@@ -40,6 +47,9 @@ const Assignment = ({
   const [openQuantityModal, setOpenQuantityModal] = useState(false);
   const [assetToAssign, setAssetToAssign] = useState(null);
   const [quantityInput, setQuantityInput] = useState(1);
+  const [assignmentTypes, setAssignmentTypes] = useState({}); // { ref: 'auto'|'manual' }
+  const [autoActivityLogged, setAutoActivityLogged] = useState(false);
+  const [overrideMode, setOverrideMode] = useState(false);
 
   const {
     assetAssignmentLogs,
@@ -49,6 +59,7 @@ const Assignment = ({
   } = useContext(AssetAssignmentLogContext);
 
   const { addActivity } = useRequestActivity();
+  const isAdmin = user?.access_level === "admin";
 
   const createAssetLog = async () => {
     const existingLog = assetAssignmentLogs.find(
@@ -103,27 +114,48 @@ const Assignment = ({
   }, []);
 
   useEffect(() => {
-    if (Array.isArray(selectedRequest.assigned_to)) {
-      const selected = employees.filter((emp) =>
-        selectedRequest.assigned_to.includes(emp.reference_number)
-      );
+    const assignedEntries = Array.isArray(selectedRequest.assigned_to)
+      ? selectedRequest.assigned_to
+      : [];
+    const assignedRefs = assignedEntries
+      .map((e) => (typeof e === "string" ? e : e?.reference_number))
+      .filter(Boolean);
+
+    if (assignedRefs.length > 0) {
+      const selected = employees.filter((emp) => assignedRefs.includes(emp.reference_number));
       setSelectedEmployees(selected);
+    } else {
+      setSelectedEmployees([]);
     }
+
+    const types = {};
+    assignedEntries.forEach((e) => {
+      if (typeof e === "string") {
+        types[e] = "manual";
+      } else if (e && e.reference_number) {
+        const t = e.type_of_assignment === "auto" ? "auto" : e.type_of_assignment === "manual" ? "manual" : "manual";
+        types[e.reference_number] = t;
+      }
+    });
+    setAssignmentTypes(types);
 
     if (Array.isArray(selectedRequest.assigned_assets)) {
       const selected = assets.filter((asset) =>
-        selectedRequest.assigned_assets?.some(
-          (a) => a.reference_number === asset.reference_number
-        )
+        selectedRequest.assigned_assets?.some((a) => a.reference_number === asset.reference_number)
       );
       setSelectedAssets(selected);
+    } else {
+      setSelectedAssets([]);
     }
-  }, [
-    selectedRequest?.assigned_to,
-    selectedRequest?.assigned_assets,
-    employees,
-    assets,
-  ]);
+  }, [selectedRequest?.assigned_to, selectedRequest?.assigned_assets, employees, assets]);
+
+  useEffect(() => {
+    const hasAuto = Object.values(assignmentTypes).includes("auto");
+    if (hasAuto && !autoActivityLogged) {
+      handleSaveActivity("Auto-assigned employee detected from request creation.");
+      setAutoActivityLogged(true);
+    }
+  }, [assignmentTypes, autoActivityLogged]);
 
   const handleSaveActivity = async (message) => {
     const newActivity = {
@@ -140,6 +172,24 @@ const Assignment = ({
       getRequestActivity();
     } catch (error) {
       console.error("Error saving activity:", error);
+    }
+  };
+
+  const handleOverrideActivity = async ({ removed, added }) => {
+    const details = `Override assignment: removed = ${removed || ""}`;
+    const entry = {
+      reference_number: selectedRequest.reference_number,
+      type: "assignment_override",
+      visibility: "internal",
+      action: "Override Assignment",
+      details,
+      performed_by: user.reference_number,
+    };
+    try {
+      await addActivity(entry);
+      getRequestActivity();
+    } catch (error) {
+      console.error("Error saving override activity:", error);
     }
   };
 
@@ -182,27 +232,46 @@ const Assignment = ({
   };
 
   const toggleEmployee = async (referenceNumber) => {
-    const current = selectedRequest.assigned_to || [];
-    const updated = current.includes(referenceNumber)
-      ? current.filter((ref) => ref !== referenceNumber)
-      : [...current, referenceNumber];
+    const currentEntries = Array.isArray(selectedRequest.assigned_to) ? selectedRequest.assigned_to : [];
+    const currentRefs = currentEntries.map((e) => (typeof e === "string" ? e : e?.reference_number)).filter(Boolean);
+    const isSelected = currentRefs.includes(referenceNumber);
+
+    if (isSelected && assignmentTypes[referenceNumber] === "auto") {
+      if (!(overrideMode && isAdmin)) {
+        ToastNotification.error("Validation", "Auto-assigned employee cannot be removed here.");
+        return;
+      }
+    }
+
+    const updatedEntries = isSelected
+      ? currentEntries.filter((e) => (typeof e === "string" ? e !== referenceNumber : e?.reference_number !== referenceNumber))
+      : [...currentEntries, { reference_number: referenceNumber, type_of_assignment: "manual" }];
 
     try {
-      await axios.put(`${process.env.REACT_APP_API_URL}/${requestType}/${selectedRequest.reference_number}`, {
-        ...selectedRequest,
-        assigned_to: updated,
-      }, { withCredentials: true });
+      await axios.put(
+        `${process.env.REACT_APP_API_URL}/${requestType}/${selectedRequest.reference_number}`,
+        { ...selectedRequest, assigned_to: updatedEntries },
+        { withCredentials: true }
+      );
 
-      setSelectedRequest((prev) => ({
-        ...prev,
-        assigned_to: updated,
-      }));
+      setSelectedRequest((prev) => ({ ...prev, assigned_to: updatedEntries }));
+      if (!isSelected) {
+        setAssignmentTypes((prev) => ({ ...prev, [referenceNumber]: "manual" }));
+      } else {
+        setAssignmentTypes((prev) => {
+          const { [referenceNumber]: _, ...rest } = prev;
+          return rest;
+        });
+      }
+
       fetchRequests();
       ToastNotification.success("Success", "Assigned employees updated.");
 
-      if (!current.includes(referenceNumber)) {
-        handleSaveActivity("An employee has been assigned.");
+      if (!isSelected) {
+        handleSaveActivity("An employee has been assigned (manual).");
         await setRequestStatusToInProgress();
+      } else if (overrideMode && isAdmin && assignmentTypes[referenceNumber] === "auto") {
+        await handleOverrideActivity({ removed: referenceNumber, added: "" });
       }
     } catch (error) {
       console.error("Error updating assigned employees:", error);
@@ -317,7 +386,20 @@ const Assignment = ({
     <div className="flex flex-col gap-4">
       {/* --- EMPLOYEE SECTION --- */}
       <div className="flex flex-col gap-2 p-3 mb-3 border-gray-400 border rounded-md h-1/2 overflow-y-auto">
-        <p className="text-sm font-semibold text-gray-600">Assignee</p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-semibold text-gray-600">Assignee</p>
+          {Object.values(assignmentTypes).includes("auto") && isAdmin && (
+            <Button
+              variant={overrideMode ? "filled" : "outlined"}
+              size="sm"
+              color={overrideMode ? "red" : "gray"}
+              onClick={() => setOverrideMode((v) => !v)}
+              className="ml-auto"
+            >
+              {overrideMode ? "Exit Override" : "Override Assignment"}
+            </Button>
+          )}
+        </div>
         <Menu placement="bottom-start" dismiss={{ itemPress: false }}>
           <MenuHandler>
             <Button
@@ -339,27 +421,40 @@ const Assignment = ({
             />
             {filteredEmployees.length > 0 ? (
               filteredEmployees.map((emp) => {
-                const isSelected = selectedRequest?.assigned_to?.includes(
-                  emp.reference_number
-                );
+                const currentRefs = (Array.isArray(selectedRequest.assigned_to)
+                  ? selectedRequest.assigned_to
+                  : []).map((e) => (typeof e === "string" ? e : e?.reference_number)).filter(Boolean);
+                const isSelected = currentRefs.includes(emp.reference_number);
+                const type = assignmentTypes[emp.reference_number];
+                const selectedStyle = isSelected
+                  ? type === "auto"
+                    ? { backgroundColor: "#E8F5E9", border: "1px solid #4CAF50" }
+                    : { backgroundColor: "#F5F5F5", border: "1px solid #BDBDBD" }
+                  : {};
                 return (
                   <MenuItem
                     key={emp.reference_number}
                     onClick={() => toggleEmployee(emp.reference_number)}
-                    className={`flex justify-between items-center mb-2 ${
-                      isSelected ? "bg-blue-100" : ""
-                    }`}
+                    className={`flex justify-between items-center mb-2`}
+                    style={selectedStyle}
                   >
                     <span className="flex items-center w-full">
-                      <UserCircle size={20} className="mr-2" />
+                      {type === "auto" ? (
+                        <CheckCircle size={18} color="#4CAF50" className="mr-2" />
+                      ) : (
+                        <UserCircle size={20} className="mr-2" />
+                      )}
                       {emp.first_name} {emp.last_name}
                     </span>
                     {isSelected && (
                       <Chip
                         size="sm"
-                        color="blue"
-                        value="Assigned"
-                        className="ml-2"
+                        value={type === "auto" ? "✓ Auto" : "Manual"}
+                        className="ml-2 text-white"
+                        style={{
+                          backgroundColor: type === "auto" ? "#4CAF50" : "#9E9E9E",
+                          border: type === "auto" ? "1px solid #4CAF50" : "1px solid #9E9E9E",
+                        }}
                       />
                     )}
                   </MenuItem>
@@ -377,14 +472,22 @@ const Assignment = ({
               Currently Assigned
             </p>
             <div className="flex flex-wrap gap-2">
-              {selectedEmployees.map((emp) => (
-                <Chip
-                  key={emp.reference_number}
-                  value={`${emp.first_name} ${emp.last_name}`}
-                  onClose={() => toggleEmployee(emp.reference_number)}
-                  color="blue"
-                />
-              ))}
+              {selectedEmployees.map((emp) => {
+                const type = assignmentTypes[emp.reference_number];
+                const label = `${emp.first_name} ${emp.last_name} ${type === "auto" ? "(Auto)" : "(Manual)"}`;
+                return (
+                  <Chip
+                    key={emp.reference_number}
+                    value={label}
+                    onClose={() => toggleEmployee(emp.reference_number)}
+                    className="text-white"
+                    style={{
+                      backgroundColor: type === "auto" ? "#4CAF50" : "#9E9E9E",
+                      border: type === "auto" ? "1px solid #4CAF50" : "1px solid #9E9E9E",
+                    }}
+                  />
+                );
+              })}
             </div>
           </div>
         ) : (
@@ -513,10 +616,10 @@ const Assignment = ({
             Cancel
           </Button>
           <Button
-            variant="blue"
+            variant="filled"
+            color="blue"
             onClick={confirmAssetAssignment}
             disabled={quantityInput < 1}
-            className="bg-blue-500 cursor-pointer"
           >
             Confirm
           </Button>

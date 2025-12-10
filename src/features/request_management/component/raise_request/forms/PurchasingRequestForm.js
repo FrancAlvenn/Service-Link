@@ -28,7 +28,7 @@ const genAI = new GoogleGenAI({
   apiVersion: "v1",
 });
 
-const PurchasingRequestForm = ({ setSelectedRequest }) => {
+const PurchasingRequestForm = ({ setSelectedRequest, prefillData, renderConfidence }) => {
   const { user } = useContext(AuthContext);
   const { allUserInfo, getUserByReferenceNumber, fetchUsers, getUserDepartmentByReferenceNumber } = useContext(UserContext);
   const { fetchPurchasingRequests } = useContext(PurchasingRequestsContext);
@@ -54,7 +54,7 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
   }
 
   const [errorMessage, setErrorMessage] = useState("");
-  const [request, setRequest] = useState({
+  const [request, setRequest] = useState(() => ({
     requester: user.reference_number,
     title: "",
     date_required: "",
@@ -64,7 +64,8 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
     remarks: "",
     details: [],
     approvers: [],
-  });
+    ...(prefillData || {}),
+  }));
   const [showParticularForm, setShowParticularForm] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
   const [particularForm, setParticularForm] = useState({
@@ -98,6 +99,16 @@ const PurchasingRequestForm = ({ setSelectedRequest }) => {
     fetchApprovalRulesByDesignation();
     fetchUsers();
   }, []);
+
+  // Handle AI prefilled data
+  useEffect(() => {
+    if (prefillData && Object.keys(prefillData).length > 0) {
+      setRequest(prev => ({
+        ...prev,
+        ...prefillData
+      }));
+    }
+  }, [prefillData]);
 
   useEffect(() => {
     const fetchData = async () => {

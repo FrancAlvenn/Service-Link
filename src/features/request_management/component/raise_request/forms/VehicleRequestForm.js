@@ -23,7 +23,7 @@ const genAI = new GoogleGenAI({
 
 const ORIGIN = "Binang 2nd, Bocaue, Bulacan, Philippines";
 
-const VehicleRequestForm = ({ setSelectedRequest }) => {
+const VehicleRequestForm = ({ setSelectedRequest, prefillData, renderConfidence }) => {
   const mapboxAddressPickerRef = useRef();
   const purposeTextareaRef = useRef(null);
 
@@ -57,7 +57,7 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
     return department ? department.name : "";
   }
 
-  const [request, setRequest] = useState({
+  const [request, setRequest] = useState(() => ({
     requester: user.reference_number,
     title: "",
     vehicle_id: "",
@@ -72,7 +72,8 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
     purpose: "",
     remarks: "",
     approvers: [],
-  });
+    ...(prefillData || {}),
+  }));
 
   const requestType = "Vehicle Request";
 
@@ -101,6 +102,16 @@ const VehicleRequestForm = ({ setSelectedRequest }) => {
     fetchUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Handle AI prefilled data
+  useEffect(() => {
+    if (prefillData && Object.keys(prefillData).length > 0) {
+      setRequest(prev => ({
+        ...prev,
+        ...prefillData
+      }));
+    }
+  }, [prefillData]);
 
   // Fetch vehicles from vehicles API
   useEffect(() => {

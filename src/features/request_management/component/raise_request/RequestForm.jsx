@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, Typography } from "@material-tailwind/react";
 import {
   ReadCvLogo,
   ShoppingCart,
   CalendarCheck,
   Car,
+  Info,
 } from "@phosphor-icons/react";
 import JobRequestForm from "./forms/JobRequestForm";
 import PurchasingRequestForm from "./forms/PurchasingRequestForm";
@@ -12,6 +13,7 @@ import VenueRequestForm from "./forms/VenueRequestForm";
 import VehicleRequestForm from "./forms/VehicleRequestForm";
 import { useContext } from "react";
 import { AuthContext } from "../../../authentication";
+import { useLocation } from "react-router-dom";
 
 const requestOptions = [
   {
@@ -51,6 +53,19 @@ const requestOptions = [
 const RequestForm = ({ selectedRequest, setSelectedRequest }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { user } = useContext(AuthContext);
+  const location = useLocation();
+  const [aiConfidences, setAiConfidences] = useState({});
+  const [prefillData, setPrefillData] = useState({});
+
+  // Extract AI data from navigation state
+  useEffect(() => {
+    if (location.state?.prefill) {
+      setPrefillData(location.state.prefill);
+    }
+    if (location.state?.aiConfidences) {
+      setAiConfidences(location.state.aiConfidences);
+    }
+  }, [location.state]);
 
   // Filter options based on role
   const availableOptions = requestOptions.filter((option) => {
@@ -64,6 +79,41 @@ const RequestForm = ({ selectedRequest, setSelectedRequest }) => {
   const currentSelection =
     availableOptions.find((option) => option.key === selectedRequest) ||
     availableOptions[0];
+
+  // Get confidence for current form
+  const getConfidence = (field) => {
+    const confidence = aiConfidences[field];
+    return confidence !== undefined ? Math.round(confidence * 100) : null;
+  };
+
+  // Render confidence indicator
+  const renderConfidence = (field) => {
+    const confidence = getConfidence(field);
+    if (confidence === null) return null;
+    
+    const color = confidence >= 80 ? "text-green-600" : confidence >= 60 ? "text-yellow-600" : "text-red-600";
+    return (
+      <div className={`flex items-center gap-1 text-xs ${color} ml-1`}>
+        <Info size={12} />
+        <span>{confidence}% confident</span>
+      </div>
+    );
+  };
+
+  const fieldLabelOverrides = {
+    event_dates: "Event Date",
+    event_start_time: "Event Start Time",
+  };
+
+  const formatFieldLabel = (key) => {
+    const override = fieldLabelOverrides[key];
+    if (override) return override;
+    return key
+      .replace(/_/g, " ")
+      .split(" ")
+      .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+      .join(" ");
+  };
 
   return (
     <div className="flex flex-col gap-2 px-4 py-6 overflow-y-auto dark:bg-gray-900">
@@ -133,20 +183,48 @@ const RequestForm = ({ selectedRequest, setSelectedRequest }) => {
         </Typography>
       </div>
 
+      {/* AI Confidence Banner */}
+      {aiConfidences && Object.keys(aiConfidences).length > 0 && (
+        <div className="p-3 rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-900/20 text-xs text-amber-700 dark:text-amber-300">
+          <span className="font-semibold">Review suggested values:</span>
+          <span className="ml-2">{Object.entries(aiConfidences).filter(([_, v]) => Number(v) < 0.6).map(([k]) => formatFieldLabel(k)).join(", ") || "All fields have acceptable confidence."}</span>
+        </div>
+      )}
+
       {/* Render Selected Form */}
       {(() => {
         switch (selectedRequest) {
           case "job_request":
-            return <JobRequestForm setSelectedRequest={setSelectedRequest} />;
+            return (
+              <JobRequestForm 
+                setSelectedRequest={setSelectedRequest}
+                prefillData={prefillData}
+                renderConfidence={renderConfidence}
+              />
+            );
           case "purchasing_request":
             return (
-              <PurchasingRequestForm setSelectedRequest={setSelectedRequest} />
+              <PurchasingRequestForm 
+                setSelectedRequest={setSelectedRequest}
+                prefillData={prefillData}
+                renderConfidence={renderConfidence}
+              />
             );
           case "venue_request":
-            return <VenueRequestForm setSelectedRequest={setSelectedRequest} />;
+            return (
+              <VenueRequestForm 
+                setSelectedRequest={setSelectedRequest}
+                prefillData={prefillData}
+                renderConfidence={renderConfidence}
+              />
+            );
           case "vehicle_request":
             return (
-              <VehicleRequestForm setSelectedRequest={setSelectedRequest} />
+              <VehicleRequestForm 
+                setSelectedRequest={setSelectedRequest}
+                prefillData={prefillData}
+                renderConfidence={renderConfidence}
+              />
             );
           default:
             return null;

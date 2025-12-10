@@ -24,7 +24,7 @@ const requestFieldConfig = {
       type: "date",
       readOnly: true,
     },
-    { key: "purpose", label: "Purpose", type: "textarea", readOnly: true },
+    // { key: "purpose", label: "Purpose", type: "textarea", readOnly: true },
     { key: "remarks", label: "Remarks", type: "textarea", readOnly: true },
   ],
 
@@ -50,7 +50,7 @@ const requestFieldConfig = {
       type: "date",
       readOnly: true,
     },
-    { key: "purpose", label: "Purpose", type: "textarea", readOnly: true },
+    // { key: "purpose", label: "Purpose", type: "textarea", readOnly: true },
     { key: "remarks", label: "Remarks", type: "textarea", readOnly: true },
   ],
 
@@ -102,7 +102,7 @@ const requestFieldConfig = {
       type: "number",
       readOnly: true,
     },
-    { key: "purpose", label: "Purpose", type: "textarea", readOnly: true },
+    // { key: "purpose", label: "Purpose", type: "textarea", readOnly: true },
     { key: "remarks", label: "Remarks", type: "textarea", readOnly: true },
   ],
 
@@ -147,7 +147,7 @@ const requestFieldConfig = {
       readOnly: true,
     },
     { key: "destination", label: "Destination", type: "text", readOnly: true },
-    { key: "purpose", label: "Purpose", type: "textarea", readOnly: true },
+    // { key: "purpose", label: "Purpose", type: "textarea", readOnly: true },
     { key: "remarks", label: "Remarks", type: "textarea", readOnly: true },
   ],
 };

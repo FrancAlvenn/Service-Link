@@ -101,7 +101,7 @@ const EmployeeTable = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-full w-full bg-white">
       <CardHeader
         floated={false}
         shadow={false}
@@ -141,9 +141,9 @@ const EmployeeTable = () => {
       </CardHeader>
       <div className="h-full bg-white rounded-lg w-full mt-0 px-3 flex justify-between">
         <div
-          className={`h-full bg-white mt-0 flex justify-between transition-[max-width] duration-300 w-[77vw] overflow-x-auto`}
+          className={`h-full bg-white mt-0 flex justify-between transition-[max-width] duration-300 w-full overflow-x-auto`}
         >
-          <div className={`flex flex-col gap-4 h-full`}>
+          <div className={`flex flex-col gap-4 h-full w-full`}>
             <CardBody className="custom-scrollbar h-full pt-0">
               <table className="w-full min-w-max table-auto text-left">
                 <thead className="sticky top-0 z-10 border-b border-blue-gray-100">

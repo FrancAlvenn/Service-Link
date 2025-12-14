@@ -6,6 +6,7 @@ import { formatDate } from "../../../utils/dateFormatter";
 import DepartmentModal from "../../../utils/departmentModal";
 import { Chip } from "@material-tailwind/react";
 import AttachmentList from "../../../components/attachments/AttachmentList";
+import { useFeatureFlags } from "../../../context/FeatureFlagsContext";
 
 const DetailTab = ({
   selectedRequest,
@@ -14,6 +15,7 @@ const DetailTab = ({
   fetchRequests,
   isAuthorized,
 }) => {
+  const { ENABLE_FILE_ATTACHMENTS } = useFeatureFlags();
   const { getUserByReferenceNumber } = useContext(UserContext);
   const [editedRequest, setEditedRequest] = useState({ ...selectedRequest });
   const [editingField, setEditingField] = useState(null);
@@ -349,14 +351,16 @@ const DetailTab = ({
           );
         })()}
       </div>
-      <div className="flex flex-col gap-2">
-        <p className="text-sm font-semibold dark:text-gray-300">Files</p>
-        <AttachmentList
-          attachments={selectedRequest?.attachments}
-          canView={isAuthorized}
-          className="border border-gray-300 dark:border-gray-700 rounded-md p-3"
-        />
-      </div>
+      {isAuthorized && ENABLE_FILE_ATTACHMENTS && (
+        <div className="flex flex-col gap-2">
+          <p className="text-sm font-semibold dark:text-gray-300">Files</p>
+          <AttachmentList
+            attachments={selectedRequest?.attachments}
+            canView={true}
+            className="border border-gray-300 dark:border-gray-700 rounded-md p-3"
+          />
+        </div>
+      )}
     </div>
   );
 };

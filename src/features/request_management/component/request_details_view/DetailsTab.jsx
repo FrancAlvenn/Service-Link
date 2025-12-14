@@ -6,6 +6,7 @@ import PriorityModal from "../../../../utils/priorityModal";
 import { formatDate } from "../../../../utils/dateFormatter";
 import DepartmentModal from "../../../../utils/departmentModal";
 import AttachmentList from "../../../../components/attachments/AttachmentList";
+import { useFeatureFlags } from "../../../../context/FeatureFlagsContext";
 
 const requestFieldConfig = {
   job_request: [
@@ -172,6 +173,7 @@ const DetailsTab = ({
   fetchRequests,
   isAuthorized,
 }) => {
+  const { ENABLE_FILE_ATTACHMENTS } = useFeatureFlags();
   const { getUserByReferenceNumber } = useContext(UserContext);
   const [editedRequest, setEditedRequest] = useState(
     selectedRequest ? { ...selectedRequest } : {}
@@ -428,13 +430,15 @@ const DetailsTab = ({
         </span>
       ))}
 
-      <div className="mt-2">
-        <AttachmentList
-          attachments={selectedRequest?.attachments}
-          canView={true}
-          className="border border-gray-300 rounded-md p-3"
-        />
-      </div>
+      {ENABLE_FILE_ATTACHMENTS && (
+        <div className="mt-2">
+          <AttachmentList
+            attachments={selectedRequest?.attachments}
+            canView={true}
+            className="border border-gray-300 rounded-md p-3"
+          />
+        </div>
+      )}
     </div>
   );
 };

@@ -47,7 +47,22 @@ export default function AttachmentList({
   attachments,
   canView = true,
   className = "",
+  disabledMessage = "You do not have permission to view files.",
 }) {
+  /**
+   * @param {{
+   *  attachments: AttachmentMeta[],
+   *  canView?: boolean,
+   *  className?: string,
+   *  disabledMessage?: string
+   * }} props
+   *
+   * Behavior:
+   * - When `canView` is false, the component renders `null` and does not mount
+   *   any DOM nodes related to file display to avoid visual references entirely.
+   * - When `canView` is true, existing functionality is preserved, including
+   *   resolving public or signed URLs and rendering file cards and preview.
+   */
   const [urls, setUrls] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -94,17 +109,7 @@ export default function AttachmentList({
   }, [resolved, canView]);
 
   if (!canView) {
-    return (
-      <div
-        className={`w-full border rounded-md p-3 ${className}`}
-        role="region"
-        aria-label="File attachments"
-      >
-        <p className="text-sm text-gray-600 dark:text-gray-300">
-          You do not have permission to view files.
-        </p>
-      </div>
-    );
+    return null;
   }
 
   return (

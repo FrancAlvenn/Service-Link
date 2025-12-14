@@ -89,6 +89,9 @@ const PurchasingRequestForm = ({ setSelectedRequest, prefillData, renderConfiden
   const purposeTextareaRef = useRef(null);
   const [attachments, setAttachments] = useState([]);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [attachmentsMeta, setAttachmentsMeta] = useState([]);
+  const [isProcessingMeta, setIsProcessingMeta] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const requestType = "Purchasing Request";
 
@@ -212,10 +215,23 @@ const PurchasingRequestForm = ({ setSelectedRequest, prefillData, renderConfiden
   };
   const handleFilesSelected = (e) => {
     const files = Array.from(e.target.files || []);
+    setIsProcessingMeta(true);
     setAttachments((prev) => [...prev, ...files]);
+    try {
+      const meta = files.map((f) => ({
+        name: f.name,
+        size: f.size,
+        type: f.type,
+        uploadedAt: new Date().toISOString(),
+      }));
+      setAttachmentsMeta((prev) => [...prev, ...meta]);
+    } finally {
+      setIsProcessingMeta(false);
+    }
   };
   const removeAttachmentAt = (idx) => {
     setAttachments((prev) => prev.filter((_, i) => i !== idx));
+    setAttachmentsMeta((prev) => prev.filter((_, i) => i !== idx));
   };
 
   // AI: Generate Purpose from Title
@@ -376,7 +392,11 @@ useEffect(() => {
       Object.entries(requestData).forEach(([k, v]) => {
         fd.append(k, typeof v === "object" ? JSON.stringify(v) : v ?? "");
       });
+      if (attachmentsMeta.length) {
+        fd.append("attachments_meta", JSON.stringify(attachmentsMeta));
+      }
       attachments.forEach((f) => fd.append("attachments", f));
+      setIsSubmitting(true);
       const response = await axios.post(`${process.env.REACT_APP_API_URL}/purchasing_request`, fd, {
         withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
@@ -434,7 +454,10 @@ useEffect(() => {
       }
     } catch (error) {
       console.error("Error submitting purchasing request:", error);
-      ToastNotification.error("Error", "Failed to submit request.");
+      const msg = error?.response?.data?.message || "Failed to submit request.";
+      ToastNotification.error("Upload Error", msg);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

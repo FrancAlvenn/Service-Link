@@ -81,6 +81,9 @@ const JobRequestForm = ({ setSelectedRequest, prefillData, renderConfidence }) =
   const purposeTextareaRef = useRef(null);
   const [attachments, setAttachments] = useState([]);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [attachmentsMeta, setAttachmentsMeta] = useState([]);
+  const [isProcessingMeta, setIsProcessingMeta] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const requestType = "Job Request";
 
@@ -214,7 +217,23 @@ const JobRequestForm = ({ setSelectedRequest, prefillData, renderConfidence }) =
   };
   const handleFilesSelected = (e) => {
     const files = Array.from(e.target.files || []);
+    setIsProcessingMeta(true);
     setAttachments((prev) => [...prev, ...files]);
+    try {
+      const meta = files.map((f) => ({
+        name: f.name,
+        size: f.size,
+        type: f.type,
+        uploadedAt: new Date().toISOString(),
+      }));
+      setAttachmentsMeta((prev) => [...prev, ...meta]);
+    } finally {
+      setIsProcessingMeta(false);
+    }
+  };
+  const removeAttachmentAt = (idx) => {
+    setAttachments((prev) => prev.filter((_, i) => i !== idx));
+    setAttachmentsMeta((prev) => prev.filter((_, i) => i !== idx));
   };
   const removeAttachmentAt = (idx) => {
     setAttachments((prev) => prev.filter((_, i) => i !== idx));
@@ -427,7 +446,11 @@ useEffect(() => {
       Object.entries(requestData).forEach(([k, v]) => {
         fd.append(k, typeof v === "object" ? JSON.stringify(v) : v ?? "");
       });
+      if (attachmentsMeta.length) {
+        fd.append("attachments_meta", JSON.stringify(attachmentsMeta));
+      }
       attachments.forEach((f) => fd.append("attachments", f));
+      setIsSubmitting(true);
       const response = await axios.post(`${process.env.REACT_APP_API_URL}/job_request`, fd, {
         withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
@@ -513,7 +536,10 @@ useEffect(() => {
       }
     } catch (error) {
       console.error("Error submitting job request:", error);
-      ToastNotification.error("Error", "Failed to submit request.");
+      const msg = error?.response?.data?.message || "Failed to submit request.";
+      ToastNotification.error("Upload Error", msg);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -798,7 +824,15 @@ useEffect(() => {
           <Button
             color="blue"
             onClick={submitJobRequest}
-            disabled={!request.title || !request.date_required || !request.purpose || errorMessage}
+            disabled={
+              !request.title ||
+              !request.date_required ||
+              !request.purpose ||
+              errorMessage ||
+              isProcessingMeta ||
+              isSubmitting ||
+              (attachments.length > 0 && attachmentsMeta.length < attachments.length)
+            }
             className="dark:bg-blue-600 dark:hover:bg-blue-500 w-full md:w-auto"
           >
             Submit Job Request

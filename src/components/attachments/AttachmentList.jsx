@@ -3,6 +3,7 @@ import axios from "axios";
 import { formatDate } from "../../utils/dateFormatter";
 import { X } from "@phosphor-icons/react";
 import AttachmentCard from "./AttachmentCard";
+import { getSignedUrl, getFileKeyFromR2Path } from "../../services/signedUrlService";
 
 /**
  * @typedef {Object} AttachmentMeta
@@ -25,14 +26,11 @@ function parseR2Path(r2Path) {
 }
 
 async function fetchSignedUrl({ r2Path }) {
-  const endpoint = process.env.REACT_APP_SIGNED_URL_ENDPOINT;
-  if (!endpoint) return null;
   try {
-    const { data } = await axios.get(`${endpoint}`, {
-      params: { path: r2Path },
-      withCredentials: true,
-    });
-    return typeof data === "string" ? data : data?.url;
+    const key = getFileKeyFromR2Path(r2Path);
+    if (!key) return null;
+    const data = await getSignedUrl(key);
+    return data?.signedUrl || null;
   } catch {
     return null;
   }

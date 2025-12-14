@@ -79,6 +79,8 @@ const JobRequestForm = ({ setSelectedRequest, prefillData, renderConfidence }) =
   const [departmentOptions, setDepartmentOptions] = useState([]);
   const [aiLoading, setAiLoading] = useState(false);
   const purposeTextareaRef = useRef(null);
+  const [attachments, setAttachments] = useState([]);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const requestType = "Job Request";
 
@@ -209,6 +211,13 @@ const JobRequestForm = ({ setSelectedRequest, prefillData, renderConfidence }) =
     setShowParticularForm(false);
     setParticularForm({ particulars: "", quantity: "", description: "", remarks: "" });
     setEditingIndex(null);
+  };
+  const handleFilesSelected = (e) => {
+    const files = Array.from(e.target.files || []);
+    setAttachments((prev) => [...prev, ...files]);
+  };
+  const removeAttachmentAt = (idx) => {
+    setAttachments((prev) => prev.filter((_, i) => i !== idx));
   };
 
   // AI: Generate Purpose from Title
@@ -414,11 +423,17 @@ useEffect(() => {
         ];
       }
 
-      const response = await axios({
-        method: "POST",
-        url: `${process.env.REACT_APP_API_URL}/job_request`,
-        data: requestData,
+      const fd = new FormData();
+      Object.entries(requestData).forEach(([k, v]) => {
+        fd.append(k, typeof v === "object" ? JSON.stringify(v) : v ?? "");
+      });
+      attachments.forEach((f) => fd.append("attachments", f));
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/job_request`, fd, {
         withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" },
+        onUploadProgress: (evt) => {
+          if (evt.total) setUploadProgress(Math.round((evt.loaded / evt.total) * 100));
+        },
       });
 
       if (response.status === 201) {
@@ -493,6 +508,8 @@ useEffect(() => {
         details: [],
         approvers: [],
       });
+      setAttachments([]);
+      setUploadProgress(0);
       }
     } catch (error) {
       console.error("Error submitting job request:", error);
@@ -750,7 +767,7 @@ useEffect(() => {
 
           {/* Remarks */}
           <div>
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 pt-1">
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
               Remarks
             </label>
             <textarea
@@ -760,6 +777,21 @@ useEffect(() => {
               className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
               required
             />
+          </div>
+          <div className="space-y-2">
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Attachments</label>
+            <input type="file" multiple onChange={handleFilesSelected} className="text-sm" />
+            {attachments.length > 0 && (
+              <div className="border border-gray-300 dark:border-gray-600 rounded-md p-2">
+                {attachments.map((f, i) => (
+                  <div key={i} className="flex justify-between items-center text-xs py-1">
+                    <span>{f.name} ({Math.round(f.size/1024)} KB)</span>
+                    <button className="text-red-500" onClick={() => removeAttachmentAt(i)}><X size={14} /></button>
+                  </div>
+                ))}
+                {uploadProgress > 0 && <div className="text-xs mt-1">Uploading: {uploadProgress}%</div>}
+              </div>
+            )}
           </div>
 
           {/* Submit */}

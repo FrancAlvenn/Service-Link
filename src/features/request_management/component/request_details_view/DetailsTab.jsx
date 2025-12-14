@@ -1,4 +1,3 @@
-import { CaretDown, Pencil } from "@phosphor-icons/react";
 import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { UserContext } from "../../../../context/UserContext";
@@ -6,6 +5,7 @@ import ToastNotification from "../../../../utils/ToastNotification";
 import PriorityModal from "../../../../utils/priorityModal";
 import { formatDate } from "../../../../utils/dateFormatter";
 import DepartmentModal from "../../../../utils/departmentModal";
+import AttachmentList from "../../../../components/attachments/AttachmentList";
 
 const requestFieldConfig = {
   job_request: [
@@ -427,6 +427,14 @@ const DetailsTab = ({
           )}
         </span>
       ))}
+
+      <div className="mt-2">
+        <AttachmentList
+          attachments={selectedRequest?.attachments}
+          canView={true}
+          className="border border-gray-300 rounded-md p-3"
+        />
+      </div>
     </div>
   );
 };

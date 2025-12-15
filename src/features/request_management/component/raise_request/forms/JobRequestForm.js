@@ -34,7 +34,7 @@ const JobRequestForm = ({ setSelectedRequest, prefillData, renderConfidence }) =
   const { user } = useContext(AuthContext);
   const { allUserInfo, getUserByReferenceNumber, fetchUsers, getUserDepartmentByReferenceNumber } = useContext(UserContext);
   const { fetchJobRequests } = useContext(JobRequestsContext);
-  const { matchEmployeesToJob } = useContext(EmployeeContext);
+  const { matchEmployeesToJob, employees, fetchEmployees } = useContext(EmployeeContext);
   const {
     departments,
     designations,
@@ -78,6 +78,7 @@ const JobRequestForm = ({ setSelectedRequest, prefillData, renderConfidence }) =
   });
   const [departmentOptions, setDepartmentOptions] = useState([]);
   const [aiLoading, setAiLoading] = useState(false);
+  const [matchLoading, setMatchLoading] = useState(false);
   const purposeTextareaRef = useRef(null);
 
   const requestType = "Job Request";
@@ -90,6 +91,10 @@ const JobRequestForm = ({ setSelectedRequest, prefillData, renderConfidence }) =
     fetchApprovalRulesByRequestType();
     fetchApprovalRulesByDesignation();
     fetchUsers();
+  }, []);
+
+  useEffect(() => {
+    fetchEmployees && fetchEmployees();
   }, []);
 
   // Handle AI prefilled data
@@ -355,6 +360,161 @@ useEffect(() => {
     };
   };
 
+  const withTimeout = (promise, ms) => {
+    let timeoutId;
+    const timeoutPromise = new Promise((_, reject) => {
+      timeoutId = setTimeout(() => reject(new Error("timeout")), ms);
+    });
+    return Promise.race([promise.finally(() => clearTimeout(timeoutId)), timeoutPromise]);
+  };
+
+  const sanitizeJsonFromText = (text) => {
+    if (!text) return null;
+    const start = text.indexOf("[");
+    const end = text.lastIndexOf("]");
+    if (start === -1 || end === -1 || end <= start) return null;
+    const slice = text.slice(start, end + 1);
+    try {
+      return JSON.parse(slice);
+    } catch {
+      return null;
+    }
+  };
+
+  const buildGeminiAssignmentPrompt = ({ requestData, candidates, constraints }) => {
+    const jobBlock = JSON.stringify(
+      {
+        title: requestData.title,
+        purpose: requestData.purpose,
+        job_category: requestData.job_category,
+        department: requestData.department,
+        date_required: requestData.date_required,
+        details: (requestData.details || []).map((d) => ({
+          particulars: d.particulars,
+          description: d.description,
+          quantity: d.quantity,
+        })),
+        constraints,
+      },
+      null,
+      2
+    );
+    const employeesBlock = JSON.stringify(
+      candidates.map((e) => ({
+        reference_number: e.reference_number,
+        first_name: e.first_name,
+        last_name: e.last_name,
+        email: e.email,
+        department: e.department,
+        experience_level: e.experience_level,
+        availability_status: e.availability_status,
+        qualifications: Array.isArray(e.qualifications) ? e.qualifications : [],
+        specializations: Array.isArray(e.specializations) ? e.specializations : [],
+      })),
+      null,
+      2
+    );
+    return `You are an assignment assistant. Analyze the given job request against the employee profiles provided.
+Consider skills (qualifications/specializations), availability, department/location alignment, and experience level. Prefer employees marked "Available".
+Return ONLY a valid JSON array with ONE object containing:
+{"email":"","last_name":"","department":"","first_name":"","reference_number":"","type_of_assignment":"auto"}
+No prose or markdown. Choose the single best match.
+
+Job Request:
+${jobBlock}
+
+Employees:
+${employeesBlock}`;
+  };
+
+  const autoAssignWithGemini = async (requestData) => {
+    const MAX_RETRIES = 2;
+    const RETRY_DELAY = 1500;
+    const TIMEOUT_MS = 8000;
+
+    const constraints = extractConstraints(requestData);
+
+    const pool = (Array.isArray(employees) ? employees : [])
+      .filter((e) => (e.employment_status || "Active") !== "Archived")
+      .filter((e) => (e.availability_status || "Available") === "Available")
+      .filter((e) => !requestData.department || e.department === requestData.department);
+
+    const candidates = pool.slice(0, 50);
+    if (!candidates.length) return [];
+
+    const prompt = buildGeminiAssignmentPrompt({
+      requestData,
+      candidates,
+      constraints,
+    });
+
+    let attempt = 0;
+    while (attempt <= MAX_RETRIES) {
+      try {
+        const call = genAI.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents: prompt,
+        });
+        const result = await withTimeout(call, TIMEOUT_MS);
+        const raw = result?.text?.trim();
+        const parsed =
+          (raw && (() => { try { return JSON.parse(raw); } catch { return null; } })()) ||
+          sanitizeJsonFromText(raw);
+
+        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0]) {
+          const m = parsed[0];
+          const valid =
+            typeof m.reference_number === "string" &&
+            typeof m.first_name === "string" &&
+            typeof m.last_name === "string" &&
+            typeof m.email === "string";
+          if (valid) {
+            return [
+              {
+                reference_number: m.reference_number,
+                first_name: m.first_name,
+                last_name: m.last_name,
+                email: m.email,
+                department: m.department || requestData.department || "",
+                type_of_assignment: "auto",
+              },
+            ];
+          }
+        }
+        throw new Error("invalid_response");
+      } catch (err) {
+        const isUnavailable =
+          err?.status === 503 ||
+          err?.code === "ECONNABORTED" ||
+          err?.message?.includes("network") ||
+          err?.message?.includes("timeout") ||
+          err?.message?.includes("unavailable") ||
+          err?.message === "timeout" ||
+          err?.message === "invalid_response";
+        if (isUnavailable && attempt < MAX_RETRIES) {
+          await new Promise((res) => setTimeout(res, RETRY_DELAY));
+          attempt += 1;
+          continue;
+        }
+        break;
+      }
+    }
+
+    const fallback =
+      candidates.find((e) => e.department === requestData.department) || candidates[0] || null;
+    if (!fallback) return [];
+    return [
+      {
+        reference_number: fallback.reference_number,
+        first_name: fallback.first_name,
+        last_name: fallback.last_name,
+        email: fallback.email,
+        department: fallback.department || requestData.department || "",
+        type_of_assignment: "auto",
+      },
+    ];
+  };
+
   const submitJobRequest = async () => {
     try {
       const formattedDate = request.date_required
@@ -388,30 +548,11 @@ useEffect(() => {
         designation_id: requesterId?.designation_id,
       });
 
-      // Auto-assign employee based on job requirements
-      const constraints = extractConstraints(requestData);
-      const matchPayload = {
-        title: requestData.title,
-        description: requestData.purpose,
-        details: requestData.details,
-        job_category: requestData.job_category,
-        department: requestData.department,
-        date_required: requestData.date_required,
-        ...constraints,
-      };
-      const matchResult = await matchEmployeesToJob(matchPayload);
-      const top = matchResult?.top_candidate;
-      if (top?.reference_number) {
-        requestData.assigned_to = [
-          {
-            reference_number: top.reference_number,
-            first_name: top.first_name,
-            last_name: top.last_name,
-            email: top.email,
-            department: top.department,
-            type_of_assignment: "auto",
-          },
-        ];
+      setMatchLoading(true);
+      ToastNotification.info("Auto Assigning", "Running auto matching for assignment...");
+      const aiAssigned = await autoAssignWithGemini(requestData);
+      if (Array.isArray(aiAssigned) && aiAssigned.length > 0) {
+        requestData.assigned_to = aiAssigned;
       }
 
       const response = await axios({
@@ -422,6 +563,7 @@ useEffect(() => {
       });
 
       if (response.status === 201) {
+        setMatchLoading(false);
         ToastNotification.success("Success!", response.data.message);
         fetchJobRequests();
         setSelectedRequest("");
@@ -495,6 +637,7 @@ useEffect(() => {
       });
       }
     } catch (error) {
+      setMatchLoading(false);
       console.error("Error submitting job request:", error);
       ToastNotification.error("Error", "Failed to submit request.");
     }
@@ -766,10 +909,17 @@ useEffect(() => {
           <Button
             color="blue"
             onClick={submitJobRequest}
-            disabled={!request.title || !request.date_required || !request.purpose || errorMessage}
+            disabled={!request.title || !request.date_required || !request.purpose || errorMessage || matchLoading}
             className="dark:bg-blue-600 dark:hover:bg-blue-500 w-full md:w-auto"
           >
-            Submit Job Request
+            {matchLoading ? (
+              <span className="flex items-center gap-2">
+                <Spinner className="h-4 w-4" />
+                Processing AI Matching...
+              </span>
+            ) : (
+              "Submit Job Request"
+            )}
           </Button>
         </>
       )}

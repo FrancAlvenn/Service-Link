@@ -249,9 +249,43 @@ const Assignment = ({
       }
     }
 
-    const updatedEntries = isSelected
-      ? currentEntries.filter((e) => (typeof e === "string" ? e !== referenceNumber : e?.reference_number !== referenceNumber))
-      : [...currentEntries, { reference_number: referenceNumber, type_of_assignment: "manual" }];
+    const year = new Date().getFullYear();
+    const refPattern = new RegExp(`^DYCI-${year}-\\d{5}$`);
+    const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email || "");
+    const validateAssignment = (obj) => {
+      if (!obj) return { ok: false, reason: "Invalid assignment object" };
+      const { email, last_name, first_name, reference_number, type_of_assignment } = obj;
+      if (![email, last_name, first_name, reference_number].every((v) => typeof v === "string" && v.trim().length > 0)) {
+        return { ok: false, reason: "Missing required fields" };
+      }
+      if (!validateEmail(email)) return { ok: false, reason: "Invalid email format" };
+      if (!refPattern.test(reference_number)) return { ok: false, reason: "Malformed reference number" };
+      if (!["auto", "manual"].includes(type_of_assignment)) return { ok: false, reason: "Invalid assignment type" };
+      return { ok: true };
+    };
+
+    const emp = employees.find((e) => e.reference_number === referenceNumber);
+    const makeManualAssignment = (employee) => ({
+      email: (employee?.email || "").trim(),
+      last_name: (employee?.last_name || "").trim(),
+      department: employee?.department || "",
+      first_name: (employee?.first_name || "").trim(),
+      reference_number: employee?.reference_number || "",
+      type_of_assignment: "manual",
+    });
+
+    let updatedEntries;
+    if (isSelected) {
+      updatedEntries = currentEntries.filter((e) => (typeof e === "string" ? e !== referenceNumber : e?.reference_number !== referenceNumber));
+    } else {
+      const newEntry = makeManualAssignment(emp);
+      const v = validateAssignment(newEntry);
+      if (!v.ok) {
+        ToastNotification.error("Validation", v.reason);
+        return;
+      }
+      updatedEntries = [...currentEntries, newEntry];
+    }
 
     try {
       await axios.put(
@@ -485,6 +519,7 @@ const Assignment = ({
                   <Chip
                     key={emp.reference_number}
                     value={label}
+                    title={`${emp.email || "N/A"} • ${emp.reference_number}`}
                     onClose={() => toggleEmployee(emp.reference_number)}
                     className="text-white"
                     style={{

@@ -915,7 +915,7 @@ ${employeesBlock}`;
             {matchLoading ? (
               <span className="flex items-center gap-2">
                 <Spinner className="h-4 w-4" />
-                Processing AI Matching...
+                Processing Auto Assignment...
               </span>
             ) : (
               "Submit Job Request"

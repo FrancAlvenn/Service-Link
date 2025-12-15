@@ -232,7 +232,7 @@ const MainTab = ({
         fetchRequests();
         onClose();
 
-        const actionText = `Request has been ${status.charAt(0).toUpperCase() + status.slice(1)} by ${currentApprover.position.position}`;
+        const actionText = `Request has been ${status.charAt(0).toUpperCase() + status.slice(1)} by ${currentApprover.position.position} - ${currentApprover.name}`;
 
         await axios.post(
           `${process.env.REACT_APP_API_URL}/request_activity`,

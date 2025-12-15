@@ -262,7 +262,7 @@ function PendingApprovalsTab() {
       </div>
 
       {/* Scrollable Container */}
-      <div className="flex flex-wrap gap-4 overflow-y-auto  h-[50vh]">
+      <div className="flex flex-wrap gap-4 overflow-y-auto">
         {searchedRequests.length === 0 ? (
           <div className="text-gray-500 dark:text-gray-400  text-sm py-3 text-center flex flex-col gap-3 items-center justify-center w-full">
             <img

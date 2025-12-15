@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import {
   Chip,
@@ -149,12 +149,18 @@ const Assignment = ({
     }
   }, [selectedRequest?.assigned_to, selectedRequest?.assigned_assets, employees, assets]);
 
+  // Track first-time auto-assignment detection to prevent re-triggering the activity log
+  const initialAutoAssignment = useRef(false);
+
   useEffect(() => {
+    // Execute only once when "auto" appears in assignmentTypes and activity hasn't been logged
     const hasAuto = Object.values(assignmentTypes).includes("auto");
-    if (hasAuto && !autoActivityLogged) {
+    if (hasAuto && !initialAutoAssignment.current && !autoActivityLogged) {
       handleSaveActivity("Auto-assigned employee detected from request creation.");
       setAutoActivityLogged(true);
+      initialAutoAssignment.current = true;
     }
+    // No cleanup required: ref guards prevent re-triggering within component lifecycle
   }, [assignmentTypes, autoActivityLogged]);
 
   const handleSaveActivity = async (message) => {

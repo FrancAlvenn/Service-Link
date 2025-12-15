@@ -163,16 +163,40 @@ function PortalDashboard() {
 
     setPendingApprovals(filtered);
 
-    const employee = Array.isArray(employees) && employees.length > 0
-      ? employees.find((e) => e.reference_number === user?.reference_number)
-      : null;
+    const isValidRef = (ref) =>
+      typeof ref === "string" && /^[A-Za-z0-9_-]{3,50}$/.test(ref);
+
+    const normalize = (ref) => (typeof ref === "string" ? ref.trim().toUpperCase() : "");
+
+    const currentRef = normalize(user?.reference_number);
+    if (!isValidRef(currentRef)) {
+      console.error("Invalid current user reference number");
+      setForVerification([]);
+      return;
+    }
+
+    const toRefs = (assigned) => {
+      if (!assigned) return [];
+      const arr = Array.isArray(assigned) ? assigned : [];
+      return arr
+        .map((entry) => {
+          if (typeof entry === "string") return normalize(entry);
+          if (entry && typeof entry === "object") return normalize(entry.reference_number);
+          return "";
+        })
+        .filter((ref) => {
+          const valid = isValidRef(ref);
+          if (!valid && ref) console.error("Invalid assigned reference number", ref);
+          return valid;
+        });
+    };
 
     const forVerification = Object.values(jobRequests).filter((req) => {
-      return (
-        req.status?.toLowerCase() === "pending" &&
-        req.verified === false &&
-        req.job_category?.toLowerCase() === employee?.expertise?.toLowerCase()
-      );
+      const statusOk = req.status?.toLowerCase() === "pending";
+      const notVerified = req.verified === false;
+      const assignedRefs = toRefs(req.assigned_to);
+      const includesCurrent = assignedRefs.includes(currentRef);
+      return statusOk && notVerified && includesCurrent;
     });
 
     setForVerification(forVerification);

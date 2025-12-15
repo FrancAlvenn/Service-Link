@@ -35,9 +35,6 @@ const VenueRequestForm = ({ setSelectedRequest, prefillData, renderConfidence })
   const { venueRequests, fetchVenueRequests } = useContext(VenueRequestsContext);
   const [attachments, setAttachments] = useState([]);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [attachmentsMeta, setAttachmentsMeta] = useState([]);
-  const [isProcessingMeta, setIsProcessingMeta] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     departments,
@@ -146,26 +143,6 @@ const VenueRequestForm = ({ setSelectedRequest, prefillData, renderConfidence })
       );
       return { ...prev, details: newDetails };
     });
-  };
-  const handleFilesSelected = (e) => {
-    const files = Array.from(e.target.files || []);
-    setIsProcessingMeta(true);
-    setAttachments((prev) => [...prev, ...files]);
-    try {
-      const meta = files.map((f) => ({
-        name: f.name,
-        size: f.size,
-        type: f.type,
-        uploadedAt: new Date().toISOString(),
-      }));
-      setAttachmentsMeta((prev) => [...prev, ...meta]);
-    } finally {
-      setIsProcessingMeta(false);
-    }
-  };
-  const removeAttachmentAt = (idx) => {
-    setAttachments((prev) => prev.filter((_, i) => i !== idx));
-    setAttachmentsMeta((prev) => prev.filter((_, i) => i !== idx));
   };
 
   useEffect(() => {
@@ -993,17 +970,9 @@ useEffect(() => {
       Object.entries(requestData).forEach(([k, v]) => {
         fd.append(k, typeof v === "object" ? JSON.stringify(v) : v ?? "");
       });
-      if (attachmentsMeta.length) {
-        fd.append("attachments_meta", JSON.stringify(attachmentsMeta));
-      }
-      attachments.forEach((f) => fd.append("attachments", f));
-      setIsSubmitting(true);
       const response = await axios.post(`${process.env.REACT_APP_API_URL}/venue_request`, fd, {
         withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
-        onUploadProgress: (evt) => {
-          if (evt.total) setUploadProgress(Math.round((evt.loaded / evt.total) * 100));
-        },
       });
 
       if (response.status === 201) {
@@ -1064,10 +1033,7 @@ useEffect(() => {
       }
     } catch (err) {
       console.error("Submit error:", err);
-      const msg = err?.response?.data?.message || "Failed to submit request.";
-      ToastNotification.error("Upload Error", msg);
-    } finally {
-      setIsSubmitting(false);
+      ToastNotification.error("Error", "Failed to submit request.");
     }
   };
 
@@ -1416,16 +1382,18 @@ useEffect(() => {
 
           <div className="space-y-2">
             <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Attachments</label>
-            <input type="file" multiple onChange={handleFilesSelected} className="text-sm" />
+            <input type="file" multiple onChange={(e) => {
+              const files = Array.from(e.target.files || []);
+              setAttachments((prev) => [...prev, ...files]);
+            }} className="text-sm" />
             {attachments && attachments.length > 0 && (
               <div className="border border-gray-300 dark:border-gray-600 rounded-md p-2">
                 {attachments.map((f, i) => (
                   <div key={i} className="flex justify-between items-center text-xs py-1">
                     <span>{f.name} ({Math.round(f.size/1024)} KB)</span>
-                    <button className="text-red-500" onClick={() => removeAttachmentAt(i)}>Remove</button>
+                    <button className="text-red-500" onClick={() => setAttachments((prev) => prev.filter((_, idx) => idx !== i))}>Remove</button>
                   </div>
                 ))}
-                {uploadProgress > 0 && <div className="text-xs mt-1">Uploading: {uploadProgress}%</div>}
               </div>
             )}
           </div>
@@ -1448,10 +1416,7 @@ useEffect(() => {
               !request.purpose ||
               formErrors.date ||
               formErrors.time ||
-              formErrors.booking ||
-              isProcessingMeta ||
-              isSubmitting ||
-              (attachments.length > 0 && attachmentsMeta.length < attachments.length)
+              formErrors.booking
             }
             className="dark:bg-blue-600 dark:hover:bg-blue-500 w-full md:w-auto"
           >

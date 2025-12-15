@@ -94,9 +94,6 @@ const VehicleRequestForm = ({ setSelectedRequest, prefillData, renderConfidence 
 
   const [attachments, setAttachments] = useState([]);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [attachmentsMeta, setAttachmentsMeta] = useState([]);
-  const [isProcessingMeta, setIsProcessingMeta] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchDepartments();
@@ -266,23 +263,10 @@ const VehicleRequestForm = ({ setSelectedRequest, prefillData, renderConfidence 
 
   const handleFilesSelected = (e) => {
     const files = Array.from(e.target.files || []);
-    setIsProcessingMeta(true);
     setAttachments((prev) => [...prev, ...files]);
-    try {
-      const meta = files.map((f) => ({
-        name: f.name,
-        size: f.size,
-        type: f.type,
-        uploadedAt: new Date().toISOString(),
-      }));
-      setAttachmentsMeta((prev) => [...prev, ...meta]);
-    } finally {
-      setIsProcessingMeta(false);
-    }
   };
   const removeAttachmentAt = (idx) => {
     setAttachments((prev) => prev.filter((_, i) => i !== idx));
-    setAttachmentsMeta((prev) => prev.filter((_, i) => i !== idx));
   };
   useEffect(() => {
     checkBookingConflicts();
@@ -569,11 +553,6 @@ useEffect(() => {
       Object.entries(requestData).forEach(([k, v]) => {
         fd.append(k, typeof v === "object" ? JSON.stringify(v) : v ?? "");
       });
-      if (attachmentsMeta.length) {
-        fd.append("attachments_meta", JSON.stringify(attachmentsMeta));
-      }
-      attachments.forEach((f) => fd.append("attachments", f));
-      setIsSubmitting(true);
       const response = await axios.post(`${process.env.REACT_APP_API_URL}/vehicle_request`, fd, {
         withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
@@ -642,10 +621,7 @@ useEffect(() => {
       }
     } catch (error) {
       console.error("Error submitting vehicle request:", error);
-      const msg = error?.response?.data?.message || "Failed to submit request.";
-      ToastNotification.error("Upload Error", msg);
-    } finally {
-      setIsSubmitting(false);
+      ToastNotification.error("Error", "Failed to submit request.");
     }
   };
 
@@ -1510,10 +1486,9 @@ useEffect(() => {
               !request.time_of_departure ||
               !request.time_of_arrival ||
               !request.number_of_passengers ||
-              !request.purpose ||
-              isProcessingMeta ||
-              isSubmitting ||
-              (attachments.length > 0 && attachmentsMeta.length < attachments.length)
+              !request.purpose 
+              // Object.keys(formErrors).length > 0 ||
+              // formErrors.booking
             }
             className="dark:bg-blue-600 dark:hover:bg-blue-500 w-full md:w-auto"
           >

@@ -10,6 +10,7 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { ArrowClockwise, Bell } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import email from "../../../assets/email_img.png";
+import notificationSound from "../../../assets/notification.wav";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
@@ -29,6 +30,11 @@ const NotificationModal = () => {
   const [showOnlyUnread, setShowOnlyUnread] = useState(false);
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [audioAllowed, setAudioAllowed] = useState(true);
+  const audioRef = useRef(null);
+  const prevActivityIdsRef = useRef(new Set());
+  const pollTimerRef = useRef(null);
 
   const { user } = useContext(AuthContext);
   const { fetchMultipleActivities, markRequestViewed } = useRequestActivity();
@@ -61,12 +67,35 @@ const NotificationModal = () => {
       setLoading(true);
       const userActivities = await fetchMultipleActivities(allRequests);
       setActivities(userActivities || []);
+      const visible = (userActivities || []).filter((a) => a.visibility !== "internal");
+      const unread = visible.filter((a) => !a.viewed);
+      setUnreadCount(unread.length);
+      const incomingIds = new Set(visible.map((a) => a.id));
+      const prevIds = prevActivityIdsRef.current;
+      const isNew = [...incomingIds].some((id) => !prevIds.has(id));
+      prevActivityIdsRef.current = incomingIds;
+      if (isNew && audioRef.current && audioAllowed) {
+        try {
+          audioRef.current.volume = 0.5;
+          await audioRef.current.play();
+        } catch {}
+      }
     } catch (error) {
       console.error("Error loading activities:", error);
     } finally {
       setLoading(false);
     }
   };
+ 
+  useEffect(() => {
+    if (hasLoadedActivities.current) {
+      if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+      pollTimerRef.current = setInterval(loadActivities, 15000);
+    }
+    return () => {
+      if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+    };
+  }, [hasLoadedActivities.current]);
 
   const handleNotificationClick = async (requestID, activityID) => {
     const type = getRequestType(requestID);
@@ -76,6 +105,9 @@ const NotificationModal = () => {
       setActivities((prev) =>
         prev.map((a) => (a.id === activityID ? { ...a, viewed: true } : a))
       );
+      const visible = activities.filter((a) => a.visibility !== "internal");
+      const unread = visible.filter((a) => !a.viewed && a.id !== activityID);
+      setUnreadCount(unread.length);
     } catch (err) {
       console.error("Failed to mark as viewed", err);
     }
@@ -110,13 +142,27 @@ const NotificationModal = () => {
       dismiss={{ itemPress: false }}
     >
       <MenuHandler>
-        <div title="Click to open notifications">
+        <div
+          title="Click to open notifications"
+          aria-label="Notifications"
+          onClick={() => setAudioAllowed(true)}
+          className="relative"
+        >
           <Button
             variant="text"
             className="flex items-center px-3 py-3 gap-x-3"
           >
             <Bell size={24} className="cursor-pointer" />
           </Button>
+          <span
+            aria-live="polite"
+            role="status"
+            className={`absolute inline-flex items-center justify-center rounded-full text-[10px] font-bold px-1.5 py-0.5 ${unreadCount > 0 ? "bg-red-600 text-white" : "bg-gray-300 text-gray-700"}`}
+            style={{ top: "-2px", right: "-2px", position: "absolute" }}
+          >
+            {unreadCount}
+          </span>
+          <audio ref={audioRef} src={notificationSound} preload="auto" aria-hidden="true" />
         </div>
       </MenuHandler>
 

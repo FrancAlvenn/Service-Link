@@ -75,6 +75,7 @@ function RequestDetailsPage({
   isApprover,
   isEmployee,
   forVerification,
+  lockActions,
 }) {
   const { jobRequests, fetchJobRequests } = useContext(JobRequestsContext);
   const { purchasingRequests, fetchPurchasingRequests } = useContext(
@@ -291,6 +292,7 @@ function RequestDetailsPage({
           onClose={onClose}
           isApprover={isApprover}
           forVerification={forVerification}
+          lockActions={!!lockActions}
         />
       )}
       {activeTab === "Details" && (

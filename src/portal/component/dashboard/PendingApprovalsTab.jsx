@@ -25,6 +25,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useOutletContext } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import service_request from "../../../assets/service_requests.png";
+import HistorySection from "./components/HistorySection";
 
 function PendingApprovalsTab() {
   const { jobRequests } = useContext(JobRequestsContext);
@@ -43,6 +44,8 @@ function PendingApprovalsTab() {
   const [pendingApprovals, setPendingApprovals] = useState([]);
 
   const [selectedStatus, setSelectedStatus] = useState("All");
+  const [historyItems, setHistoryItems] = useState([]);
+  const [historyComputeError, setHistoryComputeError] = useState("");
 
   const getRequestType = (referenceNumber) => {
     const firstTwoLetters = referenceNumber.slice(0, 2);
@@ -180,6 +183,54 @@ function PendingApprovalsTab() {
     });
 
     setPendingApprovals(filtered);
+
+    // Build history items: requests with a final action approved/rejected, optionally by current user
+    try {
+      const normalize = (ref) => (typeof ref === "string" ? ref.trim().toUpperCase() : "");
+      const currentRef = normalize(user?.reference_number);
+
+      const history = allRequests
+        .filter((req) => {
+          const status = (req.status || "").toLowerCase();
+          const final = status === "approved" || status === "rejected";
+          if (!final && Array.isArray(req.approvers)) {
+            const acted = req.approvers.flat().some((a) => {
+              const s = (a?.status || "").toLowerCase();
+              return s === "approved" || s === "rejected";
+            });
+            return acted;
+          }
+          return final;
+        })
+        .map((req) => {
+          const firstTwoLetters = (req.reference_number || "").slice(0, 2);
+          const type = firstTwoLetters === "JR" ? "Job Request" : firstTwoLetters === "PR" ? "Purchasing Request" : firstTwoLetters === "VR" ? "Venue Request" : firstTwoLetters === "SV" ? "Vehicle Request" : "Unknown";
+          const approverEntry = Array.isArray(req.approvers)
+            ? req.approvers.flat().reverse().find((a) => {
+                const s = (a?.status || "").toLowerCase();
+                return s === "approved" || s === "rejected";
+              })
+            : null;
+          const finalStatus = (req.status || approverEntry?.status || "Unknown");
+          const actionUser = approverEntry?.approver_name || approverEntry?.name || approverEntry?.approver?.name || approverEntry?.reference_number || "";
+          const timestamp = req.updated_at || approverEntry?.timestamp || req.approved_at || req.created_at;
+          return {
+            reference_number: req.reference_number,
+            title: req.title,
+            purpose: req.purpose,
+            finalStatus,
+            actionUser,
+            timestamp,
+            type,
+          };
+        });
+      setHistoryItems(history);
+      setHistoryComputeError("");
+    } catch (e) {
+      console.error("Error building history items", e);
+      setHistoryItems([]);
+      setHistoryComputeError("Failed to compute history items");
+    }
   }, [user, jobRequests, purchasingRequests, vehicleRequests, venueRequests]);
 
   return (
@@ -211,7 +262,7 @@ function PendingApprovalsTab() {
       </div>
 
       {/* Scrollable Container */}
-      <div className="flex flex-wrap gap-4 overflow-y-auto">
+      <div className="flex flex-wrap gap-4 overflow-y-auto  h-[50vh]">
         {searchedRequests.length === 0 ? (
           <div className="text-gray-500 dark:text-gray-400  text-sm py-3 text-center flex flex-col gap-3 items-center justify-center w-full">
             <img
@@ -314,11 +365,26 @@ function PendingApprovalsTab() {
                 referenceNumber={selectedRequest.reference_number}
                 onClose={closeRequestDetails}
                 isApprover={true}
+                lockActions={historyItems.some((h) => h.reference_number === selectedRequest.reference_number)}
               />
             </motion.div>
           </>
         )}
-      </AnimatePresence>
+          </AnimatePresence>
+      {/* History Section */}
+      <div className="mt-6">
+        {historyComputeError && (
+          <Typography variant="small" className="text-red-500 mb-2">
+            {historyComputeError}
+          </Typography>
+        )}
+        <HistorySection
+          items={historyItems}
+          statusOptions={statusOptions}
+          title="Request History"
+          onOpenDetails={openRequestDetails}
+        />
+      </div>
     </div>
   );
 }

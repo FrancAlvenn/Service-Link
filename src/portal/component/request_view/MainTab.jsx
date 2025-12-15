@@ -39,6 +39,7 @@ const MainTab = ({
   onClose,
   isApprover,
   forVerification,
+  lockActions,
 }) => {
   const { user } = useContext(AuthContext);
   const { getUserByReferenceNumber } = useContext(UserContext);
@@ -551,7 +552,8 @@ const MainTab = ({
                   setApprovalStatus("approved");
                   setOpenApprovalDialog(true);
                 }}
-                className="w-full p-2 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600"
+                disabled={lockActions}
+                className={`w-full p-2 text-sm text-white rounded-md ${lockActions ? "bg-blue-400 cursor-not-allowed opacity-50" : "bg-blue-500 hover:bg-blue-600"}`}
               >
                 Approve Request
               </button>
@@ -562,7 +564,8 @@ const MainTab = ({
                   setApprovalStatus("rejected");
                   setOpenApprovalDialog(true);
                 }}
-                className="w-full p-2 text-sm text-white bg-red-500 rounded-md hover:bg-red-600"
+                disabled={lockActions}
+                className={`w-full p-2 text-sm text-white rounded-md ${lockActions ? "bg-red-400 cursor-not-allowed opacity-50" : "bg-red-500 hover:bg-red-600"}`}
               >
                 Reject Request
               </button>
@@ -575,7 +578,8 @@ const MainTab = ({
         <div className="mt-4 w-full">
           <button
             onClick={handleVerification}
-            className="w-full p-2 text-sm text-white bg-green-500 rounded-md hover:bg-green-600"
+            disabled={lockActions}
+            className={`w-full p-2 text-sm text-white rounded-md ${lockActions ? "bg-green-400 cursor-not-allowed opacity-50" : "bg-green-500 hover:bg-green-600"}`}
           >
             Verify Request
           </button>

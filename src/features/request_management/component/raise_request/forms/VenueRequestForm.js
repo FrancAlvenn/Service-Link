@@ -33,8 +33,6 @@ const VenueRequestForm = ({ setSelectedRequest, prefillData, renderConfidence })
   const { user } = useContext(AuthContext);
   const { allUserInfo, getUserByReferenceNumber, fetchUsers, getUserDepartmentByReferenceNumber } = useContext(UserContext);
   const { venueRequests, fetchVenueRequests } = useContext(VenueRequestsContext);
-  const [attachments, setAttachments] = useState([]);
-  const [uploadProgress, setUploadProgress] = useState(0);
 
   const {
     departments,
@@ -966,13 +964,8 @@ useEffect(() => {
         requestData.event_nature = request.event_nature_other.trim();
       }
 
-      const fd = new FormData();
-      Object.entries(requestData).forEach(([k, v]) => {
-        fd.append(k, typeof v === "object" ? JSON.stringify(v) : v ?? "");
-      });
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/venue_request`, fd, {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/venue_request`, requestData, {
         withCredentials: true,
-        headers: { "Content-Type": "multipart/form-data" },
       });
 
       if (response.status === 201) {
@@ -1378,24 +1371,6 @@ useEffect(() => {
                 </div>
               ))}
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Attachments</label>
-            <input type="file" multiple onChange={(e) => {
-              const files = Array.from(e.target.files || []);
-              setAttachments((prev) => [...prev, ...files]);
-            }} className="text-sm" />
-            {attachments && attachments.length > 0 && (
-              <div className="border border-gray-300 dark:border-gray-600 rounded-md p-2">
-                {attachments.map((f, i) => (
-                  <div key={i} className="flex justify-between items-center text-xs py-1">
-                    <span>{f.name} ({Math.round(f.size/1024)} KB)</span>
-                    <button className="text-red-500" onClick={() => setAttachments((prev) => prev.filter((_, idx) => idx !== i))}>Remove</button>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
 
           {/* Submit */}

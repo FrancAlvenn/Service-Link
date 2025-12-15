@@ -1,3 +1,4 @@
+import { CaretDown, Pencil } from "@phosphor-icons/react";
 import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { UserContext } from "../../../context/UserContext";
@@ -5,7 +6,6 @@ import ToastNotification from "../../../utils/ToastNotification";
 import { formatDate } from "../../../utils/dateFormatter";
 import DepartmentModal from "../../../utils/departmentModal";
 import { Chip } from "@material-tailwind/react";
-import AttachmentList from "../../../components/attachments/AttachmentList";
 
 const DetailTab = ({
   selectedRequest,
@@ -348,14 +348,6 @@ const DetailTab = ({
             }
           );
         })()}
-      </div>
-      <div className="flex flex-col gap-2">
-        <p className="text-sm font-semibold dark:text-gray-300">Files</p>
-        <AttachmentList
-          attachments={selectedRequest?.attachments}
-          canView={isAuthorized}
-          className="border border-gray-300 dark:border-gray-700 rounded-md p-3"
-        />
       </div>
     </div>
   );

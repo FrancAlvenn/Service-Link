@@ -235,6 +235,9 @@ const JobRequestForm = ({ setSelectedRequest, prefillData, renderConfidence }) =
     setAttachments((prev) => prev.filter((_, i) => i !== idx));
     setAttachmentsMeta((prev) => prev.filter((_, i) => i !== idx));
   };
+  const removeAttachmentAt = (idx) => {
+    setAttachments((prev) => prev.filter((_, i) => i !== idx));
+  };
 
   // AI: Generate Purpose from Title
   const generatePurpose = async (retryCount = 0) => {

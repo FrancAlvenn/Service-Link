@@ -61,7 +61,6 @@ import Help from "./pages/Help";
 import AssetTrackingLog from "./features/asset_management/component/AssetTrackingLog";
 import { AssetAssignmentLogProvider } from "./features/asset_management/context/AssetAssignmentLogContext";
 import { SettingsProvider } from "./features/settings/context/SettingsContext";
-import FeatureFlagsProvider from "./context/FeatureFlagsContext";
 import Settings from "./features/settings/component/Settings";
 import PendingApprovalsTab from "./portal/component/dashboard/PendingApprovalsTab";
 import ForVerification from "./portal/component/dashboard/ForVerification";
@@ -415,34 +414,32 @@ const router = createBrowserRouter([
 function App() {
   return (
     <ThemeProvider>
-      <FeatureFlagsProvider>
-        <AuthProvider>
-          <UserProvider>
-            <RequestActivityProvider>
-              <SettingsProvider>
-                <TicketProvider>
-                  <AssetProvider>
-                    <VenueProvider>
-                      <VehicleProvider>
-                        <AssetAssignmentLogProvider>
-                          <EmployeeProvider>
-                            <RequestsProviderWrapper>
-                              <div className="App font-sans ">
-                                <RouterProvider router={router} />
-                                <CustomToastContainer />
-                              </div>
-                            </RequestsProviderWrapper>
-                          </EmployeeProvider>
-                        </AssetAssignmentLogProvider>
-                      </VehicleProvider>
-                    </VenueProvider>
-                  </AssetProvider>
-                </TicketProvider>
-              </SettingsProvider>
-            </RequestActivityProvider>
-          </UserProvider>
-        </AuthProvider>
-      </FeatureFlagsProvider>
+      <AuthProvider>
+        <UserProvider>
+          <RequestActivityProvider>
+            <SettingsProvider>
+              <TicketProvider>
+                <AssetProvider>
+                  <VenueProvider>
+                    <VehicleProvider>
+                      <AssetAssignmentLogProvider>
+                        <EmployeeProvider>
+                          <RequestsProviderWrapper>
+                            <div className="App font-sans ">
+                              <RouterProvider router={router} />
+                              <CustomToastContainer />
+                            </div>
+                          </RequestsProviderWrapper>
+                        </EmployeeProvider>
+                      </AssetAssignmentLogProvider>
+                    </VehicleProvider>
+                  </VenueProvider>
+                </AssetProvider>
+              </TicketProvider>
+            </SettingsProvider>
+          </RequestActivityProvider>
+        </UserProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

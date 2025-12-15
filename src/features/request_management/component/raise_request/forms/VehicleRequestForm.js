@@ -12,7 +12,6 @@ import { GoogleGenAI } from "@google/genai";
 import { Sparkle, ArrowClockwise, MapPin, Info, X, CaretLeft, CaretRight, Calendar } from "@phosphor-icons/react";
 import { renderDetailsTable } from "../../../../../utils/emailsTempalte";
 import { sendBrevoEmail } from "../../../../../utils/brevo";
-import { useFeatureFlags } from "../../../../../context/FeatureFlagsContext";
 
 // ---------------------------------------------------------------------
 // Gemini initialisation
@@ -24,19 +23,7 @@ const genAI = new GoogleGenAI({
 
 const ORIGIN = "Binang 2nd, Bocaue, Bulacan, Philippines";
 
-/**
- * @param {{
- *  setSelectedRequest: (val: any) => void,
- *  prefillData?: object,
- *  renderConfidence?: (field: string) => React.ReactNode
- * }} props
- *
- * Behavior:
- * - The attachments upload UI mounts only when `ENABLE_FILE_ATTACHMENTS` is true.
- *   When disabled, no file-related DOM nodes are rendered.
- */
 const VehicleRequestForm = ({ setSelectedRequest, prefillData, renderConfidence }) => {
-  const { ENABLE_FILE_ATTACHMENTS } = useFeatureFlags();
   const mapboxAddressPickerRef = useRef();
   const purposeTextareaRef = useRef(null);
 
@@ -582,12 +569,10 @@ useEffect(() => {
       Object.entries(requestData).forEach(([k, v]) => {
         fd.append(k, typeof v === "object" ? JSON.stringify(v) : v ?? "");
       });
-      if (ENABLE_FILE_ATTACHMENTS) {
-        if (attachmentsMeta.length) {
-          fd.append("attachments_meta", JSON.stringify(attachmentsMeta));
-        }
-        attachments.forEach((f) => fd.append("attachments", f));
+      if (attachmentsMeta.length) {
+        fd.append("attachments_meta", JSON.stringify(attachmentsMeta));
       }
+      attachments.forEach((f) => fd.append("attachments", f));
       setIsSubmitting(true);
       const response = await axios.post(`${process.env.REACT_APP_API_URL}/vehicle_request`, fd, {
         withCredentials: true,
@@ -1498,23 +1483,21 @@ useEffect(() => {
               required
             />
           </div>
-          {ENABLE_FILE_ATTACHMENTS && (
-            <div className="space-y-2">
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Attachments</label>
-              <input type="file" multiple onChange={handleFilesSelected} className="text-sm" />
-              {attachments.length > 0 && (
-                <div className="border border-gray-300 dark:border-gray-600 rounded-md p-2">
-                  {attachments.map((f, i) => (
-                    <div key={i} className="flex justify-between items-center text-xs py-1">
-                      <span>{f.name} ({Math.round(f.size/1024)} KB)</span>
-                      <button className="text-red-500" onClick={() => removeAttachmentAt(i)}>Remove</button>
-                    </div>
-                  ))}
-                  {uploadProgress > 0 && <div className="text-xs mt-1">Uploading: {uploadProgress}%</div>}
-                </div>
-              )}
-            </div>
-          )}
+          <div className="space-y-2">
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Attachments</label>
+            <input type="file" multiple onChange={handleFilesSelected} className="text-sm" />
+            {attachments.length > 0 && (
+              <div className="border border-gray-300 dark:border-gray-600 rounded-md p-2">
+                {attachments.map((f, i) => (
+                  <div key={i} className="flex justify-between items-center text-xs py-1">
+                    <span>{f.name} ({Math.round(f.size/1024)} KB)</span>
+                    <button className="text-red-500" onClick={() => removeAttachmentAt(i)}>Remove</button>
+                  </div>
+                ))}
+                {uploadProgress > 0 && <div className="text-xs mt-1">Uploading: {uploadProgress}%</div>}
+              </div>
+            )}
+          </div>
 
           {/* Submit */}
           <Button
@@ -1530,7 +1513,7 @@ useEffect(() => {
               !request.purpose ||
               isProcessingMeta ||
               isSubmitting ||
-              (ENABLE_FILE_ATTACHMENTS && attachments.length > 0 && attachmentsMeta.length < attachments.length)
+              (attachments.length > 0 && attachmentsMeta.length < attachments.length)
             }
             className="dark:bg-blue-600 dark:hover:bg-blue-500 w-full md:w-auto"
           >

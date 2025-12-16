@@ -117,18 +117,18 @@ function RequestsManagementControls() {
       </Accordion>
 
       {/* Other items */}
-      <ListItem className="text-sm">
-        <ListItemPrefix>
-          <ChatCircle size={20} />
-        </ListItemPrefix>
-        <Typography
-          color="black"
-          className="mr-auto font-normal text-sm"
-          onClick={() => navigate("/workspace/requests-management/raise-request")}
-        >
-          Raise a Request
-        </Typography>
-      </ListItem>
+      // <ListItem className="text-sm">
+      //   <ListItemPrefix>
+      //     <ChatCircle size={20} />
+      //   </ListItemPrefix>
+      //   <Typography
+      //     color="black"
+      //     className="mr-auto font-normal text-sm"
+      //     onClick={() => navigate("/workspace/requests-management/raise-request")}
+      //   >
+      //     Raise a Request
+      //   </Typography>
+      // </ListItem>
 
       <ListItem className="text-sm">
         <ListItemPrefix>

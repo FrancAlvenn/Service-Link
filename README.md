@@ -98,6 +98,22 @@ The **Service Link System** consists of both frontend and backend applications d
 
 
 
+## Venue Request Form
+
+- Pax Estimation:
+  - The pax field enforces venue capacity limits; submission is blocked if estimated attendees exceed capacity.
+  - A warning appears when pax reaches 80% or more of capacity to help avoid overbooking.
+  - Capacity is displayed next to the pax input when a venue is selected.
+
+- Time Selection:
+  - Start and end times can be any valid times (no 5:00 PM cap).
+  - Validation requires end time to be after start time and event duration to be at least 1 hour.
+  - Day view calendar now shows selectable slots from 00:00 to 23:00 and preserves drag-to-select behavior.
+
+- Compatibility:
+  - Request payload fields remain unchanged; existing submissions continue to work.
+  - No backend changes are required for these updates.
+
 
 
 

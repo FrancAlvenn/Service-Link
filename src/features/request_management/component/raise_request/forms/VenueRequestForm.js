@@ -17,6 +17,7 @@ import { GoogleGenAI } from "@google/genai";
 import { renderDetailsTable } from "../../../../../utils/emailsTempalte";
 import { sendBrevoEmail } from "../../../../../utils/brevo";
 import { CaretLeft, CaretRight } from "@phosphor-icons/react";
+import { validatePax, validateTimeRange } from "../../../utils/validation/venueRequestValidation";
 
 // ---------------------------------------------------------------------
 // Gemini initialisation
@@ -328,6 +329,7 @@ const VenueRequestForm = ({ setSelectedRequest, prefillData, renderConfidence })
     const { name, value } = e.target;
     const updatedRequest = { ...request, [name]: value };
     let newErrors = { ...formErrors };
+    let newWarnings = { ...formWarnings };
 
     if (name === "event_dates") {
       const today = new Date(); today.setHours(0, 0, 0, 0);
@@ -347,40 +349,31 @@ const VenueRequestForm = ({ setSelectedRequest, prefillData, renderConfidence })
     }
 
     if (name === "event_start_time" || name === "event_end_time") {
-      if (value) {
-        const [hours, minutes] = value.split(":").map(Number);
-        const totalMinutes = hours * 60 + minutes;
+      const { error } = validateTimeRange(updatedRequest.event_start_time, updatedRequest.event_end_time);
+      newErrors.time = error || "";
+    }
 
-        const minMinutes = 6 * 60;    // 06:00
-        const maxMinutes = 17 * 60;   // 17:00
+    if (name === "pax_estimation") {
+      const selectedVenue = venueOptions.find((v) => Number(v.venue_id) === Number(updatedRequest.venue_id));
+      const capacity = selectedVenue?.capacity ? Number(selectedVenue.capacity) : null;
+      const pax = value ? Number(value) : 0;
 
-        if (totalMinutes < minMinutes) {
-          newErrors.time = "Start time cannot be earlier than 6:00 AM.";
-        } else if (totalMinutes > maxMinutes) {
-          newErrors.time = "End time cannot be later than 5:00 PM.";
-        } else {
-          delete newErrors.time;
-        }
+      if (pax < 0) {
+        const msg = "Pax estimation must be a non-negative number.";
+        newErrors.pax = msg;
+        newWarnings.pax = "";
+        setFormErrors(newErrors);
+        setFormWarnings(newWarnings);
+        return;
       }
 
-      // Existing end > start + duration check
-      const start = updatedRequest.event_start_time
-        ? new Date(`1970-01-01T${updatedRequest.event_start_time}`)
-        : null;
-      const end = updatedRequest.event_end_time
-        ? new Date(`1970-01-01T${updatedRequest.event_end_time}`)
-        : null;
-
-      if (start && end) {
-        if (start >= end) {
-          newErrors.time = "End time must be later than start time.";
-        } else if ((end - start) / (1000 * 60) < 60) {
-          newErrors.time = "Event duration must be at least 1 hour.";
-        }
-      }
+      const { error, warning } = validatePax(capacity, pax);
+      newErrors.pax = error || "";
+      newWarnings.pax = warning || "";
     }
 
     setFormErrors(newErrors);
+    setFormWarnings(newWarnings);
     setRequest(updatedRequest);
   };
 
@@ -629,13 +622,15 @@ useEffect(() => {
           return selectedDay >= start && selectedDay <= end;
         });
       
-      // Generate time slots (6 AM to 5 PM)
+      // Generate time slots (00:00 to 23:00)
       const timeSlots = [];
-      for (let hour = 6; hour <= 17; hour++) {
+      for (let hour = 0; hour <= 23; hour++) {
+        const displayHour = hour === 0 ? 12 : hour <= 12 ? hour : hour - 12;
+        const ampm = hour < 12 ? "AM" : "PM";
         timeSlots.push({
           hour,
           time: `${String(hour).padStart(2, "0")}:00`,
-          displayTime: hour <= 12 ? `${hour === 12 ? 12 : hour}:00 ${hour < 12 ? "AM" : "PM"}` : `${hour - 12}:00 PM`,
+          displayTime: `${displayHour}:00 ${ampm}`,
         });
       }
       
@@ -1167,8 +1162,6 @@ useEffect(() => {
                     <input
                       type="time"
                       name="event_start_time"
-                      min="06:00"
-                      max="17:00"
                       value={request.event_start_time}
                       onChange={handleChange}
                       className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
@@ -1181,8 +1174,6 @@ useEffect(() => {
                     <input
                       type="time"
                       name="event_end_time"
-                      min="07:00"
-                      max="24:00"
                       value={request.event_end_time}
                       onChange={handleChange}
                       className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
@@ -1288,14 +1279,29 @@ useEffect(() => {
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Pax Estimation</label>
+              <span className="flex gap-2 items-center">
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-200">Pax Estimation</label>
+                {request.venue_id && (
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                    Capacity: {venueOptions.find((v) => Number(v.venue_id) === Number(request.venue_id))?.capacity ?? "N/A"}
+                  </p>
+                )}
+              </span>
               <input
                 type="number"
                 name="pax_estimation"
                 value={request.pax_estimation}
                 onChange={handleChange}
+                min="0"
+                max={
+                  request.venue_id
+                    ? venueOptions.find((v) => Number(v.venue_id) === Number(request.venue_id))?.capacity ?? undefined
+                    : undefined
+                }
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
               />
+              {formWarnings.pax && <p className="text-amber-500 text-xs mt-1">{formWarnings.pax}</p>}
+              {formErrors.pax && <p className="text-red-500 text-xs mt-1">{formErrors.pax}</p>}
             </div>
           </div>
 
@@ -1391,7 +1397,8 @@ useEffect(() => {
               !request.purpose ||
               formErrors.date ||
               formErrors.time ||
-              formErrors.booking
+              formErrors.booking ||
+              formErrors.pax
             }
             className="dark:bg-blue-600 dark:hover:bg-blue-500 w-full md:w-auto"
           >

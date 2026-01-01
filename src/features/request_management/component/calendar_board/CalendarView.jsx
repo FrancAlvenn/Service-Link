@@ -63,18 +63,38 @@ const CalendarView = () => {
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   const getRequestData = () => {
+    let data;
     switch (requestType) {
       case "job_request":
-        return jobRequests;
+        data = jobRequests;
+        break;
       case "purchasing_request":
-        return purchasingRequests;
+        data = purchasingRequests;
+        break;
       case "vehicle_request":
-        return vehicleRequests;
+        data = vehicleRequests;
+        break;
       case "venue_request":
-        return venueRequests;
+        data = venueRequests;
+        break;
       default:
-        return [];
+        data = [];
     }
+
+    // FIX: Add type checking and error handling to ensure data is always an array.
+    // This prevents "requestData is not a function" or similar errors when .filter() is called
+    // if the context data is undefined or null (e.g., during loading or type switching).
+    if (!Array.isArray(data)) {
+      if (data !== undefined && data !== null) {
+        console.warn(
+          `CalendarView: Expected array for ${requestType}, received:`,
+          data
+        );
+      }
+      return [];
+    }
+
+    return data;
   };
 
   useEffect(() => {

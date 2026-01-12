@@ -31,7 +31,7 @@ const NotificationModal = () => {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [audioAllowed, setAudioAllowed] = useState(true);
+  const [audioAllowed, setAudioAllowed] = useState(false);
   const audioRef = useRef(null);
   const prevActivityIdsRef = useRef(new Set());
   const pollTimerRef = useRef(null);

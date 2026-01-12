@@ -164,10 +164,64 @@ const CalendarView = () => {
     return departureDate.toISOString();
   };
 
+  // Date/time display formatting standard:
+  // - Locale-based date with 2-digit month/day/year
+  // - 12-hour time with leading zeros and AM/PM
+  // - Example: "01/22/2026 09:05 AM"
+  const formatLocalDateTime = (dateObj) => {
+    const datePart = dateObj.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+    const timePart = dateObj.toLocaleTimeString(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+    return `${datePart} ${timePart}`;
+  };
+
+  const makeLocalDateFromYMDHM = (ymd, hm) => {
+    const [y, m, d] = ymd.split("-").map((n) => parseInt(n, 10));
+    const [hh = "0", mm = "0"] = (hm || "00:00").split(":");
+    return new Date(y, (m || 1) - 1, d || 1, parseInt(hh, 10), parseInt(mm, 10), 0);
+  };
+
+  const getDateDisplay = (task) => {
+    if (task.event_dates && task.event_start_time && task.event_end_time) {
+      const startObj = makeLocalDateFromYMDHM(task.event_dates, task.event_start_time);
+      const endObj = makeLocalDateFromYMDHM(task.event_dates, task.event_end_time);
+      const startStr = formatLocalDateTime(startObj);
+      const endStr = endObj
+        ? endObj.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hour12: true })
+        : "";
+      return `${startStr}${endStr ? ` - ${endStr}` : ""}`;
+    }
+    if (task.date_of_trip && task.time_of_departure) {
+      const tripObj = makeLocalDateFromYMDHM(task.date_of_trip, task.time_of_departure);
+      return formatLocalDateTime(tripObj);
+    }
+    if (task.date_required) {
+  const ymd = task.date_required.split(" ")[0];
+  const dateObj = makeLocalDateFromYMDHM(ymd, "00:00");
+
+  // This returns just the date portion based on the user's locale
+  return dateObj.toLocaleDateString(); 
+  }
+    if (task.event_dates) {
+      const ymd = task.event_dates.split(" ")[0];
+      const dateObj = makeLocalDateFromYMDHM(ymd, "00:00");
+      return formatLocalDateTime(dateObj);
+    }
+    return "";
+  };
+
   const events = filteredTasks().map((task) => {
     let start = "";
     let end = "";
     let allDay = false;
+     const dateDisplay = getDateDisplay(task);
 
     if (task.date_required) {
       start = task.date_required.split(" ")[0];
@@ -200,6 +254,7 @@ const CalendarView = () => {
         requestType: requestType,
         status: task.status,
         hasAccess,
+        dateDisplay,
       },
       backgroundColor: "white",
       borderColor: "white",
@@ -208,14 +263,15 @@ const CalendarView = () => {
 
   const renderEventContent = (arg) => {
     const { title, extendedProps } = arg.event;
-    const { hasAccess } = extendedProps;
+    const { hasAccess, dateDisplay } = extendedProps;
     const typeColor = requestTypeColor[extendedProps.requestType] || "gray";
 
     const pillBgColor = pillColorClass[requestType] || "#4b5563";
+    const chipValue = dateDisplay ? `${title} • ${dateDisplay}` : title;
 
     return (
       <Chip
-        value={title}
+        value={chipValue}
         color={typeColor}
         className={`!text-white text-wrap whitespace-normal text-xs h-fit font-medium px-2 py-1 cursor-pointer relative ${
           !hasAccess ? "bg-gray-400" : ""

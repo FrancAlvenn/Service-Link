@@ -43,6 +43,12 @@ const Settings = () => {
           { key: "workflow.requestType", label: "Approval by Request Type" },
           { key: "workflow.designationRule", label: "Approval by Designation" },
           { key: "workflow.departmentRule", label: "Approval by Department" },
+        ],
+      },
+      {
+        key: "roleManagement",
+        label: "Role Management",
+        items: [
           { key: "workflow.approvers", label: "Approvers" },
         ],
       },

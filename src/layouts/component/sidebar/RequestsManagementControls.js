@@ -192,7 +192,7 @@ function RequestsManagementControls() {
         <ListItemPrefix>
           <ChalkboardTeacher size={20} />
         </ListItemPrefix>
-        Board
+        Employee List
       </ListItem>
 
       <hr className="my-2 border-t border-gray-300" />
@@ -205,13 +205,13 @@ function RequestsManagementControls() {
         <ListItemPrefix>
           <ChalkboardSimple size={20} />
         </ListItemPrefix>
-        Board
+        Venue Registry
       </ListItem>
       <ListItem onClick={() => navigate("/workspace/venue-management/calendar")}>
         <ListItemPrefix>
           <Calendar size={20} />
         </ListItemPrefix>
-        Calendar
+        Venue Bookings
       </ListItem>
 
       <hr className="my-2 border-t border-gray-300" />
@@ -224,13 +224,13 @@ function RequestsManagementControls() {
         <ListItemPrefix>
           <Car size={20} />
         </ListItemPrefix>
-        Board
+        Vehicle List
       </ListItem>
       <ListItem onClick={() => navigate("/workspace/vehicle-management/calendar")}>
         <ListItemPrefix>
           <Calendar size={20} />
         </ListItemPrefix>
-        Calendar
+        Vehicle Schedule
       </ListItem>
 
       <hr className="my-2 border-t border-gray-300" />
@@ -243,7 +243,7 @@ function RequestsManagementControls() {
         <ListItemPrefix>
           <ChalkboardTeacher size={20} />
         </ListItemPrefix>
-        Board
+        Asset Directory
       </ListItem>
       <ListItem onClick={() => navigate("/workspace/asset-management/asset-tracking-log")}>
         <ListItemPrefix>

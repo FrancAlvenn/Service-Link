@@ -22,6 +22,79 @@ import { JobRequestsContext } from "../../request_management/context/JobRequests
 import { PurchasingRequestsContext } from "../../request_management/context/PurchasingRequestsContext";
 import { VehicleRequestsContext } from "../../request_management/context/VehicleRequestsContext";
 import { VenueRequestsContext } from "../../request_management/context/VenueRequestsContext";
+import PropTypes from "prop-types";
+
+const PrivacyBanner = ({ storageKey, policyHref }) => {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(storageKey);
+      if (stored === "dismissed") {
+        setVisible(false);
+      } else {
+        setVisible(true);
+      }
+    } catch (err) {
+      setVisible(true);
+    }
+  }, [storageKey]);
+
+  const handleDismiss = () => {
+    try {
+      localStorage.setItem(storageKey, "dismissed");
+    } catch (err) {}
+    setVisible(false);
+  };
+
+  if (!visible) return null;
+
+  return (
+    <div
+      className="fixed bottom-0 inset-x-0 z-40"
+      role="dialog"
+      aria-label="Data privacy notice"
+    >
+      <div className="mx-auto max-w-4xl mb-3 px-3">
+        <div className="bg-white text-center rounded-lg shadow-xl border border-gray-300 px-4 py-3 sm:px-6 sm:py-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+          <p className="text-xs sm:text-sm leading-relaxed flex-1">
+            Service Link collects and processes your account information and usage data
+            to provide secure access, improve services, and comply with institutional
+            policies. By signing in, you acknowledge that your data may be logged and
+            audited in accordance with our{" "}
+            <a
+              href={policyHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline text-blue-300 hover:text-blue-200"
+            >
+              Privacy Policy
+            </a>
+            .
+          </p>
+          <button
+            type="button"
+            onClick={handleDismiss}
+            className="ml-auto mt-1 sm:mt-0 inline-flex items-center justify-center px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md bg-white text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-gray-900"
+            aria-label="Dismiss data privacy notice"
+          >
+            I Understand
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+PrivacyBanner.propTypes = {
+  storageKey: PropTypes.string,
+  policyHref: PropTypes.string,
+};
+
+PrivacyBanner.defaultProps = {
+  storageKey: "service_link_privacy_banner",
+  policyHref: "/privacy-policy",
+};
 
 /**
  * LoginForm component
@@ -396,6 +469,7 @@ function LoginForm() {
         </div>
       </div>
       <AuthFooter />
+      <PrivacyBanner />
     </div>
   );
 }

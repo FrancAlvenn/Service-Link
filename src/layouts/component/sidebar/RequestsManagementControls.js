@@ -190,7 +190,7 @@ function RequestsManagementControls() {
       <Typography className="text-xs font-semibold text-gray-700 pb-1">
         In-house Management
       </Typography>
-      <ListItem onClick={() => navigate("/workspace/employee-management/board")}>
+      <ListItem onClick={() => navigate("/workspace/employee-management/board")} className="text-sm">
         <ListItemPrefix>
           <ChalkboardTeacher size={20} />
         </ListItemPrefix>
@@ -203,13 +203,13 @@ function RequestsManagementControls() {
       <Typography className="text-xs font-semibold text-gray-700 pb-1">
         Venue Management
       </Typography>
-      <ListItem onClick={() => navigate("/workspace/venue-management/board")}>
+      <ListItem onClick={() => navigate("/workspace/venue-management/board")} className="text-sm">
         <ListItemPrefix>
           <ChalkboardSimple size={20} />
         </ListItemPrefix>
         Venue Registry
       </ListItem>
-      <ListItem onClick={() => navigate("/workspace/venue-management/calendar")}>
+      <ListItem onClick={() => navigate("/workspace/venue-management/calendar")} className="text-sm">
         <ListItemPrefix>
           <Calendar size={20} />
         </ListItemPrefix>
@@ -222,13 +222,13 @@ function RequestsManagementControls() {
       <Typography className="text-xs font-semibold text-gray-700 pb-1">
         Vehicle Management
       </Typography>
-      <ListItem onClick={() => navigate("/workspace/vehicle-management/board")}>
+      <ListItem onClick={() => navigate("/workspace/vehicle-management/board")} className="text-sm">
         <ListItemPrefix>
           <Car size={20} />
         </ListItemPrefix>
         Vehicle List
       </ListItem>
-      <ListItem onClick={() => navigate("/workspace/vehicle-management/calendar")}>
+      <ListItem onClick={() => navigate("/workspace/vehicle-management/calendar")} className="text-sm">
         <ListItemPrefix>
           <Calendar size={20} />
         </ListItemPrefix>
@@ -241,13 +241,13 @@ function RequestsManagementControls() {
       <Typography className="text-xs font-semibold text-gray-700 pb-1">
         Asset Management
       </Typography>
-      <ListItem onClick={() => navigate("/workspace/asset-management/board")}>
+      <ListItem onClick={() => navigate("/workspace/asset-management/board")} className="text-sm">
         <ListItemPrefix>
           <ChalkboardTeacher size={20} />
         </ListItemPrefix>
         Asset Directory
       </ListItem>
-      <ListItem onClick={() => navigate("/workspace/asset-management/asset-tracking-log")}>
+      <ListItem onClick={() => navigate("/workspace/asset-management/asset-tracking-log")} className="text-sm">
         <ListItemPrefix>
           <Notebook size={20} />
         </ListItemPrefix>
@@ -260,7 +260,7 @@ function RequestsManagementControls() {
       <Typography className="text-xs font-semibold text-gray-700 pb-1">
         Directory
       </Typography>
-      <ListItem onClick={() => navigate("/workspace/user-management/board")}>
+      <ListItem onClick={() => navigate("/workspace/user-management/board")} className="text-sm">
         <ListItemPrefix>
           <UsersThree size={20} />
         </ListItemPrefix>
@@ -273,7 +273,7 @@ function RequestsManagementControls() {
       <Typography className="text-xs font-semibold text-gray-700 pb-1">
         Settings
       </Typography>
-      <ListItem onClick={() => navigate("/workspace/settings")}>
+      <ListItem onClick={() => navigate("/workspace/settings")} className="text-sm">
         <ListItemPrefix>
           <Gear size={20} />
         </ListItemPrefix>

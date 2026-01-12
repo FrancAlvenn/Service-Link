@@ -11,6 +11,11 @@ import {
   MenuHandler,
   MenuList,
   MenuItem,
+  Tabs,
+  TabsHeader,
+  TabsBody,
+  Tab,
+  TabPanel,
 } from "@material-tailwind/react";
 import { AuthContext } from "../../../features/authentication";
 import axios from "axios";
@@ -370,23 +375,10 @@ function PendingApprovalsTab() {
             </motion.div>
           </>
         )}
-          </AnimatePresence>
-      {/* History Section */}
-      <div className="mt-6">
-        {historyComputeError && (
-          <Typography variant="small" className="text-red-500 mb-2">
-            {historyComputeError}
-          </Typography>
-        )}
-        <HistorySection
-          items={historyItems}
-          statusOptions={statusOptions}
-          title="Request History"
-          onOpenDetails={openRequestDetails}
-        />
-      </div>
+      </AnimatePresence>
     </div>
   );
 }
+
 
 export default PendingApprovalsTab;

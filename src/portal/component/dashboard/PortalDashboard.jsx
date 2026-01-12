@@ -11,6 +11,8 @@ import {
   ShoppingCart,
   CalendarCheck,
   Car,
+  SortAscending,
+  SortDescending,
 } from "@phosphor-icons/react";
 import RequestDetailsPage from "../request_view/RequestDetailsPage";
 import { motion, AnimatePresence } from "framer-motion";
@@ -33,6 +35,7 @@ function PortalDashboard() {
   const [statusOptions, setStatusOptions] = useState([]);
   const [selectedType, setSelectedType] = useState("All");
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [sortOrder, setSortOrder] = useState("desc"); // "asc" or "desc"
 
   const { searchQuery } = useOutletContext();
 
@@ -130,15 +133,21 @@ function PortalDashboard() {
     navigate(path);
   };
 
-  // Apply search filter
-  const searchedRequests = filteredRequests.filter((request) => {
-    const query = searchQuery.toLowerCase();
-    return (
-      request.title?.toLowerCase().includes(query) ||
-      request.purpose?.toLowerCase().includes(query) ||
-      request.reference_number?.toLowerCase().includes(query)
-    );
-  });
+  // Apply search filter and sort
+  const searchedRequests = filteredRequests
+    .filter((request) => {
+      const query = searchQuery.toLowerCase();
+      return (
+        request.title?.toLowerCase().includes(query) ||
+        request.purpose?.toLowerCase().includes(query) ||
+        request.reference_number?.toLowerCase().includes(query)
+      );
+    })
+    .sort((a, b) => {
+      const dateA = new Date(a.created_at);
+      const dateB = new Date(b.created_at);
+      return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+    });
 
   // You may need to fetch all request types from a context or API
   useEffect(() => {
@@ -236,30 +245,51 @@ function PortalDashboard() {
         )}
       </div>
 
-      {/* Filter Buttons */}
-      <div className="flex flex-wrap gap-1 overflow-x-auto md:justify-start justify-start">
-        {[
-          { type: "All", color: "blue" },
-          ...(user?.designation_id === 1 //Changeable later to dynamic if wanted to add to settings
-            ? [] // Student — hide Job & Purchasing
-            : [
-                { type: "Job Request", color: "blue" },
-                { type: "Purchasing Request", color: "green" },
-              ]),
-          { type: "Venue Request", color: "purple" },
-          { type: "Vehicle Request", color: "red" },
-        ].map(({ type, color }) => (
-          <Button
-            key={type}
-            size="sm"
-            color={color}
-            variant={selectedType === type ? "filled" : "outlined"}
-            onClick={() => setSelectedType(type)}
-            className="md:min-w-fit"
-          >
-            {type}
-          </Button>
-        ))}
+      {/* Filter Buttons and Sort Control */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+        <div className="flex flex-wrap gap-1 overflow-x-auto md:justify-start justify-start">
+          {[
+            { type: "All", color: "blue" },
+            ...(user?.designation_id === 1 //Changeable later to dynamic if wanted to add to settings
+              ? [] // Student — hide Job & Purchasing
+              : [
+                  { type: "Job Request", color: "blue" },
+                  { type: "Purchasing Request", color: "green" },
+                ]),
+            { type: "Venue Request", color: "purple" },
+            { type: "Vehicle Request", color: "red" },
+          ].map(({ type, color }) => (
+            <Button
+              key={type}
+              size="sm"
+              color={color}
+              variant={selectedType === type ? "filled" : "outlined"}
+              onClick={() => setSelectedType(type)}
+              className="md:min-w-fit"
+            >
+              {type}
+            </Button>
+          ))}
+        </div>
+
+        <Button
+          size="sm"
+          variant="text"
+          color="blue-gray"
+          className="flex items-center gap-2"
+          onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+          aria-label={`Sort by date ${sortOrder === "asc" ? "descending" : "ascending"}`}
+        >
+          {sortOrder === "asc" ? (
+            <>
+              <SortAscending size={20} /> Oldest First
+            </>
+          ) : (
+            <>
+              <SortDescending size={20} /> Newest First
+            </>
+          )}
+        </Button>
       </div>
 
       {pendingApprovals.length > 0 &&

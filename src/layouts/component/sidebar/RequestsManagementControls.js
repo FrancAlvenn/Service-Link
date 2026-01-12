@@ -117,6 +117,7 @@ function RequestsManagementControls() {
       </Accordion>
 
       {/* Other items */}
+      {/*
       <ListItem className="text-sm">
         <ListItemPrefix>
           <ChatCircle size={20} />
@@ -129,6 +130,7 @@ function RequestsManagementControls() {
           Raise a Request
         </Typography>
       </ListItem>
+      */}
 
       <ListItem className="text-sm">
         <ListItemPrefix>

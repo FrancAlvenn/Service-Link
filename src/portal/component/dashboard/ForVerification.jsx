@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { JobRequestsContext } from "../../../features/request_management/context/JobRequestsContext";
-import { Typography, Chip, Button } from "@material-tailwind/react";
+import { Typography, Chip, Button, Tabs, TabsHeader, TabsBody, Tab, TabPanel } from "@material-tailwind/react";
 import { AuthContext } from "../../../features/authentication";
 import axios from "axios";
 import { ReadCvLogo } from "@phosphor-icons/react";
@@ -292,23 +292,10 @@ function ForVerification() {
             </motion.div>
           </>
         )}
-          </AnimatePresence>
-      {/* History Section */}
-      <div className="mt-6">
-        {historyComputeError && (
-          <Typography variant="small" className="text-red-500 mb-2">
-            {historyComputeError}
-          </Typography>
-        )}
-        <HistorySection
-          items={historyItems}
-          statusOptions={statusOptions}
-          title="Request History"
-          onOpenDetails={openRequestDetails}
-        />
-      </div>
+      </AnimatePresence>
     </div>
   );
 }
+
 
 export default ForVerification;

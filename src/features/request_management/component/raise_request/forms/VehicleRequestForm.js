@@ -12,6 +12,9 @@ import { GoogleGenAI } from "@google/genai";
 import { Sparkle, ArrowClockwise, MapPin, Info, X, CaretLeft, CaretRight, Calendar } from "@phosphor-icons/react";
 import { renderDetailsTable } from "../../../../../utils/emailsTempalte";
 import { sendBrevoEmail } from "../../../../../utils/brevo";
+import { geocodeOrigin, getRouteDurationSeconds, addDurationToTime } from "../../../utils/mapboxTravel";
+import { getVehicleCapacity } from "../../../utils/vehicleCapacity";
+import { validatePassengers } from "../../../utils/validation/vehiclePassengerValidation";
 
 // ---------------------------------------------------------------------
 // Gemini initialisation
@@ -32,6 +35,8 @@ const VehicleRequestForm = ({ setSelectedRequest, prefillData, renderConfidence 
   const [aiLoading, setAiLoading] = useState(false);
   const [travelAnalytics, setTravelAnalytics] = useState(null);
   const [showAnalytics, setShowAnalytics] = useState(false);
+  const [etaLoading, setEtaLoading] = useState(false);
+  const [originCoords, setOriginCoords] = useState(null);
 
   const { user } = useContext(AuthContext);
   const { allUserInfo, getUserByReferenceNumber, fetchUsers, getUserDepartmentByReferenceNumber } = useContext(UserContext);
@@ -101,6 +106,20 @@ const VehicleRequestForm = ({ setSelectedRequest, prefillData, renderConfidence 
     fetchApprovalRulesByDesignation();
     fetchUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const initOrigin = async () => {
+      try {
+        const token = process.env.REACT_APP_MAPBOX_TOKEN;
+        if (!token) return;
+        const coords = await geocodeOrigin(token, ORIGIN);
+        setOriginCoords(coords);
+      } catch (e) {
+        console.warn("Failed to geocode origin:", e);
+      }
+    };
+    initOrigin();
   }, []);
 
   // Handle AI prefilled data
@@ -315,6 +334,22 @@ const VehicleRequestForm = ({ setSelectedRequest, prefillData, renderConfidence 
       }
     }
 
+    if (name === "number_of_passengers") {
+      const capacity = getVehicleCapacity(vehicleOptions, request.vehicle_id);
+      const passengers = value ? Number(value) : 0;
+      const { error, warning } = validatePassengers(capacity, passengers);
+      if (passengers < 0) {
+        newErrors.passengers = "Passengers must be a non-negative number.";
+        newErrors.time = newErrors.time || "";
+        setFormErrors(newErrors);
+        setFormWarnings((prev) => ({ ...prev, passengers: "" }));
+        setRequest((prev) => ({ ...prev, [name]: value }));
+        return;
+      }
+      setFormWarnings((prev) => ({ ...prev, passengers: warning || "" }));
+      newErrors.passengers = error || "";
+    }
+
     setFormErrors(newErrors);
     setRequest((prev) => ({ ...prev, [name]: value }));
   };
@@ -328,6 +363,36 @@ const VehicleRequestForm = ({ setSelectedRequest, prefillData, renderConfidence 
     setSelectedLocation(place);
     // Do NOT auto-show analytics
   };
+
+  useEffect(() => {
+    const calcETA = async () => {
+      if (!originCoords) return;
+      if (!request.destination_coordinates || !request.time_of_departure || !request.date_of_trip) return;
+      try {
+        setEtaLoading(true);
+        setFormErrors((prev) => ({ ...prev, arrival: "" }));
+        const token = process.env.REACT_APP_MAPBOX_TOKEN;
+        const dest = request.destination_coordinates;
+        const destCoord = { lon: dest.lon ?? dest[0], lat: dest.lat ?? dest[1] };
+        const durationSec = await getRouteDurationSeconds(token, originCoords, destCoord);
+        const arrivalHHMM = addDurationToTime(request.date_of_trip, request.time_of_departure, durationSec);
+        setRequest((prev) => ({ ...prev, time_of_arrival: arrivalHHMM }));
+      } catch (err) {
+        console.error("ETA calculation failed:", err);
+        setFormErrors((prev) => ({
+          ...prev,
+          arrival: "Failed to calculate ETA (Mapbox). Please adjust destination or try again.",
+        }));
+        setRequest((prev) => ({ ...prev, time_of_arrival: "" }));
+      } finally {
+        setEtaLoading(false);
+      }
+    };
+    calcETA();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [originCoords, request.destination_coordinates, request.time_of_departure, request.date_of_trip]);
+
+  // Capacity display handled in UI; keep manual passenger input unchanged.
 
   // AI: Generate Purpose
   const generatePurpose = async (retryCount = 0) => {
@@ -1157,6 +1222,11 @@ useEffect(() => {
                   </option>
                 ))}
               </select>
+              {request.vehicle_id && (
+                <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
+                  Capacity: {getVehicleCapacity(vehicleOptions, request.vehicle_id) ?? "N/A"}
+                </p>
+              )}
             </div>
           </div>
 
@@ -1238,21 +1308,28 @@ useEffect(() => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
-                      Time of Arrival
-                    </label>
-                    <input
-                      type="time"
-                      name="time_of_arrival"
-                      min="04:00"
-                      max="19:00"
-                      value={request.time_of_arrival || ""}
-                      onChange={handleChange}
-                      className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
-                    />
-                    {formErrors.time && <p className="text-red-500 text-xs mt-1">{formErrors.time}</p>}
-                  </div>
-                </div>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
+                Time of Arrival
+              </label>
+              <div className="relative">
+                <input
+                  type="time"
+                  name="time_of_arrival"
+                  value={request.time_of_arrival || ""}
+                  readOnly
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-gray-100 dark:bg-gray-800 dark:text-gray-200"
+                  title="Auto-calculated ETA based on Mapbox route"
+                />
+                {etaLoading && (
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2">
+                    <Spinner className="h-4 w-4" />
+                  </span>
+                )}
+              </div>
+              {formErrors.time && <p className="text-red-500 text-xs mt-1">{formErrors.time}</p>}
+              {formErrors.arrival && <p className="text-red-500 text-xs mt-1">{formErrors.arrival}</p>}
+            </div>
+          </div>
                 
                 {/* Booking Conflicts */}
                 <div className="space-y-2 mt-3">
@@ -1379,9 +1456,14 @@ useEffect(() => {
 
           {/* Passengers */}
           <div>
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Number of Passengers
-            </label>
+            <span className="flex gap-2 items-center">
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-200">Number of Passengers</label>
+              {request.vehicle_id && (
+                <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                  Capacity: {vehicleOptions.find((v) => Number(v.vehicle_id) === Number(request.vehicle_id))?.capacity ?? "N/A"}
+                </p>
+              )}
+            </span>
             <input
               type="number"
               name="number_of_passengers"
@@ -1389,7 +1471,18 @@ useEffect(() => {
               onChange={handleChange}
               min="1"
               className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+              aria-describedby="passengers-helper"
             />
+            {formWarnings.passengers && (
+              <p className="text-amber-500 text-xs mt-1" id="passengers-helper" aria-live="polite">
+                {formWarnings.passengers}
+              </p>
+            )}
+            {formErrors.passengers && (
+              <p className="text-red-500 text-xs mt-1" role="alert" aria-live="assertive">
+                {formErrors.passengers}
+              </p>
+            )}
           </div>
 
           {/* Purpose with AI */}
@@ -1454,7 +1547,8 @@ useEffect(() => {
               !request.time_of_departure ||
               !request.time_of_arrival ||
               !request.number_of_passengers ||
-              !request.purpose 
+              !request.purpose ||
+              formErrors.passengers
               // Object.keys(formErrors).length > 0 ||
               // formErrors.booking
             }

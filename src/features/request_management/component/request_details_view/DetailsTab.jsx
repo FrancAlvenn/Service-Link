@@ -7,6 +7,25 @@ import PriorityModal from "../../../../utils/priorityModal";
 import { formatDate } from "../../../../utils/dateFormatter";
 import DepartmentModal from "../../../../utils/departmentModal";
 
+const timeKeys = [
+  "event_start_time",
+  "event_end_time",
+  "time_of_departure",
+  "time_of_arrival",
+];
+
+const formatTime12h = (timeStr) => {
+  if (!timeStr || typeof timeStr !== "string") return "";
+  const match = timeStr.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+  if (!match) return timeStr;
+  const hours24 = parseInt(match[1], 10);
+  const minutes = match[2];
+  const isPM = hours24 >= 12;
+  const hours12 = hours24 % 12 === 0 ? 12 : hours24 % 12;
+  const suffix = isPM ? "PM" : "AM";
+  return `${hours12}:${minutes} ${suffix}`;
+};
+
 const requestFieldConfig = {
   job_request: [
     {
@@ -363,6 +382,8 @@ const DetailsTab = ({
                   "date_of_trip",
                 ].includes(key) ? (
                   formatDate(selectedRequest[key])
+                ) : timeKeys.includes(key) ? (
+                  formatTime12h(selectedRequest[key])
                 ) : key === "requester" ? (
                   getUserByReferenceNumber(selectedRequest[key]) || (
                     <span className="text-gray-400 italic"></span>
@@ -400,6 +421,8 @@ const DetailsTab = ({
                 "date_of_trip",
               ].includes(key) ? (
                 formatDate(selectedRequest[key])
+              ) : timeKeys.includes(key) ? (
+                formatTime12h(selectedRequest[key])
               ) : key === "requester" ? (
                 getUserByReferenceNumber(selectedRequest[key]) || (
                   <span className="text-gray-400 italic">N/A</span>

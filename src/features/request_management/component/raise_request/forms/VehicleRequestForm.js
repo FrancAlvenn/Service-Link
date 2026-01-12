@@ -315,11 +315,16 @@ const VehicleRequestForm = ({ setSelectedRequest, prefillData, renderConfidence 
         const [hours, minutes] = value.split(":").map(Number);
         const totalMinutes = hours * 60 + minutes;
 
-        const minMinutes = 4 * 60;     // 04:00
+        const minMinutes = 6 * 60;     // 06:00
         const maxMinutes = 19 * 60;    // 19:00
 
         if (totalMinutes < minMinutes || totalMinutes > maxMinutes) {
-          newErrors.time = "Time must be between 4:00 AM and 7:00 PM.";
+          const clamped = Math.max(minMinutes, Math.min(totalMinutes, maxMinutes));
+          const clampedH = String(Math.floor(clamped / 60)).padStart(2, "0");
+          const clampedM = String(clamped % 60).padStart(2, "0");
+          const clampedStr = `${clampedH}:${clampedM}`;
+          newErrors.time = "Time must be between 06:00 and 19:00.";
+          setRequest((prev) => ({ ...prev, [name]: clampedStr }));
         } else {
           delete newErrors.time;
         }
@@ -581,6 +586,18 @@ useEffect(() => {
 
   const submitVehicleRequest = async () => {
     try {
+      if (!request.time_of_departure || !request.time_of_arrival) {
+        ToastNotification.error("Invalid Time", "Please select a valid time range.");
+        return;
+      }
+      const [sdh, sdm] = request.time_of_departure.split(":").map(Number);
+      const [edh, edm] = request.time_of_arrival.split(":").map(Number);
+      const startMin = sdh * 60 + sdm;
+      const endMin = edh * 60 + edm;
+      if (startMin < 360 || endMin > 1140 || startMin >= endMin) {
+        ToastNotification.error("Invalid Time", "Bookings must be between 06:00 and 19:00, with departure earlier than arrival.");
+        return;
+      }
       let requestData = {
         ...request,
         authorized_access: Array.from(
@@ -846,13 +863,13 @@ useEffect(() => {
           return selectedDay >= start && selectedDay <= end;
         });
       
-      // Generate time slots (4 AM to 7 PM)
+      // Generate time slots (6 AM to 7 PM)
       const timeSlots = [];
-      for (let hour = 4; hour <= 19; hour++) {
+      for (let hour = 6; hour <= 19; hour++) {
         timeSlots.push({
           hour,
           time: `${String(hour).padStart(2, "0")}:00`,
-          displayTime: hour <= 12 ? `${hour === 12 ? 12 : hour}:00 ${hour < 12 ? "AM" : "PM"}` : `${hour - 12}:00 PM`,
+          displayTime: `${String(hour).padStart(2, "0")}:00`,
         });
       }
       
@@ -902,7 +919,7 @@ useEffect(() => {
       // Handle time slot click/drag
       const handleTimeSlotMouseDown = (hour) => {
         if (isTimeSlotBooked(hour) || isDayUnavailable) return;
-        
+        if (hour < 6 || hour > 19) return;
         const timeStr = `${String(hour).padStart(2, "0")}:00`;
         setDragStart(hour);
         setDragEnd(hour);
@@ -917,7 +934,7 @@ useEffect(() => {
       
       const handleTimeSlotMouseEnter = (hour) => {
         if (!dragging || isTimeSlotBooked(hour) || isDayUnavailable) return;
-        
+        if (hour < 6 || hour > 19) return;
         setDragEnd(hour);
         
         const startHour = dragStart;
@@ -1297,15 +1314,16 @@ useEffect(() => {
                     <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
                       Time of Departure
                     </label>
-                    <input
-                      type="time"
-                      name="time_of_departure"
-                      min="04:00"
-                      max="19:00"
-                      value={request.time_of_departure || ""}
-                      onChange={handleChange}
-                      className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
-                    />
+                  <input
+                    type="time"
+                    name="time_of_departure"
+                    min="06:00"
+                    max="19:00"
+                    value={request.time_of_departure || ""}
+                    onChange={handleChange}
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
+                  />
+                  <p className="text-[11px] text-gray-600 dark:text-gray-400 mt-1">Bookings allowed between 06:00 and 19:00.</p>
                   </div>
                   <div>
               <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">

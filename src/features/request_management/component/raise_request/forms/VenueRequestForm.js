@@ -37,11 +37,13 @@ const VenueRequestForm = ({ setSelectedRequest, prefillData, renderConfidence })
 
   const {
     departments,
+    organizations,
     approvers,
     approvalRulesByDepartment,
     approvalRulesByRequestType,
     approvalRulesByDesignation,
     fetchDepartments,
+    fetchOrganizations,
     fetchDesignations,
     fetchApprovers,
     fetchApprovalRulesByDepartment,
@@ -53,10 +55,15 @@ const VenueRequestForm = ({ setSelectedRequest, prefillData, renderConfidence })
     const department = departments.find((dept) => dept.id === departmentId);
     return department ? department.name : "";
   }
+  const getOrganizationName = (organizations, organizationId) => {
+    if (!organizationId) return "No Organization";
+    const organization = organizations.find((org) => org.id === organizationId);
+    return organization ? organization.organization : "No Organization";
+  }
 
   const [request, setRequest] = useState(() => ({
     requester: user.reference_number,
-    organization: "",
+    organization: getOrganizationName(organizations, user?.organization_id),
     title: "",
     department: getDepartmentName(departments, getUserDepartmentByReferenceNumber(user.reference_number)),
     event_nature: "",
@@ -146,6 +153,7 @@ const VenueRequestForm = ({ setSelectedRequest, prefillData, renderConfidence })
 
   useEffect(() => {
     fetchDepartments();
+    fetchOrganizations();
     fetchDesignations();
     fetchApprovers();
     fetchApprovalRulesByDepartment();
@@ -154,6 +162,14 @@ const VenueRequestForm = ({ setSelectedRequest, prefillData, renderConfidence })
     fetchUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    const orgName = getOrganizationName(organizations, user?.organization_id);
+    setRequest((prev) => {
+      if (prev.organization && prev.organization !== "No Organization") return prev;
+      return { ...prev, organization: orgName };
+    });
+  }, [organizations, user?.organization_id]);
 
   // Handle AI prefilled data
   useEffect(() => {
@@ -351,6 +367,19 @@ const VenueRequestForm = ({ setSelectedRequest, prefillData, renderConfidence })
     if (name === "event_start_time" || name === "event_end_time") {
       const { error } = validateTimeRange(updatedRequest.event_start_time, updatedRequest.event_end_time);
       newErrors.time = error || "";
+      if (value) {
+        const [h, m] = value.split(":").map(Number);
+        const total = h * 60 + m;
+        const min = 6 * 60;   // 06:00
+        const max = 19 * 60;  // 19:00
+        if (total < min || total > max) {
+          const clamped = Math.max(min, Math.min(total, max));
+          const ch = String(Math.floor(clamped / 60)).padStart(2, "0");
+          const cm = String(clamped % 60).padStart(2, "0");
+          updatedRequest[name] = `${ch}:${cm}`;
+          newErrors.time = "Events must be scheduled between 06:00 and 19:00.";
+        }
+      }
     }
 
     if (name === "pax_estimation") {
@@ -622,9 +651,9 @@ useEffect(() => {
           return selectedDay >= start && selectedDay <= end;
         });
       
-      // Generate time slots (00:00 to 23:00)
+      // Generate time slots (06:00 to 19:00)
       const timeSlots = [];
-      for (let hour = 0; hour <= 23; hour++) {
+      for (let hour = 6; hour <= 19; hour++) {
         const displayHour = hour === 0 ? 12 : hour <= 12 ? hour : hour - 12;
         const ampm = hour < 12 ? "AM" : "PM";
         timeSlots.push({
@@ -674,6 +703,10 @@ useEffect(() => {
       // Handle time slot click/drag
       const handleTimeSlotMouseDown = (hour) => {
         if (isTimeSlotBooked(hour) || isDayUnavailable) return;
+        if (hour < 6 || hour > 19) {
+          setFormErrors((prev) => ({ ...prev, time: "Events must be scheduled between 06:00 and 19:00." }));
+          return;
+        }
         
         const timeStr = `${String(hour).padStart(2, "0")}:00`;
         setDragStart(hour);
@@ -689,6 +722,10 @@ useEffect(() => {
       
       const handleTimeSlotMouseEnter = (hour) => {
         if (!dragging || isTimeSlotBooked(hour) || isDayUnavailable) return;
+        if (hour < 6 || hour > 19) {
+          setFormErrors((prev) => ({ ...prev, time: "Events must be scheduled between 06:00 and 19:00." }));
+          return;
+        }
         
         setDragEnd(hour);
         
@@ -826,8 +863,13 @@ useEffect(() => {
                 {request.event_start_time || "Not set"} - {request.event_end_time || "Not set"}
               </p>
               <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                Click and drag on available time slots to select your event time
+                Click and drag on available time slots to select your event time. Available window: 06:00–19:00.
               </p>
+              {formErrors.time && (
+                <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+                  {formErrors.time}
+                </p>
+              )}
             </div>
           )}
           
@@ -1159,26 +1201,30 @@ useEffect(() => {
                     <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
                       Start Time
                     </label>
-                    <input
-                      type="time"
-                      name="event_start_time"
-                      value={request.event_start_time}
-                      onChange={handleChange}
-                      className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
-                    />
+                  <input
+                    type="time"
+                    name="event_start_time"
+                    min="06:00"
+                    max="19:00"
+                    value={request.event_start_time}
+                    onChange={handleChange}
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
+                  />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
                       End Time
                     </label>
-                    <input
-                      type="time"
-                      name="event_end_time"
-                      value={request.event_end_time}
-                      onChange={handleChange}
-                      className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
-                    />
-                    {formErrors.time && <p className="text-red-500 text-xs mt-1">{formErrors.time}</p>}
+                  <input
+                    type="time"
+                    name="event_end_time"
+                    min="06:00"
+                    max="19:00"
+                    value={request.event_end_time}
+                    onChange={handleChange}
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-200"
+                  />
+                  {formErrors.time && <p className="text-red-500 text-xs mt-1">{formErrors.time}</p>}
                   </div>
                 </div>
                 
@@ -1269,7 +1315,7 @@ useEffect(() => {
           {/* Participants & Pax */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Participants</label>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Nature of Participants</label>
               <input
                 type="text"
                 name="participants"

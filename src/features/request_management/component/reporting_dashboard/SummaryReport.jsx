@@ -89,6 +89,10 @@ const SummaryReport = () => {
     pending: filteredRequests.filter((r) => r.status?.toLowerCase().includes("pending")).length,
   };
 
+  const dynamicTitle = filters.requestType
+    ? `${filters.requestType} Request Report`
+    : "Summary Request Report";
+
   // PRINT FUNCTION – EXACTLY LIKE YOUR PrintableRequestForm
   const handlePrintSummary = () => {
     const content = renderToStaticMarkup(
@@ -122,7 +126,7 @@ const SummaryReport = () => {
       <html>
         <head>
           <meta charset="utf-8" />
-          <title>Summary Report - ${new Date().toISOString().split("T")[0]}</title>
+          <title>${dynamicTitle} - ${new Date().toISOString().split("T")[0]}</title>
           ${styles}
           <style>
             body { 
@@ -234,7 +238,7 @@ const SummaryReport = () => {
     <div className="p-6 bg-gray-50 min-h-screen">
       {/* Header */}
 
-    <Header title="Summary Report" description="Comprehensive overview of all request types with filtering and export" />
+    <Header title={dynamicTitle} description="Comprehensive overview of all request types with filtering and export" />
 
       {/* Filters */}
       <div className="bg-white rounded-xl shadow-xs p-6 mb-6 flex flex-wrap gap-3 items-center">

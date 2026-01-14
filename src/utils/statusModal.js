@@ -46,10 +46,12 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate, edit
   const textareaRef = useRef(null);
 
   const { user } = useContext(AuthContext);
-  const { fetchJobRequests, fetchArchivedJobRequests } = useContext(JobRequestsContext);
-  const { fetchPurchasingRequests, fetchArchivedPurchasingRequests } = useContext(PurchasingRequestsContext);
-  const { fetchVehicleRequests, fetchArchivedVehicleRequests } = useContext(VehicleRequestsContext);
-  const { fetchVenueRequests, fetchArchivedVenueRequests } = useContext(VenueRequestsContext);
+  const { jobRequests, archivedJobRequests, fetchJobRequests, fetchArchivedJobRequests } = useContext(JobRequestsContext);
+  const { purchasingRequests, archivedPurchasingRequests, fetchPurchasingRequests, fetchArchivedPurchasingRequests } = useContext(PurchasingRequestsContext);
+  const { vehicleRequests, archivedVehicleRequests, fetchVehicleRequests, fetchArchivedVehicleRequests } = useContext(VehicleRequestsContext);
+  const { venueRequests, archivedVenueRequests, fetchVenueRequests, fetchArchivedVenueRequests } = useContext(VenueRequestsContext);
+  const [canComplete, setCanComplete] = useState(false);
+  const [normalizedDates, setNormalizedDates] = useState({ required: null, events: null, departure: null });
 
   const fetchAllRequests = () => {
     fetchJobRequests();
@@ -105,7 +107,71 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate, edit
       status?.toLowerCase().includes(kw)
     );
 
+  const isCompletedOption = (status) => status?.toLowerCase() === "completed";
+  const parseISODate = (v) => {
+    if (!v) return null;
+    const d = new Date(v);
+    return isNaN(d.getTime()) ? null : d;
+  };
+  const combineDateTime = (dateOnly, time) => {
+    if (!dateOnly || !time) return null;
+    const d = new Date(`${dateOnly}T${time}`);
+    return isNaN(d.getTime()) ? null : d;
+  };
+  const parseEventDates = (s) => {
+    if (!s || typeof s !== "string") return null;
+    const matches = s.match(/\d{4}-\d{2}-\d{2}/g);
+    if (!matches || matches.length === 0) return null;
+    const dates = matches.map((m) => new Date(m)).filter((d) => !isNaN(d.getTime()));
+    if (dates.length === 0) return null;
+    return new Date(Math.max(...dates.map((d) => d.getTime())));
+  };
+  const isPast = (d) => {
+    if (!d) return false;
+    const now = new Date();
+    return d.getTime() < now.getTime();
+  };
+  const normalizeDatesForRequest = (type, req) => {
+    if (!req) return { required: null, events: null, departure: null };
+    if (type === "job_request") {
+      return { required: parseISODate(req.date_required), events: null, departure: null };
+    }
+    if (type === "purchasing_request") {
+      return { required: parseISODate(req.date_required), events: null, departure: null };
+    }
+    if (type === "venue_request") {
+      return { required: null, events: parseEventDates(req.event_dates), departure: null };
+    }
+    if (type === "vehicle_request") {
+      return { required: null, events: null, departure: combineDateTime(req.date_of_trip, req.time_of_departure) };
+    }
+    return { required: null, events: null, departure: null };
+  };
+  const computeCanComplete = (norm) => {
+    const applicable = [norm.required, norm.events, norm.departure].filter((d) => d !== null);
+    if (applicable.length === 0) return false;
+    return applicable.every((d) => isPast(d));
+  };
+  useEffect(() => {
+    const allByType = (type) => {
+      if (type === "job_request") return [...(jobRequests || []), ...(archivedJobRequests || [])];
+      if (type === "purchasing_request") return [...(purchasingRequests || []), ...(archivedPurchasingRequests || [])];
+      if (type === "venue_request") return [...(venueRequests || []), ...(archivedVenueRequests || [])];
+      if (type === "vehicle_request") return [...(vehicleRequests || []), ...(archivedVehicleRequests || [])];
+      return [];
+    };
+    const list = allByType(requestType);
+    const req = list.find((r) => r.reference_number === referenceNumber);
+    const norm = normalizeDatesForRequest(requestType, req);
+    setNormalizedDates(norm);
+    setCanComplete(computeCanComplete(norm));
+  }, [requestType, referenceNumber, jobRequests, archivedJobRequests, purchasingRequests, archivedPurchasingRequests, vehicleRequests, archivedVehicleRequests, venueRequests, archivedVenueRequests]);
+
   const handleStatusClick = (status) => {
+    if (isCompletedOption(status) && !canComplete) {
+      ToastNotification.error("Validation", "Completed is disabled until all required dates have passed.");
+      return;
+    }
     setSelectedStatus(status);
     setSelectedReason("");
     setAdditionalComment("");
@@ -241,19 +307,21 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate, edit
                 {statusOptions
                   .filter(option => option.status !== currentStatus)
                   .map((option) => (
-                    <MenuItem
-                      key={option.id}
-                      className="flex justify-between items-center px-4 py-2 text-xs cursor-pointer hover:bg-gray-50"
-                      onClick={() => handleStatusClick(option.status)}
-                    >
-                      <Chip
-                        size="sm"
-                        variant="ghost"
-                        value={option.status}
-                        className="text-center w-fit px-4 py-2"
-                        color={option.color}
-                      />
-                    </MenuItem>
+                  <MenuItem
+                    key={option.id}
+                    className={`flex justify-between items-center px-4 py-2 text-xs ${isCompletedOption(option.status) && !canComplete ? "opacity-60 cursor-not-allowed" : "cursor-pointer hover:bg-gray-50"}`}
+                    onClick={() => handleStatusClick(option.status)}
+                    title={isCompletedOption(option.status) && !canComplete ? "Completed is disabled until all required dates have passed." : undefined}
+                    aria-disabled={isCompletedOption(option.status) && !canComplete}
+                  >
+                    <Chip
+                      size="sm"
+                      variant="ghost"
+                      value={option.status}
+                      className="text-center w-fit px-4 py-2"
+                      color={option.color}
+                    />
+                  </MenuItem>
                   ))}
               </div>
 

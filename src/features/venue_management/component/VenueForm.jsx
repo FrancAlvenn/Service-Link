@@ -95,17 +95,69 @@ const VenueForm = ({ mode = "add", initialValues, onClose, onSuccess }) => {
   const handleAmenityChange = (amenity) => {
     setVenue((prev) => {
       const amenities = Array.isArray(prev.amenities) ? prev.amenities : [];
-      if (amenities.includes(amenity)) {
+      // Check if amenity exists (either as string or object)
+      const existingIndex = amenities.findIndex(a => 
+        (typeof a === 'string' && a === amenity) || 
+        (typeof a === 'object' && a.name === amenity)
+      );
+
+      if (existingIndex >= 0) {
+        // Remove amenity
         return {
           ...prev,
-          amenities: amenities.filter((a) => a !== amenity),
+          amenities: amenities.filter((_, index) => index !== existingIndex),
         };
       } else {
+        // Add amenity with default quantity of 1
         return {
           ...prev,
-          amenities: [...amenities, amenity],
+          amenities: [...amenities, { name: amenity, quantity: 1 }],
         };
       }
+    });
+  };
+
+  const handleQuantityChange = (amenityName, change) => {
+    setVenue((prev) => {
+      const amenities = Array.isArray(prev.amenities) ? prev.amenities : [];
+      return {
+        ...prev,
+        amenities: amenities.map(item => {
+          const itemName = typeof item === 'string' ? item : item.name;
+          if (itemName !== amenityName) return item;
+
+          // Convert string to object if needed
+          const currentItem = typeof item === 'string' 
+            ? { name: item, quantity: 1 } 
+            : item;
+
+          const newQuantity = Math.max(1, (currentItem.quantity || 1) + change);
+          
+          return { ...currentItem, quantity: newQuantity };
+        })
+      };
+    });
+  };
+
+  const handleQuantityInput = (amenityName, value) => {
+    setVenue((prev) => {
+      const amenities = Array.isArray(prev.amenities) ? prev.amenities : [];
+      return {
+        ...prev,
+        amenities: amenities.map(item => {
+          const itemName = typeof item === 'string' ? item : item.name;
+          if (itemName !== amenityName) return item;
+
+          const currentItem = typeof item === 'string' 
+            ? { name: item, quantity: 1 } 
+            : item;
+
+          const parsedValue = parseInt(value);
+          const newQuantity = isNaN(parsedValue) || parsedValue < 1 ? 1 : parsedValue;
+          
+          return { ...currentItem, quantity: newQuantity };
+        })
+      };
     });
   };
 
@@ -985,27 +1037,65 @@ const VenueForm = ({ mode = "add", initialValues, onClose, onSuccess }) => {
               <label className="block text-sm font-semibold text-gray-800 my-2">
                 Amenities
               </label>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {commonAmenities.map((amenity) => (
-                  <div key={amenity} className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id={amenity}
-                      checked={
-                        Array.isArray(venue.amenities) &&
-                        venue.amenities.includes(amenity)
-                      }
-                      onChange={() => handleAmenityChange(amenity)}
-                      className="mr-2"
-                    />
-                    <label
-                      htmlFor={amenity}
-                      className="text-xs font-medium text-gray-700 cursor-pointer"
-                    >
-                      {amenity}
-                    </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {commonAmenities.map((amenity) => {
+                  const isChecked = Array.isArray(venue.amenities) && venue.amenities.some(a => 
+                    (typeof a === 'string' && a === amenity) || 
+                    (typeof a === 'object' && a.name === amenity)
+                  );
+                  
+                  const currentItem = isChecked ? venue.amenities.find(a => 
+                    (typeof a === 'string' && a === amenity) || 
+                    (typeof a === 'object' && a.name === amenity)
+                  ) : null;
+
+                  const quantity = currentItem && typeof currentItem === 'object' ? currentItem.quantity : 1;
+
+                  return (
+                  <div key={amenity} className="flex flex-col p-2 border border-gray-200 rounded-md">
+                    <div className="flex items-center mb-2">
+                      <input
+                        type="checkbox"
+                        id={amenity}
+                        checked={isChecked}
+                        onChange={() => handleAmenityChange(amenity)}
+                        className="mr-2"
+                      />
+                      <label
+                        htmlFor={amenity}
+                        className="text-xs font-medium text-gray-700 cursor-pointer select-none"
+                      >
+                        {amenity}
+                      </label>
+                    </div>
+                    
+                    {isChecked && (
+                      <div className="flex items-center gap-2 ml-5">
+                        <button
+                          type="button"
+                          onClick={() => handleQuantityChange(amenity, -1)}
+                          className="w-6 h-6 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded border border-gray-300 text-gray-600 text-xs"
+                        >
+                          -
+                        </button>
+                        <input
+                          type="number"
+                          value={quantity}
+                          onChange={(e) => handleQuantityInput(amenity, e.target.value)}
+                          className="w-12 h-6 text-center text-xs border border-gray-300 rounded px-1"
+                          min="1"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleQuantityChange(amenity, 1)}
+                          className="w-6 h-6 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded border border-gray-300 text-gray-600 text-xs"
+                        >
+                          +
+                        </button>
+                      </div>
+                    )}
                   </div>
-                ))}
+                )})}
               </div>
             </div>
 
@@ -1260,7 +1350,15 @@ VenueForm.propTypes = {
     description: PropTypes.string,
     location: PropTypes.string,
     capacity: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    amenities: PropTypes.arrayOf(PropTypes.string),
+    amenities: PropTypes.arrayOf(
+      PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.shape({
+          name: PropTypes.string,
+          quantity: PropTypes.number
+        })
+      ])
+    ),
     hourly_rate: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     status: PropTypes.string,
     operating_hours_start: PropTypes.string,

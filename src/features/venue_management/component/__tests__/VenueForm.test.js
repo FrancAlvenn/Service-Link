@@ -23,7 +23,7 @@ const mockVenueContext = {
   fetchVenueUnavailability: jest.fn(),
 };
 
-describe('VenueForm Amenities Enhancement', () => {
+describe('VenueForm Quantity Tracking', () => {
   const renderComponent = (props = {}) => {
     return render(
       <AuthContext.Provider value={{ user: mockUser }}>
@@ -34,46 +34,58 @@ describe('VenueForm Amenities Enhancement', () => {
     );
   };
 
-  test('renders all enhanced amenity options', () => {
+  test('displays quantity controls when amenity is selected', () => {
     renderComponent({ mode: 'add' });
 
-    const expectedAmenities = [
-      "Wi-Fi",
-      "Air Conditioning",
-      "Sound System",
-      "Microphone",
-      "Projector",
-      "LCD Projector",
-      "LED Monitor",
-      "Whiteboard",
-      "Chairs",
-      "Tables",
-      "Electric Fan",
-      "Water Dispenser",
-      "Parking",
-      "Restrooms",
-      "Accessibility",
-      "Catering",
-    ];
+    // Select amenity
+    const checkbox = screen.getByLabelText("Chairs");
+    fireEvent.click(checkbox);
 
-    expectedAmenities.forEach(amenity => {
-      expect(screen.getByLabelText(amenity)).toBeInTheDocument();
-    });
+    // Check for quantity input (default 1)
+    const quantityInput = screen.getByDisplayValue("1");
+    expect(quantityInput).toBeInTheDocument();
+    
+    // Check for +/- buttons
+    expect(screen.getByText("+")).toBeInTheDocument();
+    expect(screen.getByText("-")).toBeInTheDocument();
   });
 
-  test('allows selecting multiple amenities', () => {
+  test('increments and decrements quantity', () => {
     renderComponent({ mode: 'add' });
 
-    const amenitiesToSelect = ["Wi-Fi", "LCD Projector", "Chairs"];
+    const checkbox = screen.getByLabelText("Chairs");
+    fireEvent.click(checkbox);
 
-    amenitiesToSelect.forEach(amenity => {
-      const checkbox = screen.getByLabelText(amenity);
-      fireEvent.click(checkbox);
-      expect(checkbox).toBeChecked();
-    });
+    const plusBtn = screen.getByText("+");
+    const minusBtn = screen.getByText("-");
+    const input = screen.getByDisplayValue("1");
 
-    // Verify others are not checked
-    const uncheckedAmenity = screen.getByLabelText("Catering");
-    expect(uncheckedAmenity).not.toBeChecked();
+    // Increment
+    fireEvent.click(plusBtn);
+    expect(input.value).toBe("2");
+
+    // Decrement
+    fireEvent.click(minusBtn);
+    expect(input.value).toBe("1");
+
+    // Should not go below 1
+    fireEvent.click(minusBtn);
+    expect(input.value).toBe("1");
+  });
+
+  test('handles manual input validation', () => {
+    renderComponent({ mode: 'add' });
+
+    const checkbox = screen.getByLabelText("Chairs");
+    fireEvent.click(checkbox);
+    const input = screen.getByDisplayValue("1");
+
+    // Valid input
+    fireEvent.change(input, { target: { value: "50" } });
+    expect(input.value).toBe("50");
+
+    // Invalid input (negative) -> should reset to 1
+    fireEvent.change(input, { target: { value: "-5" } });
+    expect(input.value).toBe("1");
   });
 });

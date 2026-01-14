@@ -1398,16 +1398,21 @@ useEffect(() => {
                     Included Amenities
                   </Typography>
                   <div className="flex flex-wrap gap-2">
-                    {selectedVenue.amenities.map((amenity, index) => (
-                      <Chip
-                        key={index}
-                        value={amenity}
-                        size="sm"
-                        variant="ghost"
-                        color="blue"
-                        className="rounded-full capitalize"
-                      />
-                    ))}
+                    {selectedVenue.amenities.map((amenity, index) => {
+                      const amenityName = typeof amenity === 'string' ? amenity : amenity.name;
+                      const quantity = typeof amenity === 'object' && amenity.quantity > 1 ? ` (${amenity.quantity})` : '';
+                      
+                      return (
+                        <Chip
+                          key={index}
+                          value={`${amenityName}${quantity}`}
+                          size="sm"
+                          variant="ghost"
+                          color="blue"
+                          className="rounded-full capitalize"
+                        />
+                      );
+                    })}
                   </div>
                 </div>
               );

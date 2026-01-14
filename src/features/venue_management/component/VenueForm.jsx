@@ -303,13 +303,21 @@ const VenueForm = ({ mode = "add", initialValues, onClose, onSuccess }) => {
 
   const commonAmenities = [
     "Wi-Fi",
-    "Projector",
-    "Sound System",
     "Air Conditioning",
+    "Sound System",
+    "Microphone",
+    "Projector",
+    "LCD Projector",
+    "LED Monitor",
+    "Whiteboard",
+    "Chairs",
+    "Tables",
+    "Electric Fan",
+    "Water Dispenser",
     "Parking",
-    "Catering",
     "Restrooms",
     "Accessibility",
+    "Catering",
   ];
 
   // Add event listeners for mouse up outside when dragging

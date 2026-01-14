@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { Button, Typography, Checkbox, Spinner } from "@material-tailwind/react";
+import PropTypes from "prop-types";
+import { Button, Typography, Checkbox, Spinner, Chip } from "@material-tailwind/react";
 import { AuthContext } from "../../../../authentication";
 import { UserContext } from "../../../../../context/UserContext";
 import { VenueRequestsContext } from "../../../context/VenueRequestsContext";
@@ -1387,6 +1388,33 @@ useEffect(() => {
             </div>
           </div>
 
+          {/* Included Amenities Display */}
+          {request.venue_id && (() => {
+            const selectedVenue = venueOptions.find((v) => Number(v.venue_id) === Number(request.venue_id));
+            if (selectedVenue && Array.isArray(selectedVenue.amenities) && selectedVenue.amenities.length > 0) {
+              return (
+                <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
+                  <Typography variant="small" className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                    Included Amenities
+                  </Typography>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedVenue.amenities.map((amenity, index) => (
+                      <Chip
+                        key={index}
+                        value={amenity}
+                        size="sm"
+                        variant="ghost"
+                        color="blue"
+                        className="rounded-full capitalize"
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            }
+            return null;
+          })()}
+
           {/* Particulars (Add-ons) */}
           <div className="space-y-2">
             <Typography className="text-xs font-semibold text-gray-600 dark:text-gray-300">Particulars</Typography>
@@ -1457,3 +1485,9 @@ useEffect(() => {
 };
 
 export default VenueRequestForm;
+
+VenueRequestForm.propTypes = {
+  setSelectedRequest: PropTypes.func,
+  prefillData: PropTypes.object,
+  renderConfidence: PropTypes.func,
+};

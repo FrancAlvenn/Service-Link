@@ -1,4 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
+import PropTypes from "prop-types";
 import {
   Button,
   Typography,
@@ -1242,4 +1243,28 @@ const VenueForm = ({ mode = "add", initialValues, onClose, onSuccess }) => {
 };
 
 export default VenueForm;
+
+VenueForm.propTypes = {
+  mode: PropTypes.oneOf(["add", "edit"]),
+  initialValues: PropTypes.shape({
+    venue_id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    name: PropTypes.string,
+    description: PropTypes.string,
+    location: PropTypes.string,
+    capacity: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    amenities: PropTypes.arrayOf(PropTypes.string),
+    hourly_rate: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    status: PropTypes.string,
+    operating_hours_start: PropTypes.string,
+    operating_hours_end: PropTypes.string,
+    booking_advance_days: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    requires_approval: PropTypes.bool,
+    assigned_department: PropTypes.string,
+    last_maintenance: PropTypes.string,
+    next_maintenance: PropTypes.string,
+    additional_details: PropTypes.array,
+  }),
+  onClose: PropTypes.func,
+  onSuccess: PropTypes.func,
+};
 

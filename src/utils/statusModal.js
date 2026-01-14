@@ -153,18 +153,48 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate, edit
     return applicable.every((d) => isPast(d));
   };
   useEffect(() => {
-    const allByType = (type) => {
-      if (type === "job_request") return [...(jobRequests || []), ...(archivedJobRequests || [])];
-      if (type === "purchasing_request") return [...(purchasingRequests || []), ...(archivedPurchasingRequests || [])];
-      if (type === "venue_request") return [...(venueRequests || []), ...(archivedVenueRequests || [])];
-      if (type === "vehicle_request") return [...(vehicleRequests || []), ...(archivedVehicleRequests || [])];
-      return [];
-    };
-    const list = allByType(requestType);
-    const req = list.find((r) => r.reference_number === referenceNumber);
-    const norm = normalizeDatesForRequest(requestType, req);
-    setNormalizedDates(norm);
-    setCanComplete(computeCanComplete(norm));
+    try {
+      const normalizeList = (arr) =>
+        Array.isArray(arr) ? arr.filter((r) => r && typeof r === "object") : [];
+      const allByType = (type) => {
+        if (type === "job_request")
+          return [
+            ...normalizeList(jobRequests),
+            ...normalizeList(archivedJobRequests),
+          ];
+        if (type === "purchasing_request")
+          return [
+            ...normalizeList(purchasingRequests),
+            ...normalizeList(archivedPurchasingRequests),
+          ];
+        if (type === "venue_request")
+          return [
+            ...normalizeList(venueRequests),
+            ...normalizeList(archivedVenueRequests),
+          ];
+        if (type === "vehicle_request")
+          return [
+            ...normalizeList(vehicleRequests),
+            ...normalizeList(archivedVehicleRequests),
+          ];
+        return [];
+      };
+      const list = allByType(requestType);
+      const req =
+        list.find(
+          (r) =>
+            r &&
+            typeof r === "object" &&
+            r.reference_number === referenceNumber
+        ) || null;
+      const norm = normalizeDatesForRequest(requestType, req);
+      setNormalizedDates(norm);
+      setCanComplete(computeCanComplete(norm));
+    } catch (err) {
+      console.error("StatusModal error computing completion gate:", err);
+      setNormalizedDates({ required: null, events: null, departure: null });
+      setCanComplete(false);
+    }
   }, [requestType, referenceNumber, jobRequests, archivedJobRequests, purchasingRequests, archivedPurchasingRequests, vehicleRequests, archivedVehicleRequests, venueRequests, archivedVenueRequests]);
 
   const handleStatusClick = (status) => {
@@ -253,7 +283,7 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate, edit
         method: "patch",
         url: `${process.env.REACT_APP_API_URL}/${requestType}/${referenceNumber}/status`,
         data: {
-          requester: user.reference_number,
+          requester: user?.reference_number,
           status: selectedStatus,
           action: actionTaken,
         },
@@ -274,7 +304,7 @@ function StatusModal({ input, referenceNumber, requestType, onStatusUpdate, edit
             type: "status_change",
             action: `Status updated to <i>${selectedStatus}</i>`,
             details: actionTaken,
-            performed_by: user.reference_number,
+            performed_by: user?.reference_number,
           },
           withCredentials: true,
         });

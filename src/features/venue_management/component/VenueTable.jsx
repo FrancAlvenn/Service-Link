@@ -21,7 +21,9 @@ const VenueTable = () => {
     setSearchQuery(e.target.value);
   };
 
-  const filteredRows = (Array.isArray(venues) ? venues : []).filter((row) => {
+  const filteredRows = (Array.isArray(venues) ? venues : [])
+    .filter((row) => row !== null && row !== undefined)
+    .filter((row) => {
     const rowString = Object.entries(row)
       .map(([_, value]) => {
         if (Array.isArray(value)) {
